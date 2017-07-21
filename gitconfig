@@ -1,0 +1,15 @@
+[user]
+	name = Volodymyr Shevchuk
+	email = volodymyr.shevchuk93@gmail.com
+[core]
+	editor = vim
+[color]
+	ui = true
+[push]
+	default = matching
+[credential]
+	helper = cache --timeout=360000
+[alias]
+	car = commit --amend --no-edit
+	unstage = reset
+	restore-branch-from = reset --hard

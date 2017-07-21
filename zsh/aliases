@@ -1,0 +1,50 @@
+# Vim specific
+alias vi='vim'
+
+# General UNIX
+alias mv='mv -iv'
+alias cp='cp -iv'
+alias srm='srm -iv'
+alias df='df -h'
+alias du='du -h'
+alias dud='du -d 1 -h'
+alias duf='du -sh *'
+alias mkdir='mkdir -pv'
+alias src='source ~/.zshrc'
+alias path='echo -e ${PATH//:/\\n}'
+
+# Listing files and directories
+alias l='ls -lFh'     #size,show type,human readable
+alias la='ls -lAFh'   #long list, show almost all, show type, human readable
+alias lr='ls -tRFh'   #sorted by date, recursive, show type, human readable
+alias lt='ls -ltFh'   #long list, sorted by date, show type, human readable
+alias ll='ls -l'      #long list
+
+# Finding stuff!
+alias fd='find . -type d -name'
+alias ff='find . -type f -name'
+
+# Tree
+alias t1='tree -CFL 1'
+alias t2='tree -CFL 2'
+alias t3='tree -CFL 3'
+alias t4='tree -CFL 4'
+
+# Rake
+alias rake='bundle exec rake'
+
+# Rails
+alias bx='bundle exec'
+alias sst='spring status'
+
+# Test
+alias rt='rake test'
+alias rtp='rake parallel:test'
+alias rti='rake test:integration'
+
+# Postgres
+alias statpost='ps aux | ag postgres'
+alias psq='pgcli -d postgres'
+
+# Ctags
+alias ct='ctags -R --languages=ruby --exclude=.git --exclude=log --exclude=node_modules . $(bundle list --paths)'

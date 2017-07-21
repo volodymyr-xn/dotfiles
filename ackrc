@@ -1,0 +1,11 @@
+--ignore-dir=vendor
+--ignore-dir=log
+--ignore-dir=tmp
+--ignore-dir=doc
+--ignore-dir=node_modules
+
+# Print a filename heading above each file's results.
+--heading
+
+# Always color, even if piping to a another program
+--color

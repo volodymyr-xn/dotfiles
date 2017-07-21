@@ -1,0 +1,416 @@
+"packadd minpac
+
+"call minpac#init()
+
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+
+" minpac must have {'type': 'opt'} so that it can be loaded with `packadd`.
+" Plugin('k-takata/minpac')
+Plugin('mileszs/ack.vim')
+Plugin('jiangmiao/auto-pairs')
+Plugin('scrooloose/nerdtree')
+Plugin('tomtom/tcomment_vim')
+Plugin('KeitaNakamura/neodark.vim')
+Plugin('lifepillar/vim-mucomplete')
+" Plugin('itchyny/lightline.vim')
+Plugin('vim-airline/vim-airline')
+Plugin('tpope/vim-bundler')
+Plugin('vim-syntastic/syntastic')
+Plugin('tpope/vim-endwise')
+Plugin('airblade/vim-gitgutter')
+Plugin('tpope/vim-rails')
+Plugin('tpope/vim-rbenv')
+Plugin('vim-ruby/vim-ruby')
+Plugin('sunaku/vim-ruby-minitest')
+Plugin('tpope/vim-surround')
+Plugin('janko-m/vim-test')
+Plugin('christoomey/vim-tmux-navigator')
+Plugin('benmills/vimux')
+Plugin('hail2u/vim-css3-syntax')
+Plugin('morhetz/gruvbox')
+Plugin('chriskempson/base16-vim')
+
+call vundle#end()
+
+nnoremap <space> <nop>
+
+set completeopt+=menuone
+set completeopt+=noselect
+
+" use the space key as our leader. put this near the top of your vimrc
+let mapleader = "\<space>"
+
+" For auto indent
+filetype plugin indent on
+
+"filetype off
+"syntax highlighting
+syntax on
+
+" Auto reload on file change
+set autoread
+
+" Use vim, not vi api
+set nocompatible
+
+" No backup files
+set nobackup
+
+" No write backup
+set nowritebackup
+
+" No swap file
+set noswapfile
+
+" Command history
+set history=500
+
+" Remove escape delay http://www.johnhawthorn.com/2012/09/vi-escape-delays/
+set timeoutlen=1000 ttimeoutlen=0
+
+" Always show cursor
+set ruler
+
+" Show incomplete commands
+set showcmd
+
+" Incremental searching (search as you type)
+set incsearch
+
+" Highlight search matches
+set hlsearch
+
+" Ignore case in search if term(s) are lowercase
+set ignorecase
+
+" Search with case sensitivity if term(s) are upper or mixed case
+set smartcase
+
+" Turn word wrap off
+set nowrap
+
+set autoindent
+
+set smartindent
+
+" Performance
+syntax sync maxlines=256
+set synmaxcol=120
+
+" Auto remove trailing blank spaces on each save
+autocmd BufWritePre * :%s/\s\+$//e
+
+" Allow backspace to delete end of line, indent and start of line characters
+set backspace=indent,eol,start
+
+set background=dark
+
+colorscheme base16-onedark
+" colorscheme gruvbox
+" colorscheme neodark
+" colorscheme seoul256
+"
+" Base16 hook
+" if filereadable(expand("~/.vimrc_background"))
+"   let base16colorspace=256
+"   source ~/.vimrc_background
+" endif
+
+" Access colors present in 256 colorspace
+let base16colorspace=256
+set t_Co=256
+
+set termguicolors
+let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+"
+" Always show statusline
+" set laststatus=2
+
+" Always display the tabline, even if there is only one tab
+set showtabline=2
+
+" Hide the default mode text (e.g. -- INSERT -- below the statusline)
+set noshowmode
+
+" Enable mouse
+set mouse=a
+
+" set number of lines
+set nu!
+
+" tabs settinngs
+set ts=2
+set sts=0
+set sw=2
+
+" Tabs settins
+" Convert tabs to spaces, all file types
+set expandtab
+
+" Set tab size in spaces (this is for manual indenting)
+set tabstop=2
+
+" The number of spaces inserted for a tab (used for auto indenting)
+set shiftwidth=2
+
+" Turn on line numbers
+set number
+
+" UTF encoding
+set encoding=utf-8
+
+set spelllang=en
+
+" Autoload files that have changed outside of vim
+set autoread
+
+" Better splits (new windows appear below and to the right)
+set splitbelow
+set splitright
+
+" Ensure Vim doesn't beep at you every time you make a mistype
+set visualbell
+
+" Visual autocomplete for command menu (e.g. :e ~/path/to/file)
+set wildmenu
+
+" Automatically rebalance windows on vim resize
+autocmd VimResized * :wincmd =
+
+" Redraw only when we need to (i.e. don't redraw when executing a macro)
+set lazyredraw
+
+" Highlight a matching [{()}?P] when cursor is placed on start/end character
+set showmatch
+
+" Complete files like a shell.
+set wildmode=list:longest
+
+" Show 3 lines of context around the cursor.
+set scrolloff=3
+
+" Set the terminal's title
+set title
+
+set clipboard+=unnamed
+
+" Remap VIM 0 to first non-blank character
+map 0 ^
+
+" Pressing ,ss will toggle and untoggle spell checking
+map <leader>ss :setlocal spell!<cr>
+
+" Copy the entire buffer into the system register
+nmap <leader>co ggVG*y
+
+" Save current file
+nnoremap <Leader>w :w<CR>
+
+" Go to the begining of line
+noremap H ^
+
+" Go to the end of line
+noremap L $
+
+" Switch between tabs
+nnoremap <TAB> gt
+
+" Edit the db/schema.rb ails file in a split
+nmap <leader>sc :split db/schema.rb<cr>
+
+" Run 'git blame' on a selection of code
+nmap <leader>gb :Gblame<CR>
+
+" Change surround double quotes to plain quotes
+nmap <Leader>' cs"'<CR>
+
+" Map text align to tab button in visual mode
+vnoremap <TAB> =
+
+" Expand word to tag
+nmap <F4> byei<<ESC>ea></<C-R>0><ESC>bba
+
+" Faster search
+nmap q /
+
+nnoremap <C-k> <C-w>s
+
+nmap <Leader>y viwy
+nmap <Leader>u vi"y
+
+" Fix indenting selection
+vnoremap < <gv
+vnoremap > >gv
+
+let g:VtrPercentage = 20
+let g:VtrUseVtrMaps = 1
+
+nnoremap <leader>sd :VtrSendCtrlD<cr>
+nmap <leader>fs :VtrFlushCommand<cr>:VtrSendCommandToRunner<cr>
+" nmap <leader>osp :VtrOpenRunner {'orientation': 'h', 'percentage': 20, 'cmd': '' }<cr>
+" nmap <leader>orc :VtrOpenRunner {'orientation': 'h', 'percentage': 40, 'cmd': 'rc'}<cr>
+" nmap <leader>opr :VtrOpenRunner {'orientation': 'h', 'percentage': 40, 'cmd': 'pry'}<cr>
+
+" Open a new tab with Ctrl+T
+map <C-t> <esc>:tabnew<CR>
+
+" For indenting code
+map <leader>i mmgg=G`m<CR>
+
+" Disable selection
+map <leader>n :nohl<CR>
+
+" Emmet expand class name to tag
+imap <c-\> <c-y>,<CR><CR><ESC>ki<TAB><TAB>
+
+" Fix indentation on paste
+" map <leader>p :set paste<CR>o<esc>"*]p:set nopaste<CR>
+
+" Enter replace command
+map <leader>r :%s/
+
+" Move up and down by visible lines if current line is wrapped
+nmap j gj
+nmap k gk
+
+" Fuzzy-find with fzf
+nmap <C-p> :FZ<cr>
+
+"Map Ctrl + S to save in any mode
+" noremap <silent> <C-S>          :update<CR>
+" vnoremap <silent> <C-S>         <C-C>:update<CR>
+" inoremap <silent> <C-S>         <C-O>:update<CR>
+" zoom a vim pane, <C-w>= to re-balance
+nmap <C-w><cr> <C-W>\| <C-W>_
+nmap <C-m> <C-W>\| <C-W>_
+nmap <C-n> <C-W>=
+
+" Faster close windows and quit
+nnoremap <C-c> <C-w>q
+
+"Open ruby test in tmux pane
+let test#strategy = "vimux"
+
+nmap <silent> <leader>t :TestNearest<CR>
+nmap <silent> <leader>j :TestNearest<CR>
+nmap <silent> <leader>T :TestFile<CR>
+nmap <silent> <leader>a :TestSuite<CR>
+nmap <silent> <leader>l :TestLast<CR>
+
+"Go to test file
+nmap t :A<CR>
+nmap <Leader>e :R<CR>
+
+" Ack (the_silver_searcher / ag)
+let g:ackprg="ag"
+
+" Ack: To go to the next search result
+map <leader>] :cn<cr>
+" Ack: To go to the previous search results
+map <leader>[ :cp<cr>
+
+" fzf
+set rtp+=~/.fzf
+
+" Tcomment
+nnoremap <Leader>/ :TComment<CR>
+map <Leader>/ :TComment<CR>
+
+vmap \ :TComment<CR>
+nnoremap \ :TComment<CR>
+
+nnoremap <C-\> <NOP>
+
+nmap <Leader>, <CR>y,
+
+" Ack mappings
+nnoremap ! :Ack<SPACE>
+" noremap ! :Ack <cr>
+
+" fzf Ag
+noremap <Leader>p :Ag <cr>
+noremap <Leader>m :FZF app/models<CR>
+nnoremap <silent> <Leader>f :Ag <C-R><C-W><CR>
+
+" vim-jsx
+" By default, JSX syntax highlighting and indenting will be enabled only for
+" files with the .jsx extension. If you would like JSX in .js files, add
+let g:jsx_ext_required = 0
+
+" Unmap GitGutter leaders that I don't use. This avoids delays for other leaders.
+autocmd VimEnter * nunmap <leader>hp
+autocmd VimEnter * nunmap <leader>hr
+autocmd VimEnter * nunmap <leader>hs
+
+" Unmap Bufexplorer leaders that I don't use. This avoids delays for other leaders.
+"autocmd VimEnter * nunmap <leader>bs
+"autocmd VimEnter * nunmap <leader>bv
+
+
+
+" Nerdtree
+let NERDTreeShowHidden=1
+let NERDTreeWinSize=40
+autocmd VimEnter * nnoremap <C-\> :NERDTreeToggle<CR>
+
+" FZF Ag setup
+function! s:ag_to_qf(line)
+  let parts = split(a:line, ':')
+  return {'filename': parts[0], 'lnum': parts[1], 'col': parts[2],
+        \ 'text': join(parts[3:], ':')}
+endfunction
+
+function! s:ag_handler(lines)
+  if len(a:lines) < 2 | return | endif
+
+  let cmd = get({'ctrl-x': 'split',
+               \ 'ctrl-v': 'vertical split',
+               \ 'ctrl-t': 'tabe'}, a:lines[0], 'e')
+  let list = map(a:lines[1:], 's:ag_to_qf(v:val)')
+
+  let first = list[0]
+  execute cmd escape(first.filename, ' %#\')
+  execute first.lnum
+  execute 'normal!' first.col.'|zz'
+
+  if len(list) > 1
+    call setqflist(list)
+    copen
+    wincmd p
+  endif
+endfunction
+
+command! -nargs=* Ag call fzf#run({
+\ 'source':  printf('ag --nogroup --column --color "%s"',
+\                   escape(empty(<q-args>) ? '^(?=.)' : <q-args>, '"\')),
+\ 'sink*':    function('<sid>ag_handler'),
+\ 'options': '--ansi --expect=ctrl-t,ctrl-v,ctrl-x --delimiter : --nth 4.. '.
+\            '--multi --bind=ctrl-a:select-all,ctrl-d:deselect-all '.
+\            '--color hl:68,hl+:110',
+\ 'down':    '50%'
+\ })
+
+
+" Syntastic settings
+let g:syntastic_javascript_checkers = ['eslint']
+let g:syntastic_error_symbol = '✗✗'
+let g:syntastic_style_error_symbol = '✠✠'
+let g:syntastic_warning_symbol = '∆∆'
+let g:syntastic_style_warning_symbol = '≈≈'
+let g:syntastic_ruby_checkers=["mri", "rubocop"]
+
+
+" Airline setings
+let g:airline_powerline_fonts = 1
+let g:airline_theme='gruvbox'
+
+if !exists('g:airline_symbols')
+  let g:airline_symbols = {}
+endif
+
+let g:airline_symbols.branch = ''
+let g:airline_symbols.readonly = ''
+let g:airline_symbols.linenr = ''
+let g:airline_symbols.crypt = '🔒'

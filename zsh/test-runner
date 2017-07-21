@@ -1,0 +1,13 @@
+
+function rt() {
+  bundle exec rake test
+}
+
+function rti() {
+  bundle exec rake test:integration
+}
+
+function rtf() {
+  bundle exec rake test && bundle exec rake test:integration
+}
+

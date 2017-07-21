@@ -1,0 +1,7 @@
+system-setup
+
+## vim Vundle
+# ignore everything
+/vim/bundle/*
+# except Vundle itself
+!/vim/bundle/Vundle.vim
