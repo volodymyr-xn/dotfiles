@@ -1,20 +1,12 @@
-"packadd minpac
-
-"call minpac#init()
-
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
-" minpac must have {'type': 'opt'} so that it can be loaded with `packadd`.
-" Plugin('k-takata/minpac')
 Plugin('mileszs/ack.vim')
 Plugin('jiangmiao/auto-pairs')
 Plugin('scrooloose/nerdtree')
 Plugin('tomtom/tcomment_vim')
-Plugin('KeitaNakamura/neodark.vim')
 Plugin('lifepillar/vim-mucomplete')
-" Plugin('itchyny/lightline.vim')
-Plugin('vim-airline/vim-airline')
+Plugin('itchyny/lightline.vim')
 Plugin('tpope/vim-bundler')
 Plugin('vim-syntastic/syntastic')
 Plugin('tpope/vim-endwise')
@@ -28,7 +20,12 @@ Plugin('janko-m/vim-test')
 Plugin('christoomey/vim-tmux-navigator')
 Plugin('benmills/vimux')
 Plugin('hail2u/vim-css3-syntax')
-Plugin('morhetz/gruvbox')
+Plugin('tpope/vim-fugitive')
+Plugin('tmux-plugins/vim-tmux-focus-events')
+Plugin('kana/vim-textobj-user')
+Plugin('rhysd/vim-textobj-ruby')
+
+" Plugin('KeitaNakamura/neodark.vim')
 Plugin('chriskempson/base16-vim')
 
 call vundle#end()
@@ -106,16 +103,16 @@ set backspace=indent,eol,start
 
 set background=dark
 
-colorscheme base16-onedark
+" colorscheme base16-onedark
 " colorscheme gruvbox
 " colorscheme neodark
 " colorscheme seoul256
 "
 " Base16 hook
-" if filereadable(expand("~/.vimrc_background"))
-"   let base16colorspace=256
-"   source ~/.vimrc_background
-" endif
+if filereadable(expand("~/.vimrc_background"))
+  let base16colorspace=256
+  source ~/.vimrc_background
+endif
 
 " Access colors present in 256 colorspace
 let base16colorspace=256
@@ -126,10 +123,10 @@ let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
 let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
 "
 " Always show statusline
-" set laststatus=2
+set laststatus=2
 
 " Always display the tabline, even if there is only one tab
-set showtabline=2
+" set showtabline=2
 
 " Hide the default mode text (e.g. -- INSERT -- below the statusline)
 set noshowmode
@@ -401,16 +398,34 @@ let g:syntastic_warning_symbol = '∆∆'
 let g:syntastic_style_warning_symbol = '≈≈'
 let g:syntastic_ruby_checkers=["mri", "rubocop"]
 
+" Lightline settings
+let g:lightline = {
+      \ 'colorscheme': 'one',
+      \ 'active': {
+      \   'left': [ [ 'mode', 'paste' ],
+      \             ['gitbranch', 'filename', 'modified'] ],
+      \   'right': [['total_lines']],
+      \ },
+      \ 'inactive': {
+      \   'left': [['filename'] ],
+      \   'right': [['total_lines']],
+      \ },
+      \ 'component_function': {
+      \   'gitbranch': 'fugitive#head'
+      \ },
+      \ 'component': {
+      \   'total_lines': ' %l/%l '
+      \ },
+      \}
 
-" Airline setings
-let g:airline_powerline_fonts = 1
-let g:airline_theme='gruvbox'
+"
+" set statusline=
+" set statusline+=%#PmenuSel#
+" set statusline+=%{StatuslineGit()}
+" set statusline+=%#LineNr#
+" set statusline+=\ %f
+" set statusline+=%m
+" set statusline+=%=
+" set statusline+=\ %l/
+" set statusline+=%L
 
-if !exists('g:airline_symbols')
-  let g:airline_symbols = {}
-endif
-
-let g:airline_symbols.branch = ''
-let g:airline_symbols.readonly = ''
-let g:airline_symbols.linenr = ''
-let g:airline_symbols.crypt = '🔒'
