@@ -30,10 +30,10 @@ Plugin('chriskempson/base16-vim')
 
 call vundle#end()
 
-nnoremap <space> <nop>
 
-set completeopt+=menuone
-set completeopt+=noselect
+" ===================== General settings ====================================
+
+nnoremap <space> <nop>
 
 " use the space key as our leader. put this near the top of your vimrc
 let mapleader = "\<space>"
@@ -44,9 +44,6 @@ filetype plugin indent on
 "filetype off
 "syntax highlighting
 syntax on
-
-" Auto reload on file change
-set autoread
 
 " Use vim, not vi api
 set nocompatible
@@ -193,14 +190,14 @@ set title
 
 set clipboard+=unnamed
 
+
+" ===================== Mapings ====================================
+
 " Remap VIM 0 to first non-blank character
 map 0 ^
 
 " Pressing ,ss will toggle and untoggle spell checking
 map <leader>ss :setlocal spell!<cr>
-
-" Copy the entire buffer into the system register
-nmap <leader>co ggVG*y
 
 " Save current file
 nnoremap <Leader>w :w<CR>
@@ -210,12 +207,6 @@ noremap H ^
 
 " Go to the end of line
 noremap L $
-
-" Switch between tabs
-nnoremap <TAB> gt
-
-" Edit the db/schema.rb ails file in a split
-nmap <leader>sc :split db/schema.rb<cr>
 
 " Run 'git blame' on a selection of code
 nmap <leader>gb :Gblame<CR>
@@ -232,23 +223,9 @@ nmap <F4> byei<<ESC>ea></<C-R>0><ESC>bba
 " Faster search
 nmap q /
 
-nnoremap <C-k> <C-w>s
-
-nmap <Leader>y viwy
-nmap <Leader>u vi"y
-
 " Fix indenting selection
 vnoremap < <gv
 vnoremap > >gv
-
-let g:VtrPercentage = 20
-let g:VtrUseVtrMaps = 1
-
-nnoremap <leader>sd :VtrSendCtrlD<cr>
-nmap <leader>fs :VtrFlushCommand<cr>:VtrSendCommandToRunner<cr>
-" nmap <leader>osp :VtrOpenRunner {'orientation': 'h', 'percentage': 20, 'cmd': '' }<cr>
-" nmap <leader>orc :VtrOpenRunner {'orientation': 'h', 'percentage': 40, 'cmd': 'rc'}<cr>
-" nmap <leader>opr :VtrOpenRunner {'orientation': 'h', 'percentage': 40, 'cmd': 'pry'}<cr>
 
 " Open a new tab with Ctrl+T
 map <C-t> <esc>:tabnew<CR>
@@ -259,12 +236,6 @@ map <leader>i mmgg=G`m<CR>
 " Disable selection
 map <leader>n :nohl<CR>
 
-" Emmet expand class name to tag
-imap <c-\> <c-y>,<CR><CR><ESC>ki<TAB><TAB>
-
-" Fix indentation on paste
-" map <leader>p :set paste<CR>o<esc>"*]p:set nopaste<CR>
-
 " Enter replace command
 map <leader>r :%s/
 
@@ -272,16 +243,13 @@ map <leader>r :%s/
 nmap j gj
 nmap k gk
 
-" Fuzzy-find with fzf
-nmap <C-p> :FZ<cr>
-
-"Map Ctrl + S to save in any mode
-" noremap <silent> <C-S>          :update<CR>
-" vnoremap <silent> <C-S>         <C-C>:update<CR>
-" inoremap <silent> <C-S>         <C-O>:update<CR>
 " zoom a vim pane, <C-w>= to re-balance
-nmap <C-w><cr> <C-W>\| <C-W>_
+" nmap <C-w><cr> <C-W>\| <C-W>_
+
+" Expand window after <CR> keypress
 nmap <C-m> <C-W>\| <C-W>_
+
+" re-balance panes
 nmap <C-n> <C-W>=
 
 " Faster close windows and quit
@@ -290,6 +258,7 @@ nnoremap <C-c> <C-w>q
 "Open ruby test in tmux pane
 let test#strategy = "vimux"
 
+" Test runner mappings
 nmap <silent> <leader>t :TestNearest<CR>
 nmap <silent> <leader>j :TestNearest<CR>
 nmap <silent> <leader>T :TestFile<CR>
@@ -298,33 +267,31 @@ nmap <silent> <leader>l :TestLast<CR>
 
 "Go to test file
 nmap t :A<CR>
+
+" Go to associated file
 nmap <Leader>e :R<CR>
+
+" Tcomment
+vmap \ :TComment<CR>
+nnoremap \ :TComment<CR>
+
+" fzf
+set rtp+=~/.fzf
+
+" Fuzzy-find with fzf
+nmap <C-p> :FZ<cr>
 
 " Ack (the_silver_searcher / ag)
 let g:ackprg="ag"
+
+" Ack mappings
+nnoremap ! :Ack<SPACE>
+" noremap ! :Ack <cr>
 
 " Ack: To go to the next search result
 map <leader>] :cn<cr>
 " Ack: To go to the previous search results
 map <leader>[ :cp<cr>
-
-" fzf
-set rtp+=~/.fzf
-
-" Tcomment
-nnoremap <Leader>/ :TComment<CR>
-map <Leader>/ :TComment<CR>
-
-vmap \ :TComment<CR>
-nnoremap \ :TComment<CR>
-
-nnoremap <C-\> <NOP>
-
-nmap <Leader>, <CR>y,
-
-" Ack mappings
-nnoremap ! :Ack<SPACE>
-" noremap ! :Ack <cr>
 
 " fzf Ag
 noremap <Leader>p :Ag <cr>
@@ -342,17 +309,62 @@ autocmd VimEnter * nunmap <leader>hr
 autocmd VimEnter * nunmap <leader>hs
 
 " Unmap Bufexplorer leaders that I don't use. This avoids delays for other leaders.
-"autocmd VimEnter * nunmap <leader>bs
-"autocmd VimEnter * nunmap <leader>bv
+" autocmd VimEnter * nunmap <leader>bs
+" autocmd VimEnter * nunmap <leader>bv
 
 
+" ===================== Nerdtree settings  ====================================
 
-" Nerdtree
 let NERDTreeShowHidden=1
 let NERDTreeWinSize=40
+nnoremap <C-\> <NOP>
 autocmd VimEnter * nnoremap <C-\> :NERDTreeToggle<CR>
 
-" FZF Ag setup
+
+" ===================== Syntastic settings  ====================================
+
+let g:syntastic_javascript_checkers = ['eslint']
+let g:syntastic_error_symbol = '✗✗'
+let g:syntastic_style_error_symbol = '✠✠'
+let g:syntastic_warning_symbol = '∆∆'
+let g:syntastic_style_warning_symbol = '≈≈'
+let g:syntastic_ruby_checkers=["mri", "rubocop"]
+
+
+" ===================== Lightline settings  ====================================
+
+let g:lightline = {
+      \ 'colorscheme': 'one',
+      \ 'active': {
+      \   'left': [ [ 'mode', 'paste' ],
+      \             ['gitbranch', 'filename', 'modified'] ],
+      \   'right': [['total_lines']],
+      \ },
+      \ 'inactive': {
+      \   'left': [['filename'] ],
+      \   'right': [['total_lines']],
+      \ },
+      \ 'component_function': {
+      \   'gitbranch': 'fugitive#head'
+      \ },
+      \ 'component': {
+      \   'total_lines': ' %l/%l '
+      \ },
+      \}
+
+" set statusline=
+" set statusline+=%#PmenuSel#
+" set statusline+=%{StatuslineGit()}
+" set statusline+=%#LineNr#
+" set statusline+=\ %f
+" set statusline+=%m
+" set statusline+=%=
+" set statusline+=\ %l/
+" set statusline+=%L
+
+
+" ===================== FZF-AG functions  ====================================
+
 function! s:ag_to_qf(line)
   let parts = split(a:line, ':')
   return {'filename': parts[0], 'lnum': parts[1], 'col': parts[2],
@@ -388,44 +400,3 @@ command! -nargs=* Ag call fzf#run({
 \            '--color hl:68,hl+:110',
 \ 'down':    '50%'
 \ })
-
-
-" Syntastic settings
-let g:syntastic_javascript_checkers = ['eslint']
-let g:syntastic_error_symbol = '✗✗'
-let g:syntastic_style_error_symbol = '✠✠'
-let g:syntastic_warning_symbol = '∆∆'
-let g:syntastic_style_warning_symbol = '≈≈'
-let g:syntastic_ruby_checkers=["mri", "rubocop"]
-
-" Lightline settings
-let g:lightline = {
-      \ 'colorscheme': 'one',
-      \ 'active': {
-      \   'left': [ [ 'mode', 'paste' ],
-      \             ['gitbranch', 'filename', 'modified'] ],
-      \   'right': [['total_lines']],
-      \ },
-      \ 'inactive': {
-      \   'left': [['filename'] ],
-      \   'right': [['total_lines']],
-      \ },
-      \ 'component_function': {
-      \   'gitbranch': 'fugitive#head'
-      \ },
-      \ 'component': {
-      \   'total_lines': ' %l/%l '
-      \ },
-      \}
-
-"
-" set statusline=
-" set statusline+=%#PmenuSel#
-" set statusline+=%{StatuslineGit()}
-" set statusline+=%#LineNr#
-" set statusline+=\ %f
-" set statusline+=%m
-" set statusline+=%=
-" set statusline+=\ %l/
-" set statusline+=%L
-
