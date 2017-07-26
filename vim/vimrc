@@ -24,6 +24,7 @@ Plugin('tpope/vim-fugitive')
 Plugin('tmux-plugins/vim-tmux-focus-events')
 Plugin('kana/vim-textobj-user')
 Plugin('rhysd/vim-textobj-ruby')
+Plugin('brooth/far.vim')
 
 " Plugin('KeitaNakamura/neodark.vim')
 Plugin('chriskempson/base16-vim')
