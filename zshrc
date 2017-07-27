@@ -37,7 +37,7 @@ export RUBYOPT="-W1"
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 alias cap-current-branch='GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD) cap'
 
-# [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 . $HOME/.asdf/asdf.sh
 # rbenv
