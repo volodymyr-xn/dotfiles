@@ -13,3 +13,4 @@
 	car = commit --amend --no-edit
 	unstage = reset
 	restore-branch-from = reset --hard
+	uncommit = reset --soft HEAD^
