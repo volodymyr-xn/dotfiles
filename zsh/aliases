@@ -35,11 +35,11 @@ alias rake='bundle exec rake'
 
 # Rails
 alias bx='bundle exec'
-alias sst='spring status'
+
+alias tx='tmuxinator'
 
 # Test
 alias rt='rake test'
-alias rtp='rake parallel:test'
 alias rti='rake test:integration'
 
 # Postgres
