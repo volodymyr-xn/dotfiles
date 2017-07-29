@@ -352,7 +352,7 @@ let g:lightline = {
       \   'gitbranch': 'fugitive#head'
       \ },
       \ 'component': {
-      \   'total_lines': ' %l/%l '
+      \   'total_lines': ' %l/%L '
       \ },
       \}
 
