@@ -212,6 +212,9 @@ noremap L $
 " Run 'git blame' on a selection of code
 nmap <leader>gb :Gblame<CR>
 
+" Run 'git status' for current file
+nmap <leader>gs :Gstatus<CR>
+
 " Change surround double quotes to plain quotes
 nmap <Leader>' cs"'<CR>
 
