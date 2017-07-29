@@ -4,3 +4,8 @@ fbr() {
     branch=$(echo "$branches" | fzf +m) &&
     git checkout $(echo "$branch" | awk '{print $1}' | sed "s/.* //")
 }
+
+conflicted() {
+  vim +Conflicted
+}
+

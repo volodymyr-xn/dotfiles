@@ -25,6 +25,7 @@ Plugin('tmux-plugins/vim-tmux-focus-events')
 Plugin('kana/vim-textobj-user')
 Plugin('rhysd/vim-textobj-ruby')
 Plugin('brooth/far.vim')
+Plugin('christoomey/vim-conflicted')
 
 " Plugin('KeitaNakamura/neodark.vim')
 Plugin('chriskempson/base16-vim')
