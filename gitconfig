@@ -14,3 +14,5 @@
 	unstage = reset
 	restore-branch-from = reset --hard
 	uncommit = reset --soft HEAD^
+[fetch]
+	prune = true
