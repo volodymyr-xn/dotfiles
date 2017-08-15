@@ -33,6 +33,11 @@ export PATH="$HOME/bin:$PATH"
 
 export RUBYOPT="-W1"
 
+# android studio
+export ANDROID_HOME=$HOME/Android/Sdk
+export PATH=$PATH:$ANDROID_HOME/tools
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+
 # Include local settings
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 alias cap-current-branch='GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD) cap'
