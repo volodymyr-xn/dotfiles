@@ -320,7 +320,11 @@ autocmd VimEnter * nunmap <leader>hs
 " Unmap Bufexplorer leaders that I don't use. This avoids delays for other leaders.
 " autocmd VimEnter * nunmap <leader>bs
 " autocmd VimEnter * nunmap <leader>bv
+"
 
+" ===================== Fugitive settings ====================================
+" Froce to split window verticaly when fugitive opens git diff
+set diffopt+=vertical
 
 " ===================== Nerdtree settings  ====================================
 
