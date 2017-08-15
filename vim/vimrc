@@ -1,36 +1,40 @@
 set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
+" call vundle#begin()
+call plug#begin('~/.vim/plugged')
 
-Plugin('mileszs/ack.vim')
-Plugin('jiangmiao/auto-pairs')
-Plugin('scrooloose/nerdtree')
-Plugin('tomtom/tcomment_vim')
-Plugin('lifepillar/vim-mucomplete')
-Plugin('itchyny/lightline.vim')
-Plugin('tpope/vim-bundler')
-Plugin('vim-syntastic/syntastic')
-Plugin('tpope/vim-endwise')
-Plugin('airblade/vim-gitgutter')
-Plugin('tpope/vim-rails')
-Plugin('tpope/vim-rbenv')
-Plugin('vim-ruby/vim-ruby')
-Plugin('sunaku/vim-ruby-minitest')
-Plugin('tpope/vim-surround')
-Plugin('janko-m/vim-test')
-Plugin('christoomey/vim-tmux-navigator')
-Plugin('benmills/vimux')
-Plugin('hail2u/vim-css3-syntax')
-Plugin('tpope/vim-fugitive')
-Plugin('tmux-plugins/vim-tmux-focus-events')
-Plugin('kana/vim-textobj-user')
-Plugin('rhysd/vim-textobj-ruby')
-Plugin('brooth/far.vim')
-Plugin('christoomey/vim-conflicted')
+Plug('mileszs/ack.vim')
+Plug('jiangmiao/auto-pairs')
+Plug('scrooloose/nerdtree')
+Plug('tomtom/tcomment_vim')
+Plug('lifepillar/vim-mucomplete')
+Plug('itchyny/lightline.vim')
+Plug('tpope/vim-bundler')
+Plug('vim-syntastic/syntastic')
+Plug('tpope/vim-endwise')
+Plug('airblade/vim-gitgutter')
+Plug('tpope/vim-rails')
+Plug('tpope/vim-rbenv')
+Plug('vim-ruby/vim-ruby')
+Plug('sunaku/vim-ruby-minitest')
+Plug('tpope/vim-surround')
+Plug('janko-m/vim-test')
+Plug('christoomey/vim-tmux-navigator')
+Plug('benmills/vimux')
+Plug('hail2u/vim-css3-syntax')
+Plug('tpope/vim-fugitive')
+Plug('tmux-plugins/vim-tmux-focus-events')
+Plug('kana/vim-textobj-user')
+Plug('rhysd/vim-textobj-ruby')
+Plug('brooth/far.vim')
+Plug('christoomey/vim-conflicted')
+Plug('pangloss/vim-javascript')
+Plug('MaxMEllon/vim-jsx-pretty')
 
-" Plugin('KeitaNakamura/neodark.vim')
-Plugin('chriskempson/base16-vim')
+" Plug('KeitaNakamura/neodark.vim')
+Plug('chriskempson/base16-vim')
 
-call vundle#end()
+" call vundle#end()
+call plug#end()
 
 
 " ===================== General settings ====================================
@@ -367,6 +371,8 @@ let g:lightline = {
 " set statusline+=\ %l/
 " set statusline+=%L
 
+" ===================== vim-jsx ====================================
+let g:vim_jsx_pretty_colorful_config = 1 " default 0
 
 " ===================== FZF-AG functions  ====================================
 
