@@ -1,5 +1,4 @@
 set rtp+=~/.vim/bundle/Vundle.vim
-" call vundle#begin()
 call plug#begin('~/.vim/plugged')
 
 Plug('mileszs/ack.vim')
@@ -29,6 +28,7 @@ Plug('brooth/far.vim')
 Plug('christoomey/vim-conflicted')
 Plug('pangloss/vim-javascript')
 Plug('MaxMEllon/vim-jsx-pretty')
+Plug('mtscout6/syntastic-local-eslint.vim')
 
 " Plug('KeitaNakamura/neodark.vim')
 Plug('chriskempson/base16-vim')
