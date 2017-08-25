@@ -2,7 +2,7 @@ set rtp+=~/.vim/bundle/Vundle.vim
 call plug#begin('~/.vim/plugged')
 
 Plug('mileszs/ack.vim')
-Plug('jiangmiao/auto-pairs')
+" Plug('jiangmiao/auto-pairs')
 Plug('scrooloose/nerdtree')
 Plug('tomtom/tcomment_vim')
 Plug('lifepillar/vim-mucomplete')
@@ -27,8 +27,7 @@ Plug('rhysd/vim-textobj-ruby')
 Plug('brooth/far.vim')
 Plug('christoomey/vim-conflicted')
 Plug('pangloss/vim-javascript')
-Plug('MaxMEllon/vim-jsx-pretty')
-Plug('mtscout6/syntastic-local-eslint.vim')
+" Plug('mtscout6/syntastic-local-eslint.vim')
 
 " Plug('KeitaNakamura/neodark.vim')
 Plug('chriskempson/base16-vim')
@@ -256,7 +255,7 @@ nmap k gk
 " nmap <C-w><cr> <C-W>\| <C-W>_
 
 " Expand window
-nmap <C-[> <C-W>\| <C-W>_
+" nmap <C-[> <C-W>\| <C-W>_
 
 " re-balance panes
 nmap <C-n> <C-W>=
