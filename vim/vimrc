@@ -1,10 +1,14 @@
 set rtp+=~/.vim/bundle/Vundle.vim
 call plug#begin('~/.vim/plugged')
 
+" global search by ack
 Plug('mileszs/ack.vim')
 " Plug('jiangmiao/auto-pairs')
 Plug('scrooloose/nerdtree')
+
+" comments
 Plug('tomtom/tcomment_vim')
+" autocomplete
 Plug('lifepillar/vim-mucomplete')
 Plug('itchyny/lightline.vim')
 Plug('tpope/vim-bundler')
@@ -24,15 +28,25 @@ Plug('tpope/vim-fugitive')
 Plug('tmux-plugins/vim-tmux-focus-events')
 Plug('kana/vim-textobj-user')
 Plug('rhysd/vim-textobj-ruby')
-Plug('brooth/far.vim')
-Plug('christoomey/vim-conflicted')
-Plug('pangloss/vim-javascript')
-" Plug('mtscout6/syntastic-local-eslint.vim')
 
-" Plug('KeitaNakamura/neodark.vim')
+" reslove git conflicts
+Plug('christoomey/vim-conflicted')
+
+" improved javscript syntax
+Plug('pangloss/vim-javascript')
+
+" jsx syntax support
+Plug('mxw/vim-jsx')
+
+" multiple cursors
+Plug('terryma/vim-multiple-cursors')
+
+" use local eslint config
+Plug('mtscout6/syntastic-local-eslint.vim')
+
+" base16 color schemes
 Plug('chriskempson/base16-vim')
 
-" call vundle#end()
 call plug#end()
 
 

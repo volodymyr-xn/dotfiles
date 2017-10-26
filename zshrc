@@ -34,6 +34,7 @@ export SSH_KEY_PATH="~/.ssh/dsa_id"
 export PATH="$HOME/bin:$PATH"
 
 export RUBYOPT="-W1"
+export RAILS_ENV="development"
 
 # android studio
 export ANDROID_HOME=$HOME/Android/Sdk
@@ -48,6 +49,6 @@ alias cap-current-branch='GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD) cap'
 
 . $HOME/.asdf/asdf.sh
 # rbenv
-export PATH="$HOME/.rbenv/bin:$PATH"
-export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"
-eval "$(rbenv init -)"
+# export PATH="$HOME/.rbenv/bin:$PATH"
+# export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"
+# eval "$(rbenv init -)"
