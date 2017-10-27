@@ -269,10 +269,10 @@ nmap k gk
 " nmap <C-w><cr> <C-W>\| <C-W>_
 
 " Expand window
-" nmap <C-[> <C-W>\| <C-W>_
+nmap " <C-W>\| <C-W>_
 
 " re-balance panes
-nmap <C-n> <C-W>=
+nmap ' <C-W>=
 
 " Faster close windows and quit
 nnoremap <C-c> <C-w>q
