@@ -57,8 +57,7 @@ nnoremap <space> <nop>
 " use the space key as our leader. put this near the top of your vimrc
 let mapleader = "\<space>"
 
-" For auto indent
-filetype plugin indent on
+" r For auto indent filetype plugin indent on
 
 "filetype off
 "syntax highlighting
@@ -261,6 +260,9 @@ map <leader>n :nohl<CR>
 " Enter replace command
 map <leader>r :%s/
 
+" Reload servers
+map r :call RestartServers() <CR>
+
 " Move up and down by visible lines if current line is wrapped
 nmap j gj
 nmap k gk
@@ -387,6 +389,12 @@ let g:lightline = {
 " set statusline+=%=
 " set statusline+=\ %l/
 " set statusline+=%L
+
+"====================== my own functions ====================================
+function RestartServers()
+  echom system("tmux send-keys -t 2.left C-c \" bundle exec rails s\" C-m")
+  echom system("tmux send-keys -t 3.left C-c \" bundle exec rails s -p 3001\" C-m")
+endfunction
 
 " ===================== vim-jsx ====================================
 let g:vim_jsx_pretty_colorful_config = 1 " default 0
