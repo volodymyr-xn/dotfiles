@@ -261,7 +261,7 @@ map <leader>n :nohl<CR>
 map <leader>r :%s/
 
 " Reload servers
-map r :call RestartServers() <CR>
+map t :call RestartServers() <CR>
 
 " Move up and down by visible lines if current line is wrapped
 nmap j gj
