@@ -365,15 +365,12 @@ let g:lightline = {
       \ 'colorscheme': 'one',
       \ 'active': {
       \   'left': [ [ 'mode', 'paste' ],
-      \             ['gitbranch', 'filename', 'modified'] ],
+      \             ['filename', 'modified'] ],
       \   'right': [['total_lines']],
       \ },
       \ 'inactive': {
       \   'left': [['filename'] ],
       \   'right': [['total_lines']],
-      \ },
-      \ 'component_function': {
-      \   'gitbranch': 'fugitive#head'
       \ },
       \ 'component': {
       \   'total_lines': ' %l/%L '
