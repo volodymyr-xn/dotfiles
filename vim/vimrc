@@ -261,7 +261,7 @@ map <leader>n :nohl<CR>
 map <leader>r :%s/
 
 " Reload servers
-map t :call RestartServers() <CR>
+nnoremap t :call RestartServers() <CR>
 
 " Move up and down by visible lines if current line is wrapped
 nmap j gj
@@ -289,8 +289,8 @@ nmap <silent> <leader>T :TestFile<CR>
 nmap <silent> <leader>a :TestSuite<CR>
 nmap <silent> <leader>l :TestLast<CR>
 
-"Go to test file
-nmap t :A<CR>
+" "Go to test file
+" nmap t :A<CR>
 
 " Go to associated file
 nmap <Leader>e :R<CR>
@@ -391,6 +391,7 @@ let g:lightline = {
 function RestartServers()
   echom system("tmux send-keys -t 2.left C-c \" bundle exec rails s\" C-m")
   echom system("tmux send-keys -t 3.left C-c \" bundle exec rails s -p 3001\" C-m")
+  echo "Servers reloaded"
 endfunction
 
 " ===================== vim-jsx ====================================
