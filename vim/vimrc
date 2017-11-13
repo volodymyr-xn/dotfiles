@@ -29,6 +29,9 @@ Plug('tmux-plugins/vim-tmux-focus-events')
 Plug('kana/vim-textobj-user')
 Plug('rhysd/vim-textobj-ruby')
 
+" crystal syntax support
+Plug('rhysd/vim-crystal')
+
 " reslove git conflicts
 Plug('christoomey/vim-conflicted')
 
@@ -260,6 +263,12 @@ map <leader>n :nohl<CR>
 " Enter replace command
 map <leader>r :%s/
 
+" Edit vim config in vertical split
+nnoremap <leader>ev :vsplit $MYVIMRC<cr>
+
+" Reload vim config
+nnoremap <leader>sv :source $MYVIMRC<cr>
+
 " Reload servers
 map t :call RestartServers() <CR>
 
@@ -342,7 +351,6 @@ autocmd VimEnter * nunmap <leader>hs
 set diffopt+=vertical
 
 " ===================== Nerdtree settings  ====================================
-
 let NERDTreeShowHidden=1
 let NERDTreeWinSize=40
 nnoremap <C-\> <NOP>
@@ -356,7 +364,7 @@ let g:syntastic_error_symbol = '✗✗'
 let g:syntastic_style_error_symbol = '✠✠'
 let g:syntastic_warning_symbol = '∆∆'
 let g:syntastic_style_warning_symbol = '≈≈'
-let g:syntastic_ruby_checkers=["mri", "rubocop"]
+let g:syntastic_ruby_checkers = ["mri", "rubocop"]
 
 
 " ===================== Lightline settings  ====================================
@@ -377,18 +385,8 @@ let g:lightline = {
       \ },
       \}
 
-" set statusline=
-" set statusline+=%#PmenuSel#
-" set statusline+=%{StatuslineGit()}
-" set statusline+=%#LineNr#
-" set statusline+=\ %f
-" set statusline+=%m
-" set statusline+=%=
-" set statusline+=\ %l/
-" set statusline+=%L
-
 "====================== my own functions ====================================
-function RestartServers()
+function! RestartServers()
   echom system("tmux send-keys -t 2.left C-c \" bundle exec rails s\" C-m")
   echom system("tmux send-keys -t 3.left C-c \" bundle exec rails s -p 3001\" C-m")
 endfunction
