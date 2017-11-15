@@ -31,6 +31,7 @@ source $HOME/dotfiles/zsh/z.sh
 # ssh
 export SSH_KEY_PATH="~/.ssh/dsa_id"
 
+# add ~/bin to PATH
 export PATH="$HOME/bin:$PATH"
 
 export RUBYOPT="-W1"
@@ -40,6 +41,8 @@ export RAILS_ENV="development"
 export ANDROID_HOME=$HOME/Android/Sdk
 export PATH=$PATH:$ANDROID_HOME/tools
 export PATH=$PATH:$ANDROID_HOME/platform-tools
+
+export PATH=$PATH:~/.local/bin
 
 # Include local settings
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
