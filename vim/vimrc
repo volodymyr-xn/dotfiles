@@ -264,10 +264,13 @@ map <leader>n :nohl<CR>
 map <leader>r :%s/
 
 " Edit vim config in vertical split
-nnoremap <leader>ev :vsplit $MYVIMRC<cr>
+nnoremap <leader>ve :vsplit $MYVIMRC<cr>
 
 " Reload vim config
-nnoremap <leader>sv :source $MYVIMRC<cr>
+nnoremap <leader>vr :source $MYVIMRC<cr>
+
+" Delete all lines beginning with '#' regardless of leading space.
+map <leader>d :g/^\s*#.*/d<CR>:nohl<CR>
 
 " Reload servers
 map t :call RestartServers() <CR>
@@ -330,6 +333,8 @@ map <leader>[ :cp<cr>
 noremap <Leader>p :Ag <cr>
 noremap <Leader>m :FZF app/models<CR>
 nnoremap <silent> <Leader>f :Ag <C-R><C-W><CR>
+
+let test#ruby#bundle_exec = 1
 
 " vim-jsx
 " By default, JSX syntax highlighting and indenting will be enabled only for
