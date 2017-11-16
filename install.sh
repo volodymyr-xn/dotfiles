@@ -10,7 +10,7 @@ dotfiles_echo() {
 set -e # Terminate script if anything exits with a non-zero value
 set -u # Prevent unset variables
 
-files="vim tmux zsh ackrc asdfrc config.reek gemrc gitconfig gitignore_global gitmessage npmrc zshrc inputrc"
+files="vim tmux zsh ackrc asdfrc ctags config.reek gemrc gitconfig gitignore_global gitmessage npmrc zshrc inputrc pryrc"
 DOTFILES_DIR=$HOME/dotfiles
 
 dotfiles_echo "Installing dotfiles..."
