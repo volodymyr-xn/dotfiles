@@ -28,6 +28,7 @@ Plug('tpope/vim-fugitive')
 Plug('tmux-plugins/vim-tmux-focus-events')
 Plug('kana/vim-textobj-user')
 Plug('rhysd/vim-textobj-ruby')
+Plug('Raimondi/delimitMate')
 
 " crystal syntax support
 Plug('rhysd/vim-crystal')
@@ -53,7 +54,9 @@ Plug('chriskempson/base16-vim')
 call plug#end()
 
 
+"============================================================================
 " ===================== General settings ====================================
+"============================================================================
 
 nnoremap <space> <nop>
 
@@ -212,7 +215,9 @@ set title
 set clipboard+=unnamed
 
 
-" ===================== Mapings ====================================
+"============================================================================
+"====================== Mapings ============================================
+"============================================================================
 
 " Remap VIM 0 to first non-blank character
 map 0 ^
@@ -258,10 +263,10 @@ map <C-t> <esc>:tabnew<CR>
 map <leader>i mmgg=G`m<CR>
 
 " Disable selection
-map <leader>n :nohl<CR>
+nnoremap <leader>n :nohl<CR>
 
 " Enter replace command
-map <leader>r :%s/
+nnoremap <leader>r :%s/
 
 " Edit vim config in vertical split
 nnoremap <leader>ve :vsplit $MYVIMRC<cr>
@@ -274,6 +279,9 @@ map <leader>d :g/^\s*#.*/d<CR>:nohl<CR>
 
 " Reload servers
 nnoremap t :call RestartServers() <CR>
+
+" Reload chrome tab
+nnoremap T :call ReloadActiveChromeTab() <CR>
 
 " Move up and down by visible lines if current line is wrapped
 nmap j gj
@@ -291,15 +299,15 @@ nmap ' <C-W>=
 " Faster close windows and quit
 nnoremap <C-c> <C-w>q
 
-"Open ruby test in tmux pane
-let test#strategy = "vimux"
-
 " Test runner mappings
-nmap <silent> <leader>t :TestNearest<CR>
-nmap <silent> <leader>j :TestNearest<CR>
-nmap <silent> <leader>T :TestFile<CR>
-nmap <silent> <leader>a :TestSuite<CR>
-nmap <silent> <leader>l :TestLast<CR>
+nnoremap <silent> <leader>t :TestNearest<CR>
+nnoremap <silent> <leader>j :TestNearest<CR>
+nnoremap <silent> <leader>T :TestFile<CR>
+nnoremap <silent> <leader>a :TestSuite<CR>
+nnoremap <silent> <leader>l :TestLast<CR>
+
+nnoremap <Leader>vr :so $MYVIMRC<CR>
+nnoremap <Leader>ve :vsplit $MYVIMRC<CR>
 
 " "Go to test file
 " nmap t :A<CR>
@@ -317,9 +325,6 @@ set rtp+=~/.fzf
 " Fuzzy-find with fzf
 nmap <C-p> :FZ<cr>
 
-" Ack (the_silver_searcher / ag)
-let g:ackprg="ag"
-
 " Ack mappings
 nnoremap ! :Ack<SPACE>
 " noremap ! :Ack <cr>
@@ -334,13 +339,6 @@ noremap <Leader>p :Ag <cr>
 noremap <Leader>m :FZF app/models<CR>
 nnoremap <silent> <Leader>f :Ag <C-R><C-W><CR>
 
-let test#ruby#bundle_exec = 1
-
-" vim-jsx
-" By default, JSX syntax highlighting and indenting will be enabled only for
-" files with the .jsx extension. If you would like JSX in .js files, add
-let g:jsx_ext_required = 0
-
 " Unmap GitGutter leaders that I don't use. This avoids delays for other leaders.
 autocmd VimEnter * nunmap <leader>hp
 autocmd VimEnter * nunmap <leader>hr
@@ -349,7 +347,20 @@ autocmd VimEnter * nunmap <leader>hs
 " Unmap Bufexplorer leaders that I don't use. This avoids delays for other leaders.
 " autocmd VimEnter * nunmap <leader>bs
 " autocmd VimEnter * nunmap <leader>bv
-"
+
+
+"============================================================================
+"====================== Plugins settings ====================================
+"============================================================================
+
+"Open ruby test in tmux pane
+let test#strategy = "vimux"
+
+" use bundle exec for ruby tests
+let test#ruby#bundle_exec = 1
+
+" Ack (the_silver_searcher / ag)
+let g:ackprg="ag"
 
 " ===================== Fugitive settings ====================================
 " Froce to split window verticaly when fugitive opens git diff
@@ -361,7 +372,6 @@ let NERDTreeWinSize=40
 nnoremap <C-\> <NOP>
 autocmd VimEnter * nnoremap <C-\> :NERDTreeToggle<CR>
 
-
 " ===================== Syntastic settings  ====================================
 
 let g:syntastic_javascript_checkers = ['eslint']
@@ -371,6 +381,13 @@ let g:syntastic_warning_symbol = '∆∆'
 let g:syntastic_style_warning_symbol = '≈≈'
 let g:syntastic_ruby_checkers = ["mri", "rubocop"]
 
+" ===================== vim-jsx ====================================
+let g:vim_jsx_pretty_colorful_config = 1 " default 0
+
+" vim-jsx
+" By default, JSX syntax highlighting and indenting will be enabled only for
+" files with the .jsx extension. If you would like JSX in .js files, add
+let g:jsx_ext_required = 0
 
 " ===================== Lightline settings  ====================================
 
@@ -390,15 +407,26 @@ let g:lightline = {
       \ },
       \}
 
-"====================== my own functions ====================================
+
+"============================================================================
+"====================== Functions ===========================================
+"============================================================================
+
 function! RestartServers()
-  echom system("tmux send-keys -t 2.left C-c \" bundle exec rails s\" C-m")
-  echom system("tmux send-keys -t 3.left C-c \" bundle exec rails s -p 3001\" C-m")
+  execute system("tmux send-keys -t 2.left C-c \" bundle exec rails s\" C-m")
+  execute system("tmux send-keys -t 3.left C-c \" bundle exec rails s -p 3001\" C-m")
+  execute system("tmux send-keys -t 5.left C-c \" bundle exec sidekiq\" C-m")
   echo "Servers reloaded"
 endfunction
 
-" ===================== vim-jsx ====================================
-let g:vim_jsx_pretty_colorful_config = 1 " default 0
+
+function! ReloadActiveChromeTab()
+  let l:terminal = system("xprop -root | grep \"_NET_ACTIVE_WINDOW(WINDOW)\"| awk '{print $5}'")
+  execute system("xdotool search --onlyvisible --class Chrome windowfocus key F5")
+  execute system("xdotool windowfocus " . l:terminal)
+  echo "Chrome tab reloaded"
+endfunction
+
 
 " ===================== FZF-AG functions  ====================================
 
