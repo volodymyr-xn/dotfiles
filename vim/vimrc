@@ -280,6 +280,9 @@ map <leader>d :g/^\s*#.*/d<CR>:nohl<CR>
 " Reload servers
 nnoremap t :call RestartServers() <CR>
 
+" Reload chrome tab
+nnoremap T :call ReloadActiveChromeTab() <CR>
+
 " Move up and down by visible lines if current line is wrapped
 nmap j gj
 nmap k gk
@@ -410,11 +413,20 @@ let g:lightline = {
 "============================================================================
 
 function! RestartServers()
-  echom system("tmux send-keys -t 2.left C-c \" bundle exec rails s\" C-m")
-  echom system("tmux send-keys -t 3.left C-c \" bundle exec rails s -p 3001\" C-m")
-  echom system("tmux send-keys -t 5.left C-c \" bundle exec sidekiq\" C-m")
+  execute system("tmux send-keys -t 2.left C-c \" bundle exec rails s\" C-m")
+  execute system("tmux send-keys -t 3.left C-c \" bundle exec rails s -p 3001\" C-m")
+  execute system("tmux send-keys -t 5.left C-c \" bundle exec sidekiq\" C-m")
   echo "Servers reloaded"
 endfunction
+
+
+function! ReloadActiveChromeTab()
+  let l:terminal = system("xprop -root | grep \"_NET_ACTIVE_WINDOW(WINDOW)\"| awk '{print $5}'")
+  execute system("xdotool search --onlyvisible --class Chrome windowfocus key F5")
+  execute system("xdotool windowfocus " . l:terminal)
+  echo "Chrome tab reloaded"
+endfunction
+
 
 " ===================== FZF-AG functions  ====================================
 
