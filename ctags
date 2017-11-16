@@ -1,10 +1,16 @@
 --sort=yes
 --tag-relative=yes
 --recurse
+--exclude=.git
 --exclude=node_modules
 --exclude=coverage
 --exclude=vendor
 --exclude=bower_components
+--exclude=log
+--exclude=tmp
+--exclude=bin
+--exclude=dist
+--exclude=tags
 
 --langdef=css
 --langmap=css:.css
