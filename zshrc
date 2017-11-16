@@ -4,8 +4,10 @@ BASE16_SHELL=$HOME/.config/base16-shell/
 [ -n "$PS1"  ] && [ -s $BASE16_SHELL/profile_helper.sh  ] && eval "$($BASE16_SHELL/profile_helper.sh)"
 . ~/.user_settings
 stty -ixon
-#
+
 export EDITOR='vim'
+
+export DISABLE_AUTO_TITLE=true
 
 # Use ~~ as the trigger sequence instead of the default **
 export FZF_COMPLETION_TRIGGER='~~'
