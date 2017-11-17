@@ -428,18 +428,16 @@ function! ReloadActiveChromeTab()
   echo "Chrome tab reloaded"
 endfunction
 
+let g:currentWindowZoomed = 0
+
 function! ZoomCurrentWindow()
   if g:currentWindowZoomed
-    " execute "normal <c-w>="
     execute "normal \'"
     let g:currentWindowZoomed = 0
   else
-    execute "normal <c-w>|"
     execute "normal \""
-    " execute "normal <c-w>="
     let g:currentWindowZoomed = 1
   endif
-  echo ""
 endfunction
 
 " ===================== FZF-AG functions  ====================================
