@@ -293,6 +293,8 @@ nmap k gk
 " Expand window
 nmap " <C-W>\| <C-W>_
 
+nnoremap m :call ZoomCurrentWindow() <CR>
+
 " re-balance panes
 nmap ' <C-W>=
 
@@ -419,7 +421,6 @@ function! RestartServers()
   echo "Servers reloaded"
 endfunction
 
-
 function! ReloadActiveChromeTab()
   let l:terminal = system("xprop -root | grep \"_NET_ACTIVE_WINDOW(WINDOW)\"| awk '{print $5}'")
   execute system("xdotool search --onlyvisible --class Chrome windowfocus key F5")
@@ -427,6 +428,19 @@ function! ReloadActiveChromeTab()
   echo "Chrome tab reloaded"
 endfunction
 
+function! ZoomCurrentWindow()
+  if g:currentWindowZoomed
+    " execute "normal <c-w>="
+    execute "normal \'"
+    let g:currentWindowZoomed = 0
+  else
+    execute "normal <c-w>|"
+    execute "normal \""
+    " execute "normal <c-w>="
+    let g:currentWindowZoomed = 1
+  endif
+  echo ""
+endfunction
 
 " ===================== FZF-AG functions  ====================================
 
