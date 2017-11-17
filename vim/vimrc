@@ -421,22 +421,29 @@ function! RestartServers()
   echo "Servers reloaded"
 endfunction
 
+
 function! ReloadActiveChromeTab()
-  let l:terminal = system("xprop -root | grep \"_NET_ACTIVE_WINDOW(WINDOW)\"| awk '{print $5}'")
+  if !exists("g:currentTerminalEmulator")
+    let g:currentTerminalEmulator = system("xprop -root | grep \"_NET_ACTIVE_WINDOW(WINDOW)\"| awk '{print $5}'")
+  endif
+
   execute system("xdotool search --onlyvisible --class Chrome windowfocus key F5")
-  execute system("xdotool windowfocus " . l:terminal)
+  execute system("xdotool windowfocus " . g:currentTerminalEmulator)
   echo "Chrome tab reloaded"
 endfunction
 
-let g:currentWindowZoomed = 0
+if !exists("t:currentWindowZoomed")
+  let t:currentWindowZoomed = 0
+endif
 
+" zoom current window
 function! ZoomCurrentWindow()
-  if g:currentWindowZoomed
+  if t:currentWindowZoomed
     execute "normal \'"
-    let g:currentWindowZoomed = 0
+    let t:currentWindowZoomed = 0
   else
     execute "normal \""
-    let g:currentWindowZoomed = 1
+    let t:currentWindowZoomed = 1
   endif
 endfunction
 
