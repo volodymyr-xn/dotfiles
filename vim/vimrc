@@ -278,10 +278,10 @@ nnoremap <leader>vr :source $MYVIMRC<cr>
 map <leader>d :g/^\s*#.*/d<CR>:nohl<CR>
 
 " Reload servers
-nnoremap t :call RestartServers() <CR>
+nnoremap q :call RestartServers() <CR>
 
 " Reload chrome tab
-nnoremap T :call ReloadActiveChromeTab() <CR>
+nnoremap R :call ReloadActiveChromeTab() <CR>
 
 " Move up and down by visible lines if current line is wrapped
 nmap j gj
@@ -290,9 +290,12 @@ nmap k gk
 " zoom a vim pane, <C-w>= to re-balance
 " nmap <C-w><cr> <C-W>\| <C-W>_
 
+" nnoremap <c-x> gt
+
 " Expand window
 nmap " <C-W>\| <C-W>_
 
+" Expand window
 nnoremap m :call ZoomCurrentWindow() <CR>
 
 " re-balance panes
@@ -435,6 +438,7 @@ function! ZoomCurrentWindow()
     execute "normal \'"
     let g:currentWindowZoomed = 0
   else
+    :NERDTreeClose
     execute "normal \""
     let g:currentWindowZoomed = 1
   endif
