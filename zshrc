@@ -36,6 +36,9 @@ export SSH_KEY_PATH="~/.ssh/dsa_id"
 # add ~/bin to PATH
 export PATH="$HOME/bin:$PATH"
 
+# add yarn bin to PATH
+export PATH="$HOME/.yarn/bin:$PATH"
+
 export RUBYOPT="-W1"
 export RAILS_ENV="development"
 
