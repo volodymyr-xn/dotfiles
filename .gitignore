@@ -1,7 +1,5 @@
 system-setup
 
-## vim Vundle
+## vim-plug
 # ignore everything
-/vim/bundle/*
-# except Vundle itself
-!/vim/bundle/Vundle.vim
+/vim/plugged/*
