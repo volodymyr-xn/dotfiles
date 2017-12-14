@@ -2,4 +2,6 @@ system-setup
 
 ## vim-plug
 # ignore everything
-/vim/plugged/*
+vim/plugged/*
+tmux/plugins/*
+!tmux/plugins/tpm
