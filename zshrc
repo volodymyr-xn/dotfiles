@@ -1,10 +1,14 @@
 . /etc/environment
 
+# base16-shell theme
 BASE16_SHELL=$HOME/.config/base16-shell/
 [ -n "$PS1"  ] && [ -s $BASE16_SHELL/profile_helper.sh  ] && eval "$($BASE16_SHELL/profile_helper.sh)"
-. ~/.user_settings
+
+[ -f ~/.local_settings] && source ~/.local_settings
+
 stty -ixon
 
+# Use vim as default editor
 export EDITOR='vim'
 
 export DISABLE_AUTO_TITLE=true
