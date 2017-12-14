@@ -8,6 +8,7 @@ Plug('scrooloose/nerdtree')
 
 " comments
 Plug('tomtom/tcomment_vim')
+Plug('joshdick/onedark.vim')
 " autocomplete
 Plug('lifepillar/vim-mucomplete')
 Plug('itchyny/lightline.vim')
@@ -130,10 +131,11 @@ set background=dark
 " colorscheme seoul256
 "
 " Base16 hook
-if filereadable(expand("~/.vimrc_background"))
-  let base16colorspace=256
-  source ~/.vimrc_background
-endif
+" if filereadable(expand("~/.vimrc_background"))
+"   let base16colorspace=256
+"   source ~/.vimrc_background
+" endif
+colorscheme onedark
 
 " Access colors present in 256 colorspace
 let base16colorspace=256
