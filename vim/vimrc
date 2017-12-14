@@ -8,13 +8,16 @@ Plug('scrooloose/nerdtree')
 
 " comments
 Plug('tomtom/tcomment_vim')
-Plug('joshdick/onedark.vim')
 " autocomplete
 Plug('lifepillar/vim-mucomplete')
 Plug('itchyny/lightline.vim')
 Plug('tpope/vim-bundler')
 Plug('vim-syntastic/syntastic')
+
+" Automaticaly add end in ruby scrips
 Plug('tpope/vim-endwise')
+
+" Show changed lines from git
 Plug('airblade/vim-gitgutter')
 Plug('tpope/vim-rails')
 Plug('tpope/vim-rbenv')
@@ -30,6 +33,9 @@ Plug('tmux-plugins/vim-tmux-focus-events')
 Plug('kana/vim-textobj-user')
 Plug('rhysd/vim-textobj-ruby')
 Plug('Raimondi/delimitMate')
+
+" TypeScript syntax
+Plug('leafgarland/typescript-vim')
 
 " crystal syntax support
 Plug('rhysd/vim-crystal')
@@ -51,6 +57,9 @@ Plug('mtscout6/syntastic-local-eslint.vim')
 
 " base16 color schemes
 Plug('chriskempson/base16-vim')
+
+" onedark colorscheme
+Plug('rakr/vim-one')
 
 call plug#end()
 
@@ -130,12 +139,13 @@ set background=dark
 " colorscheme neodark
 " colorscheme seoul256
 "
-" Base16 hook
+"Base16 hook
 " if filereadable(expand("~/.vimrc_background"))
 "   let base16colorspace=256
 "   source ~/.vimrc_background
 " endif
-colorscheme onedark
+
+colorscheme one
 
 " Access colors present in 256 colorspace
 let base16colorspace=256
@@ -280,10 +290,10 @@ nnoremap <leader>vr :source $MYVIMRC<cr>
 map <leader>d :g/^\s*#.*/d<CR>:nohl<CR>
 
 " Reload servers
-nnoremap t :call RestartServers() <CR>
+nnoremap q :call RestartServers() <CR>
 
 " Reload chrome tab
-nnoremap T :call ReloadActiveChromeTab() <CR>
+nnoremap R :call ReloadActiveChromeTab() <CR>
 
 " Move up and down by visible lines if current line is wrapped
 nmap j gj
@@ -292,10 +302,13 @@ nmap k gk
 " zoom a vim pane, <C-w>= to re-balance
 " nmap <C-w><cr> <C-W>\| <C-W>_
 
+" nnoremap <c-x> gt
+
 " Expand window
 nmap " <C-W>\| <C-W>_
 
-nnoremap m :call ZoomCurrentWindow() <CR>
+" Expand window
+nnoremap m :ZoomCurrentWindow <CR>
 
 " re-balance panes
 nmap ' <C-W>=
@@ -360,7 +373,13 @@ autocmd VimEnter * nunmap <leader>hs
 "Open ruby test in tmux pane
 let test#strategy = "vimux"
 
-" use bundle exec for ruby tests
+" Use vertical tmux slpit for vimux commands
+let g:VimuxOrientation = "h"
+
+" Open vimux tmux pane with 50% width of screen
+let g:VimuxHeight = "50"
+
+" Use bundle exec for ruby tests
 let test#ruby#bundle_exec = 1
 
 " Ack (the_silver_searcher / ag)
@@ -411,6 +430,10 @@ let g:lightline = {
       \ },
       \}
 
+"============================================================================
+"====================== Commands ===========================================
+"============================================================================
+command ZoomCurrentWindow :call ZoomCurrentWindow()
 
 "============================================================================
 "====================== Functions ===========================================
@@ -422,7 +445,6 @@ function! RestartServers()
   execute system("tmux send-keys -t 5.left C-c \" bundle exec sidekiq\" C-m")
   echo "Servers reloaded"
 endfunction
-
 
 function! ReloadActiveChromeTab()
   if !exists("g:currentTerminalEmulator")
@@ -444,6 +466,7 @@ function! ZoomCurrentWindow()
     execute "normal \'"
     let t:currentWindowZoomed = 0
   else
+    :NERDTreeClose
     execute "normal \""
     let t:currentWindowZoomed = 1
   endif
