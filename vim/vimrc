@@ -367,7 +367,13 @@ autocmd VimEnter * nunmap <leader>hs
 "Open ruby test in tmux pane
 let test#strategy = "vimux"
 
-" use bundle exec for ruby tests
+" Use vertical tmux slpit for vimux commands
+let g:VimuxOrientation = "h"
+
+" Open vimux tmux pane with 50% width of screen
+let g:VimuxHeight = "50"
+
+" Use bundle exec for ruby tests
 let test#ruby#bundle_exec = 1
 
 " Ack (the_silver_searcher / ag)
@@ -429,7 +435,6 @@ function! RestartServers()
   execute system("tmux send-keys -t 5.left C-c \" bundle exec sidekiq\" C-m")
   echo "Servers reloaded"
 endfunction
-
 
 function! ReloadActiveChromeTab()
   if !exists("g:currentTerminalEmulator")
