@@ -31,6 +31,9 @@ Plug('kana/vim-textobj-user')
 Plug('rhysd/vim-textobj-ruby')
 Plug('Raimondi/delimitMate')
 
+" TypeScript syntax
+Plug('leafgarland/typescript-vim')
+
 " crystal syntax support
 Plug('rhysd/vim-crystal')
 
