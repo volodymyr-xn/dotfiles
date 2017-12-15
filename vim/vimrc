@@ -232,7 +232,7 @@ set clipboard+=unnamed
 "============================================================================
 
 " Remap VIM 0 to first non-blank character
-map 0 ^
+nnoremap 0 ^
 
 " Pressing ,ss will toggle and untoggle spell checking
 map <leader>ss :setlocal spell!<cr>
@@ -262,7 +262,7 @@ vnoremap <TAB> =
 nmap <F4> byei<<ESC>ea></<C-R>0><ESC>bba
 
 " Faster search
-nmap q /
+nnoremap s /
 
 " Fix indenting selection
 vnoremap < <gv
@@ -308,7 +308,7 @@ nmap k gk
 nmap " <C-W>\| <C-W>_
 
 " Expand window
-nnoremap m :ZoomCurrentWindow <CR>
+nnoremap m :ToggleCurrentWindowZoom <CR>
 
 " re-balance panes
 nmap ' <C-W>=
@@ -433,7 +433,7 @@ let g:lightline = {
 "============================================================================
 "====================== Commands ===========================================
 "============================================================================
-command ZoomCurrentWindow :call ZoomCurrentWindow()
+command! ToggleCurrentWindowZoom :call ToggleCurrentWindowZoom()
 
 "============================================================================
 "====================== Functions ===========================================
@@ -460,8 +460,8 @@ if !exists("t:currentWindowZoomed")
   let t:currentWindowZoomed = 0
 endif
 
-" zoom current window
-function! ZoomCurrentWindow()
+" toggle zoom current window
+function! ToggleCurrentWindowZoom()
   if t:currentWindowZoomed
     execute "normal \'"
     let t:currentWindowZoomed = 0
