@@ -512,11 +512,25 @@ function! s:ag_handler(lines)
 endfunction
 
 command! -nargs=* Ag call fzf#run({
-\ 'source':  printf('ag --nogroup --column --color "%s"',
-\                   escape(empty(<q-args>) ? '^(?=.)' : <q-args>, '"\')),
-\ 'sink*':    function('<sid>ag_handler'),
-\ 'options': '--ansi --expect=ctrl-t,ctrl-v,ctrl-x --delimiter : --nth 4.. '.
-\            '--multi --bind=ctrl-a:select-all,ctrl-d:deselect-all '.
-\            '--color hl:68,hl+:110',
-\ 'down':    '50%'
-\ })
+      \ 'source':  printf('ag --nogroup --column --color "%s"',
+      \                   escape(empty(<q-args>) ? '^(?=.)' : <q-args>, '"\')),
+      \ 'sink*':    function('<sid>ag_handler'),
+      \ 'options': '--ansi --expect=ctrl-t,ctrl-v,ctrl-x --delimiter : --nth 4.. '.
+      \            '--multi --bind=ctrl-a:select-all,ctrl-d:deselect-all '.
+      \            '--color hl:68,hl+:110',
+      \ 'down':    '50%'
+      \ })
+
+
+syntax match jsCapitalizedVariable    contained  /\%(\%(^\|[^.]\)\.\s*\)\@<!\<\u\%(\w\|[^\x00-\x7F]\)*\>\%(\s*(\)\@!/
+" syntax match jsCapitalizedVariable    contained  /\s[A-Z]\k*/
+syntax keyword jsImport     import skipwhite skipempty nextgroup=jsCapitalizedVariable,jsModuleAsterisk,jsModuleKeyword,jsModuleGroup,jsFlowImportType
+syntax cluster jsAll         contains=@jsExpression,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsException,jsTry,jsNoise,jsBlockLabel
+syntax match   jsCont        contained /\.container/
+syntax keyword jsFrom        from
+syntax cluster jsAll         contains=@jsExpression,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsException,jsTry,jsNoise,jsBlockLabel,jsCapitalizedVariable,jsCont,jsFrom
+
+highlight def link  jsImport               Include
+" highlight def link  jsCont               Type
+highlight def link jsCapitalizedVariable  Type
+highlight def link jsFrom  Include
