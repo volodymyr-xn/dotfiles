@@ -146,6 +146,9 @@ set background=dark
 " endif
 
 colorscheme one
+call one#highlight('rubySymbol', '98c379', '', '')
+call one#highlight('rubyStringDelimiter', 'bf6565', '', '')
+call one#highlight('jsConstant', 'bf6565', '', '')
 
 " Access colors present in 256 colorspace
 let base16colorspace=256
