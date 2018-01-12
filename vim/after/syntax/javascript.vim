@@ -3,6 +3,7 @@ syntax match jsCapitalizedVariable      /\<[A-Z]\k*/
 syntax match jsCapitalizedVariable      /\.[A-Z]\k*/
 
 syntax keyword jsImport      import skipwhite skipempty nextgroup=jsCapitalizedVariable,jsModuleAsterisk,jsModuleKeyword,jsModuleGroup,jsFlowImportType
+syntax region  jsModuleGroup        contained matchgroup=jsModuleBraces  start=/{/ end=/}/   contains=jsModuleKeyword,jsModuleComma,jsModuleAs,jsComment,jsFlowTypeKeyword,jsCapitalizedVariable skipwhite skipempty nextgroup=jsFrom fold
 syntax cluster jsAll         contains=@jsExpression,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsException,jsTry,jsNoise,jsBlockLabel
 syntax match   jsCont        contained /\.container/
 syntax keyword jsFrom        from
@@ -11,6 +12,8 @@ syntax region  jsClassValue  contained start=/=/ end=/\_[;}]\@=/ contains=@jsExp
 
 syntax region  jsObject      contained matchgroup=jsObjectBraces start=/{/  end=/}/  contains=jsObjectKey,jsObjectKeyString,jsObjectKeyComputed,jsObjectSeparator,jsObjectFuncName,jsObjectMethodType,jsGenerator,jsComment,jsObjectStringKey,jsSpreadExpression,jsDecorator,jsAsyncKeyword,jsCapitalizedVariable extend fold
 syntax region  jsClassBlock  contained matchgroup=jsClassBraces  start=/{/  end=/}/  contains=jsClassFuncName,jsClassMethodType,jsArrowFunction,jsArrowFuncArgs,jsComment,jsGenerator,jsDecorator,jsClassProperty,jsClassPropertyComputed,jsClassStringKey,jsAsyncKeyword,jsNoise,jsCapitalizedVariable extend fold
+syntax region  jsFuncArgExpression    contained matchgroup=jsFuncArgOperator start=/=/ end=/[,)]\@=/ contains=@jsExpression,jsCapitalizedVariable extend
+" syntax region  jsFuncArgs           contained matchgroup=jsFuncParens          start=/(/  end=/)/  contains=jsFuncArgCommas,jsComment,jsFuncArgExpression,jsDestructuringBlock,jsDestructuringArray,jsRestExpression,jsFlowArgumentDef,jsCapitalizedVariable skipwhite skipempty nextgroup=jsCommentFunction,jsFuncBlock,jsFlowReturn extend fold
 
 " highlight def link  jsImport   Type
 highlight def link jsCapitalizedVariable  Type
