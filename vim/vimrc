@@ -413,6 +413,8 @@ autocmd VimEnter * nnoremap <C-\> :NERDTreeToggle<CR>
 let g:ale_sign_error = '✗✗'
 let g:ale_sign_warning = '∆∆'
 
+let g:ale_javascript_eslint_executable = '~/.asdf/shims/eslint'
+
 " ===================== vim-jsx ====================================
 let g:vim_jsx_pretty_colorful_config = 1 " default 0
 
