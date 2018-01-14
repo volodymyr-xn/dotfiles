@@ -99,6 +99,9 @@ set timeoutlen=1000 ttimeoutlen=0
 " Always show cursor
 set ruler
 
+" Highligh current line
+set cursorline
+
 " Show incomplete commands
 set showcmd
 
