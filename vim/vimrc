@@ -362,9 +362,9 @@ noremap <Leader>m :FZF app/models<CR>
 nnoremap <silent> <Leader>f :Ag <C-R><C-W><CR>
 
 " Unmap GitGutter leaders that I don't use. This avoids delays for other leaders.
-autocmd VimEnter * nunmap <leader>hp
-autocmd VimEnter * nunmap <leader>hr
-autocmd VimEnter * nunmap <leader>hs
+" autocmd VimEnter * nunmap <leader>hp
+" autocmd VimEnter * nunmap <leader>hr
+" autocmd VimEnter * nunmap <leader>hs
 
 " Unmap Bufexplorer leaders that I don't use. This avoids delays for other leaders.
 " autocmd VimEnter * nunmap <leader>bs
@@ -398,7 +398,7 @@ set diffopt+=vertical
 let NERDTreeShowHidden=1
 let NERDTreeWinSize=40
 nnoremap <C-\> <NOP>
-autocmd VimEnter * nnoremap <C-\> :NERDTreeToggle<CR>
+nnoremap <C-\> :NERDTreeToggle<CR>
 
 " ===================== Syntastic settings  ====================================
 
