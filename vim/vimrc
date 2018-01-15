@@ -398,7 +398,7 @@ set diffopt+=vertical
 let NERDTreeShowHidden=1
 let NERDTreeWinSize=40
 nnoremap <C-\> <NOP>
-nnoremap <C-\> :NERDTreeToggle<CR>
+autocmd VimEnter * nnoremap <C-\> :NERDTreeToggle<CR>
 
 " ===================== Syntastic settings  ====================================
 
