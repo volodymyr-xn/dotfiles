@@ -467,12 +467,13 @@ function! ReloadActiveChromeTab()
   echo "Chrome tab reloaded"
 endfunction
 
-if !exists("t:currentWindowZoomed")
-  let t:currentWindowZoomed = 0
-endif
 
 " toggle zoom current window
 function! ToggleCurrentWindowZoom()
+  if !exists("t:currentWindowZoomed")
+    let t:currentWindowZoomed = 0
+  endif
+
   if t:currentWindowZoomed
     execute "normal \'"
     let t:currentWindowZoomed = 0
