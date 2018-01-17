@@ -46,4 +46,5 @@ alias statpost='ps aux | ag postgres'
 alias psq='pgcli -d postgres'
 
 # Ctags
-alias ct='ctags -R --languages=ruby --exclude=.git --exclude=log --exclude=node_modules . $(bundle list --paths)'
+alias ct='ctags -R --languages=ruby,javascript --sort=yes  --tag-relative=yes --exclude=.git --exclude=log --exclude=node_modules . $(bundle list --paths)'
+alias jt="ctags -R app config lib && sed -i '' -E '/^(if|switch|function|module\.exports|it|describe).+language:js$/d' tags"
