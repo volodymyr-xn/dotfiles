@@ -20,3 +20,24 @@ conflicted() {
   vim +Conflicted
 }
 
+fz() {
+  fzf --preview '[[ $(file --mime {}) =~ binary ]] &&
+    echo {} is a binary file ||
+    (highlight -O ansi -l {} ||
+     coderay {} ||
+     rougify {} ||
+     cat {}) 2> /dev/null | head -500'
+}
+
+fdd() {
+   find . -type d
+}
+
+fvim() {
+  fzf --preview '[[ $(file --mime {}) =~ binary ]] &&
+    echo {} is a binary file ||
+    (highlight -O ansi -l {} ||
+     coderay {} ||
+     rougify {} ||
+     cat {}) 2> /dev/null | head -500'
+}
