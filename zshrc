@@ -1,5 +1,10 @@
 . /etc/environment
 
+# bindkey -s "^f" '$(fdd | fzf)\nclear\n'
+# bindkey -s "^t" '$(fz)\n'
+bindkey -s "^f" 'vim $(fz)\n'
+bindkey -s "^o" 'fbr\n'
+
 # base16-shell theme
 BASE16_SHELL=$HOME/.config/base16-shell/
 [ -n "$PS1"  ] && [ -s $BASE16_SHELL/profile_helper.sh  ] && eval "$($BASE16_SHELL/profile_helper.sh)"
@@ -19,6 +24,7 @@ export FZF_COMPLETION_TRIGGER='~~'
 # Options to fzf command
 export FZF_COMPLETION_OPTS='+c -x'
 export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
+export FZF_CTRL_T_OPTS="--preview '(highlight -O ansi -l {} 2> /dev/null || cat {} || tree -C {}) 2> /dev/null | head -200'"
 
 # Use ag instead of the default find command for listing candidates.
 # - The first argument to the function is the base path to start traversal

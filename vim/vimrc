@@ -13,7 +13,7 @@ Plug('lifepillar/vim-mucomplete')
 Plug('itchyny/lightline.vim')
 Plug('tpope/vim-bundler')
 Plug('vim-syntastic/syntastic')
-Plug('w0rp/ale')
+Plug('mtscout6/syntastic-local-eslint.vim')
 
 " Automaticaly add end in ruby scrips
 Plug('tpope/vim-endwise')
@@ -291,9 +291,6 @@ nnoremap <leader>ve :vsplit $MYVIMRC<cr>
 " Reload vim config
 nnoremap <leader>vr :source $MYVIMRC<cr>
 
-" Delete all lines beginning with '#' regardless of leading space.
-map <leader>d :g/^\s*#.*/d<CR>:nohl<CR>
-
 " Reload servers
 nnoremap q :call RestartServers() <CR>
 
@@ -362,9 +359,9 @@ noremap <Leader>m :FZF app/models<CR>
 nnoremap <silent> <Leader>f :Ag <C-R><C-W><CR>
 
 " Unmap GitGutter leaders that I don't use. This avoids delays for other leaders.
-autocmd VimEnter * nunmap <leader>hp
-autocmd VimEnter * nunmap <leader>hr
-autocmd VimEnter * nunmap <leader>hs
+" autocmd VimEnter * nunmap <leader>hp
+" autocmd VimEnter * nunmap <leader>hr
+" autocmd VimEnter * nunmap <leader>hs
 
 " Unmap Bufexplorer leaders that I don't use. This avoids delays for other leaders.
 " autocmd VimEnter * nunmap <leader>bs
@@ -402,18 +399,19 @@ autocmd VimEnter * nnoremap <C-\> :NERDTreeToggle<CR>
 
 " ===================== Syntastic settings  ====================================
 
-" let g:syntastic_javascript_checkers = ['eslint']
-" let g:syntastic_error_symbol = '✗✗'
-" let g:syntastic_style_error_symbol = '✠✠'
-" let g:syntastic_warning_symbol = '∆∆'
-" let g:syntastic_style_warning_symbol = '≈≈'
-" let g:syntastic_ruby_checkers = ["mri", "rubocop"]
+let g:syntastic_javascript_checkers = ['eslint']
+let g:syntastic_error_symbol = '✗✗'
+let g:syntastic_style_error_symbol = '✠✠'
+let g:syntastic_warning_symbol = '∆∆'
+let g:syntastic_style_warning_symbol = '≈≈'
+let g:syntastic_ruby_checkers = ["mri", "rubocop"]
 
 " ===================== ALE settings  ====================================
-let g:ale_sign_error = '✗✗'
-let g:ale_sign_warning = '∆∆'
-
-let g:ale_javascript_eslint_executable = '~/.asdf/shims/eslint'
+" let g:ale_sign_error = '✗✗'
+" let g:ale_sign_warning = '∆∆'
+" let g:ale_lint_delay = 1000
+" let g:ale_lint_on_text_changed = 'never'
+" let g:ale_javascript_eslint_executable = '~/.asdf/shims/eslint'
 
 " ===================== vim-jsx ====================================
 let g:vim_jsx_pretty_colorful_config = 1 " default 0
@@ -467,12 +465,13 @@ function! ReloadActiveChromeTab()
   echo "Chrome tab reloaded"
 endfunction
 
-if !exists("t:currentWindowZoomed")
-  let t:currentWindowZoomed = 0
-endif
 
 " toggle zoom current window
 function! ToggleCurrentWindowZoom()
+  if !exists("t:currentWindowZoomed")
+    let t:currentWindowZoomed = 0
+  endif
+
   if t:currentWindowZoomed
     execute "normal \'"
     let t:currentWindowZoomed = 0
@@ -512,11 +511,13 @@ function! s:ag_handler(lines)
 endfunction
 
 command! -nargs=* Ag call fzf#run({
-\ 'source':  printf('ag --nogroup --column --color "%s"',
-\                   escape(empty(<q-args>) ? '^(?=.)' : <q-args>, '"\')),
-\ 'sink*':    function('<sid>ag_handler'),
-\ 'options': '--ansi --expect=ctrl-t,ctrl-v,ctrl-x --delimiter : --nth 4.. '.
-\            '--multi --bind=ctrl-a:select-all,ctrl-d:deselect-all '.
-\            '--color hl:68,hl+:110',
-\ 'down':    '50%'
-\ })
+      \ 'source':  printf('ag --nogroup --column --color "%s"',
+      \                   escape(empty(<q-args>) ? '^(?=.)' : <q-args>, '"\')),
+      \ 'sink*':    function('<sid>ag_handler'),
+      \ 'options': '--ansi --expect=ctrl-t,ctrl-v,ctrl-x --delimiter : --nth 4.. '.
+      \            '--multi --bind=ctrl-a:select-all,ctrl-d:deselect-all '.
+      \            '--color hl:68,hl+:110',
+      \ 'down':    '50%'
+      \ })
+
+
