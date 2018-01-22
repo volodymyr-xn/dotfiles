@@ -15,3 +15,4 @@ Session.vim
 .powenv
 node_modules/
 *.local
+tags
