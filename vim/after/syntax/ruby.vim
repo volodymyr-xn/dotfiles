@@ -1,3 +1,10 @@
+syntax keyword rubyBinding binding nextgroup=rubyPry
+syntax match rubyPry /\.pry/
+
+highlight def link rubyBinding  Type
+highlight def link rubyPry  Type
+call one#highlight('rubyPry', 'c678dd', '', 'none')
+
 let s:bcs = b:current_syntax
 unlet b:current_syntax
 syntax include @SQL syntax/sql.vim
@@ -13,5 +20,5 @@ let b:current_syntax = s:bcs
 "start=+<<[-~.]*\z([A-Z]\+\)+ end=+^\s*\z1+ contains=NONE
 
 syntax region hereDocDashSQL matchgroup=Statement start=+<<[-~.]*\z(SQL\)+  end=+^\s*\z1+ contains=@SQL
-
 syntax region hereDocDashShell matchgroup=Statement start=+<<[-~.]*\z(SHELL\)+  end=+^\s*\z1+ contains=@SHELL
+
