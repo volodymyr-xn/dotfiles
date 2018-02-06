@@ -1,9 +1,7 @@
-syntax keyword rubyBinding binding nextgroup=rubyPry
-syntax match rubyPry /\.pry/
+syntax match rubyBindingPry /binding\.pry/
 
-highlight def link rubyBinding  Type
-highlight def link rubyPry  Type
-call one#highlight('rubyPry', 'c678dd', '', 'none')
+
+highlight def link rubyBindingPry Function
 
 let s:bcs = b:current_syntax
 unlet b:current_syntax
