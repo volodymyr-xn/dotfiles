@@ -50,7 +50,6 @@ export PATH="$HOME/bin:$PATH"
 export PATH="$HOME/.yarn/bin:$PATH"
 
 export RUBYOPT="-W1"
-export RAILS_ENV="development"
 
 # android studio
 export ANDROID_HOME=$HOME/Android/Sdk
