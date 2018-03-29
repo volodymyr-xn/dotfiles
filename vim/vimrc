@@ -297,7 +297,8 @@ nnoremap <leader>ve :vsplit $MYVIMRC<cr>
 nnoremap <leader>vr :source $MYVIMRC<cr>
 
 " Reload servers
-nnoremap q :call RestartServers() <CR>
+" nnoremap q :call RestartServers() <CR>
+nnoremap q :call
 
 " Reload chrome tab
 nnoremap R :call ReloadActiveChromeTab() <CR>
@@ -336,8 +337,11 @@ nnoremap <Leader>ve :vsplit $MYVIMRC<CR>
 " "Go to test file
 " nmap t :A<CR>
 
-" Go to associated file
-nmap <Leader>e :R<CR>
+" Go to related file
+nnoremap <Leader>e :R<CR>
+
+" Go to alternate file
+nnoremap q :A<CR>
 
 " Tcomment
 vmap \ :TComment<CR>
@@ -453,12 +457,13 @@ command! ToggleCurrentWindowZoom :call ToggleCurrentWindowZoom()
 "====================== Functions ===========================================
 "============================================================================
 
-function! RestartServers()
-  execute system("tmux send-keys -t 2.left C-c \" bundle exec rails s\" C-m")
-  execute system("tmux send-keys -t 3.left C-c \" bundle exec rails s -p 3001\" C-m")
-  execute system("tmux send-keys -t 5.left C-c \" bundle exec sidekiq\" C-m")
-  echo "Servers reloaded"
-endfunction
+" DEPRECATED
+" function! RestartServers()
+"   execute system("tmux send-keys -t 2.left C-c \" bundle exec rails s\" C-m")
+"   execute system("tmux send-keys -t 3.left C-c \" bundle exec rails s -p 3001\" C-m")
+"   execute system("tmux send-keys -t 5.left C-c \" bundle exec sidekiq\" C-m")
+"   echo "Servers reloaded"
+" endfunction
 
 function! ReloadActiveChromeTab()
   if !exists("g:currentTerminalEmulator")
