@@ -36,7 +36,7 @@ fi
 ln -s ~/dotfiles/tmux/tmux.conf ~/.tmux.conf
 ln -s ~/dotfiles/vim/ ~/.config/nvim/
 
-git submodule update --init --recursive
+# git submodule update --init --recursive
 
 touch ~/.user_settings
 mkdir ~/bin
