@@ -49,6 +49,9 @@ export PATH="$HOME/bin:$PATH"
 # add yarn bin to PATH
 export PATH="$HOME/.yarn/bin:$PATH"
 
+# add rust package manager to PATH
+export PATH="$HOME/.cargo/bin:$PATH"
+
 export RUBYOPT="-W1"
 
 # android studio
