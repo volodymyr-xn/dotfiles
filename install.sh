@@ -34,7 +34,6 @@ if [ -f $HOME/.tmux.conf ]; then
 fi
 
 ln -s ~/dotfiles/tmux/tmux.conf ~/.tmux.conf
-ln -s ~/dotfiles/vim/ ~/.config/nvim/
 
 # git submodule update --init --recursive
 
