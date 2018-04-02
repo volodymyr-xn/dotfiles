@@ -46,4 +46,7 @@ instalation_scripts/install_silver_searcher.sh
 instalation_scripts/install_oh-my-zsh.sh
 instalation_scripts/install_ctags.sh
 
+ln -s ~/dotfiles/bin/toggle-window-focus /usr/local/bin/toggle-window-focus
+
+
 dotfiles_echo "Dotfiles installation complete!"
