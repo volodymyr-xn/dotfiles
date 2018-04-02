@@ -1,4 +1,3 @@
-set rtp+=~/.vim/bundle/Vundle.vim
 call plug#begin('~/.vim/plugged')
 
 " global search by ack
