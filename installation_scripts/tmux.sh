@@ -9,7 +9,7 @@ git clone https://github.com/tmux/tmux.git $tmux_source_dir
 cd $tmux_source_dir
 
 # checkout to last stable version
-git checkout $(git tag | tail -n 1)
+git checkout 2.6
 
 sh autogen.sh
 ./configure && make -j 4
