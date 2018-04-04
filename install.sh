@@ -41,11 +41,6 @@ touch ~/.user_settings
 mkdir ~/bin
 
 # ./fonts/install.sh
-instalation_scripts/install_fzf.sh
-instalation_scripts/install_silver_searcher.sh
-instalation_scripts/install_oh-my-zsh.sh
-instalation_scripts/install_ctags.sh
-
 ln -s ~/dotfiles/bin/toggle-window-focus /usr/local/bin/toggle-window-focus
 
 
