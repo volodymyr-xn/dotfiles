@@ -7,6 +7,8 @@
 ./installation_scripts/develop_libs.sh
 ./installation_scripts/docker.sh
 ./installation_scripts/fzf.sh
+./go.sh
+./htop.sh
 
 # install oracle java
 ./installation_scripts/java.sh
