@@ -13,3 +13,6 @@ git clone https://github.com/jwilm/alacritty.git $alacritty_source_tmp_path
 
 # build alacritty from source
 (cd $alacritty_source_tmp_path && cargo build --release)
+
+sudo cp $alacritty_source_tmp_path/target/release/alacritty /usr/local/bin/alacritty
+cp Alacritty.desktop ~/.local/share/applications
