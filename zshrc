@@ -2,7 +2,6 @@
 
 # bindkey -s "^f" '$(fdd | fzf)\nclear\n'
 # bindkey -s "^t" '$(fz)\n'
-bindkey -s "^f" 'vim $(fz)\n'
 bindkey -s "^o" 'fbr\n'
 
 # base16-shell theme
@@ -38,7 +37,7 @@ source $HOME/dotfiles/zsh/oh-my-zsh
 source $HOME/dotfiles/zsh/aliases
 source $HOME/dotfiles/zsh/tmux
 source $HOME/dotfiles/zsh/functions
-source $HOME/dotfiles/zsh/z.sh
+source $HOME/dotfiles/zsh/key-bindings
 
 # ssh
 export SSH_KEY_PATH="~/.ssh/dsa_id"

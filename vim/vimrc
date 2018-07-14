@@ -5,18 +5,19 @@ Plug('mileszs/ack.vim')
 " Plug('jiangmiao/auto-pairs')
 Plug('scrooloose/nerdtree')
 
+Plug('posva/vim-vue')
 " comments
 Plug('tomtom/tcomment_vim')
 " autocomplete
 Plug('lifepillar/vim-mucomplete')
 Plug('itchyny/lightline.vim')
 Plug('tpope/vim-bundler')
-Plug('vim-syntastic/syntastic')
+" Plug('vim-syntastic/syntastic')
+Plug('w0rp/ale')
 Plug('mtscout6/syntastic-local-eslint.vim')
 
 " Automaticaly add end in ruby scrips
 Plug('tpope/vim-endwise')
-
 
 " Show changed lines from git
 Plug('airblade/vim-gitgutter')
@@ -364,6 +365,7 @@ map <leader>[ :cp<cr>
 " fzf Ag
 noremap <Leader>p :Ag <cr>
 noremap <Leader>m :FZF app/models<CR>
+noremap <Leader>c :FZF app/controllers<CR>
 nnoremap <silent> <Leader>f :Ag <C-R><C-W><CR>
 
 " Unmap GitGutter leaders that I don't use. This avoids delays for other leaders.
@@ -407,7 +409,7 @@ autocmd VimEnter * nnoremap <C-\> :NERDTreeToggle<CR>
 
 " ===================== Syntastic settings  ====================================
 
-let g:syntastic_javascript_checkers = ['eslint']
+" let g:syntastic_javascript_checkers = ['eslint']
 let g:syntastic_error_symbol = '✗✗'
 let g:syntastic_style_error_symbol = '✠✠'
 let g:syntastic_warning_symbol = '∆∆'
@@ -415,10 +417,10 @@ let g:syntastic_style_warning_symbol = '≈≈'
 let g:syntastic_ruby_checkers = ["mri", "rubocop -P -R"]
 
 " ===================== ALE settings  ====================================
-" let g:ale_sign_error = '✗✗'
-" let g:ale_sign_warning = '∆∆'
-" let g:ale_lint_delay = 1000
-" let g:ale_lint_on_text_changed = 'never'
+let g:ale_sign_error = '✗✗'
+let g:ale_sign_warning = '∆∆'
+let g:ale_lint_delay = 1000
+let g:ale_lint_on_text_changed = 'never'
 " let g:ale_javascript_eslint_executable = '~/.asdf/shims/eslint'
 
 " ===================== vim-jsx ====================================
