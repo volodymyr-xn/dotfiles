@@ -37,3 +37,5 @@ call one#highlight('jsExportDefault', 'c678dd', '', 'none')
 
 call one#highlight('jsClassDefinition', 'e5c07b', '', 'none')
 call one#highlight('jsClassKeyword', 'c678dd', '', 'none')
+call one#highlight('jsClassKeyword', 'c678dd', '', 'none')
+call one#highlight('jsObjectKeyComputed', 'c678dd', '', 'none')
