@@ -21,7 +21,8 @@ syntax region  jsParenIfElse        contained matchgroup=jsParensIfElse        s
 syntax region  jsFuncArgs           contained matchgroup=jsFuncParens          start=/(/  end=/)/  contains=jsFuncArgCommas,jsComment,jsFuncArgExpression,jsDestructuringBlock,jsDestructuringArray,jsRestExpression,jsFlowArgumentDef,jsCapitalizedVariable skipwhite skipempty nextgroup=jsCommentFunction,jsFuncBlock,jsFlowReturn extend fold
 
 
-highlight def link jsCapitalizedVariable  Type
+highlight def link jsCapitalizedVariable Type
+hi def link jsObjectKeyComputed Type
 
 " call one#highlight('Normal', 'e06c75', '', 'none')
 "  def link jsExport               Statement
@@ -38,4 +39,4 @@ call one#highlight('jsExportDefault', 'c678dd', '', 'none')
 call one#highlight('jsClassDefinition', 'e5c07b', '', 'none')
 call one#highlight('jsClassKeyword', 'c678dd', '', 'none')
 call one#highlight('jsClassKeyword', 'c678dd', '', 'none')
-call one#highlight('jsObjectKeyComputed', 'c678dd', '', 'none')
+" call one#highlight('jsObjectKeyComputed', 'c678dd', '', 'none')
