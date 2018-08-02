@@ -13,7 +13,7 @@ Plug('lifepillar/vim-mucomplete')
 Plug('itchyny/lightline.vim')
 Plug('tpope/vim-bundler')
 " Plug('vim-syntastic/syntastic')
-Plug('w0rp/ale')
+" Plug('w0rp/ale')
 Plug('mtscout6/syntastic-local-eslint.vim')
 
 " Automaticaly add end in ruby scrips
