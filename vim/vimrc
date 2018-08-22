@@ -385,6 +385,9 @@ nnoremap <silent> <Leader>f :Ag <C-R><C-W><CR>
 "Open ruby test in tmux pane
 let test#strategy = "vimux"
 
+" Run rspec with spring preloader
+let test#ruby#rspec#executable = 'rsx'
+
 " Use vertical tmux slpit for vimux commands
 let g:VimuxOrientation = "h"
 
