@@ -13,7 +13,7 @@ Plug('lifepillar/vim-mucomplete')
 Plug('itchyny/lightline.vim')
 Plug('tpope/vim-bundler')
 " Plug('vim-syntastic/syntastic')
-Plug('w0rp/ale')
+" Plug('w0rp/ale')
 Plug('mtscout6/syntastic-local-eslint.vim')
 
 " Automaticaly add end in ruby scrips
@@ -365,6 +365,13 @@ map <leader>[ :cp<cr>
 " fzf Ag
 noremap <Leader>p :Ag <cr>
 noremap <Leader>m :FZF app/models<CR>
+
+noremap <Leader>1 :FZF app/javascript<CR>
+noremap <Leader>2 :FZF app/views<CR>
+noremap <Leader>3 :FZF app/presenters<CR>
+noremap <Leader>4 :FZF app/assets/stylesheets<CR>
+noremap <Leader>5 :FZF app/spec<CR>
+
 noremap <Leader>c :FZF app/controllers<CR>
 nnoremap <silent> <Leader>f :Ag <C-R><C-W><CR>
 
