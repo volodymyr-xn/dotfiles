@@ -13,6 +13,9 @@ alias mkdir='mkdir -pv'
 alias src='source ~/.zshrc'
 alias path='echo -e ${PATH//:/\\n}'
 
+alias rs='bundle exec rspec spec'
+alias rsx='bin/spring rspec'
+
 # Listing files and directories
 alias l='ls -lFh'     #size,show type,human readable
 alias la='ls -lAFh'   #long list, show almost all, show type, human readable
