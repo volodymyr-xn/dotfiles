@@ -1,5 +1,6 @@
 # Vim specific
 alias vi='vim'
+alias v='vim'
 
 # General UNIX
 alias mv='mv -iv'
