@@ -1,7 +1,12 @@
 syntax match rubyBindingPry /binding\.pry/
-
+syntax match rubyNewConstructorMethod /.new(/
+syntax match rubySaveConstructorMethod /.save(/
+syntax match rubyCreateConstructorMethod /.create(/
 
 highlight def link rubyBindingPry Function
+highlight def link rubyNewConstructorMethod Function
+highlight def link rubySaveConstructorMethod Function
+highlight def link rubyCreateConstructorMethod Function
 
 let s:bcs = b:current_syntax
 unlet b:current_syntax

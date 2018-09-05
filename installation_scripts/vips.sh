@@ -1,5 +1,10 @@
 # dependencies
-sudo apt-get install python-gi-dev libgirepository1.0-dev automake libtool swig gtk-doc-tools
+sudo apt-get install git build-essential libxml2-dev libfftw3-dev \
+	libmagickwand-dev libopenexr-dev liborc-0.4-0 \
+	gobject-introspection libgsf-1-dev \
+	libglib2.0-dev liborc-0.4-dev \
+  python-gi-dev libgirepository1.0-dev \
+  automake libtool swig gtk-doc-tools
 
 timestamp=$(date +%s)
 destination_dir=/tmp/libvips-$timestamp
