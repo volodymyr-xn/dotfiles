@@ -366,13 +366,12 @@ map <leader>[ :cp<cr>
 noremap <Leader>p :Ag <cr>
 noremap <Leader>m :FZF app/models<CR>
 
-noremap <Leader>1 :FZF app/javascript<CR>
+noremap <Leader>1 :FZF spec<CR>
 noremap <Leader>2 :FZF app/views<CR>
 noremap <Leader>3 :FZF app/presenters<CR>
 noremap <Leader>4 :FZF app/assets/stylesheets<CR>
 
 noremap <Leader>c :FZF app/controllers<CR>
-noremap <Leader>z :FZF app/spec<CR>
 nnoremap <silent> <Leader>f :Ag <C-R><C-W><CR>
 
 " Unmap GitGutter leaders that I don't use. This avoids delays for other leaders.

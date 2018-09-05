@@ -29,6 +29,9 @@ export VIPSHOME=/usr/local
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$VIPSHOME/lib
 export PATH=$PATH:$VIPSHOME/bin
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$VIPSHOME/lib/pkgconfig
+export MANPATH=$MANPATH:$VIPSHOME/man
+export PYTHONPATH=$VIPSHOME/lib/python2.7/site-packages
+export GI_TYPELIB_PATH="/usr/local/lib/girepository-1.0"
 # export MANPATH=$MANPATH:$VIPSHOME/man
 # export PYTHONPATH=$VIPSHOME/lib/python2.7/site-packages
 
