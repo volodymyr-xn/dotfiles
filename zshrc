@@ -25,6 +25,13 @@ export FZF_COMPLETION_OPTS='+c -x'
 export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
 export FZF_CTRL_T_OPTS="--preview '(highlight -O ansi -l {} 2> /dev/null || cat {} || tree -C {}) 2> /dev/null | head -200'"
 
+export VIPSHOME=/usr/local
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$VIPSHOME/lib
+export PATH=$PATH:$VIPSHOME/bin
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$VIPSHOME/lib/pkgconfig
+# export MANPATH=$MANPATH:$VIPSHOME/man
+# export PYTHONPATH=$VIPSHOME/lib/python2.7/site-packages
+
 # Use ag instead of the default find command for listing candidates.
 # - The first argument to the function is the base path to start traversal
 # - Note that ag only lists files not directories
