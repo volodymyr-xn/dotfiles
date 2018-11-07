@@ -1,47 +1,69 @@
 #!/usr/bin/env bash
 
-dotfiles_echo() {
+installation_log() {
   local fmt="$1"; shift
   # shellcheck disable=SC2059
   printf "\n[DOTFILES] $fmt\n" "$@"
 }
 
 
+#===============================================================
+#================= Configuration ===============================
+#===============================================================
+
 set -e # Terminate script if anything exits with a non-zero value
 set -u # Prevent unset variables
 
-files="vim tmux zsh ackrc asdfrc ctags config.reek gemrc gitconfig \
-      gitignore_global gitmessage npmrc zshrc inputrc pryrc default-gems \
-      asdfrc"
+files_to_copy="\
+      vim tmux zsh ackrc asdfrc ctags config.reek gemrc \
+      gitconfig gitignore_global gitmessage npmrc zshrc \
+      inputrc pryrc default-gems asdfrc"
+
 DOTFILES_DIR=$HOME/dotfiles
 
-dotfiles_echo "Installing dotfiles..."
 
-for file in $files; do
+#===============================================================
+#================= Instalation =================================
+#===============================================================
+
+installation_log "Installing dotfiles..."
+
+# Copy configuration files
+for file in $files_to_copy; do
+
+  # If configuration file alreay present - backup it
   if [ -f $HOME/.$file ]; then
-    dotfiles_echo ".$file already present. Backing up..."
+    installation_log ".$file already present. Backing up..."
+
     cp $HOME/.$file "$HOME/.${file}_backup"
+
     rm -f $HOME/.$file
   fi
-  dotfiles_echo "-> Linking $DOTFILES_DIR/$file to $HOME/.$file..."
+
+  installation_log "-> Linking $DOTFILES_DIR/$file to $HOME/.$file..."
+
   ln -nfs "$DOTFILES_DIR/$file" "$HOME/.$file"
 done
 
+
+# Backup existing tmux config
 if [ -f $HOME/.tmux.conf ]; then
-  dotfiles_echo ".tmux.conf already present. Backing up..."
+  installation_log ".tmux.conf already present. Backing up..."
   cp $HOME/.tmux.conf "$HOME/.tmux_conf_backup"
   rm -f $HOME/.tmux.conf
 fi
 
+# Copy tmux config
 ln -s ~/dotfiles/tmux/tmux.conf ~/.tmux.conf
 
-# git submodule update --init --recursive
-
 touch ~/.user_settings
+
+# Create bin dir in user home for custom scripts and executables
 mkdir ~/bin
 
 # ./fonts/install.sh
+
+# Simlink custom linux util scripts
 ln -s ~/dotfiles/bin/toggle-window-focus /usr/local/bin/toggle-window-focus
 
-
-dotfiles_echo "Dotfiles installation complete!"
+installation_log "Dotfiles installation complete!"
