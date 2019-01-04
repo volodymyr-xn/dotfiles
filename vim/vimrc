@@ -242,7 +242,7 @@ ab fsl # frozen_string_literal: true
 nnoremap 0 ^
 
 " Copy selected text to sytem buffer
-vnoremap y "+y
+vnoremap n "+y
 
 " Pressing ,ss will toggle and untoggle spell checking
 map <leader>ss :setlocal spell!<cr>
@@ -313,7 +313,7 @@ nnoremap V 0v$
 
 nnoremap > <C-w>10<
 nnoremap < <C-w>10>
-nnoremap " <C-w>10+
+" nnoremap " <C-w>10+
 
 " zoom a vim pane, <C-w>= to re-balance
 " nmap <C-w><cr> <C-W>\| <C-W>_
