@@ -17,3 +17,5 @@
 	s = status
 [fetch]
 	prune = true
+[commit]
+	gpgsign = false
