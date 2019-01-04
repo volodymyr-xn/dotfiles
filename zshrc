@@ -1,5 +1,7 @@
 . /etc/environment
 
+export TERM=screen-256color
+
 # bindkey -s "^f" '$(fdd | fzf)\nclear\n'
 # bindkey -s "^t" '$(fz)\n'
 bindkey -s "^o" 'fbr\n'
