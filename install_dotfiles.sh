@@ -6,6 +6,28 @@ installation_log() {
   printf "\n[DOTFILES] $fmt\n" "$@"
 }
 
+backup_file() {
+  # If file alreay present - backup it
+  if [ -f $HOME/.$1 ]; then
+    installation_log ".$1 already present. Backing up..."
+
+    cp $HOME/.$1 "$HOME/.${1}_backup"
+
+    rm -f $HOME/.$1
+  fi
+}
+
+symlink_file() {
+  installation_log "-> Linking $DOTFILES_DIR/$1 to $HOME/.$1..."
+
+  ln -nfs "$DOTFILES_DIR/$1" "$HOME/.$1"
+}
+
+setup_settings_file() {
+  backup_file $1
+  symlink_file $1
+}
+
 
 #===============================================================
 #================= Configuration ===============================
@@ -14,7 +36,7 @@ installation_log() {
 set -e # Terminate script if anything exits with a non-zero value
 set -u # Prevent unset variables
 
-files_to_copy="\
+files_to_symlink="\
       vim tmux zsh ackrc asdfrc ctags config.reek gemrc \
       gitconfig gitignore_global gitmessage npmrc zshrc \
       inputrc pryrc default-gems asdfrc bashrc"
@@ -29,36 +51,23 @@ DOTFILES_DIR=$HOME/dotfiles
 installation_log "Installing dotfiles..."
 
 # Copy configuration files
-for file in $files_to_copy; do
-
-  # If configuration file alreay present - backup it
-  if [ -f $HOME/.$file ]; then
-    installation_log ".$file already present. Backing up..."
-
-    cp $HOME/.$file "$HOME/.${file}_backup"
-
-    rm -f $HOME/.$file
-  fi
-
-  installation_log "-> Linking $DOTFILES_DIR/$file to $HOME/.$file..."
-
-  ln -nfs "$DOTFILES_DIR/$file" "$HOME/.$file"
+for file in $files_to_symlink; do
+  setup_settings_file $file
 done
 
-
-# Backup existing tmux config
-if [ -f $HOME/.tmux.conf ]; then
-  installation_log ".tmux.conf already present. Backing up..."
-  cp $HOME/.tmux.conf "$HOME/.tmux_conf_backup"
-  rm -f $HOME/.tmux.conf
-fi
+# Backup existing tmux configi
+backup_file "tmux.conf"
 
 # Copy tmux config
-ln -sf ~/dotfiles/tmux/tmux.conf ~/.tmux.conf
+ln -nsf $DOTFILES_DIR/tmux/tmux.conf ~/.tmux.conf
+
+mkdir -p ~/.config/nvim/
+
+ln -sf $DOTFILES_DIR/vim/init.vim ~/.config/nvim/init.vim
 
 touch ~/.user_settings
 
-# Create bin dir in user home for custom scripts and executables
+# Create ~/bin dir in user home for custom scripts and executables
 mkdir -p ~/bin
 
 # ./fonts/install.sh

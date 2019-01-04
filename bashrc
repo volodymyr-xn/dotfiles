@@ -1,11 +1,10 @@
+. /etc/environment
+
 parse_git_branch() {
   git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
 }
 
-export PS1="\u@\h \W\[\033[32m\]\$(parse_git_branch)\[\033[00m\] $ "<Paste>
-
-
-. /etc/environment
+export PS1="\u@\h \W\[\033[32m\]\$(parse_git_branch)\[\033[00m\] $ "
 
 # base16-shell theme
 BASE16_SHELL=$HOME/.config/base16-shell/
