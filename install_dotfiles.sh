@@ -54,16 +54,16 @@ if [ -f $HOME/.tmux.conf ]; then
 fi
 
 # Copy tmux config
-ln -s ~/dotfiles/tmux/tmux.conf ~/.tmux.conf
+ln -sf ~/dotfiles/tmux/tmux.conf ~/.tmux.conf
 
 touch ~/.user_settings
 
 # Create bin dir in user home for custom scripts and executables
-mkdir ~/bin
+mkdir -p ~/bin
 
 # ./fonts/install.sh
 
 # Simlink custom linux util scripts
-ln -s ~/dotfiles/bin/toggle-window-focus /usr/local/bin/toggle-window-focus
+ln -sf ~/dotfiles/bin/toggle-window-focus ~/bin/toggle-window-focus
 
 installation_log "Dotfiles installation complete!"
