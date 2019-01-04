@@ -2,11 +2,15 @@ syntax match rubyBindingPry /binding\.pry/
 syntax match rubyNewConstructorMethod /.new(/
 syntax match rubySaveConstructorMethod /.save(/
 syntax match rubyCreateConstructorMethod /.create(/
+syntax match rubyPerformInMethod /.perform_in(/
+syntax match rubyPerformAsyncMethod /.perform_async(/
 
 highlight def link rubyBindingPry Function
 highlight def link rubyNewConstructorMethod Function
 highlight def link rubySaveConstructorMethod Function
 highlight def link rubyCreateConstructorMethod Function
+highlight def link rubyPerformInMethod Function
+highlight def link rubyPerformAsyncMethod Function
 
 let s:bcs = b:current_syntax
 unlet b:current_syntax

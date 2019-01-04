@@ -2,12 +2,13 @@ call plug#begin('~/.vim/plugged')
 
 " global search by ack
 Plug('mileszs/ack.vim')
+
 " Plug('jiangmiao/auto-pairs')
 Plug('scrooloose/nerdtree')
 
-Plug('posva/vim-vue')
 " comments
 Plug('tomtom/tcomment_vim')
+
 " autocomplete
 Plug('lifepillar/vim-mucomplete')
 Plug('itchyny/lightline.vim')
@@ -15,7 +16,7 @@ Plug('tpope/vim-bundler')
 " Plug('vim-syntastic/syntastic')
 " Plug('w0rp/ale')
 Plug('keith/rspec.vim')
-Plug('mtscout6/syntastic-local-eslint.vim')
+" Plug('mtscout6/syntastic-local-eslint.vim')
 
 " Automaticaly add end in ruby scrips
 Plug('tpope/vim-endwise')
@@ -280,7 +281,9 @@ vnoremap < <gv
 vnoremap > >gv
 
 " Open a new tab with Ctrl+T
-map <C-t> <esc>:tabnew<CR>
+nnoremap <C-t> <esc>:tabnew<CR>
+
+nnoremap <TAB>\ :tabnext<CR>
 
 " For indenting code
 map <leader>i mmgg=G`m<CR>
@@ -299,7 +302,7 @@ nnoremap <leader>vr :source $MYVIMRC<cr>
 
 " Reload servers
 " nnoremap q :call RestartServers() <CR>
-nnoremap q :call
+" nnoremap q :call
 
 " Reload chrome tab
 nnoremap R :call ReloadActiveChromeTab() <CR>
@@ -332,7 +335,10 @@ nnoremap <silent> <leader>T :TestFile<CR>
 nnoremap <silent> <leader>a :TestSuite<CR>
 nnoremap <silent> <leader>l :TestLast<CR>
 
+" Reload vim config
 nnoremap <Leader>vr :so $MYVIMRC<CR>
+
+" Open vim config in split panel
 nnoremap <Leader>ve :vsplit $MYVIMRC<CR>
 
 " "Go to test file
@@ -345,7 +351,10 @@ nnoremap <Leader>e :R<CR>
 nnoremap q :A<CR>
 
 " Tcomment
+" Comment line in visual mode
 vmap \ :TComment<CR>
+
+" Comment line in normal mode
 nnoremap \ :TComment<CR>
 
 " fzf
@@ -368,8 +377,8 @@ noremap <Leader>p :Ag <cr>
 noremap <Leader>m :FZF app/models<CR>
 
 noremap <Leader>1 :FZF spec<CR>
-noremap <Leader>2 :FZF app/views<CR>
-noremap <Leader>3 :FZF app/presenters<CR>
+noremap <Leader>2 :FZF app/serializers<CR>
+noremap <Leader>3 :FZF app/javascripts<CR>
 noremap <Leader>4 :FZF app/assets/stylesheets<CR>
 
 noremap <Leader>c :FZF app/controllers<CR>
@@ -391,6 +400,9 @@ nnoremap <silent> <Leader>f :Ag <C-R><C-W><CR>
 
 "Open ruby test in tmux pane
 let test#strategy = "vimux"
+"
+" Use bundle exec for ruby tests
+let test#ruby#bundle_exec = 1
 
 " Run rspec with spring preloader
 let test#ruby#rspec#executable = 'rsx'
@@ -400,9 +412,6 @@ let g:VimuxOrientation = "h"
 
 " Open vimux tmux pane with 50% width of screen
 let g:VimuxHeight = "50"
-
-" Use bundle exec for ruby tests
-let test#ruby#bundle_exec = 1
 
 " Ack (the_silver_searcher / ag)
 let g:ackprg="ag"

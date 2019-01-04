@@ -8,4 +8,5 @@ asdf global ruby $last_ruby_version
 
 gem install bundler
 gem install tmuxinator
+gem install rb-readline
 asdf reshim ruby
