@@ -138,11 +138,6 @@ set backspace=indent,eol,start
 
 set background=dark
 
-" colorscheme base16-onedark
-" colorscheme gruvbox
-" colorscheme neodark
-" colorscheme seoul256
-"
 "Base16 hook
 " if filereadable(expand("~/.vimrc_background"))
 "   let base16colorspace=256
@@ -246,11 +241,15 @@ ab fsl # frozen_string_literal: true
 " Remap VIM 0 to first non-blank character
 nnoremap 0 ^
 
+" Copy selected text to sytem buffer
+vnoremap y "+y
+
 " Pressing ,ss will toggle and untoggle spell checking
 map <leader>ss :setlocal spell!<cr>
 
 " Save current file
 nnoremap <Leader>w :w<CR>
+nnoremap <C-s> :w<CR>
 
 " Go to the begining of line
 noremap H ^
@@ -267,9 +266,6 @@ nmap <leader>gs :Gstatus<CR>
 " Change surround double quotes to plain quotes
 nmap <Leader>' cs"'<CR>
 
-" Map text align to tab button in visual mode
-vnoremap <TAB> =
-
 " Expand word to tag
 nmap <F4> byei<<ESC>ea></<C-R>0><ESC>bba
 
@@ -281,9 +277,10 @@ vnoremap < <gv
 vnoremap > >gv
 
 " Open a new tab with Ctrl+T
-nnoremap <C-t> <esc>:tabnew<CR>
+" nnoremap <C-t> <esc>:tabnew<CR>
 
-nnoremap <TAB>\ :tabnext<CR>
+" Open a new tab with T
+nnoremap T <esc>:tabnew<CR>
 
 " For indenting code
 map <leader>i mmgg=G`m<CR>
@@ -310,20 +307,31 @@ nnoremap R :call ReloadActiveChromeTab() <CR>
 " Move up and down by visible lines if current line is wrapped
 nmap j gj
 nmap k gk
+nmap K k
+
+nnoremap V 0v$
+
+nnoremap > <C-w>10<
+nnoremap < <C-w>10>
+nnoremap " <C-w>10+
 
 " zoom a vim pane, <C-w>= to re-balance
 " nmap <C-w><cr> <C-W>\| <C-W>_
 
-" nnoremap <c-x> gt
+" Switch between tabs
+nnoremap <TAB> gt
 
-" Expand window
-nmap " <C-W>\| <C-W>_
+" Map text align to tab button in visual mode
+vnoremap <TAB> =
+
+" " Expand window
+" nmap " <C-W>\| <C-W>_
+"
+" re-balance panes
+nnoremap = <C-W>=
 
 " Expand window
 nnoremap m :ToggleCurrentWindowZoom <CR>
-
-" re-balance panes
-nmap ' <C-W>=
 
 " Faster close windows and quit
 nnoremap <C-c> <C-w>q
@@ -342,7 +350,7 @@ nnoremap <Leader>vr :so $MYVIMRC<CR>
 nnoremap <Leader>ve :vsplit $MYVIMRC<CR>
 
 " "Go to test file
-" nmap t :A<CR>
+" nmap t :A<CR> DEPRECATED
 
 " Go to related file
 nnoremap <Leader>e :R<CR>
@@ -365,10 +373,10 @@ nmap <C-p> :FZ<cr>
 
 " Ack mappings
 nnoremap ! :Ack<SPACE>
-" noremap ! :Ack <cr>
 
 " Ack: To go to the next search result
 map <leader>] :cn<cr>
+
 " Ack: To go to the previous search results
 map <leader>[ :cp<cr>
 
@@ -379,7 +387,6 @@ noremap <Leader>m :FZF app/models<CR>
 noremap <Leader>1 :FZF spec<CR>
 noremap <Leader>2 :FZF app/serializers<CR>
 noremap <Leader>3 :FZF app/javascripts<CR>
-noremap <Leader>4 :FZF app/assets/stylesheets<CR>
 
 noremap <Leader>c :FZF app/controllers<CR>
 nnoremap <silent> <Leader>f :Ag <C-R><C-W><CR>
