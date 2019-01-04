@@ -14,7 +14,7 @@ Plug('lifepillar/vim-mucomplete')
 Plug('itchyny/lightline.vim')
 Plug('tpope/vim-bundler')
 " Plug('vim-syntastic/syntastic')
-" Plug('w0rp/ale')
+Plug('w0rp/ale')
 Plug('keith/rspec.vim')
 " Plug('mtscout6/syntastic-local-eslint.vim')
 
@@ -309,7 +309,7 @@ nmap j gj
 nmap k gk
 nmap K k
 
-nnoremap V 0v$
+" nnoremap V 0v$
 
 nnoremap > <C-w>10<
 nnoremap < <C-w>10>
@@ -447,7 +447,6 @@ let g:ale_sign_error = '✗✗'
 let g:ale_sign_warning = '∆∆'
 let g:ale_lint_delay = 1000
 let g:ale_lint_on_text_changed = 'never'
-" let g:ale_javascript_eslint_executable = '~/.asdf/shims/eslint'
 
 " ===================== vim-jsx ====================================
 let g:vim_jsx_pretty_colorful_config = 1 " default 0
