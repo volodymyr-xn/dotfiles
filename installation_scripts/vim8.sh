@@ -1,7 +1,7 @@
 timestamp=$(date +%s)
 vim_source_dir=/tmp/vim-$timestamp
 
-echo "Cloning into $vim_source_dir"
+echo "Stating installl"
 git clone https://github.com/vim/vim $vim_source_dir
 
 echo "Stating compile process"
