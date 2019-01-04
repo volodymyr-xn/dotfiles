@@ -17,7 +17,7 @@ set -u # Prevent unset variables
 files_to_copy="\
       vim tmux zsh ackrc asdfrc ctags config.reek gemrc \
       gitconfig gitignore_global gitmessage npmrc zshrc \
-      inputrc pryrc default-gems asdfrc"
+      inputrc pryrc default-gems asdfrc bashrc"
 
 DOTFILES_DIR=$HOME/dotfiles
 
