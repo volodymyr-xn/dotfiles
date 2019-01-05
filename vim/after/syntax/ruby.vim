@@ -29,3 +29,8 @@ let b:current_syntax = s:bcs
 syntax region hereDocDashSQL matchgroup=Statement start=+<<[-~.]*\z(SQL\)+  end=+^\s*\z1+ contains=@SQL
 syntax region hereDocDashShell matchgroup=Statement start=+<<[-~.]*\z(SHELL\)+  end=+^\s*\z1+ contains=@SHELL
 
+let s:red = 'bf6565'
+let s:blue = '98c379'
+
+" call one#highlight('rubySymbol', s:blue, '', '')
+" call one#highlight('rubyStringDelimiter', s:red, '', '')
