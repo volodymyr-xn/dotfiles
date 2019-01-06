@@ -64,7 +64,7 @@ Plug('chriskempson/base16-vim')
 Plug('rakr/vim-one')
 
 " Highligh colors
-" Plug('ap/vim-css-color')
+Plug('lilydjwg/colorizer')
 
 call plug#end()
 "============================================================================
