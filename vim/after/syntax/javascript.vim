@@ -20,10 +20,9 @@ syntax region  jsClassBlock  contained matchgroup=jsClassBraces  start=/{/  end=
 syntax region  jsParenIfElse        contained matchgroup=jsParensIfElse        start=/(/  end=/)/  contains=@jsAll,jsCapitalizedVariable skipwhite skipempty nextgroup=jsCommentIfElse,jsIfElseBlock
 syntax region  jsFuncArgs           contained matchgroup=jsFuncParens          start=/(/  end=/)/  contains=jsFuncArgCommas,jsComment,jsFuncArgExpression,jsDestructuringBlock,jsDestructuringArray,jsRestExpression,jsFlowArgumentDef,jsCapitalizedVariable skipwhite skipempty nextgroup=jsCommentFunction,jsFuncBlock,jsFlowReturn extend fold
 
-highlight def link jsCapitalizedVariable Type
+hi def link jsCapitalizedVariable Type
 hi def link jsObjectKeyComputed Type
 
-" call one#highlight('Normal', 'e06c75', '', 'none')
 "  def link jsExport               Statement
 " hi def link jsFrom                 Statement
 " hi def link jsExportDefault        Statement

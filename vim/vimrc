@@ -1,3 +1,4 @@
+
 call plug#begin('~/.vim/plugged')
 
 " global search by ack
@@ -62,9 +63,10 @@ Plug('chriskempson/base16-vim')
 " onedark colorscheme
 Plug('rakr/vim-one')
 
+" Highligh colors
+" Plug('ap/vim-css-color')
+
 call plug#end()
-
-
 "============================================================================
 " ===================== General settings ====================================
 "============================================================================
@@ -74,8 +76,10 @@ nnoremap <space> <nop>
 " use the space key as our leader. put this near the top of your vimrc
 let mapleader = "\<space>"
 
-" r For auto indent filetype plugin indent on
+" Enable italics
+let g:one_allow_italics = 1
 
+" r For auto indent filetype plugin indent on
 "filetype off
 "syntax highlighting
 syntax on
@@ -223,6 +227,7 @@ set scrolloff=3
 " Set the terminal's title
 set title
 
+" Yank to system clipboard
 set clipboard+=unnamed
 
 "============================================================================
