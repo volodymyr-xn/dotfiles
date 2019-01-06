@@ -10,24 +10,27 @@ Plug('scrooloose/nerdtree')
 " comments
 Plug('tomtom/tcomment_vim')
 
-" autocomplete
+" Autocomplete
 Plug('lifepillar/vim-mucomplete')
 Plug('itchyny/lightline.vim')
-Plug('tpope/vim-bundler')
 " Plug('vim-syntastic/syntastic')
 Plug('w0rp/ale')
-Plug('keith/rspec.vim')
 " Plug('mtscout6/syntastic-local-eslint.vim')
 
-" Automaticaly add end in ruby scrips
-Plug('tpope/vim-endwise')
 
 " Show changed lines from git
 Plug('airblade/vim-gitgutter')
+
+"******* Ruby/Rails plugins ******
+Plug('keith/rspec.vim')
+Plug('tpope/vim-bundler')
 Plug('tpope/vim-rails')
 Plug('tpope/vim-rbenv')
 Plug('vim-ruby/vim-ruby')
 Plug('sunaku/vim-ruby-minitest')
+Plug('rhysd/vim-textobj-ruby')
+Plug('tpope/vim-endwise') " Automaticaly add end in ruby scrips
+
 Plug('tpope/vim-surround')
 Plug('janko-m/vim-test')
 Plug('christoomey/vim-tmux-navigator')
@@ -36,31 +39,30 @@ Plug('hail2u/vim-css3-syntax')
 Plug('tpope/vim-fugitive')
 Plug('tmux-plugins/vim-tmux-focus-events')
 Plug('kana/vim-textobj-user')
-Plug('rhysd/vim-textobj-ruby')
 Plug('Raimondi/delimitMate')
 
 " TypeScript syntax
 Plug('leafgarland/typescript-vim')
 
-" crystal syntax support
+" Crystal syntax support
 Plug('rhysd/vim-crystal')
 
-" reslove git conflicts
+" Reslove git conflicts
 Plug('christoomey/vim-conflicted')
 
-" improved javscript syntax
+" Improved JavaScript syntax
 Plug('pangloss/vim-javascript')
 
 " jsx syntax support
 Plug('mxw/vim-jsx')
 
-" multiple cursors
+" Multiple cursors
 Plug('terryma/vim-multiple-cursors')
 
-" base16 color schemes
+" Base16 color schemes
 Plug('chriskempson/base16-vim')
 
-" onedark colorscheme
+" Onedark colorscheme
 Plug('rakr/vim-one')
 
 " Highligh colors
