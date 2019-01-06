@@ -76,9 +76,6 @@ nnoremap <space> <nop>
 " use the space key as our leader. put this near the top of your vimrc
 let mapleader = "\<space>"
 
-" Enable italics
-let g:one_allow_italics = 1
-
 " r For auto indent filetype plugin indent on
 "filetype off
 "syntax highlighting
@@ -155,9 +152,13 @@ let base16colorspace=256
 set t_Co=256
 
 set termguicolors
+
 let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
 let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
-"
+
+" Enable italic for comments
+hi Comment gui=italic cterm=italic
+
 " Always show statusline
 set laststatus=2
 
