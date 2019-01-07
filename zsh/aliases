@@ -1,11 +1,12 @@
 # Vim specific
 alias vi='vim'
 alias v='vim'
+alias nv='nvim'
+alias dtt='cd ~/dotfiles'
 
 # General UNIX
 alias mv='mv -iv'
 alias cp='cp -iv'
-alias srm='srm -iv'
 alias df='df -h'
 alias du='du -h'
 alias dud='du -d 1 -h'
@@ -14,8 +15,12 @@ alias mkdir='mkdir -pv'
 alias src='source ~/.zshrc'
 alias path='echo -e ${PATH//:/\\n}'
 
+# Tests
 alias rs='bundle exec rspec spec'
 alias rsx='bin/spring rspec'
+alias rt='rake test'
+alias rti='rake test:integration'
+
 
 # Listing files and directories
 alias l='ls -lFh'     #size,show type,human readable
@@ -40,14 +45,6 @@ alias rake='bundle exec rake'
 alias bx='bundle exec'
 
 alias tx='tmuxinator'
-
-# Test
-alias rt='rake test'
-alias rti='rake test:integration'
-
-# Postgres
-alias statpost='ps aux | ag postgres'
-alias psq='pgcli -d postgres'
 
 # Ctags
 alias ct='ctags -R --languages=ruby,javascript --sort=yes  --tag-relative=yes --exclude=.git --exclude=log --exclude=node_modules . $(bundle list --paths)'
