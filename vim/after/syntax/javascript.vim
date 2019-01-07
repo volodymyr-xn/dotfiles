@@ -18,7 +18,7 @@ syntax match jsInstantiateClass /\(new\)\@<=\s[A-Z]\w\+\(\(\)\)\@=/
 syntax match   jsVariableDef  contained /\k*/ skipwhite skipempty nextgroup=jsFlowDefinition
 
 "*****************************************************************
-"********** CLUSTERS AND REGIONS *************************
+"********** CLUSTERS AND REGIONS *********************************
 "*****************************************************************
 "*****************************************************************
 

@@ -15,6 +15,7 @@ Plug('lifepillar/vim-mucomplete')
 Plug('itchyny/lightline.vim')
 " Plug('vim-syntastic/syntastic')
 Plug('w0rp/ale')
+
 " Plug('mtscout6/syntastic-local-eslint.vim')
 
 
@@ -58,6 +59,9 @@ Plug('mxw/vim-jsx')
 
 " Multiple cursors
 Plug('terryma/vim-multiple-cursors')
+
+" Emmet
+Plug('mattn/emmet-vim')
 
 " Base16 color schemes
 Plug('chriskempson/base16-vim')
@@ -437,6 +441,16 @@ let NERDTreeShowHidden=1
 let NERDTreeWinSize=40
 nnoremap <C-\> <NOP>
 autocmd VimEnter * nnoremap <C-\> :NERDTreeToggle<CR>
+
+" ===================== Emmet settings  ====================================
+" Expand tag
+imap <C-l> <C-y>,
+imap <expr>k<tab> emmet#expandAbbrIntelligent("\<tab>")
+let g:user_emmet_settings = {
+  \  'javascript.jsx' : {
+    \      'extends' : 'jsx',
+    \  },
+  \}
 
 " ===================== Syntastic settings  ====================================
 
