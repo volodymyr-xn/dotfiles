@@ -1,27 +1,37 @@
-" syntax match jsCapitalizedVariable    contained  /\%(\%(^\|[^.]\)\.\s*\)\@<!\<\u\%(\w\|[^\x00-\x7F]\)*\>\%(\s*(\)\@!/
+"*****************************************************************
+"********* KEYWORDS AND MATCHES **********************************
+"*****************************************************************
+"*****************************************************************
+
 syntax match jsCapitalizedVariable  /\<[A-Z]\k*/
 " syntax match jsCapitalizedVariable  /\s?[A-Z]\k*/
 " syntax match jsCapitalizedVariable  /\.[A-Z]\k*/
+" syntax match jsCapitalizedVariable    contained  /\%(\%(^\|[^.]\)\.\s*\)\@<!\<\u\%(\w\|[^\x00-\x7F]\)*\>\%(\s*(\)\@!/
+
+" Overide jsFrom
+syntax keyword jsFrom from
 
 " Instantiate class
 syntax match jsInstantiateClass /\(new\)\@<=\s[A-Z]\w\+\(\(\)\)\@=/
-" Support
+
+" Overide jsVariableDef default pattern from /\<\K\k*/ to /\k*/
+syntax match   jsVariableDef  contained /\k*/ skipwhite skipempty nextgroup=jsFlowDefinition
+
+"*****************************************************************
+"********** CLUSTERS AND REGIONS *************************
+"*****************************************************************
+"*****************************************************************
+
 syntax cluster jsExpression
       \ contains=jsBracket,jsParen,jsObject,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsOperatorKeyword,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsInstantiateClass,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper,jsDo,jsForAwait,jsAsyncKeyword,jsStatement,jsDot
-
 
 syntax keyword jsImport
       \ import skipwhite skipempty nextgroup=jsCapitalizedVariable,jsModuleAsterisk,jsModuleKeyword,jsModuleGroup,jsFlowImportType
 
+
 syntax region  jsModuleGroup
       \ contained matchgroup=jsModuleBraces  start=/{/ end=/}/
       \ contains=jsModuleKeyword,jsModuleComma,jsModuleAs,jsComment,jsFlowTypeKeyword,jsCapitalizedVariable skipwhite skipempty nextgroup=jsFrom fold
-
-syntax cluster jsAll
-      \ contains=@jsExpression,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsException,jsTry,jsNoise,jsBlockLabel
-
-syntax match   jsCont contained /\.container/
-syntax keyword jsFrom from
 
 syntax cluster jsAll
       \ contains=@jsExpression,jsInstantiateClass,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsException,jsTry,jsNoise,jsBlockLabel,jsCapitalizedVariable,jsCont,jsFrom
@@ -53,14 +63,11 @@ syntax region jsFuncArgs
 
 syntax cluster jsExpression  contains=jsBracket,jsParen,jsObject,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsOperatorKeyword,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper,jsDo,jsForAwait,jsAsyncKeyword,jsStatement,jsDot,jsCapitalizedVariable
 
-" Extend jsNoise
-syntax match jsNoise /[:,;\.]/
-" syntax match jsNoise /[\.]/
 
-
-" ****************** HIGHLIGHTING *************************
-" *********************************************************
-" *********************************************************
+"*****************************************************************
+"****************** HIGHLIGHTING *********************************
+"*****************************************************************
+"*****************************************************************
 
 let s:regular_red = '#e06c75'
 let s:secondary_red = '#be5046'
@@ -77,6 +84,8 @@ call Highlight('Noises', s:regual_gray_text)
 call Highlight('jsFuncParens', s:regual_gray_text)
 call Highlight('jsFuncBraces', s:regual_gray_text)
 call Highlight('jsClassBraces', s:regual_gray_text)
+call Highlight('jsDot', s:regual_gray_text)
+
 call Highlight('jsModuleAs', s:purple)
 
 call Highlight('Normal', s:regular_red)
@@ -95,3 +104,4 @@ call Highlight('jsClassKeyword', s:purple)
 call Highlight('jsConstant', s:yellow)
 
 call Highlight('jsObjectKeyComputed', s:purple)
+call Highlight('jsExtendsKeyword', s:purple)
