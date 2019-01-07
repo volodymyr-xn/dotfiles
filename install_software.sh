@@ -5,14 +5,10 @@
 ./installation_scripts/crystal-asdf.sh
 ./installation_scripts/ctags.sh
 ./installation_scripts/develop_libs.sh
-./installation_scripts/docker.sh
 ./installation_scripts/fzf.sh
-./go.sh
-./htop.sh
-
-# install oracle java
-./installation_scripts/java.sh
-
+./installation_scripts/go.sh
+./installation_scripts/htop.sh
+./installation_scripts/java.sh # install oracle java
 ./installation_scripts/libevent.sh
 ./installation_scripts/nodejs_asdf.sh
 ./installation_scripts/numix-circle.sh
@@ -23,7 +19,9 @@
 ./installation_scripts/silver_searcher.sh
 ./installation_scripts/tmux.sh
 ./installation_scripts/tweak_tool.sh
-./installation_scripts/vim8.sh
+./installation_scripts/universal-ctags.sh
+./installation_scripts/vim.sh
 ./installation_scripts/vim_plug.sh
+./installation_scripts/nvim.sh
 ./installation_scripts/xdotool.sh
 ./installation_scripts/zsh.sh
