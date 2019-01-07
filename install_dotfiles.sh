@@ -50,22 +50,25 @@ DOTFILES_DIR=$HOME/dotfiles
 
 installation_log "Installing dotfiles..."
 
-# Copy configuration files
+# Symlink configuration files
 for file in $files_to_symlink; do
   setup_settings_file $file
 done
 
-# Backup existing tmux configi
+# Backup existing Tmux config
 backup_file "tmux.conf"
 
-# Copy tmux config
+# Copy Tmux config
 ln -nsf $DOTFILES_DIR/tmux/tmux.conf ~/.tmux.conf
 
+# Copy Alacrity config
+mkdir -p ~/.config/alacrity/
+ln -nsf $DOTFILES_DIR/alacrity.yml ~/.config/alacrity/alacrity.yml
+
+# Install Neovim config
+# Create directory for neovim config
 mkdir -p ~/.config/nvim/
-
 ln -sf $DOTFILES_DIR/vim/init.vim ~/.config/nvim/init.vim
-
-touch ~/.user_settings
 
 # Create ~/bin dir in user home for custom scripts and executables
 mkdir -p ~/bin
