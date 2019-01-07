@@ -1,45 +1,58 @@
 
 call plug#begin('~/.vim/plugged')
 
-" global search by ack
+" Global search by ack cli util
 Plug('mileszs/ack.vim')
 
-" Plug('jiangmiao/auto-pairs')
+" Filetree
 Plug('scrooloose/nerdtree')
 
-" comments
+" Comments
 Plug('tomtom/tcomment_vim')
 
 " Autocomplete
 Plug('lifepillar/vim-mucomplete')
+
+" Statusline
 Plug('itchyny/lightline.vim')
-" Plug('vim-syntastic/syntastic')
+
+" Linting
 Plug('w0rp/ale')
-
-" Plug('mtscout6/syntastic-local-eslint.vim')
-
 
 " Show changed lines from git
 Plug('airblade/vim-gitgutter')
 
 "******* Ruby/Rails plugins ******
-Plug('keith/rspec.vim')
 Plug('tpope/vim-bundler')
 Plug('tpope/vim-rails')
 Plug('tpope/vim-rbenv')
 Plug('vim-ruby/vim-ruby')
+Plug('keith/rspec.vim')
 Plug('sunaku/vim-ruby-minitest')
 Plug('rhysd/vim-textobj-ruby')
 Plug('tpope/vim-endwise') " Automaticaly add end in ruby scrips
 
 Plug('tpope/vim-surround')
+
+" Run various tests from vim
 Plug('janko-m/vim-test')
+
+" Easily navigate between vim and tmux panes
 Plug('christoomey/vim-tmux-navigator')
+
+" Allows vim to communicate and run commands in tmux
 Plug('benmills/vimux')
+
+" CSS3 syntax support
 Plug('hail2u/vim-css3-syntax')
+
+" Git integration
 Plug('tpope/vim-fugitive')
+
 Plug('tmux-plugins/vim-tmux-focus-events')
 Plug('kana/vim-textobj-user')
+
+" Provides insert mode auto-completion for quotes, parens, brackets
 Plug('Raimondi/delimitMate')
 
 " TypeScript syntax
@@ -54,7 +67,7 @@ Plug('christoomey/vim-conflicted')
 " Improved JavaScript syntax
 Plug('pangloss/vim-javascript')
 
-" jsx syntax support
+" JSX syntax support
 Plug('mxw/vim-jsx')
 
 " Multiple cursors
@@ -69,7 +82,7 @@ Plug('chriskempson/base16-vim')
 " Onedark colorscheme
 Plug('rakr/vim-one')
 
-" Highligh colors
+" Highligh color codes
 Plug('lilydjwg/colorizer')
 
 call plug#end()
@@ -177,10 +190,10 @@ set noshowmode
 " Enable mouse
 set mouse=a
 
-" set number of lines
+" Set number of lines
 set nu!
 
-" tabs settinngs
+" Tabulation settinngs
 set ts=2
 set sts=0
 set sw=2
@@ -200,7 +213,6 @@ set number
 
 " UTF encoding
 set encoding=utf-8
-
 set spelllang=en
 
 " Autoload files that have changed outside of vim
@@ -240,7 +252,7 @@ set clipboard+=unnamed
 "============================================================================
 "====================== Abbreviations ============================================
 "============================================================================
-" Frozen string literl for Ruby
+" Frozen string literal for Ruby
 ab fsl # frozen_string_literal: true
 
 "============================================================================
@@ -251,10 +263,10 @@ ab fsl # frozen_string_literal: true
 nnoremap 0 ^
 
 " Copy selected text to sytem buffer
-vnoremap n "+y
+vnoremap y "+y
 
 " Pressing ,ss will toggle and untoggle spell checking
-map <leader>ss :setlocal spell!<cr>
+map <Leader>ss :setlocal spell!<cr>
 
 " Save current file
 nnoremap <Leader>w :w<CR>
@@ -267,10 +279,10 @@ noremap H ^
 noremap L $
 
 " Run 'git blame' on a selection of code
-nmap <leader>gb :Gblame<CR>
+nmap <Leader>gb :Gblame<CR>
 
 " Run 'git status' for current file
-nmap <leader>gs :Gstatus<CR>
+nmap <Leader>gs :Gstatus<CR>
 
 " Change surround double quotes to plain quotes
 nmap <Leader>' cs"'<CR>
@@ -286,25 +298,26 @@ vnoremap < <gv
 vnoremap > >gv
 
 " Open a new tab with Ctrl+T
+nnoremap <C-t> <esc>:tabnew<CR>
+
+" " Open a new tab
+" DEPRECATED
 " nnoremap <C-t> <esc>:tabnew<CR>
 
-" Open a new tab with T
-nnoremap T <esc>:tabnew<CR>
-
 " For indenting code
-map <leader>i mmgg=G`m<CR>
+map <Leader>i mmgg=G`m<CR>
 
 " Disable selection
-nnoremap <leader>n :nohl<CR>
+nnoremap <Leader>n :nohl<CR>
 
 " Enter replace command
-nnoremap <leader>r :%s/
+nnoremap <Leader>r :%s/
 
 " Edit vim config in vertical split
-nnoremap <leader>ve :vsplit $MYVIMRC<cr>
+nnoremap <Leader>ve :vsplit $MYVIMRC<cr>
 
 " Reload vim config
-nnoremap <leader>vr :source $MYVIMRC<cr>
+nnoremap <Leader>vr :source $MYVIMRC<cr>
 
 " Reload servers
 " nnoremap q :call RestartServers() <CR>
@@ -320,9 +333,11 @@ nmap K k
 
 " nnoremap V 0v$
 
-nnoremap > <C-w>10<
-nnoremap < <C-w>10>
-" nnoremap " <C-w>10+
+" Easily resize windows
+nnoremap < <C-w>10<
+nnoremap > <C-w>10>
+nnoremap + <C-w>5+
+nnoremap _ <C-w>5-
 
 " zoom a vim pane, <C-w>= to re-balance
 " nmap <C-w><cr> <C-W>\| <C-W>_
@@ -389,7 +404,7 @@ map <leader>] :cn<cr>
 " Ack: To go to the previous search results
 map <leader>[ :cp<cr>
 
-" fzf Ag
+" Full text search by FZF AG
 noremap <Leader>p :Ag <cr>
 noremap <Leader>m :FZF app/models<CR>
 
