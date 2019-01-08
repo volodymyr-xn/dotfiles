@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 ./installation_scripts/alacritty.sh
 ./installation_scripts/arc-theme.sh
 ./installation_scripts/asdf.sh
