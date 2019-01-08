@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 sudo apt-get install autoconf automake libgtk-3-dev
 
 timestamp=$(date +%s)

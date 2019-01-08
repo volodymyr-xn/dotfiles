@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #Install required packages to allow apt to use a repository over HTTPS
 sudo apt-get install \
   apt-transport-https \
