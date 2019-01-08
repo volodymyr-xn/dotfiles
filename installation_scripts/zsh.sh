@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 timestamp=$(date +%s)
 zsh_source_path=/tmp/zsh-$timestamp
 

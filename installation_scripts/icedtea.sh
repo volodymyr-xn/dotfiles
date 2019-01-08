@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # sudo add-apt-repository ppa:maarten-fonville/ppa
 # sudo apt-get update
 # sudo apt-get install icedtea-8-plugin

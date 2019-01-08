@@ -1,4 +1,6 @@
-# installing dependencies
+#!/usr/bin/env bash
+
+# Installing dependencies
 sudo apt-get install ninja-build gettext libtool libtool-bin autoconf automake cmake g++ pkg-config unzip
 
 timestamp=$(date +%s)

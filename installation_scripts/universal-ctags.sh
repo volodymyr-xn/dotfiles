@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 timestamp=$(date +%s)
 tags_source_dir=/tmp/universal-ctags-$timestamp
 
@@ -9,6 +11,5 @@ cd $tags_source_dir
 ./configure
 make -j 4
 sudo make install
-cd -
 
 rm -rf $tags_source_dir
