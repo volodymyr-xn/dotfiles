@@ -59,14 +59,17 @@ done
 backup_file "tmux.conf"
 
 # Copy Tmux config
+installation_log "Linking .tmux.conf"
 ln -nsf $DOTFILES_DIR/tmux/tmux.conf ~/.tmux.conf
 
-# Copy Alacrity config
+# Link Alacrity config
+installation_log "Linking alacrity.yml"
 mkdir -p ~/.config/alacrity/
 ln -nsf $DOTFILES_DIR/alacrity.yml ~/.config/alacrity/alacrity.yml
 
 # Install Neovim config
 # Create directory for neovim config
+installation_log "Linking init.vim"
 mkdir -p ~/.config/nvim/
 ln -sf $DOTFILES_DIR/vim/init.vim ~/.config/nvim/init.vim
 
