@@ -1,14 +1,13 @@
 . /etc/environment
 
-# bindkey -s "^f" '$(fdd | fzf)\nclear\n'
-# bindkey -s "^t" '$(fz)\n'
-bindkey -s "^o" 'fbr\n'
+# CTRL-o runs fzf branch search
+bindkey -s "^o" 'ch\n'
 
-# base16-shell theme
+# Base16-shell theme
 BASE16_SHELL=$HOME/.config/base16-shell/
-[ -n "$PS1"  ] && [ -s $BASE16_SHELL/profile_helper.sh  ] && eval "$($BASE16_SHELL/profile_helper.sh)"
 
-[ -f ~/.local_settings ] && source ~/.local_settings
+# Enable Base16-shell themes
+[ -n "$PS1"  ] && [ -s $BASE16_SHELL/profile_helper.sh  ] && eval "$($BASE16_SHELL/profile_helper.sh)"
 
 stty -ixon
 
@@ -22,9 +21,14 @@ export FZF_COMPLETION_TRIGGER='~~'
 
 # Options to fzf command
 export FZF_COMPLETION_OPTS='+c -x'
-export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
-export FZF_CTRL_T_OPTS="--preview '(highlight -O ansi -l {} 2> /dev/null || cat {} || tree -C {}) 2> /dev/null | head -200'"
 
+# FZF will ignore .git and hidden files
+export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
+
+# DEPRECATED
+# export FZF_CTRL_T_OPTS="--preview '(highlight -O ansi -l {} 2> /dev/null || cat {} || tree -C {}) 2> /dev/null | head -200'"
+
+# libvips support
 export VIPSHOME=/usr/local
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$VIPSHOME/lib
 export PATH=$PATH:$VIPSHOME/bin
@@ -32,8 +36,6 @@ export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$VIPSHOME/lib/pkgconfig
 export MANPATH=$MANPATH:$VIPSHOME/man
 export PYTHONPATH=$VIPSHOME/lib/python2.7/site-packages
 export GI_TYPELIB_PATH="/usr/local/lib/girepository-1.0"
-# export MANPATH=$MANPATH:$VIPSHOME/man
-# export PYTHONPATH=$VIPSHOME/lib/python2.7/site-packages
 
 # Use ag instead of the default find command for listing candidates.
 # - The first argument to the function is the base path to start traversal
@@ -43,36 +45,34 @@ _fzf_compgen_path() {
   ag -g "" "$1"
 }
 
+# ZSH extensions
 source $HOME/dotfiles/zsh/oh-my-zsh
 source $HOME/dotfiles/zsh/aliases
 source $HOME/dotfiles/zsh/tmux
 source $HOME/dotfiles/zsh/functions
 source $HOME/dotfiles/zsh/key-bindings
 
-# ssh
-export SSH_KEY_PATH="~/.ssh/dsa_id"
+# # SSH DEPRECATED
+# export SSH_KEY_PATH="~/.ssh/dsa_id"
 
-# add ~/bin to PATH
+# Add ~/bin to PATH
 export PATH="$HOME/bin:$PATH"
 
-# add yarn bin to PATH
+# Add yarn bin to PATH
 export PATH="$HOME/.yarn/bin:$PATH"
 
-# add rust package manager to PATH
+# Add rust package manager to PATH
 export PATH="$HOME/.cargo/bin:$PATH"
 
-# add go to path
+# Add go to path
 export PATH="$HOME/.go/bin:$PATH"
 
+# Ruby verbose mode
 export RUBYOPT="-W1"
-
-# android studio
-export ANDROID_HOME=$HOME/Android/Sdk
-export PATH=$PATH:$ANDROID_HOME/tools
-export PATH=$PATH:$ANDROID_HOME/platform-tools
 
 export PATH=$PATH:~/.local/bin
 
+# Better less highlight
 export LESS_TERMCAP_mb=$'\E[1;31m'     # begin bold
 export LESS_TERMCAP_md=$'\E[1;36m'     # begin blink
 export LESS_TERMCAP_me=$'\E[0m'        # reset bold/blink
@@ -86,9 +86,13 @@ export GROFF_NO_SGR=1                  # for konsole and gnome-terminal
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 alias cap-current-branch='GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD) cap'
 
+# Enable fzf
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
+# Enable asdf
 . $HOME/.asdf/asdf.sh
+
+# DEPRECATED
 # rbenv
 # export PATH="$HOME/.rbenv/bin:$PATH"
 # export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"
