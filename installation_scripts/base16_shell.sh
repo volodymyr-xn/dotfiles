@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 base16_shell_dir=~/.config/base16-shell
 
 echo "Installing base16-shell into $base16_shell_dir"

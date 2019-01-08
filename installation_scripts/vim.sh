@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 timestamp=$(date +%s)
 vim_source_dir=/tmp/vim-$timestamp
 

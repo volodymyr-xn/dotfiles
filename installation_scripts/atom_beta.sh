@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 atom_deb_file_path=/tmp/atom_beta_linux.deb
 
 wget https://atom.io/download/deb\?channel\=beta -O $atom_deb_file_path
