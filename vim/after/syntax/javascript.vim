@@ -11,11 +11,16 @@ syntax match jsCapitalizedVariable  /\<[A-Z]\k*/
 " Overide jsFrom
 syntax keyword jsFrom from
 
+syntax keyword jsThis this
+
 " Instantiate class
 syntax match jsInstantiateClass /\(new\)\@<=\s[A-Z]\w\+\(\(\)\)\@=/
 
 " Overide jsVariableDef default pattern from /\<\K\k*/ to /\k*/
 syntax match   jsVariableDef  contained /\k*/ skipwhite skipempty nextgroup=jsFlowDefinition
+
+" TODO
+exe 'syntax match jsArrowFunctionDeclaration /\w\+\(\s=\s(.*)\ze\s*=>\)\@=/  skipwhite skipempty nextgroup=jsArrowFuncArgs '.(exists('g:javascript_conceal_arrow_function') ? 'conceal cchar='.g:javascript_conceal_arrow_function : '')
 
 "*****************************************************************
 "********** CLUSTERS AND REGIONS *********************************
@@ -23,7 +28,7 @@ syntax match   jsVariableDef  contained /\k*/ skipwhite skipempty nextgroup=jsFl
 "*****************************************************************
 
 syntax cluster jsExpression
-      \ contains=jsBracket,jsParen,jsObject,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsOperatorKeyword,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsInstantiateClass,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper,jsDo,jsForAwait,jsAsyncKeyword,jsStatement,jsDot
+      \ contains=jsBracket,jsParen,jsObject,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsOperatorKeyword,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsArrowFunctionDeclaration,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsInstantiateClass,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFunctionDeclaration,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper,jsDo,jsForAwait,jsAsyncKeyword,jsStatement,jsDot
 
 syntax keyword jsImport
       \ import skipwhite skipempty nextgroup=jsCapitalizedVariable,jsModuleAsterisk,jsModuleKeyword,jsModuleGroup,jsFlowImportType
@@ -47,7 +52,7 @@ syntax region jsObject
 syntax region jsClassBlock
       \ contained matchgroup=jsClassBraces
       \ start=/{/  end=/}/
-      \ contains=jsClassFuncName,jsClassMethodType,jsArrowFunction,jsArrowFuncArgs,jsComment,jsGenerator,jsDecorator,jsClassProperty,jsClassPropertyComputed,jsClassStringKey,jsAsyncKeyword,jsNoise,jsCapitalizedVariable extend fold
+      \ contains=jsClassFuncName,jsClassMethodType,jsArrowFunction,jsArrowFunctionDeclaration,jsArrowFuncArgs,jsComment,jsGenerator,jsDecorator,jsClassProperty,jsClassPropertyComputed,jsClassStringKey,jsAsyncKeyword,jsNoise,jsCapitalizedVariable extend fold
 " syntax region jsFuncArgExpression    contained matchgroup=jsFuncArgOperator start=/=/ end=/[,)]\@=/ contains=@jsExpression,jsCapitalizedVariable extend
 
 " Add ability to match jsCapitalidedVariable inside function call
@@ -61,7 +66,7 @@ syntax region jsFuncArgs
       \ start=/(/  end=/)/
       \ contains=jsFuncArgCommas,jsComment,jsFuncArgExpression,jsDestructuringBlock,jsDestructuringArray,jsRestExpression,jsFlowArgumentDef,jsCapitalizedVariable skipwhite skipempty nextgroup=jsCommentFunction,jsFuncBlock,jsFlowReturn,jsCapitalizedVariable extend fold
 
-syntax cluster jsExpression  contains=jsBracket,jsParen,jsObject,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsOperatorKeyword,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper,jsDo,jsForAwait,jsAsyncKeyword,jsStatement,jsDot,jsCapitalizedVariable
+syntax cluster jsExpression  contains=jsBracket,jsParen,jsObject,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsOperatorKeyword,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsArrowFunctionDeclaration,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFunctionDeclaration,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper,jsDo,jsForAwait,jsAsyncKeyword,jsStatement,jsDot,jsCapitalizedVariable
 
 
 "*****************************************************************
@@ -73,6 +78,7 @@ let s:regular_red = '#e06c75'
 let s:secondary_red = '#be5046'
 let s:regual_gray_text = 'gray'
 let s:purple = '#c678dd'
+let s:blue = '#61afef'
 let s:yellow = '#e5c07b'
 
 hi def link jsCapitalizedVariable Type
@@ -105,3 +111,8 @@ call Highlight('jsConstant', s:yellow)
 
 call Highlight('jsObjectKeyComputed', s:purple)
 call Highlight('jsExtendsKeyword', s:purple)
+call Highlight('jsArrowFunctionDeclaration', s:blue)
+call Highlight('jsThis', s:blue)
+
+" hi jsThis gui=italic cterm=italic guifg=#e5c07b
+hi jsThis gui=italic cterm=italic guifg=#98c379
