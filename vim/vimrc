@@ -263,7 +263,7 @@ ab fsl # frozen_string_literal: true
 nnoremap 0 ^
 
 " Copy selected text to sytem buffer
-vnoremap y "+y
+" vnoremap y "+y TODO
 
 " Pressing ,ss will toggle and untoggle spell checking
 map <Leader>ss :setlocal spell!<cr>
