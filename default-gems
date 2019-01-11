@@ -1,4 +1,5 @@
 bundler
+rails
 pry
 pry-doc
 gem-ctags

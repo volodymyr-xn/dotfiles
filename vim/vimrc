@@ -593,3 +593,7 @@ command! -nargs=* Ag call fzf#run({
 function! Highlight(group, color)
   exec "hi " a:group . " guifg=" . a:color
 endfunction
+
+function! Ihighlight(group, color)
+  exec "hi " a:group . " guifg=" . a:color . " gui=italic"
+endfunction
