@@ -85,6 +85,7 @@ hi def link jsCapitalizedVariable Type
 hi def link jsObjectKeyComputed Type
 hi def link jsInstantiateClass Type
 
+
 call Highlight('jsNoise', s:regual_gray_text)
 call Highlight('Noises', s:regual_gray_text)
 call Highlight('jsFuncParens', s:regual_gray_text)
@@ -116,3 +117,4 @@ call Highlight('jsThis', s:blue)
 
 " hi jsThis gui=italic cterm=italic guifg=#e5c07b
 hi jsThis gui=italic cterm=italic guifg=#98c379
+

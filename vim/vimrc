@@ -597,3 +597,6 @@ endfunction
 function! Ihighlight(group, color)
   exec "hi " a:group . " guifg=" . a:color . " gui=italic"
 endfunction
+
+
+call Highlight('NERDTreeFile', 'gray')
