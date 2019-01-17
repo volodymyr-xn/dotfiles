@@ -19,6 +19,9 @@ Plug('itchyny/lightline.vim')
 " Linting
 Plug('w0rp/ale')
 
+" Enable repeating supported plugin maps with '.'
+Plug('tpope/vim-repeat')
+
 " Show changed lines from git
 Plug('airblade/vim-gitgutter')
 
@@ -74,7 +77,7 @@ Plug('mxw/vim-jsx')
 Plug('terryma/vim-multiple-cursors')
 
 " Emmet
-Plug('mattn/emmet-vim')
+" Plug('mattn/emmet-vim')
 
 " Base16 color schemes
 Plug('chriskempson/base16-vim')
@@ -84,6 +87,8 @@ Plug('rakr/vim-one')
 
 " Highligh color codes
 Plug('lilydjwg/colorizer')
+
+Plug('tiagofumo/vim-nerdtree-syntax-highlight')
 
 call plug#end()
 "============================================================================
@@ -247,13 +252,14 @@ set scrolloff=3
 set title
 
 " Yank to system clipboard
-set clipboard+=unnamed
+" set clipboard+=unnamed
 
 "============================================================================
 "====================== Abbreviations ============================================
 "============================================================================
 " Frozen string literal for Ruby
 ab fsl # frozen_string_literal: true
+ab pry binding.pry
 
 "============================================================================
 "====================== Mapings ============================================
@@ -343,8 +349,8 @@ nnoremap _ <C-w>5-
 " nmap <C-w><cr> <C-W>\| <C-W>_
 
 " Switch between tabs
-nnoremap <TAB> gt
-
+nnoremap <C-s> gt
+"
 " Map text align to tab button in visual mode
 vnoremap <TAB> =
 
@@ -459,13 +465,13 @@ autocmd VimEnter * nnoremap <C-\> :NERDTreeToggle<CR>
 
 " ===================== Emmet settings  ====================================
 " Expand tag
-imap <C-l> <C-y>,
-imap <expr>k<tab> emmet#expandAbbrIntelligent("\<tab>")
-let g:user_emmet_settings = {
-  \  'javascript.jsx' : {
-    \      'extends' : 'jsx',
-    \  },
-  \}
+" imap <C-l> <C-y>,
+" imap <expr>k<tab> emmet#expandAbbrIntelligent("\<tab>")
+" let g:user_emmet_settings = {
+"   \  'javascript.jsx' : {
+"     \      'extends' : 'jsx',
+"     \  },
+"   \}
 
 " ===================== Syntastic settings  ====================================
 
@@ -483,15 +489,16 @@ let g:ale_lint_delay = 1000
 let g:ale_lint_on_text_changed = 'never'
 
 " ===================== vim-jsx ====================================
-let g:vim_jsx_pretty_colorful_config = 1 " default 0
+" default 0
+let g:vim_jsx_pretty_colorful_config = 1
 
 " vim-jsx
 " By default, JSX syntax highlighting and indenting will be enabled only for
 " files with the .jsx extension. If you would like JSX in .js files, add
 let g:jsx_ext_required = 0
 
-" ===================== Lightline settings  ====================================
 
+" ===================== Lightline settings  ====================================
 let g:lightline = {
       \ 'colorscheme': 'one',
       \ 'active': {
@@ -509,7 +516,6 @@ let g:lightline = {
       \}
 
 " ===================== FZF settings  ====================================
-
 " Customize fzf colors to match your color scheme
 let g:fzf_colors =
 \ { 'fg':      ['fg', 'Normal'],
@@ -517,12 +523,12 @@ let g:fzf_colors =
   \ 'hl':      ['fg', 'Comment'],
   \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
   \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
-  \ 'hl+':     ['fg', 'Statement'],
+  \ 'hl+':     ['fg', 'Type'],
   \ 'info':    ['fg', 'PreProc'],
   \ 'border':  ['fg', 'Ignore'],
   \ 'prompt':  ['fg', 'Conditional'],
   \ 'pointer': ['fg', 'Exception'],
-  \ 'marker':  ['fg', 'Keyword'],
+  \ 'marker':  ['fg', 'Statement'],
   \ 'spinner': ['fg', 'Label'],
   \ 'header':  ['fg', 'Comment'] }
 
@@ -613,9 +619,14 @@ function! Highlight(group, color)
   exec "hi " a:group . " guifg=" . a:color
 endfunction
 
-function! Ihighlight(group, color)
+function! ItalicHighlight(group, color)
   exec "hi " a:group . " guifg=" . a:color . " gui=italic"
 endfunction
 
+" ===================== Custom highlighting  ====================================
+"
 
+" TabLine
+" TabLineFill
+" TabLineSel
 call Highlight('NERDTreeFile', 'gray')
