@@ -1,5 +1,6 @@
 # Vim specific
 alias vi='vim'
+alias vi:='vim ~/.vim/vimrc'
 alias v='vim'
 alias nv='nvim'
 alias dtt='cd ~/dotfiles'
