@@ -366,7 +366,7 @@ nnoremap m :ToggleCurrentWindowZoom <CR>
 " Faster close windows and quit
 nnoremap <C-c> <C-w>q
 
-Move current line to top
+"" Move current line to top
 nnoremap <C-Up> :m .-2<CR>
 
 " Move current line to bottom
