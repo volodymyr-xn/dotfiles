@@ -366,6 +366,12 @@ nnoremap m :ToggleCurrentWindowZoom <CR>
 " Faster close windows and quit
 nnoremap <C-c> <C-w>q
 
+Move current line to top
+nnoremap <C-Up> :m .-2<CR>
+
+" Move current line to bottom
+nnoremap <C-Down> :m .+1<CR>
+
 " Test runner mappings
 nnoremap <silent> <leader>t :TestNearest<CR>
 nnoremap <silent> <leader>j :TestNearest<CR>
