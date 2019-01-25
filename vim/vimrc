@@ -25,16 +25,29 @@ Plug('tpope/vim-repeat')
 " Show changed lines from git
 Plug('airblade/vim-gitgutter')
 
-"******* Ruby/Rails plugins ******
+" Lightweight support for Ruby's Bundler
 Plug('tpope/vim-bundler')
-Plug('tpope/vim-rails')
-Plug('tpope/vim-rbenv')
-Plug('vim-ruby/vim-ruby')
-Plug('keith/rspec.vim')
-Plug('sunaku/vim-ruby-minitest')
-Plug('rhysd/vim-textobj-ruby')
-Plug('tpope/vim-endwise') " Automaticaly add end in ruby scrips
 
+" Ruby on Rails power tool
+" This is a massive (in a good way) Vim plugin for editing Ruby on Rails applications.
+Plug('tpope/vim-rails')
+
+" Minimal rbenv support
+Plug('tpope/vim-rbenv')
+
+" Better rspec syntax highlighting for Vim
+Plug('keith/rspec.vim')
+
+" Vim highlighting & completion for MiniTest
+Plug('sunaku/vim-ruby-minitest')
+
+" Make text objects with various ruby block structures.
+Plug('rhysd/vim-textobj-ruby')
+
+" Automaticaly add end in ruby scrips
+Plug('tpope/vim-endwise')
+
+" quoting/parenthesizing made simple
 Plug('tpope/vim-surround')
 
 " Run various tests from vim
@@ -52,7 +65,10 @@ Plug('hail2u/vim-css3-syntax')
 " Git integration
 Plug('tpope/vim-fugitive')
 
+" Make terminal vim and tmux work better together.
 Plug('tmux-plugins/vim-tmux-focus-events')
+
+" Create your own text objects
 Plug('kana/vim-textobj-user')
 
 " Provides insert mode auto-completion for quotes, parens, brackets
