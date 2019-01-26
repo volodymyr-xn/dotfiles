@@ -111,14 +111,13 @@ call plug#end()
 " ===================== General settings ====================================
 "============================================================================
 
-nnoremap <space> <nop>
-
 " use the space key as our leader. put this near the top of your vimrc
+" Disable default space mapping
+nnoremap <space> <nop>
+" Make space Leader
 let mapleader = "\<space>"
 
 " r For auto indent filetype plugin indent on
-"filetype off
-"syntax highlighting
 syntax on
 
 " Use vim, not vi api
@@ -191,6 +190,8 @@ colorscheme one
 let base16colorspace=256
 set t_Co=256
 
+" Use 24bit(True color) gui colors
+" VIM syntax highlight will work in gui mode
 set termguicolors
 
 let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
@@ -268,7 +269,7 @@ set scrolloff=3
 set title
 
 " Yank to system clipboard
-" set clipboard+=unnamed
+set clipboard+=unnamed
 
 "============================================================================
 "====================== Abbreviations ============================================
@@ -355,6 +356,12 @@ nmap K k
 
 " nnoremap V 0v$
 
+" Copy selected text to system clipboard
+vnoremap m "+y
+
+" Copy current line to system clipboard
+nnoremap ` "+yy
+
 " Easily resize windows
 nnoremap < <C-w>10<
 nnoremap > <C-w>10>
@@ -365,13 +372,13 @@ nnoremap _ <C-w>5-
 " nmap <C-w><cr> <C-W>\| <C-W>_
 
 " Switch between tabs
-nnoremap <C-s> gt
+nnoremap <C-e> gt
 "
 " Map text align to tab button in visual mode
 vnoremap <TAB> =
 
 " " Expand window
-" nmap " <C-W>\| <C-W>_
+nmap " <C-W>\| <C-W>_
 "
 " re-balance panes
 nnoremap = <C-W>=
@@ -483,6 +490,7 @@ set diffopt+=vertical
 let NERDTreeShowHidden=1
 let NERDTreeWinSize=40
 nnoremap <C-\> <NOP>
+nnoremap <C-\> :NERDTreeToggle<CR>
 autocmd VimEnter * nnoremap <C-\> :NERDTreeToggle<CR>
 
 " ===================== Emmet settings  ====================================
@@ -590,11 +598,11 @@ function! ToggleCurrentWindowZoom()
   endif
 
   if t:currentWindowZoomed
-    execute "normal \'"
+    execute "normal \<C-W>="
     let t:currentWindowZoomed = 0
   else
     :NERDTreeClose
-    execute "normal \""
+    execute "normal \<C-W>\| \<C-W>_"
     let t:currentWindowZoomed = 1
   endif
 endfunction
