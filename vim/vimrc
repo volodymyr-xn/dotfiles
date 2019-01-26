@@ -596,7 +596,7 @@ function! ReloadActiveChromeTab()
 endfunction
 
 
-" toggle zoom current window
+" Toggle zoom of current window
 function! ToggleCurrentWindowZoom()
   if !exists("t:currentWindowZoomed")
     let t:currentWindowZoomed = 0
@@ -614,7 +614,7 @@ endfunction
 
 
 " ===================== FZF-AG functions  ====================================
-
+" Full text search support
 function! s:ag_to_qf(line)
   let parts = split(a:line, ':')
   return {'filename': parts[0], 'lnum': parts[1], 'col': parts[2],
@@ -641,6 +641,7 @@ function! s:ag_handler(lines)
   endif
 endfunction
 
+" Ag command does full text search by FZF
 command! -nargs=* Ag call fzf#run({
       \ 'source':  printf('ag --nogroup --column --color "%s"',
       \                   escape(empty(<q-args>) ? '^(?=.)' : <q-args>, '"\')),
