@@ -649,17 +649,19 @@ command! -nargs=* Ag call fzf#run({
       \ 'down':    '50%'
       \ })
 
+" Custom highlight function
+" Requires vim 'set termguicolors'
 function! Highlight(group, color)
   exec "hi " a:group . " guifg=" . a:color
 endfunction
 
+" Custom highlight function with italic text
+" Requires vim 'set termguicolors'
 function! ItalicHighlight(group, color)
   exec "hi " a:group . " guifg=" . a:color . " gui=italic"
 endfunction
 
 " ===================== Custom highlighting  ====================================
-"
-
 " TabLine
 " TabLineFill
 " TabLineSel
