@@ -368,6 +368,12 @@ nnoremap > <C-w>10>
 nnoremap + <C-w>5+
 nnoremap _ <C-w>5-
 
+" Move current line up
+nnoremap <C-Up> :m .-2<CR>
+
+" Move current line down
+nnoremap <C-Down> :m .+1<CR>
+
 " zoom a vim pane, <C-w>= to re-balance
 " nmap <C-w><cr> <C-W>\| <C-W>_
 
