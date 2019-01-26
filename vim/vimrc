@@ -447,12 +447,15 @@ map <leader>[ :cp<cr>
 
 " Full text search by FZF AG
 noremap <Leader>p :Ag <cr>
+
+" Search app/models by FZF
 noremap <Leader>m :FZF app/models<CR>
 
 noremap <Leader>1 :FZF spec<CR>
 noremap <Leader>2 :FZF app/serializers<CR>
 noremap <Leader>3 :FZF app/javascripts<CR>
 
+" Search app/controllers by FZF
 noremap <Leader>c :FZF app/controllers<CR>
 nnoremap <silent> <Leader>f :Ag <C-R><C-W><CR>
 
@@ -460,11 +463,6 @@ nnoremap <silent> <Leader>f :Ag <C-R><C-W><CR>
 " autocmd VimEnter * nunmap <leader>hp
 " autocmd VimEnter * nunmap <leader>hr
 " autocmd VimEnter * nunmap <leader>hs
-
-" Unmap Bufexplorer leaders that I don't use. This avoids delays for other leaders.
-" autocmd VimEnter * nunmap <leader>bs
-" autocmd VimEnter * nunmap <leader>bv
-
 
 "============================================================================
 "====================== Plugins settings ====================================
