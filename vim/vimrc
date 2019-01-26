@@ -601,9 +601,8 @@ command! ToggleCurrentWindowZoom :call ToggleCurrentWindowZoom()
 " endfunction
 
 function! ReloadActiveChromeTab()
-  if !exists("g:currentTerminalEmulator")
-    let g:currentTerminalEmulator = system("xprop -root | grep \"_NET_ACTIVE_WINDOW(WINDOW)\"| awk '{print $5}'")
-  endif
+    " let g:currentTerminalEmulator = system("xprop -root | grep \"_NET_ACTIVE_WINDOW(WINDOW)\"| awk '{print $5}'")
+  let g:currentTerminalEmulator = system("xdotool getactivewindow")
 
   execute system("xdotool search --onlyvisible --class Chrome windowfocus key F5")
   execute system("xdotool windowfocus " . g:currentTerminalEmulator)
