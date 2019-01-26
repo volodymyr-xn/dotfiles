@@ -369,10 +369,19 @@ nnoremap + <C-w>5+
 nnoremap _ <C-w>5-
 
 " Move current line up
-nnoremap <C-Up> :m .-2<CR>
+nnoremap <C-Up> :m .-2<CR>==
+inoremap <C-Up> <ESC>:m .-2<CR>==gi
+
+" Move multipe lines up in visual mode
+vnoremap <C-Up> :m '<-2<CR>gv=gv
 
 " Move current line down
-nnoremap <C-Down> :m .+1<CR>
+nnoremap <C-Down> :m .+1<CR>==
+inoremap <C-Down> <ESC>:m .+1<CR>==gi
+
+" Move multipe lines down in visual mode
+vnoremap <C-Down> :m '>+1<CR>gv=gv
+
 
 " zoom a vim pane, <C-w>= to re-balance
 " nmap <C-w><cr> <C-W>\| <C-W>_
