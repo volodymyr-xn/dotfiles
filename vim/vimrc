@@ -500,9 +500,15 @@ let g:ackprg="ag"
 set diffopt+=vertical
 
 " ===================== Nerdtree settings  ====================================
+" Show hidden files
 let NERDTreeShowHidden=1
+
 let NERDTreeWinSize=40
+
+" Disable default Ctrl-\ mapping
 nnoremap <C-\> <NOP>
+
+" Toggle NERDTree
 nnoremap <C-\> :NERDTreeToggle<CR>
 autocmd VimEnter * nnoremap <C-\> :NERDTreeToggle<CR>
 
