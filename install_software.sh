@@ -9,9 +9,11 @@
 ./installation_scripts/develop_libs.sh
 ./installation_scripts/fzf.sh
 ./installation_scripts/go.sh
+./installation_scripts/h2o.sh
 ./installation_scripts/htop.sh
 ./installation_scripts/java.sh # install oracle java
 ./installation_scripts/libevent.sh
+./installation_scripts/neovim.sh
 ./installation_scripts/nodejs_asdf.sh
 ./installation_scripts/numix-circle.sh
 ./installation_scripts/oh_my_zsh.sh
