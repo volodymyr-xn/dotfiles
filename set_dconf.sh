@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Theme
 gsettings set org.gnome.desktop.wm.preferences theme 'Arc-Darker'
 gsettings set org.gnome.desktop.interface gtk-theme 'Arc-Darker'
