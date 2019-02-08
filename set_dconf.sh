@@ -1,0 +1,13 @@
+# Theme
+gsettings set org.gnome.desktop.wm.preferences theme 'Arc-Darker'
+gsettings set org.gnome.desktop.interface gtk-theme 'Arc-Darker'
+
+# Icon theme
+gsettings set org.gnome.desktop.interface icon-theme 'Numix-Circle'
+
+# Keybindings
+# Toggle display focus
+custom_keybinding_0_schema=/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0
+dconf write $custom_keybinding_0_schema/name "'Toggle display focus'"
+dconf write $custom_keybinding_0_schema/command "'toggle-display-focus'"
+dconf write $custom_keybinding_0_schema/binding "'<Control>space'"
