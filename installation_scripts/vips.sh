@@ -9,7 +9,7 @@ sudo apt-get install git build-essential libxml2-dev libfftw3-dev \
   automake libtool swig gtk-doc-tools
 
 timestamp=$(date +%s)
-destination_dir=/tmp/libvips-$timestamp
+destination_dir=/tmp/libvips-source-$timestamp
 
 git clone https://github.com/jcupitt/libvips.git $destination_dir
 
