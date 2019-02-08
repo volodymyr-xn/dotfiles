@@ -3,4 +3,3 @@
 ./install_software.sh
 ./install_dotfiles.sh
 ./set_dconf.sh
-
