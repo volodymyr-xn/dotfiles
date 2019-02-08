@@ -5,6 +5,7 @@
 ./installation_scripts/asdf.sh
 ./installation_scripts/base16_shell.sh
 ./installation_scripts/crystal-asdf.sh
+./installation_scripts/dconf.sh
 ./installation_scripts/ctags.sh
 ./installation_scripts/develop_libs.sh
 ./installation_scripts/fzf.sh
