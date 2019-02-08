@@ -80,6 +80,7 @@ let s:regual_gray_text = 'gray'
 let s:purple = '#c678dd'
 let s:blue = '#61afef'
 let s:yellow = '#e5c07b'
+let s:green = '#98c379'
 
 hi def link jsCapitalizedVariable Type
 hi def link jsObjectKeyComputed Type
@@ -113,8 +114,6 @@ call Highlight('jsConstant', s:yellow)
 call Highlight('jsObjectKeyComputed', s:purple)
 call Highlight('jsExtendsKeyword', s:purple)
 call Highlight('jsArrowFunctionDeclaration', s:blue)
-call Highlight('jsThis', s:blue)
 
 " hi jsThis gui=italic cterm=italic guifg=#e5c07b
-hi jsThis gui=italic cterm=italic guifg=#98c379
-
+call ItalicHighlight('jsThis', s:green)
