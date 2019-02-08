@@ -95,7 +95,7 @@ call Highlight('jsDot', s:regual_gray_text)
 
 call Highlight('jsModuleAs', s:purple)
 
-call Highlight('Normal', s:regular_red)
+" call Highlight('Normal', s:regular_red)
 
 call Highlight('jsClassMethodType', s:purple)
 
