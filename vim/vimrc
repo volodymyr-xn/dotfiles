@@ -400,6 +400,10 @@ vnoremap <C-Down> :m '>+1<CR>gv=gv
 " Switch between tabs
 nnoremap <C-e> gt
 
+" Tabs
+nnoremap <C-Left> :tabprev<cr>
+nnoremap <C-Right> :tabnext<cr>
+
 " Map text align to tab button in visual mode
 vnoremap <TAB> =
 
@@ -725,3 +729,17 @@ function! ToggleBackground()
 		endif
 	endif
 endfunction
+
+" Save file
+" nnoremap s :w<cr>
+
+" Cursorline {{{
+" Only show cursorline in the current window and in normal mode.
+" augroup cline
+"     au!
+"     au WinLeave,InsertEnter * set nocursorline
+"     au WinEnter,InsertLeave * set cursorline
+" augroup END
+
+" Save when losing focus
+au FocusLost * :silent! wall
