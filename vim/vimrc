@@ -702,7 +702,7 @@ endfunction
 call Highlight('NERDTreeFile', 'gray')
 
 " ===================== Experimental ====================================
-function! s:toggle_background()
+function! ToggleBackground()
 	if ! exists('g:colors_name')
 		echomsg 'No colorscheme set'
 		return
