@@ -5,4 +5,4 @@ sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main"
 sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main" > /etc/apt/sources.list.d/pgdg_xenial.list'
 
 sudo apt update
-sudo apt-get install postgresql-10
+sudo apt-get install postgresql-11
