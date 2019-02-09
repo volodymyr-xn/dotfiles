@@ -186,7 +186,7 @@ set background=dark
 colorscheme one
 " colorscheme base16-onedark
 
-if g:colors_name == "one" || g:colors_name == "base16-onedark"
+if g:colors_name ==# "one" || g:colors_name ==# "base16-onedark"
 "   " let g:custom_color_regular = '#e06c75'
 "   " let g:custom_color_secondary_regular = '#be5046'
 "   " let g:custom_color_statement = '#c678dd'
@@ -197,8 +197,6 @@ if g:colors_name == "one" || g:colors_name == "base16-onedark"
 elseif g:colors_name == "base16-gruvbox-dark-medium" || g:colors_name == "base16-gruvbox-dark-pale" || g:colors_name == "base16-gruvbox-dark-soft"
   let g:custom_color_character = '#98c379'
 endif
-
-let g:custom_color_character = '#98c379'
 
 " Access colors present in 256 colorspace
 let base16colorspace=256
