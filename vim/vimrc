@@ -184,13 +184,28 @@ set background=dark
 " endif
 
 colorscheme one
+" colorscheme base16-onedark
+
+if g:colors_name == "one" || g:colors_name == "base16-onedark"
+"   " let g:custom_color_regular = '#e06c75'
+"   " let g:custom_color_secondary_regular = '#be5046'
+"   " let g:custom_color_statement = '#c678dd'
+"   " let g:custom_color_noise = 'gray'
+"   " let g:custom_color_type = '#e5c07b'
+"   " let g:custom_color_special = '#61afef'
+  let g:custom_color_character = '#98c379'
+elseif g:colors_name == "base16-gruvbox-dark-medium" || g:colors_name == "base16-gruvbox-dark-pale" || g:colors_name == "base16-gruvbox-dark-soft"
+  let g:custom_color_character = '#98c379'
+endif
+
+let g:custom_color_character = '#98c379'
 
 " Access colors present in 256 colorspace
 let base16colorspace=256
 set t_Co=256
 
-" Use 24bit(True color) gui colors
-" VIM syntax highlight will work in gui mode
+" Use 24bit(True color) GUI colors
+" VIM syntax highlight will work in gui mode(guifg, guibg)
 set termguicolors
 
 let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
@@ -386,7 +401,7 @@ vnoremap <C-Down> :m '>+1<CR>gv=gv
 
 " Switch between tabs
 nnoremap <C-e> gt
-"
+
 " Map text align to tab button in visual mode
 vnoremap <TAB> =
 
@@ -627,7 +642,7 @@ endfunction
 
 
 " ===================== FZF-AG functions  ====================================
-" Full text search support
+" Full text search support for FZF
 function! s:ag_to_qf(line)
   let parts = split(a:line, ':')
   return {'filename': parts[0], 'lnum': parts[1], 'col': parts[2],
@@ -682,3 +697,28 @@ endfunction
 " TabLineFill
 " TabLineSel
 call Highlight('NERDTreeFile', 'gray')
+
+" ===================== Experimental ====================================
+function! s:toggle_background()
+	if ! exists('g:colors_name')
+		echomsg 'No colorscheme set'
+		return
+	endif
+	let l:scheme = g:colors_name
+
+	if l:scheme =~# 'dark' || l:scheme =~# 'light'
+		" Rotate between different theme backgrounds
+		execute 'colorscheme' (l:scheme =~# 'dark'
+					\ ? substitute(l:scheme, 'dark', 'light', '')
+					\ : substitute(l:scheme, 'light', 'dark', ''))
+	else
+		execute 'set background='.(&background ==# 'dark' ? 'light' : 'dark')
+		if ! exists('g:colors_name')
+			execute 'colorscheme' l:scheme
+			echomsg 'The colorscheme `'.l:scheme
+				\ .'` doesn''t have background variants!'
+		else
+			echo 'Set colorscheme to '.&background.' mode'
+		endif
+	endif
+endfunction

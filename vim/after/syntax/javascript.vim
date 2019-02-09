@@ -74,46 +74,67 @@ syntax cluster jsExpression  contains=jsBracket,jsParen,jsObject,jsTernaryIf,jsT
 "*****************************************************************
 "*****************************************************************
 
-let s:regular_red = '#e06c75'
-let s:secondary_red = '#be5046'
-let s:regual_gray_text = 'gray'
-let s:purple = '#c678dd'
-let s:blue = '#61afef'
-let s:yellow = '#e5c07b'
-let s:green = '#98c379'
-
 hi def link jsCapitalizedVariable Type
 hi def link jsObjectKeyComputed Type
 hi def link jsInstantiateClass Type
 
+" call Highlight('Normal', g:custom_color_regular)
 
-call Highlight('jsNoise', s:regual_gray_text)
-call Highlight('Noises', s:regual_gray_text)
-call Highlight('jsFuncParens', s:regual_gray_text)
-call Highlight('jsFuncBraces', s:regual_gray_text)
-call Highlight('jsClassBraces', s:regual_gray_text)
-call Highlight('jsDot', s:regual_gray_text)
+" call Highlight('jsNoise', g:custom_color_noise)
+hi! link jsNoise NonText
 
-call Highlight('jsModuleAs', s:purple)
+" call Highlight('Noises', g:custom_color_noise)
+hi! link Noises NonText
 
-" call Highlight('Normal', s:regular_red)
+" call Highlight('jsFuncParens', g:custom_color_noise)
+hi! link jsFuncParens NonText
 
-call Highlight('jsClassMethodType', s:purple)
+" call Highlight('jsFuncBraces', g:custom_color_noise)
+hi! link jsFuncBraces NonText
 
-call Highlight('jsImport', s:purple)
-call Highlight('jsFrom',s:purple)
-call Highlight('jsExport', s:purple)
-call Highlight('jsExportDefault', s:purple)
-" hi def link jsExportDefaultGroup   Statement TODO
+" call Highlight('jsClassBraces', g:custom_color_noise)
+hi! link jsClassBraces NonText
 
-call Highlight('jsClassDefinition', s:yellow)
-call Highlight('jsClassKeyword', s:purple)
-call Highlight('jsClassKeyword', s:purple)
-call Highlight('jsConstant', s:yellow)
+" call Highlight('jsDot', g:custom_color_noise)
+hi! link jsDot NonText
 
-call Highlight('jsObjectKeyComputed', s:purple)
-call Highlight('jsExtendsKeyword', s:purple)
-call Highlight('jsArrowFunctionDeclaration', s:blue)
+" call Highlight('jsModuleAs', g:custom_color_statement)
+hi! link jsModuleAs Statement
+
+" call Highlight('jsClassMethodType', g:custom_color_statement)
+hi! link jsClassMethodType Statement
+
+" call Highlight('jsImport', g:custom_color_statement)
+hi! link jsImport Statement
+
+" call Highlight('jsFrom',g:custom_color_statement)
+hi! link jsFrom Statement
+
+" call Highlight('jsExport', g:custom_color_statement)
+hi! link jsExport Statement
+hi! link jsExportDefault Statement
+hi! link jsExportDefaultGroup Statement
+
+" call Highlight('jsClassDefinition', g:custom_color_type)
+hi! link jsClassDefinition Type
+
+" call Highlight('jsClassKeyword', g:custom_color_statement)
+hi! link jsClassKeyword Statement
+
+" call Highlight('jsClassKeyword', g:custom_color_statement)
+hi! link jsClassKeyword Statement
+
+" call Highlight('jsConstant', g:custom_color_type)
+hi! link jsConstant Type
+
+" call Highlight('jsObjectKeyComputed', g:custom_color_statement)
+hi! link jsObjectKeyComputed Statement
+
+" call Highlight('jsExtendsKeyword', g:custom_color_statement)
+hi! link jsExtendsKeyword Statement
+
+" call Highlight('jsArrowFunctionDeclaration', g:custom_color_special)
+hi! link jsArrowFunctionDeclaration Special
 
 " hi jsThis gui=italic cterm=italic guifg=#e5c07b
-call ItalicHighlight('jsThis', s:green)
+call ItalicHighlight('jsThis', g:custom_color_character)
