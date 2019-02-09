@@ -600,6 +600,11 @@ let g:fzf_colors =
 "============================================================================
 command! ToggleCurrentWindowZoom :call ToggleCurrentWindowZoom()
 
+command! W w
+command! WQ wq
+command! Wq wq
+command! Q q
+
 
 "============================================================================
 "====================== Functions ===========================================
