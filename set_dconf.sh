@@ -11,7 +11,8 @@ gsettings set org.gnome.desktop.interface icon-theme 'Numix-Circle'
 gsettings set org.gnome.desktop.interface cursor-theme 'DMZ-Black'
 
 # disable caps_lock
-dconf write /org/gnome/desktop/input-sources/xkb-options "['caps:none']"
+# dconf write /org/gnome/desktop/input-sources/xkb-options "['caps:none
+gsettings set org.gnome.desktop.input-sources xkb-options "['caps:none']"
 
 # Keybindings
 # Toggle display focus
