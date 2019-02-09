@@ -10,8 +10,8 @@ gsettings set org.gnome.desktop.interface icon-theme 'Numix-Circle'
 # Curson theme
 gsettings set org.gnome.desktop.interface cursor-theme 'DMZ-Black'
 
-# disable Caps Lock
-# dconf write /org/gnome/desktop/input-sources/xkb-options "['caps:none
+# Disable Caps Lock
+# dconf write /org/gnome/desktop/input-sources/xkb-options "['caps:none']"
 gsettings set org.gnome.desktop.input-sources xkb-options "['caps:none']"
 
 # Keybindings
