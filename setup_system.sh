@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-./install_executables.sh
 ./install_software.sh
 ./install_dotfiles.sh
+./install_executables.sh
 ./set_dconf.sh
