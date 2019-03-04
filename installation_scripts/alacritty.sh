@@ -10,8 +10,7 @@ source $HOME/.cargo/env
 rustup override set stable
 rustup update stable
 
-
-# # install dependencies
+# install dependencies
 sudo apt-get install cmake libfreetype6-dev libfontconfig1-dev xclip
 
 alacritty_source_tmp_path=/tmp/alacritty-$(date +%s)
