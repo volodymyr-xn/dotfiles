@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 getwindowat() {
-    # move mouse to coordinates provided, get window id beneath it, move mouse back
-    eval `xdotool mousemove $1 $2 getmouselocation --shell mousemove restore`
-    echo $WINDOW
+  # move mouse to coordinates provided, get window id beneath it, move mouse back
+  eval `xdotool mousemove $1 $2 getmouselocation --shell mousemove restore`
+  echo $WINDOW
 }
 
 # get active app
