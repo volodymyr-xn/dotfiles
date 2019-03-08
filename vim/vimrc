@@ -707,7 +707,7 @@ endfunction
 " TabLine
 " TabLineFill
 " TabLineSel
-call Highlight('NERDTreeFile', 'gray')
+" call Highlight('NERDTreeFile', 'gray')
 
 " ===================== Experimental ====================================
 function! ToggleBackground()
