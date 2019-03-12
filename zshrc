@@ -86,6 +86,9 @@ export GROFF_NO_SGR=1                  # for konsole and gnome-terminal
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 alias cap-current-branch='GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD) cap'
 
+# gopath dir
+export GOPATH="$HOME/gopath"
+
 # Enable fzf
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 

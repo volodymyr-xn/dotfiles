@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+timestamp=$(date +%s)
+destination_dir=/tmp/jemalloc-$timestamp
+
+git clone https://github.com/contribsys/faktory $destination_dir
+
+cd $destination_dir
+
+./autogen.sh
+make dist
+make -j 8
+sudo make install -j 8
