@@ -179,25 +179,26 @@ set backspace=indent,eol,start
 set background=dark
 
 "Base16 hook
-" if filereadable(expand("~/.vimrc_background"))
-"   let base16colorspace=256
-"   source ~/.vimrc_background
+if filereadable(expand("~/.vimrc_background"))
+  let base16colorspace=256
+  source ~/.vimrc_background
+endif
+
+" colorscheme one
+
+" if g:colors_name ==# "one" || g:colors_name ==# "base16-onedark"
+" "   " let g:custom_color_regular = '#e06c75'
+" "   " let g:custom_color_secondary_regular = '#be5046'
+" "   " let g:custom_color_statement = '#c678dd'
+" "   " let g:custom_color_noise = 'gray'
+" "   " let g:custom_color_type = '#e5c07b'
+" "   " let g:custom_color_special = '#61afef'
+"   " let g:custom_color_character = '#98c379'
+" elseif g:colors_name == "base16-gruvbox-dark-medium" || g:colors_name == "base16-gruvbox-dark-pale" || g:colors_name == "base16-gruvbox-dark-soft"
+"   " let g:custom_color_character = '#98c379'
 " endif
 
-colorscheme one
-" colorscheme base16-onedark
-
-if g:colors_name ==# "one" || g:colors_name ==# "base16-onedark"
-"   " let g:custom_color_regular = '#e06c75'
-"   " let g:custom_color_secondary_regular = '#be5046'
-"   " let g:custom_color_statement = '#c678dd'
-"   " let g:custom_color_noise = 'gray'
-"   " let g:custom_color_type = '#e5c07b'
-"   " let g:custom_color_special = '#61afef'
-  let g:custom_color_character = '#98c379'
-elseif g:colors_name == "base16-gruvbox-dark-medium" || g:colors_name == "base16-gruvbox-dark-pale" || g:colors_name == "base16-gruvbox-dark-soft"
-  let g:custom_color_character = '#98c379'
-endif
+let g:custom_color_character = '#98c379'
 
 " Access colors present in 256 colorspace
 let base16colorspace=256
@@ -710,29 +711,29 @@ endfunction
 " call Highlight('NERDTreeFile', 'gray')
 
 " ===================== Experimental ====================================
-function! ToggleBackground()
-	if ! exists('g:colors_name')
-		echomsg 'No colorscheme set'
-		return
-	endif
-	let l:scheme = g:colors_name
-
-	if l:scheme =~# 'dark' || l:scheme =~# 'light'
-		" Rotate between different theme backgrounds
-		execute 'colorscheme' (l:scheme =~# 'dark'
-					\ ? substitute(l:scheme, 'dark', 'light', '')
-					\ : substitute(l:scheme, 'light', 'dark', ''))
-	else
-		execute 'set background='.(&background ==# 'dark' ? 'light' : 'dark')
-		if ! exists('g:colors_name')
-			execute 'colorscheme' l:scheme
-			echomsg 'The colorscheme `'.l:scheme
-				\ .'` doesn''t have background variants!'
-		else
-			echo 'Set colorscheme to '.&background.' mode'
-		endif
-	endif
-endfunction
+" function! ToggleBackground()
+" 	if ! exists('g:colors_name')
+" 		echomsg 'No colorscheme set'
+" 		return
+" 	endif
+" 	let l:scheme = g:colors_name
+"
+" 	if l:scheme =~# 'dark' || l:scheme =~# 'light'
+" 		" Rotate between different theme backgrounds
+" 		execute 'colorscheme' (l:scheme =~# 'dark'
+" 					\ ? substitute(l:scheme, 'dark', 'light', '')
+" 					\ : substitute(l:scheme, 'light', 'dark', ''))
+" 	else
+" 		execute 'set background='.(&background ==# 'dark' ? 'light' : 'dark')
+" 		if ! exists('g:colors_name')
+" 			execute 'colorscheme' l:scheme
+" 			echomsg 'The colorscheme `'.l:scheme
+" 				\ .'` doesn''t have background variants!'
+" 		else
+" 			echo 'Set colorscheme to '.&background.' mode'
+" 		endif
+" 	endif
+" endfunction
 
 " Save file
 " nnoremap s :w<cr>
