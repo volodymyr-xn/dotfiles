@@ -17,6 +17,7 @@
 ./installation_scripts/java.sh # install oracle java
 ./installation_scripts/jemalloc.sh # install oracle java
 ./installation_scripts/libevent.sh
+./installation_scripts/linuxbrew.sh
 ./installation_scripts/neovim.sh
 ./installation_scripts/nodejs_asdf.sh
 ./installation_scripts/numix-circle.sh
