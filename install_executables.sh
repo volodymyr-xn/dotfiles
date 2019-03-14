@@ -3,6 +3,9 @@
 # Create dir for executables
 mkdir -p $HOME/bin
 
-ln -nfs $HOME/dotfiles/bin/toggle-display-focus $HOME/bin/toggle-display-focus
+BINARIES_DIR=$HOME/dotfiles/bin/
+
+ln -nfs $BINARIES_DIR/toggle-display-focus $HOME/bin/toggle-display-focus
+ln -nfs $BINARIES_DIR/xcopy $HOME/bin/xcopy
 
 mkdir $HOME/.log
