@@ -1,6 +1,3 @@
-/usr/bin - for software installed by package manager (apt, yum, pac, dnf)
-/usr/local/bin - for software manually compiled and installed
-
 ## What --prefix Means
 When you run ./configure --prefix=directory, you are indicating that the software should be installed under the  directory directory. But this rarely, if ever, places loose files in directory. Instead, it places files that serve different purposes in the different subdirectories of directory. If those subdirectories don't exist, it creates them.
 
