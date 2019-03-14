@@ -1,21 +1,43 @@
 #!/usr/bin/env bash
 
 timestamp=$(date +%s)
-zsh_source_path=/tmp/zsh-$timestamp
+destination_dir=/tmp/zsh-$timestamp
 
-echo 'Download zsh source code to $zsh_source_path'
-mkdir -p $zsh_source_path
+echo 'Download zsh source code to $destination_dir'
+
+sudo apt-get install -y \
+  git-core \
+  gcc \
+  make \
+  autoconf \
+  yodl \
+  libncursesw5-dev \
+  texinfo
 
 # Download and unapack zsh source code to tmp directory
-curl http://www.zsh.org/pub/zsh.tar.gz | tar -xzvf - -C $zsh_source_path
+git clone https://github.com/zsh-users/zsh $destination_dir
+cd $destination_dir
 
-(cd $zsh_source_path && cd $(ls -d */|head -n 1) && ./configure && make -j 8 && sudo make install)
+git checkout $(git tag | tail -n 1)
+
+./Util/preconfig
+
+./configure
+
+make -j 4
+make check -j 4
+sudo make install -j 4
+
+cd ..
 
 # Remove tmp directory with source code
-rm -rf $zsh_source_path
+rm -rf $destination_dir
 
 # Add Zsh to the list of shells in /etc/shells.
 which zsh | sudo tee -a /etc/shells
 
 # Set Zsh as the default shell for the current user.
 sudo chsh -s $(which zsh)
+
+echo 'ZSH installation done'
+echo $(zsh --version)
