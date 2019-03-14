@@ -103,9 +103,6 @@ Plug('rakr/vim-one')
 " Highligh color codes
 Plug('lilydjwg/colorizer')
 
-" Make the yanked region apparent!
-Plug('machakann/vim-highlightedyank')
-
 call plug#end()
 "============================================================================
 " ===================== General settings ====================================
@@ -203,9 +200,6 @@ let g:custom_color_character = '#98c379'
 " Access colors present in 256 colorspace
 let base16colorspace=256
 set t_Co=256
-
-" Highlight for yanked regions
-highlight HighlightedyankRegion cterm=reverse gui=reverse
 
 " Use 24bit(True color) GUI colors
 " VIM syntax highlight will work in gui mode(guifg, guibg)
