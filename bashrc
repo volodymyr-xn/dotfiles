@@ -58,6 +58,11 @@ export PATH="$HOME/.cargo/bin:$PATH"
 # add go to path
 export PATH="$HOME/.go/bin:$PATH"
 
+export PATH=$PATH:~/.local/bin
+
+# add linuxbrew bin location to path
+export PATH=$PATH:~/.linuxbrew/bin
+
 export RUBYOPT="-W1"
 
 # android studio
