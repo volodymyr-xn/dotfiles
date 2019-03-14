@@ -6,6 +6,7 @@ Comment=A sample application
 Exec=application
 Icon=application.png
 Terminal=false
+MimeType=image/png
 
 /* [Desktop Entry]	The first line of every desktop file and the section header to identify the block of key value pairs associated with the desktop. Necessary for the desktop to recognize the file correctly. */
 
