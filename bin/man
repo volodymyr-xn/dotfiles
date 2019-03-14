@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 COLUMNS=$(tput cols)
-max_width=82
+max_width=80
 
 if [ "$COLUMNS" -lt $max_width ]
 then
