@@ -9,3 +9,8 @@ There is a /usr/sbin with the same relationship to /usr/bin as /sbin has to /bin
 /usr/local/bin is for normal user programs not managed by the distribution package manager, e.g. locally compiled packages. You should not install them into /usr/bin because future distribution upgrades may modify or delete them without warning.
 
 /usr/local/sbin, as you can probably guess at this point, is to /usr/local/bin as /usr/sbin to /usr/bin.
+
+
+/usr/bin - for software installed by package manager (apt, yum, pac, dnf)
+/usr/local/bin - for software manually compiled and installed
+
