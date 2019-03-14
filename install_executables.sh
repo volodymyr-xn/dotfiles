@@ -5,7 +5,10 @@ mkdir -p $HOME/bin
 
 BINARIES_DIR=$HOME/dotfiles/bin/
 
-ln -nfs $BINARIES_DIR/toggle-display-focus $HOME/bin/toggle-display-focus
-ln -nfs $BINARIES_DIR/xcopy $HOME/bin/xcopy
+executables_to_symlink="toggle-display-focus xcopy man"
 
-mkdir $HOME/.log
+for executable in $executables_to_symlink; do
+  ln -nfs $BINARIES_DIR/$executable $HOME/bin/$executable
+done
+
+mkdir -p $HOME/.log

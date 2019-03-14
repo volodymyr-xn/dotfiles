@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+COLUMNS=$(tput cols)
+max_width=82
+
+if [ "$COLUMNS" -lt $max_width ]
+then
+  man_width=$COLUMNS
+else
+ man_width=$max_width
+fi
+
+MANWIDTH=$man_width /usr/bin/man "$@"
