@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
 # Create dir for executables
-mkdir -p $HOME/bin
+mkdir -p $HOME/.local/bin
 
 BINARIES_DIR=$HOME/dotfiles/bin/
 
 executables_to_symlink="toggle-display-focus xcopy man"
 
 for executable in $executables_to_symlink; do
-  ln -nfs $BINARIES_DIR/$executable $HOME/bin/$executable
+  ln -nfs $BINARIES_DIR/$executable $HOME/.local/bin/$executable
 done
 
 mkdir -p $HOME/.log
