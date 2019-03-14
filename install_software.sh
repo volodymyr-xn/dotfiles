@@ -17,7 +17,6 @@
 ./installation_scripts/neovim.sh
 ./installation_scripts/nodejs_asdf.sh
 ./installation_scripts/numix-circle.sh
-./installation_scripts/oh_my_zsh.sh
 ./installation_scripts/postgres.sh
 ./installation_scripts/rclone.sh
 ./installation_scripts/redis.sh
@@ -31,3 +30,4 @@
 ./installation_scripts/nvim.sh
 ./installation_scripts/xdotool.sh
 ./installation_scripts/zsh.sh
+./installation_scripts/oh_my_zsh.sh
