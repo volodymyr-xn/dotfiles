@@ -14,15 +14,13 @@ tar xzvf redis-$redis_version.tar.gz &>> /dev/null
 cd redis-$redis_version
 
 # Make Redis
-make &>> /dev/null
+make -j 4 &>> /dev/null
 
 # Install Redis into /usr/local
 sudo make install prefix=/usr/local/bin &>> /dev/null
 
 # Additional setup for Redis-server
 cd utils
-
-warn 'Use default Redis settings'
 
 # Install Redis server
 echo yes | sudo ./install_server.sh
