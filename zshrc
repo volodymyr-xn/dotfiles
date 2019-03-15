@@ -76,7 +76,7 @@ export PATH="$GOPATH/bin:$PATH"
 # Ruby verbose mode
 export RUBYOPT="-W1"
 
-export PATH="$PATH:$HOME/.local/bin"
+export PATH="$HOME/.local/bin:$PATH"
 
 # Add linuxbrew to PATH
 export HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
