@@ -413,7 +413,8 @@ nmap " <C-W>\| <C-W>_
 nnoremap = <C-W>=
 
 " Expand window
-nnoremap m :ToggleCurrentWindowZoom <CR>
+nnoremap M :ToggleCurrentWindowZoom <CR>
+nnoremap m gt
 
 " Faster close windows and quit
 nnoremap <C-c> <C-w>q
