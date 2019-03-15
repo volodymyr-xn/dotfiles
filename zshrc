@@ -56,7 +56,7 @@ source $HOME/dotfiles/zsh/key-bindings
 # export SSH_KEY_PATH="~/.ssh/dsa_id"
 
 # Add ~/bin to PATH
-export PATH="$HOME/bin:$PATH"
+# export PATH="$HOME/bin:$PATH"
 
 # Add yarn bin to PATH
 export PATH="$HOME/.yarn/bin:$PATH"
@@ -67,10 +67,20 @@ export PATH="$HOME/.cargo/bin:$PATH"
 # Add go to path
 export PATH="$HOME/.go/bin:$PATH"
 
+# gopath dir
+export GOPATH="$HOME/go"
+
+# add packages installed by go to path
+export PATH="$GOPATH/bin:$PATH"
+
 # Ruby verbose mode
 export RUBYOPT="-W1"
 
-export PATH=$PATH:~/.local/bin
+export PATH="$PATH:$HOME/.local/bin"
+
+# Add linuxbrew to PATH
+export PATH="$PATH:$HOME/.linuxbrew/bin"
+
 
 # Better less highlight
 export LESS_TERMCAP_mb=$'\E[1;31m'     # begin bold
@@ -85,9 +95,6 @@ export GROFF_NO_SGR=1                  # for konsole and gnome-terminal
 # Include local settings
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 alias cap-current-branch='GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD) cap'
-
-# gopath dir
-export GOPATH="$HOME/gopath"
 
 # Enable fzf
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
