@@ -79,9 +79,10 @@ export RUBYOPT="-W1"
 export PATH="$PATH:$HOME/.local/bin"
 
 # Add linuxbrew to PATH
-export PATH="$PATH:$HOME/.linuxbrew/bin"
-export PATH="$PATH:$HOME/.linuxbrew/sbin"
-
+export HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
+export HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar"
+export HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX/Homebrew"
+export PATH="$PATH:$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin"
 
 # Better less highlight
 export LESS_TERMCAP_mb=$'\E[1;31m'     # begin bold
