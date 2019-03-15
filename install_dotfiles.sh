@@ -78,7 +78,10 @@ mkdir -p ~/bin
 
 # ./fonts/install.sh
 
-# Simlink custom linux util scripts
+# Symlink custom linux util scripts
 ln -sf ~/dotfiles/bin/toggle-window-focus ~/bin/toggle-window-focus
+
+# Symlink file templates
+ln -nsf ~/dotfiles/file-templates/* ~/Templates
 
 installation_log "Dotfiles installation complete!"
