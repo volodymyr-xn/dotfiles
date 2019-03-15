@@ -82,6 +82,6 @@ mkdir -p ~/bin
 ln -sf ~/dotfiles/bin/toggle-window-focus ~/bin/toggle-window-focus
 
 # Symlink file templates
-ln -nsf ~/dotfiles/file-templates/* ~/Templates
+ln -nsf ~/dotfiles/file-templates/gnome/* ~/Templates
 
 installation_log "Dotfiles installation complete!"
