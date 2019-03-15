@@ -14,6 +14,11 @@ echo "sh backup.sh" | at 9:00 AM
 at -f myjobs.txt now + 1 hour
 ```
 
+In the following example, let us run a new at job using queue “z”:
+```bash
+at -q z -f /root/myjobs.txt now + 1 hour
+```
+
 `atq` - list of scheduled jobs
 `atrm` - remove scheduled job by job id
 `at -c 5` - check the content
