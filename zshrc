@@ -70,13 +70,14 @@ export PATH="$HOME/.go/bin:$PATH"
 # gopath dir
 export GOPATH="$HOME/go"
 
-# add packages installed by go to path
+# Add packages installed by go to path
 export PATH="$GOPATH/bin:$PATH"
+
+# Add local binaries to path
+export PATH="$HOME/.local/bin:$PATH"
 
 # Ruby verbose mode
 export RUBYOPT="-W1"
-
-export PATH="$HOME/.local/bin:$PATH"
 
 # Add linuxbrew to PATH
 export HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
