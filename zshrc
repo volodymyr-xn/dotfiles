@@ -80,6 +80,7 @@ export PATH="$PATH:$HOME/.local/bin"
 
 # Add linuxbrew to PATH
 export PATH="$PATH:$HOME/.linuxbrew/bin"
+export PATH="$PATH:$HOME/.linuxbrew/sbin"
 
 
 # Better less highlight
