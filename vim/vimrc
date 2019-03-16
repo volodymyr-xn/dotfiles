@@ -414,6 +414,8 @@ nnoremap = <C-W>=
 
 " Expand window
 nnoremap M :ToggleCurrentWindowZoom <CR>
+
+" Swith between tabs
 nnoremap m gt
 
 " Faster close windows and quit
