@@ -13,6 +13,7 @@
 ./installation_scripts/faktory.sh
 ./installation_scripts/fzf.sh
 ./installation_scripts/go.sh
+./installation_scripts/gotop.sh
 ./installation_scripts/h2o.sh
 ./installation_scripts/htop.sh
 ./installation_scripts/java.sh # install oracle java
