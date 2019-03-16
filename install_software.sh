@@ -27,6 +27,7 @@
 ./installation_scripts/redis.sh
 ./installation_scripts/ruby_asdf.sh
 ./installation_scripts/silver_searcher.sh
+./installation_scripts/tcptrack.sh
 ./installation_scripts/tmux.sh
 ./installation_scripts/tweak_tool.sh
 ./installation_scripts/universal-ctags.sh
