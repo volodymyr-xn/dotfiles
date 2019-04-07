@@ -95,7 +95,7 @@ Plug('terryma/vim-multiple-cursors')
 " Plug('mattn/emmet-vim')
 
 " Base16 color schemes
-Plug('chriskempson/base16-vim')
+" Plug('chriskempson/base16-vim')
 
 " Onedark colorscheme
 Plug('rakr/vim-one')
@@ -346,8 +346,8 @@ nnoremap <Leader>n :nohl<CR>
 " Enter replace command
 nnoremap <Leader>r :%s/
 
-" Edit vim config in vertical split
-nnoremap <Leader>ve :vsplit $MYVIMRC<cr>
+" Edit vim config
+nnoremap <Leader>ve :e $MYVIMRC<cr>
 
 " Reload vim config
 nnoremap <Leader>vr :source $MYVIMRC<cr>
@@ -433,12 +433,6 @@ nnoremap <silent> <leader>j :TestNearest<CR>
 nnoremap <silent> <leader>T :TestFile<CR>
 nnoremap <silent> <leader>a :TestSuite<CR>
 nnoremap <silent> <leader>l :TestLast<CR>
-
-" Reload vim config
-nnoremap <Leader>vr :so $MYVIMRC<CR>
-
-" Open vim config in split panel
-nnoremap <Leader>ve :vsplit $MYVIMRC<CR>
 
 " "Go to test file
 " nmap t :A<CR> DEPRECATED
