@@ -78,3 +78,25 @@ or you can override == and use alias :eql? :== so the two methods behave the sam
 it is used to determine object identity (that is, a.equal?(b) iff a is the same object as b).*
 
 - **This is effectively pointer comparison.**
+
+## and && difference
+Check out the difference between and and &&. In the examples you give the method puts is called without parens around it's arguments and the difference in precedence changes how it is parsed.
+
+In test 1 && has higher precedence than the method call. So what's actually happening is puts('hello' && return).
+Arguments are always evaluated before the methods they're called with -- so we first evaluate 'hello' && return.
+Since 'hello' is truthy the boolean does not short circuit and return is evaluated.
+When return we exit the method without doing anything else: so nothing
+is ever logged and the second line isn't run.
+
+In test 2 and has a lower precedence than the method call. So what happens is puts('hello') and return.
+The puts method logs what is passed to it and then returns nil.
+nil is a falsey value so the and expression short circuits and the return expression is never evaluated.
+We just move to the second line where puts 'world' is run.
+
+```ruby
+redirect_to edit_order_path(@order) and return
+
+ pry(main)> a = true && false => false pry(main)> a => false -----> a = (true && false)
+ pry(main)> a = true and false => false pry(main)> a => true -----> (a = true) and false
+
+```
