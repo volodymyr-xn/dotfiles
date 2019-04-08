@@ -598,6 +598,7 @@ let g:fzf_colors =
 "============================================================================
 command! ToggleCurrentWindowZoom :call ToggleCurrentWindowZoom()
 
+" Fix save file typos
 command! W w
 command! WQ wq
 command! Wq wq
