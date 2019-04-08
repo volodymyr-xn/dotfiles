@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # Installing dependencies
-sudo apt-get install ninja-build gettext libtool
-     \ libtool-bin autoconf automake cmake g++ pkg-config unzip
+sudo apt-get install ninja-build gettext libtool \
+     libtool-bin autoconf automake cmake g++ pkg-config unzip
 
 timestamp=$(date +%s)
 neovim_source_dir=/tmp/neovim-$timestamp
@@ -16,7 +16,7 @@ cd $neovim_source_dir
 #
 # git checkout $latest_tag
 
-rm -r build
+# rm -r build
 make clean
 make CMAKE_BUILD_TYPE=Release -j 8
 sudo make install -j 8
