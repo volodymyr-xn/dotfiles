@@ -15,3 +15,5 @@ rm -rf $vim_source_dir
 echo "Installing VIM Plug"
 curl -fLo ~/dotfiles/vim/autoload/plug.vim --create-dirs \
    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+# brew install vim
