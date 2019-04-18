@@ -23,3 +23,5 @@ sudo make install -j 8
 
 echo "Remove neovim source directory $neovim"
 rm -rf $neovim
+
+# brew install neovim
