@@ -10,6 +10,9 @@ gsettings set org.gnome.desktop.interface icon-theme 'Numix-Circle'
 # Curson theme
 gsettings set org.gnome.desktop.interface cursor-theme 'DMZ-Black'
 
+# Set gnome shell theme
+gsettings set org.gnome.shell.extensions user-theme 'Arc-Dark'
+
 # Disable Caps Lock
 # dconf write /org/gnome/desktop/input-sources/xkb-options "['caps:none']"
 gsettings set org.gnome.desktop.input-sources xkb-options "['caps:none']"
@@ -26,3 +29,5 @@ gnome_terminal=$(gsettings get org.gnome.Terminal.ProfilesList default)
 gnome_terminal=${gnome_terminal:1:-1} # remove leading and trailing single quotes
 gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$gnome_terminal/" font "Fira Mono Medium 14"
 
+# /org/gnome/desktop/input-sources/xkb-options
+#   ['caps:none', 'grp:alt_shift_toggle']
