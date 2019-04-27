@@ -5,4 +5,4 @@ yes | sudo apt-get install \
      libreadline-dev libyaml-dev libsqlite3-dev sqlite3 \
      libxml2-dev libxslt1-dev libcurl4-openssl-dev \
      libffi-dev libncurses5-dev \
-     libncursesw5-dev xclip git tree
+     libncursesw5-dev xclip git
