@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-sudo add-apt-repository ppa:numix/ppa
+yes | sudo add-apt-repository ppa:numix/ppa
 sudo apt update
-sudo apt install numix-icon-theme-circle
+yes | sudo apt install numix-icon-theme-circle

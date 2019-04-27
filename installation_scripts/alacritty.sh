@@ -11,7 +11,7 @@ rustup override set stable
 rustup update stable
 
 # install dependencies
-sudo apt-get install cmake libfreetype6-dev libfontconfig1-dev xclip
+yes | sudo apt-get install cmake libfreetype6-dev libfontconfig1-dev xclip
 
 alacritty_source_tmp_path=/tmp/alacritty-$(date +%s)
 
