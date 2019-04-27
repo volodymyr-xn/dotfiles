@@ -33,5 +33,4 @@
 ./installation_scripts/ruby_asdf.sh
 ./installation_scripts/postgres.sh
 ./installation_scripts/alacritty.sh
-
-
+./installation_scripts/virtualbox.sh
