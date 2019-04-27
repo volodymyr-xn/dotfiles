@@ -2,7 +2,6 @@
 
 ./installation_scripts/tmux.sh
 ./installation_scripts/vim.sh
-./installation_scripts/vim_plug.sh
 ./installation_scripts/fzf.sh
 ./installation_scripts/at.sh
 ./installation_scripts/arc-theme.sh
@@ -10,9 +9,8 @@
 ./installation_scripts/brotli.sh
 ./installation_scripts/crystal-asdf.sh
 ./installation_scripts/dconf.sh
-./installation_scripts/ctags.sh
 # ./installation_scripts/faktory.sh
-./installation_scripts/go.sh
+# ./installation_scripts/go.sh
 # ./installation_scripts/gotop.sh
 ./installation_scripts/h2o.sh
 ./installation_scripts/htop.sh

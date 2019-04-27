@@ -5,3 +5,5 @@ system-setup
 vim/plugged/*
 tmux/plugins/*
 !tmux/plugins/tpm
+.vagrant
+*.log
