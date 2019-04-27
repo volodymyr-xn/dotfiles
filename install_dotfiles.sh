@@ -60,12 +60,12 @@ backup_file "tmux.conf"
 
 # Copy Tmux config
 installation_log "Linking .tmux.conf"
-ln -nsf $DOTFILES_DIR/tmux/tmux.conf ~/.tmux.conf
+ln -sf $DOTFILES_DIR/tmux/tmux.conf ~/.tmux.conf
 
 # Link Alacrity config
 installation_log "Linking alacrity.yml"
 mkdir -p ~/.config/alacrity/
-ln -nsf $DOTFILES_DIR/alacrity.yml ~/.config/alacrity/alacrity.yml
+ln -sf $DOTFILES_DIR/alacrity.yml ~/.config/alacrity/alacrity.yml
 
 # Install Neovim config
 # Create directory for neovim config
@@ -82,6 +82,6 @@ mkdir -p ~/bin
 ln -sf ~/dotfiles/bin/toggle-window-focus ~/bin/toggle-window-focus
 
 # Symlink file templates
-ln -nsf ~/dotfiles/file-templates/gnome/* ~/Templates
+ln -sf ~/dotfiles/file-templates/gnome/* ~/Templates
 
 installation_log "Dotfiles installation complete!"

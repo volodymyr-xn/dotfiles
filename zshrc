@@ -3,7 +3,7 @@
 # CTRL-o runs fzf branch search
 bindkey -s "^o" 'ch\n'
 
-# Base16-shell theme
+# base16-shell theme
 BASE16_SHELL=$HOME/.config/base16-shell/
 
 # Enable Base16-shell themes

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-sudo add-apt-repository ppa:webupd8team/java
+yes | sudo add-apt-repository ppa:webupd8team/java
 sudo apt-get update
-sudo apt-get install oracle-java9-installer
+yes | sudo apt-get install oracle-java9-installer
