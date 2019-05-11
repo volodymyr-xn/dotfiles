@@ -17,6 +17,7 @@ backup_file() {
   fi
 }
 
+
 symlink_file() {
   installation_log "-> Linking $DOTFILES_DIR/$1 to $HOME/.$1..."
 
@@ -63,9 +64,9 @@ installation_log "Linking .tmux.conf"
 ln -sf $DOTFILES_DIR/tmux/tmux.conf ~/.tmux.conf
 
 # Link Alacrity config
-installation_log "Linking alacrity.yml"
-mkdir -p ~/.config/alacrity/
-ln -sf $DOTFILES_DIR/alacrity.yml ~/.config/alacrity/alacrity.yml
+installation_log "Linking alacritty.yml"
+mkdir -p ~/.config/alacritty/
+ln -sf $DOTFILES_DIR/alacritty.yml ~/.config/alacritty/alacritty.yml
 
 # Install Neovim config
 # Create directory for neovim config
