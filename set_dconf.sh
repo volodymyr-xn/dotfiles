@@ -29,5 +29,7 @@ gnome_terminal=$(gsettings get org.gnome.Terminal.ProfilesList default)
 gnome_terminal=${gnome_terminal:1:-1} # remove leading and trailing single quotes
 gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$gnome_terminal/" font "Fira Mono Medium 14"
 
+gconftool-2 set /apps/metacity/general/focus_new_windows --type string strict
+
 # /org/gnome/desktop/input-sources/xkb-options
 #   ['caps:none', 'grp:alt_shift_toggle']
