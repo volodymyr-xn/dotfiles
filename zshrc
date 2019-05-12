@@ -64,11 +64,8 @@ export PATH="$HOME/.yarn/bin:$PATH"
 # Add rust package manager to PATH
 export PATH="$HOME/.cargo/bin:$PATH"
 
-# Add go to path
-export PATH="$HOME/.go/bin:$PATH"
-
 # gopath dir
-export GOPATH="$HOME/go"
+export GOPATH="$HOME/opt/go"
 
 # Add packages installed by go to path
 export PATH="$GOPATH/bin:$PATH"

@@ -11,6 +11,8 @@ git clone https://github.com/tmux/tmux.git $tmux_source_dir
 cd $tmux_source_dir
 source ~/dotfiles/packages_versions.sh
 
+tmux_version=$1
+
 # Checkout to last stable version
 git checkout $tmux_version
 

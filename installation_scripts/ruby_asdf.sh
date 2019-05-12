@@ -2,14 +2,10 @@
 
 asdf plugin-add ruby https://github.com/asdf-vm/asdf-ruby.git
 
-source ~/dotfiles/packages_versions.sh
+RUBY_CONFIGURE_OPTS=--with-jemalloc asdf install ruby $1
 
-last_ruby_version=$ruby_version
+ruby_version=$1
 
-echo "Install ruby $last_ruby_version"
-
-RUBY_CONFIGURE_OPTS=--with-jemalloc asdf install ruby $last_ruby_version
-
-asdf global ruby $last_ruby_version
+asdf global ruby $ruby_version
 
 asdf reshim ruby
