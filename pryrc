@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'rb-readline'
 require 'readline'
 
@@ -9,6 +11,8 @@ end
 
 if fzf_installed?
   def RbReadline.rl_reverse_search_history(_sign, _key)
-    rl_insert_text(`cat ~/.pry_history | fzf --tac |  tr '\n' ' '`)
+    command = `cat #{Pry.config.history.file} | fzf --tac |  tr '\n' ' '`
+
+    rl_insert_text(command)
   end
 end
