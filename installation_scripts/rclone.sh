@@ -2,4 +2,4 @@
 
 go get -u -v github.com/ncw/rclone
 
-sudo cp ${GOPATH}bin/rclone /usr/local/bin/rclone
+mv ${GOPATH}/bin/rclone $HOME/.local/bin/rclone
