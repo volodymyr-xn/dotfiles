@@ -24,9 +24,9 @@ git checkout $(git tag | tail -n 1)
 
 ./configure
 
-make -j 4
-make check -j 4
-sudo make install -j 4
+make -j $(nproc)
+make check -j $(nproc)
+sudo make install -j $(nproc)
 
 cd ..
 

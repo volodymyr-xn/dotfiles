@@ -17,8 +17,8 @@ cd $vim_source_dir
 yes | sudo apt-get build-dep vim-gtk
 ./configure --enable-gui=gtk2 --enable-gtk2-check --with-x
 
-make -j 4
-sudo make install -j 4
+make -j $(nproc)
+sudo make install
 
 echo "Remove vim source directory $vim_source_dir"
 rm -rf $vim_source_dir
