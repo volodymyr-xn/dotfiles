@@ -16,5 +16,5 @@ brew install faktory
 
 # ./autogen.sh
 # make dist
-# make -j 4
-# sudo make install -j 4
+# make -j $(nproc)
+# sudo make install

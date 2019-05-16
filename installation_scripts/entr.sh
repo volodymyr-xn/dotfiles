@@ -8,5 +8,5 @@ hg clone https://bitbucket.org/eradman/entr $destination_dir
 cd $destination_dir
 
 ./configure
-make test
-sudo make install -j 4
+make test -j $(nproc)
+sudo make install

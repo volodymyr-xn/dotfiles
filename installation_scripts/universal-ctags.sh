@@ -9,7 +9,7 @@ cd $tags_source_dir
 
 ./autogen.sh
 ./configure
-make -j 4
+make -j $(nproc)
 sudo make install
 
 rm -rf $tags_source_dir
