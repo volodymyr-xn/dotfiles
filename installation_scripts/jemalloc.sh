@@ -9,5 +9,5 @@ cd $destination_dir
 
 ./autogen.sh
 make dist
-make -j 8
-sudo make install -j 8
+make -j $(nproc)
+sudo make install

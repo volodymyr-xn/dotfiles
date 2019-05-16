@@ -18,8 +18,8 @@ cd $neovim_source_dir
 
 # rm -r build
 make clean
-make CMAKE_BUILD_TYPE=Release -j 4
-sudo make install -j 4
+make CMAKE_BUILD_TYPE=Release -j $(nproc)
+sudo make install
 
 echo "Remove neovim source directory $neovim"
 rm -rf $neovim
