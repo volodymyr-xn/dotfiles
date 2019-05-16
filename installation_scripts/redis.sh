@@ -14,7 +14,7 @@ tar xzvf redis-$redis_version.tar.gz &>> /dev/null
 cd redis-$redis_version
 
 # Make Redis
-make -j 4 &>> /dev/null
+make -j $(nproc)
 
 # Install Redis into /usr/local
 sudo make install prefix=/usr/local/bin &>> /dev/null

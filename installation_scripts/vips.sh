@@ -16,5 +16,5 @@ git clone https://github.com/jcupitt/libvips.git $destination_dir
 cd $destination_dir
 
 ./autogen.sh
-make
-sudo make install -j 4
+make -j $(nproc)
+sudo make install
