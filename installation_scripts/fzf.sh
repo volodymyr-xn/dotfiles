@@ -2,9 +2,9 @@
 
 # brew install ack
 
-sudo apt-get install silversearcher-ag
+# sudo apt-get install silversearcher-ag
 
-# brew install the_silver_searcher
+brew install the_silver_searcher
 
 # sudo apt-get install -y automake pkg-config libpcre3-dev zlib1g-dev liblzma-dev
 
