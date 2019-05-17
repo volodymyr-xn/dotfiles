@@ -32,3 +32,4 @@
 ./installation_scripts/postgres_asdf.sh 11.3
 ./installation_scripts/alacritty.sh
 ./installation_scripts/virtualbox.sh
+./installation_scripts/rofi.sh
