@@ -37,7 +37,7 @@ dconf write $custom_keybinding_0_schema/binding "'<Control>space'"
 custom_keybinding_1_schema=$keybindings_schema/custom1
 dconf write $custom_keybinding_1_schema/name "'Rofi'"
 dconf write $custom_keybinding_1_schema/command "'rofi -combi-modi \"window,drun\" -show combi'"
-dconf write $custom_keybinding_1_schema/binding "'<Primary><Shift>f'"
+dconf write $custom_keybinding_1_schema/binding "'<Primary><Shift>o'"
 
 # Should be carefull here. It could broke the gnome
 dconf write $keybindings_schema "['$custom_keybinding_0_schema/', '$custom_keybinding_1_schema/']"
