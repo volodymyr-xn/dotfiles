@@ -3,6 +3,7 @@ alias vi='vim'
 alias vi:='vim ~/.vim/vimrc'
 alias v='vim'
 alias nv='nvim'
+alias vn='nvim'
 alias dt='cd ~/dotfiles'
 
 # General UNIX
