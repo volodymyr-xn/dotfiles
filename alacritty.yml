@@ -435,7 +435,8 @@ key_bindings:
   - { key: Down,                    chars: "\x1b[B",   mode: ~AppCursor  }
   - { key: Down,                    chars: "\x1bOB",   mode: AppCursor   }
   - { key: F1,                      chars: "\x1bOP"                      }
-  - { key: F2,                      chars: "\x1bOQ"                      }
+  # Toggle full screen mode
+  - { key: F2,                      action: ToggleFullscreen             }
   - { key: F3,                      chars: "\x1bOR"                      }
   - { key: F4,                      chars: "\x1bOS"                      }
   - { key: F5,                      chars: "\x1b[15~"                    }
