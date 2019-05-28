@@ -28,6 +28,7 @@
 ./installation_scripts/xdotool.sh
 ./installation_scripts/zsh.sh
 ./installation_scripts/oh_my_zsh.sh
+./installation_scripts/xvfb.sh
 ./installation_scripts/ruby_asdf.sh 2.6.3
 ./installation_scripts/postgres_asdf.sh 11.3
 ./installation_scripts/alacritty.sh
