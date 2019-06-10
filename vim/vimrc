@@ -223,6 +223,9 @@ set noshowmode
 " Enable mouse
 set mouse=a
 
+" fix mouse support inside tmux
+set ttymouse=xterm2
+
 " Set number of lines
 set nu!
 
