@@ -298,9 +298,6 @@ ab fsl # frozen_string_literal: true
 " Remap VIM 0 to first non-blank character
 nnoremap 0 ^
 
-" Copy selected text to sytem buffer
-" vnoremap y "+y TODO
-
 " Pressing ,ss will toggle and untoggle spell checking
 map <Leader>ss :setlocal spell!<cr>
 
