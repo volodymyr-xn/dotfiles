@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
-# mogrify -format jpg -quality 80 *.png
-quality=100
+quality=80
 
-find ./ -name "*.png" -exec mogrify -format jpg -quality $quality {} \;
+mogrify -format jpg -quality $quality *.png
 
 # rm *png
-
 gvfs-trash *.png
