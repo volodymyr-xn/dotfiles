@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+mogrify -format jpg -quality 80 *.png
+
+# rm *png
+
+gvfs-trash *.png
