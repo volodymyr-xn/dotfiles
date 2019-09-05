@@ -91,6 +91,12 @@ Plug('mxw/vim-jsx')
 " Multiple cursors
 Plug('terryma/vim-multiple-cursors')
 
+" Brewfile syntax highlighting
+Plug('bfontaine/brewfile.vim')
+
+" Auto close (X)HTML tags
+Plug('alvan/vim-closetag')
+
 " Emmet
 " Plug('mattn/emmet-vim')
 
@@ -324,7 +330,7 @@ nmap <Leader>' cs"'<CR>
 nmap <F4> byei<<ESC>ea></<C-R>0><ESC>bba
 
 " Faster search
-nnoremap s /
+" nnoremap s /
 
 " Fix indenting selection
 vnoremap < <gv
@@ -499,6 +505,8 @@ let g:VimuxHeight = "50"
 
 " Ack (the_silver_searcher / ag)
 let g:ackprg="ag"
+
+let g:closetag_filenames = '*.html,*.xhtml,*.jsx, *.js'
 
 " ===================== Fugitive settings ====================================
 " Froce to split window verticaly when fugitive opens git diff
