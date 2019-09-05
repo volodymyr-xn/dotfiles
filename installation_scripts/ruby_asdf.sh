@@ -9,3 +9,6 @@ ruby_version=$1
 asdf global ruby $ruby_version
 
 asdf reshim ruby
+
+echo "\nBuilt with libs:"
+ruby -r rbconfig -e "puts RbConfig::CONFIG['MAINLIBS']"
