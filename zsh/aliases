@@ -4,7 +4,9 @@ alias vi:='vim ~/.vim/vimrc'
 alias v='vim'
 alias nv='nvim'
 alias vn='nvim'
-alias dt='cd ~/dotfiles'
+alias dot='cd ~/dotfiles'
+alias den='cd ~/dev_notes'
+alias con='cd ~/controll_panel'
 
 # General UNIX
 alias mv='mv -iv'
