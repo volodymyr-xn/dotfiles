@@ -26,18 +26,34 @@ gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/prof
 
 # Keybindings
 # Toggle display focus
-keybindings_schema=/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings
+keybinding_schema=/org/gnome/settings-daemon/plugins/media-keys
+custom_keybinding_schema=$keybinding_schema/custom-keybindings
 
-custom_keybinding_0_schema=$keybindings_schema/custom0
+custom_keybinding_0_schema=$custom_keybinding_schema/custom0
 dconf write $custom_keybinding_0_schema/name "'Toggle display focus'"
 dconf write $custom_keybinding_0_schema/command "'toggle-display-focus'"
 dconf write $custom_keybinding_0_schema/binding "'<Control>space'"
 
+# zero on numpad
+dconf write $keybinding_schema/play/command "'KP_Insert'"
+
+# minus on numpad
+dconf write $keybinding_schema/volume-down/command "'KP_Subtract'"
+
+# plus on numpad
+dconf write $keybinding_schema/volume-up/command "'KP_Add'"
+
+# 1 on numpad
+dconf write $keybinding_schema/previous/command "'KP_End'"
+
+# 2 on numpad
+dconf write $keybinding_schema/next/command "'KP_Down'"
+
 # Rofi setup
-# custom_keybinding_1_schema=$keybindings_schema/custom1
+# custom_keybinding_1_schema=$custom_keybinding_schema/custom1
 # dconf write $custom_keybinding_1_schema/name "'Rofi'"
 # dconf write $custom_keybinding_1_schema/command "'rofi -combi-modi \"window,drun\" -show combi'"
 # dconf write $custom_keybinding_1_schema/binding "'<Primary><Shift>o'"
 
 # Should be carefull here. It could broke the gnome
-# dconf write $keybindings_schema "['$custom_keybinding_0_schema/', '$custom_keybinding_1_schema/']"
+# dconf write $custom_keybinding_schema "['$custom_keybinding_0_schema/', '$custom_keybinding_1_schema/']"
