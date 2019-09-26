@@ -6,13 +6,13 @@ destination_dir=/tmp/zsh-$timestamp
 echo 'Download zsh source code to $destination_dir'
 
 sudo apt-get install -y \
-  git-core \
-  gcc \
-  make \
-  autoconf \
-  yodl \
-  libncursesw5-dev \
-  texinfo
+                      git-core \
+                      gcc \
+                      make \
+                      autoconf \
+                      yodl \
+                      libncursesw5-dev \
+                      texinfo
 
 # Download and unapack zsh source code to tmp directory
 git clone https://github.com/zsh-users/zsh $destination_dir
@@ -26,7 +26,7 @@ git checkout $(git tag | tail -n 1)
 
 make -j $(nproc)
 make check -j $(nproc)
-sudo make install -j $(nproc)
+sudo make install
 
 cd ..
 
