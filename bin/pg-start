@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+postgres -D $(asdf where postgres)/data
