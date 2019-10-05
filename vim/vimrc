@@ -101,7 +101,7 @@ Plug('alvan/vim-closetag')
 " Plug('mattn/emmet-vim')
 
 " Base16 color schemes
-" Plug('chriskempson/base16-vim')
+Plug('chriskempson/base16-vim')
 
 " Onedark colorscheme
 Plug('rakr/vim-one')
@@ -158,7 +158,6 @@ set hlsearch
 
 " Ignore case in search if term(s) are lowercase
 set ignorecase
-
 " Search with case sensitivity if term(s) are upper or mixed case
 set smartcase
 
@@ -412,17 +411,30 @@ nnoremap <C-Right> :tabnext<cr>
 " Map text align to tab button in visual mode
 vnoremap <TAB> =
 
-" " Expand window
+" Expand window
 nmap " <C-W>\| <C-W>_
-"
-" re-balance panes
+
+" Toggle windows layout mode
+nnoremap K <C-w>H
+nnoremap F <C-w>J
+
+" Re-balance panes
 nnoremap = <C-W>=
 
-" Expand window
+" Toggle current window zoom
 nnoremap M :ToggleCurrentWindowZoom <CR>
 
 " Swith between tabs
 nnoremap m gt
+
+" Select tab by nuber
+" 'ctrl-m 1' - selects first tab, etc
+" for i in range(1, 9)
+"   execute "nnoremap \<C-w>" . i . " " . i . "gt<CR>"
+" endfor
+
+" Yank, comment and paster (usefull for refactoring)
+vnoremap <C-o> yV'] :TComment<CR>']pO<ESC>j
 
 " Faster close windows and quit
 nnoremap <C-c> <C-w>q
@@ -445,7 +457,7 @@ nnoremap q :A<CR>
 
 " Tcomment
 " Comment line in visual mode
-vmap \ :TComment<CR>
+vnoremap \ :TComment<CR>
 
 " Comment line in normal mode
 nnoremap \ :TComment<CR>
@@ -454,7 +466,7 @@ nnoremap \ :TComment<CR>
 set rtp+=~/.fzf
 
 " Fuzzy-find with fzf
-nmap <C-p> :FZ<cr>
+nnoremap <C-p> :FZ<cr>
 
 " Ack mappings
 nnoremap ! :Ack<SPACE>
@@ -634,6 +646,7 @@ endfunction
 function! ToggleCurrentWindowZoom()
   if !exists("t:currentWindowZoomed")
     let t:currentWindowZoomed = 0
+    " TODO check nerdtree state
   endif
 
   if t:currentWindowZoomed
