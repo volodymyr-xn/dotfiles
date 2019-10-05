@@ -40,8 +40,7 @@ set -u # Prevent unset variables
 files_to_symlink="\
       vim tmux zsh ackrc asdfrc ctags config.reek gemrc \
       gitconfig gitignore_global gitmessage npmrc zshrc \
-      inputrc pryrc default-gems asdfrc bashrc editorconfig \
-      local_profile"
+      inputrc pryrc default-gems asdfrc bashrc editorconfig"
 
 DOTFILES_DIR=$HOME/dotfiles
 
@@ -56,6 +55,9 @@ installation_log "Installing dotfiles..."
 for file in $files_to_symlink; do
   setup_settings_file $file
 done
+
+# Create local profile file if exist
+touch $HOME/local_profile
 
 # Backup existing Tmux config
 backup_file "tmux.conf"

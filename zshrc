@@ -1,4 +1,4 @@
-source ~/.local_profile
+source ~/dotfiles/shared_shell_settings
 
 # CTRL-o runs fzf branch search
 bindkey -s "^o" 'ch\n'
