@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-brew install gpg
+brew install cmake
