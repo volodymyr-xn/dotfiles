@@ -2,8 +2,19 @@
 
 version=1.5.1
 timestamp=$(date +%s)
-destination_file=/tmp/rofi-$version-$timestamp.deb
+destination=/tmp/rofi-sources-$timestamp
 
-wget https://launchpad.net/ubuntu/+archive/primary/+files/rofi_$version-1_amd64.deb -O $destination_file
+git clone --recursive https://github.com/DaveDavenport/rofi $destination
 
-sudo dpkg -i $destination_file
+cd $destination
+
+autoreconf -i
+
+mkdir build && cd build
+../configure
+
+make -j (nproc)
+sudo make install
+
+# TO BE CONTINUED...
+# ON NEWER UBUNTU VERSION

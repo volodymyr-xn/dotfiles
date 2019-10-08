@@ -94,4 +94,6 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
 # export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"
 # eval "$(rbenv init -)"
 
+export XDG_USER_CONFIG_DIR=$HOME/.config
+
 source ~/.local_profile

@@ -1,0 +1,125 @@
+/**
+ * rofi -dump-theme output.
+ * Rofi version: 1.5.4
+ **/
+* {
+    base01:           rgba ( 46, 60, 67, 100 % );
+    base02:           rgba ( 49, 69, 73, 100 % );
+    base03:           rgba ( 84, 110, 122, 100 % );
+    base04:           rgba ( 178, 204, 214, 100 % );
+    base05:           rgba ( 238, 255, 255, 100 % );
+    base06:           rgba ( 238, 255, 255, 100 % );
+    base07:           rgba ( 255, 255, 255, 100 % );
+    base08:           rgba ( 240, 113, 120, 100 % );
+    base09:           rgba ( 247, 140, 108, 100 % );
+    base0A:           rgba ( 255, 203, 107, 100 % );
+    base0B:           rgba ( 195, 232, 141, 100 % );
+    base0C:           rgba ( 137, 221, 255, 100 % );
+    base0D:           rgba ( 130, 170, 255, 100 % );
+    base0E:           rgba ( 199, 146, 234, 100 % );
+    base0F:           rgba ( 255, 83, 112, 100 % );
+    spacing:          0;
+    font:             "Roboto Mono 13";
+    background-color: rgba ( 0, 0, 0, 0 % );
+    base00:           rgba ( 38, 50, 56, 100 % );
+}
+window {
+    background-color: rgba ( 38, 50, 56, 80 % );
+    transparency:     "real";
+}
+mainbox {
+    border:       1px ;
+    border-color: var(base0D);
+    spacing:      30px ;
+    children:     [ inputbar,message,mode-switcher,listview ];
+    padding:      30px 0px ;
+}
+inputbar {
+    padding:  0px 30px ;
+    children: [ prompt,textbox-prompt-colon,entry,case-indicator ];
+}
+prompt {
+    text-color: var(base0D);
+}
+textbox-prompt-colon {
+    expand:     false;
+    str:        ":";
+    margin:     0px 1.0000em 0px 0px ;
+    text-color: var(base0D);
+}
+entry {
+    text-color: var(base07);
+}
+case-indicator {
+    text-color: var(base0F);
+}
+mode-switcher {
+    border:       1px 0px ;
+    border-color: var(base0D);
+}
+message {
+    border:       1px 0px ;
+    border-color: var(base0D);
+}
+button {
+    background-color: var(base03);
+    text-color:       var(base07);
+    padding:          5px ;
+}
+button selected {
+    background-color: var(base0D);
+}
+textbox {
+    background-color: var(base03);
+    text-color:       var(base07);
+    padding:          5px ;
+}
+listview {
+    scrollbar: true;
+    margin:    0px 10px 0px 30px ;
+}
+scrollbar {
+    background-color: var(base03);
+    border:           0px 1px ;
+    border-color:     var(base0D);
+    handle-color:     var(base0D);
+    handle-width:     10px ;
+    margin:           0px 0px 0px 20px ;
+}
+element {
+    highlight: bold underline ;
+    padding:   5px ;
+}
+element normal {
+    background-color: rgba ( 0, 0, 0, 0 % );
+}
+element normal.normal {
+    text-color: var(base07);
+}
+element normal.urgent {
+    text-color: var(base0F);
+}
+element normal.active {
+    text-color: var(base0B);
+}
+element selected {
+    background-color: var(base0D);
+}
+element selected.normal {
+    text-color: var(base07);
+}
+element selected.urgent {
+    text-color: var(base0F);
+}
+element selected.active {
+    text-color: var(base0B);
+}
+element alternate.normal {
+    text-color: var(base07);
+}
+element alternate.urgent {
+    text-color: var(base0F);
+}
+element alternate.active {
+    text-color: var(base0B);
+}

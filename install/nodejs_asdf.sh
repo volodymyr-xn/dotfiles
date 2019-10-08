@@ -9,3 +9,12 @@ asdf global nodejs $l1
 
 # Install yarn globally
 npm i yarn -g
+
+# Install eslint globally
+npm i eslint -g
+
+# Install eslint globally
+npm i stylelint -g
+
+# Install stylelint globally
+npm install stylelint-config-standard -g

@@ -13,7 +13,7 @@ hi def link rubyPerformInMethod Function
 hi def link rubyPerformAsyncMethod Function
 
 " hi! link rubySymbol Special
-hi! link rubyStringDelimiter Identifier
+hi! link rubyStringDelimiter Special
 
 let s:bcs = b:current_syntax
 unlet b:current_syntax
@@ -31,3 +31,28 @@ let b:current_syntax = s:bcs
 
 syntax region hereDocDashSQL matchgroup=Statement start=+<<[-~.]*\z(SQL\)+  end=+^\s*\z1+ contains=@SQL
 syntax region hereDocDashShell matchgroup=Statement start=+<<[-~.]*\z(SHELL\)+  end=+^\s*\z1+ contains=@SHELL
+
+" Extensions from one-dark
+hi! link rubyBlock                     Statement
+hi! link rubyBlockParameter            Statement
+hi! link rubyBlockParameterList        Special
+" hi! link rubyCapitalizedMethod         Statement
+" hi! link rubyConstant                  Type
+" hi! link rubyClass                     Statement
+" hi link rubyControl                   Statement
+" hi link rubyDefine                    Statement
+" hi link rubyEscape                    Special
+" hi link rubyFunction                  Function
+" hi link rubyGlobalVariable            Special
+" hi link rubyInclude                   Function
+" hi link rubyIncluderubyGlobalVariable Special
+" hi link rubyInstanceVariable          Special
+" hi link rubyInterpolation             Include
+" hi link rubyInterpolationDelimiter    Special
+" hi link rubyKeyword                   Function
+" hi link rubyModule                    Statement
+" hi link rubyPseudoVariable            Special
+" hi link rubyRegexp                    Include
+" hi link rubyRegexpDelimiter           Include
+hi! link rubyStringDelimiter           Include
+" hi! link rubySymbol                    Include

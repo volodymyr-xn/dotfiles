@@ -1,0 +1,1 @@
+findmnt --real -t nosquashfs
