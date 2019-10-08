@@ -180,13 +180,13 @@ set backspace=indent,eol,start
 
 set background=dark
 
-"Base16 hook
-" if filereadable(expand("~/.vimrc_background"))
-"   let base16colorspace=256
-"   source ~/.vimrc_background
-" endif
+" Base16 hook
+if filereadable(expand("~/.vimrc_background"))
+  let base16colorspace=256
+  source ~/.vimrc_background
+endif
 
-colorscheme one
+" colorscheme one
 
 " if g:colors_name ==# "one" || g:colors_name ==# "base16-onedark"
 " "   " let g:custom_color_regular = '#e06c75'
@@ -272,6 +272,9 @@ set wildmenu
 " Automatically rebalance windows on vim resize
 autocmd VimResized * :wincmd =
 
+" Highlight crontab and anacrontab files
+autocmd BufNewFile,BufRead crontab,anacrontab set syntax=crontab
+
 " Redraw only when we need to (i.e. don't redraw when executing a macro)
 set lazyredraw
 
@@ -280,6 +283,7 @@ set showmatch
 
 " Complete files like a shell.
 set wildmode=list:longest
+
 
 " Show 3 lines of context around the cursor.
 set scrolloff=3
@@ -422,21 +426,23 @@ nnoremap F <C-w>J
 nnoremap = <C-W>=
 
 " Toggle current window zoom
-nnoremap M :ToggleCurrentWindowZoom <CR>
+nnoremap m :ToggleCurrentWindowZoom <CR>
 
 " Swith between tabs
-nnoremap m gt
+" nnoremap m gt
 
 " Select tab by nuber
 " 'ctrl-m 1' - selects first tab, etc
-" for i in range(1, 9)
-"   execute "nnoremap \<C-w>" . i . " " . i . "gt<CR>"
-" endfor
+for i in range(1, 9)
+  execute "nnoremap \<C-w>" . i . " " . i . "gt<CR>"
+endfor
 
 " Yank, comment and paster (usefull for refactoring)
-vnoremap <C-o> yV'] :TComment<CR>']pO<ESC>j
+vnoremap M yV'] :TComment<CR>']pj
+nnoremap M yy']:TComment<CR>']pj
 
 " Faster close windows and quit
+" nnoremap <C-c> <C-w>q
 nnoremap <C-c> <C-w>q
 
 " Test runner mappings
@@ -578,7 +584,7 @@ let g:lightline = {
       \ 'active': {
       \   'left': [ [ 'mode', 'paste' ],
       \             ['filename', 'modified'] ],
-      \   'right': [['total_lines']],
+      \   'right': [['zoom_status'], ['total_lines']],
       \ },
       \ 'inactive': {
       \   'left': [['filename'] ],
@@ -587,7 +593,18 @@ let g:lightline = {
       \ 'component': {
       \   'total_lines': ' %l/%L '
       \ },
+      \ 'component_function': {
+      \   'zoom_status': 'IsCurrentWindowZoomed'
+      \ },
       \}
+
+function! IsCurrentWindowZoomed()
+  if t:currentWindowZoomed
+    return ' WINDOW ZOOMED '
+  else
+    return ''
+  endif
+endfunction
 
 " ===================== FZF settings  ====================================
 " Customize fzf colors to match your color scheme
@@ -642,12 +659,13 @@ function! ReloadActiveChromeTab()
 endfunction
 
 
+let t:currentWindowZoomed = 0
+
 " Toggle zoom of current window
 function! ToggleCurrentWindowZoom()
-  if !exists("t:currentWindowZoomed")
-    let t:currentWindowZoomed = 0
-    " TODO check nerdtree state
-  endif
+  " if !exists("t:currentWindowZoomed")
+  "   " TODO check nerdtree state
+  " endif
 
   if t:currentWindowZoomed
     execute "normal \<C-W>="
