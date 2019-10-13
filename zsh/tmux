@@ -18,7 +18,6 @@ function tk() {
 alias tl='tmux ls'
 
 # Create a new session named for current directory, or attach if exists.
-alias tna='tmux new-session -As $(basename "$PWD" | tr . -)'
 
 # Source .tmux.conf
 alias tsrc="tmux source-file ~/.tmux.conf"

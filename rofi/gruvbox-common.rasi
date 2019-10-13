@@ -9,7 +9,8 @@
 window {
     background-color: @background;
     border:           2;
-    padding:          2;
+    padding:          15 20 25;
+    border-radius: 5px;
 }
 
 mainbox {
@@ -26,11 +27,12 @@ message {
 textbox {
     highlight:  @highlight;
     text-color: @foreground;
+    padding: 20px;
 }
 
 listview {
     border:       2px solid 0 0;
-    padding:      2px 0 0;
+    padding:      10px 0 0;
     border-color: @separatorcolor;
     spacing:      2px;
     scrollbar:    @scrollbar;
@@ -38,7 +40,11 @@ listview {
 
 element {
     border:  0;
-    padding: 2px;
+    padding: 5px 10px 2px;
+}
+
+element-icon {
+  padding: 10px;
 }
 
 element.normal.normal {
