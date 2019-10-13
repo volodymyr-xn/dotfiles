@@ -109,6 +109,8 @@ Plug('rakr/vim-one')
 " Highligh color codes
 Plug('lilydjwg/colorizer')
 
+Plug('brooth/far.vim')
+
 call plug#end()
 "============================================================================
 " ===================== General settings ====================================
@@ -199,7 +201,6 @@ endif
 " elseif g:colors_name == "base16-gruvbox-dark-medium" || g:colors_name == "base16-gruvbox-dark-pale" || g:colors_name == "base16-gruvbox-dark-soft"
 "   " let g:custom_color_character = '#98c379'
 " endif
-
 let g:custom_color_character = '#98c379'
 
 " Access colors present in 256 colorspace
@@ -220,7 +221,7 @@ hi Comment gui=italic cterm=italic
 set laststatus=2
 
 " Always display the tabline, even if there is only one tab
-" set showtabline=2
+set showtabline=2
 
 " Hide the default mode text (e.g. -- INSERT -- below the statusline)
 set noshowmode
@@ -599,8 +600,12 @@ let g:lightline = {
       \}
 
 function! IsCurrentWindowZoomed()
+  if !exists("t:currentWindowZoomed")
+    let t:currentWindowZoomed = 0
+  end
+
   if t:currentWindowZoomed
-    return ' WINDOW ZOOMED '
+    return '            WINDOW ZOOMED                '
   else
     return ''
   endif
@@ -659,13 +664,13 @@ function! ReloadActiveChromeTab()
 endfunction
 
 
-let t:currentWindowZoomed = 0
 
 " Toggle zoom of current window
 function! ToggleCurrentWindowZoom()
-  " if !exists("t:currentWindowZoomed")
-  "   " TODO check nerdtree state
-  " endif
+  if !exists("t:currentWindowZoomed")
+    let t:currentWindowZoomed = 0
+    " TODO check nerdtree state
+  endif
 
   if t:currentWindowZoomed
     execute "normal \<C-W>="
@@ -730,9 +735,8 @@ function! ItalicHighlight(group, color)
 endfunction
 
 " ===================== Custom highlighting  ====================================
-" TabLine
-" TabLineFill
-" TabLineSel
+" hi! TabLine S
+hi! link TabLineSel Function
 " call Highlight('NERDTreeFile', 'gray')
 
 " ===================== Experimental ====================================
@@ -772,4 +776,11 @@ endfunction
 " augroup END
 
 " Save when losing focus
-au FocusLost * :silent! wall
+" au FocusLost * :silent! wall
+
+
+" Modificate tabline
+"turn off status line
+" set tabline="what status line equals, or equaled or whatever"
+" "set or change the color of the tabline
+" hi tablinefill cterm=none ctermbg=blue ctermfg=white gui=none guibg=blue guifg=white

@@ -4,6 +4,10 @@ syntax match rubySaveConstructorMethod /.save(/
 syntax match rubyCreateConstructorMethod /.create(/
 syntax match rubyPerformInMethod /.perform_in(/
 syntax match rubyPerformAsyncMethod /.perform_async(/
+syntax match rubyDestroyMethod /.destroy(/
+syntax match rubyDeleteAllMethod /.delete_all(/
+syntax match rubyUpdateMethod /.update(/
+syntax match rubyUpdateAllMethod /.update_all(/
 
 hi def link rubyBindingPry Function
 hi def link rubyNewConstructorMethod Function
@@ -11,6 +15,10 @@ hi def link rubySaveConstructorMethod Function
 hi def link rubyCreateConstructorMethod Function
 hi def link rubyPerformInMethod Function
 hi def link rubyPerformAsyncMethod Function
+hi def link rubyDestroyMethod Function
+hi def link rubyDeleteAllMethod Function
+hi def link rubyUpdateMethod Function
+hi def link rubyUpdateAllMethod Function
 
 " hi! link rubySymbol Special
 hi! link rubyStringDelimiter Special
