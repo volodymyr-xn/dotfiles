@@ -17,7 +17,7 @@ alias dud='du -d 1 -h'
 alias duf='du -sh *'
 alias mkdir='mkdir -pv'
 alias src='source ~/.zshrc'
-alias path='echo -e ${PATH//:/\\n}'
+alias path_var='echo -e ${PATH//:/\\n}'
 
 # Tests
 alias rs='bundle exec rspec spec'
