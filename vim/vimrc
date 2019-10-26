@@ -109,7 +109,14 @@ Plug('rakr/vim-one')
 " Highligh color codes
 Plug('lilydjwg/colorizer')
 
+" Search and replace
 Plug('brooth/far.vim')
+
+" FZF
+Plug('junegunn/fzf.vim')
+
+" Local eslint
+Plug('benjie/local-npm-bin.vim')
 
 call plug#end()
 "============================================================================
@@ -343,10 +350,6 @@ vnoremap > >gv
 " Open a new tab with Ctrl+T
 nnoremap <C-t> <esc>:tabnew<CR>
 
-" " Open a new tab
-" DEPRECATED
-" nnoremap <C-t> <esc>:tabnew<CR>
-
 " For indenting code
 map <Leader>i mmgg=G`m<CR>
 
@@ -438,6 +441,11 @@ for i in range(1, 9)
   execute "nnoremap \<C-w>" . i . " " . i . "gt<CR>"
 endfor
 
+" TODO
+for i in range(1, 5)
+  execute "nnoremap \<Leader>" . i . " " . i . "gt<CR>"
+endfor
+
 " Yank, comment and paster (usefull for refactoring)
 vnoremap M yV'] :TComment<CR>']pj
 nnoremap M yy']:TComment<CR>']pj
@@ -472,17 +480,16 @@ nnoremap \ :TComment<CR>
 " fzf
 set rtp+=~/.fzf
 
-" Fuzzy-find with fzf
 nnoremap <C-p> :FZ<cr>
 
 " Ack mappings
 nnoremap ! :Ack<SPACE>
 
 " Ack: To go to the next search result
-map <leader>] :cn<cr>
+nnoremap <leader>] :cn<cr>
 
 " Ack: To go to the previous search results
-map <leader>[ :cp<cr>
+nnoremap <leader>[ :cp<cr>
 
 " Full text search by FZF AG
 noremap <Leader>p :Ag <cr>
@@ -490,9 +497,8 @@ noremap <Leader>p :Ag <cr>
 " Search app/models by FZF
 noremap <Leader>m :FZF app/models<CR>
 
-noremap <Leader>1 :FZF spec<CR>
-noremap <Leader>2 :FZF app/serializers<CR>
-noremap <Leader>3 :FZF app/javascripts<CR>
+" Search javascripts
+noremap <Leader>u :FZF app/javascripts<CR>
 
 " Search app/controllers by FZF
 noremap <Leader>c :FZF app/controllers<CR>
@@ -605,7 +611,7 @@ function! IsCurrentWindowZoomed()
   end
 
   if t:currentWindowZoomed
-    return '            WINDOW ZOOMED                '
+    return '  ///          VIM WINDOW ZOOM            ///'
   else
     return ''
   endif

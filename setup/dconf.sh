@@ -36,26 +36,37 @@ dconf write $custom_keybinding_0_schema/name "'Toggle display focus'"
 dconf write $custom_keybinding_0_schema/command "'toggle-display-focus'"
 dconf write $custom_keybinding_0_schema/binding "'<Control>space'"
 
+# Play sound
 # zero on numpad
 dconf write $media_keys_keybinding_schema/play/command "'KP_Insert'"
 
+# Volume down
 # minus on numpad
 dconf write $media_keys_keybinding_schema/volume-down/command "'KP_Subtract'"
 
+# Volume up
 # plus on numpad
 dconf write $media_keys_keybinding_schema/volume-up/command "'KP_Add'"
 
+# Previous track
 # 1 on numpad
 dconf write $media_keys_keybinding_schema/previous/command "'KP_End'"
 
+# Next track
 # 2 on numpad
 dconf write $media_keys_keybinding_schema/next/command "'KP_Down'"
 
 # Make screenshot of area
+# F2
 dconf write $media_keys_keybinding_schema/area-screenshot-clip "'F2'"
 
 # Run media player
-dconf write $media_keys_keybinding_schema/media "'KP_Begin'"
+# 4 on numpad
+dconf write $media_keys_keybinding_schema/media "'KP_Left'"
+
+# Toggle terminal fullscreen
+# 4 on numpad
+dconf write /org/gnome/terminal/legacy/keybindings/full-screen "'KP_Begin'"
 
 # Rofi setup
 custom_keybinding_1_schema=$custom_keybinding_schema/custom1
