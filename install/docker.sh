@@ -30,3 +30,5 @@ sudo apt-get install docker-ce
 
 # Verify docker installation by running docker test image
 sudo docker run hello-world
+
+brew install docker-compose
