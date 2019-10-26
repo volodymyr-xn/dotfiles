@@ -78,6 +78,9 @@ installation_log "Linking init.vim"
 mkdir -p ~/.config/nvim/
 ln -sf $DOTFILES_DIR/vim/init.vim ~/.config/nvim/init.vim
 
+installation_log "Linking htop config"
+ln -sf $DOTFILES_DIR/htop/htoprc ~/.config/htop/htoprc
+
 # Create ~/bin dir in user home for custom scripts and executables
 mkdir -p ~/bin
 
