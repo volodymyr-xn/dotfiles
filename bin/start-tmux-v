@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+tmux_session_name=$1
+directory_name=$2
+
+is_tmux_server_running() {
+  [[ -n $(pgrep tmux) ]] && return 0 || return 1
+}
+
+is_session_exist() {
+  if is_tmux_server_running ; then
+    return $(tmux has-session -t $tmux_session_name)
+  else
+    return false
+  fi
+}
+
+attach_to_session() {
+  tmux attach-session -t $tmux_session_name
+}
+
+switch_to_session() {
+  tmux switch -t $tmux_session_name
+}
+
+connect_to_session() {
+  if [ -n "$TMUX" ]; then
+    switch_to_session
+  else
+    attach_to_session
+  fi
+}
+
+create_session() {
+  # Create a new tmux session_name, starting vim from a saved session_name in the new window
+  tmux new-session -d -s $tmux_session_name -n vim -c $directory_name
+
+  # Run vim
+  tmux send-keys -t $tmux_session_name:1 vim C-m
+}
+
+if is_session_exist ; then
+  connect_to_session
+else
+  create_session
+  connect_to_session
+fi
