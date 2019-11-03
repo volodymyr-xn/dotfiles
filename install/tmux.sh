@@ -17,7 +17,7 @@ tmux_version=$1
 git checkout $tmux_version
 
 sh autogen.sh
-./configure
+./configure --prefix=~/.local/
 make -j $(nproc)
 sudo make install
 cd -
