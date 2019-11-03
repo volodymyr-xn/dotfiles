@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+start-tmux-v dev_notes ~/dev_notes

@@ -118,6 +118,9 @@ Plug('junegunn/fzf.vim')
 " Local eslint
 Plug('benjie/local-npm-bin.vim')
 
+" Vue syntax
+Plug('posva/vim-vue')
+
 call plug#end()
 "============================================================================
 " ===================== General settings ====================================
@@ -143,6 +146,9 @@ set nowritebackup
 
 " No swap file
 set noswapfile
+
+" Encrypted files encryption method
+set cm=blowfish2
 
 " Command history
 set history=500

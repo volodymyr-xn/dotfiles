@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+read -p "Enter your password: " -s pass
+
+# TODO
+# encrypted_content=$(gpg --batch --passphrase $pass -d $1 | vipe | gpg -c --batch --passphrase $pass)
+decrypted_content=$(gpg --batch --passphrase $pass -d $1)
+
+echo $decrypted_content
+
+# TODO
+if $? ; then
+  echo $decrypted_content
+else
+  echo 'ERROR'
+  exit 1
+fi
+
+encrypted_content=$(echo $decrypted_content | vipe | gpg -c --batch --passphrase $pass)
+
+echo "Ecntrypted content: " $encrypted_content
+
+# TODO
+echo $encrypted_content > $1

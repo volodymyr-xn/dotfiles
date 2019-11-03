@@ -141,7 +141,6 @@ call ItalicHighlight('jsThis', g:custom_color_character)
 
 
 
-
 " return full path with the trailing slash
 "  or an empty string if we're not in an npm project
 fun! s:GetNodeModulesAbsPath ()

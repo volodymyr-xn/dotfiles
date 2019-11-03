@@ -10,7 +10,12 @@ echo "Stating VIM compile process"
 cd $vim_source_dir
 
 yes | sudo apt-get build-dep vim-gtk
-./configure --enable-gui=gtk2 --enable-gtk2-check --with-x
+./configure \
+  --enable-gui=gtk2 \
+  --enable-gtk2-check \
+  --with-x \
+  --prefix=~/.local/
+
 
 make -j $(nproc)
 yes | sudo make install

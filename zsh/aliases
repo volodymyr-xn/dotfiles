@@ -4,9 +4,6 @@ alias vi:='vim ~/.vim/vimrc'
 alias v='vim'
 alias nv='nvim'
 alias vn='nvim'
-alias dot='cd ~/dotfiles'
-alias den='cd ~/dev_notes'
-alias con='cd ~/controll_panel'
 
 # General UNIX
 alias mv='mv -iv'
@@ -17,14 +14,12 @@ alias dud='du -d 1 -h'
 alias duf='du -sh *'
 alias mkdir='mkdir -pv'
 alias src='source ~/.zshrc'
-alias path_var='echo -e ${PATH//:/\\n}'
 
 # Tests
 alias rs='bundle exec rspec spec'
 alias rsx='bin/spring rspec'
 alias rt='rake test'
 alias rti='rake test:integration'
-
 
 # Listing files and directories
 alias l='ls -lFh'     #size,show type,human readable
