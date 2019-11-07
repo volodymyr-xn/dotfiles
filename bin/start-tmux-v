@@ -11,7 +11,9 @@ is_session_exist() {
   if is_tmux_server_running ; then
     return $(tmux has-session -t $tmux_session_name)
   else
-    return false
+    # return false
+    # Experimental
+    return 1
   fi
 }
 
