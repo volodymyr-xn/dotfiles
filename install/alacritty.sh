@@ -11,7 +11,7 @@ rustup update stable
 # install dependencies
 yes | sudo apt-get install cmake libfreetype6-dev libfontconfig1-dev xclip
 
-alacritty_source_tmp_path=/tmp/alacritty-$(date +%s)
+alacritty_source_tmp_path=/tmp/alacritty-$(timestamp-ms)
 
 # clone alacritty from github
 git clone https://github.com/jwilm/alacritty $alacritty_source_tmp_path

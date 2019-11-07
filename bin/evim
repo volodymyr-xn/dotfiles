@@ -2,23 +2,31 @@
 
 read -p "Enter your password: " -s pass
 
-# TODO
-# encrypted_content=$(gpg --batch --passphrase $pass -d $1 | vipe | gpg -c --batch --passphrase $pass)
 decrypted_content=$(gpg --batch --passphrase $pass -d $1)
 
-echo $decrypted_content
-
-# TODO
-if $? ; then
-  echo $decrypted_content
+if [ $? -eq 0 ] ; then
+  echo 'Decrypted file successfully'
 else
-  echo 'ERROR'
+  echo 'Decryption error'
   exit 1
 fi
 
-encrypted_content=$(echo $decrypted_content | vipe | gpg -c --batch --passphrase $pass)
+result=$(echo $decrypted_content | vipe)
 
-echo "Ecntrypted content: " $encrypted_content
+if ! [ $? -eq 0 ] ; then
+  echo 'VIM exited with error'
+  exit 1
+fi
 
-# TODO
-echo $encrypted_content > $1
+if [ -z "$result" ] ; then
+  echo 'VIM returned blank string'
+  exit 1
+fi
+
+echo $result \
+  | gpg \
+    -c \
+    --batch \
+    --passphrase $pass \
+    --output $1 \
+    --yes
