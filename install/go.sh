@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# TODO set go destination dir
 timestamp=$(date +%s)
 go_tmp_binaries_dir=/tmp/go-binaries-$timestamp
 version=1.12.1

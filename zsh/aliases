@@ -43,8 +43,6 @@ alias rake='bundle exec rake'
 # Rails
 alias bx='bundle exec'
 
-alias tx='tmuxinator'
-
 # Ctags
 alias ct='ctags -R --languages=ruby,javascript --sort=yes  --tag-relative=yes --exclude=.git --exclude=log --exclude=node_modules . $(bundle list --paths)'
 alias jt="ctags -R app config lib && sed -i '' -E '/^(if|switch|function|module\.exports|it|describe).+language:js$/d' tags"

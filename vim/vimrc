@@ -74,7 +74,7 @@ Plug('kana/vim-textobj-user')
 Plug('Raimondi/delimitMate')
 
 " TypeScript syntax
-Plug('leafgarland/typescript-vim')
+" Plug('leafgarland/typescript-vim')
 
 " Crystal syntax support
 Plug('rhysd/vim-crystal')
@@ -84,6 +84,9 @@ Plug('christoomey/vim-conflicted')
 
 " Improved JavaScript syntax
 Plug('pangloss/vim-javascript')
+
+" Alternative JavaScript syntax
+" Plug('othree/yajs.vim')
 
 " JSX syntax support
 Plug('mxw/vim-jsx')
@@ -121,6 +124,9 @@ Plug('benjie/local-npm-bin.vim')
 " Vue syntax
 Plug('posva/vim-vue')
 
+" Coc is an intellisense engine for Vim/Neovim.
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
 call plug#end()
 "============================================================================
 " ===================== General settings ====================================
@@ -148,7 +154,7 @@ set nowritebackup
 set noswapfile
 
 " Encrypted files encryption method
-set cm=blowfish2
+" set cm=blowfish2 " doesnt work in neovim
 
 " Command history
 set history=500
@@ -173,22 +179,20 @@ set hlsearch
 
 " Ignore case in search if term(s) are lowercase
 set ignorecase
+
 " Search with case sensitivity if term(s) are upper or mixed case
 set smartcase
 
 " Turn word wrap off
 set nowrap
 
+" Indent settings
 set autoindent
-
 set smartindent
 
 " Performance
 syntax sync maxlines=256
 set synmaxcol=120
-
-" Auto remove trailing blank spaces on each save
-autocmd BufWritePre * :%s/\s\+$//e
 
 " Allow backspace to delete end of line, indent and start of line characters
 set backspace=indent,eol,start
@@ -227,9 +231,6 @@ set termguicolors
 let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
 let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
 
-" Enable italic for comments
-hi Comment gui=italic cterm=italic
-
 " Always show statusline
 set laststatus=2
 
@@ -243,7 +244,8 @@ set noshowmode
 set mouse=a
 
 " fix mouse support inside tmux
-set ttymouse=xterm2
+" Doesnt work in neovim
+" set ttymouse=xterm2
 
 " Set number of lines
 set nu!
@@ -307,6 +309,25 @@ set title
 
 " Yank to system clipboard
 set clipboard+=unnamed
+
+
+"============================================================================
+"====================== Highlight ============================================
+"============================================================================
+
+" Enable italic for comments
+hi Comment gui=italic cterm=italic
+
+"============================================================================
+"====================== Autocommands ============================================
+"============================================================================
+
+" Auto remove trailing blank spaces on each save
+autocmd BufWritePre * :%s/\s\+$//e
+
+" Set textwidth 75 for markdown files
+au BufRead,BufNewFile *.md setlocal textwidth=75
+
 
 "============================================================================
 "====================== Abbreviations ============================================
@@ -790,9 +811,10 @@ hi! link TabLineSel Function
 " Save when losing focus
 " au FocusLost * :silent! wall
 
-
 " Modificate tabline
 "turn off status line
 " set tabline="what status line equals, or equaled or whatever"
 " "set or change the color of the tabline
 " hi tablinefill cterm=none ctermbg=blue ctermfg=white gui=none guibg=blue guifg=white
+"
+"
