@@ -38,23 +38,27 @@ dconf write $custom_keybinding_0_schema/binding "'<Control>space'"
 
 # Play sound
 # zero on numpad
-dconf write $media_keys_keybinding_schema/play/command "'KP_Insert'"
+dconf write $media_keys_keybinding_schema/play "'KP_Insert'"
 
 # Volume down
 # minus on numpad
-dconf write $media_keys_keybinding_schema/volume-down/command "'KP_Subtract'"
+dconf write $media_keys_keybinding_schema/volume-down "'KP_Subtract'"
 
 # Volume up
 # plus on numpad
-dconf write $media_keys_keybinding_schema/volume-up/command "'KP_Add'"
+dconf write $media_keys_keybinding_schema/volume-up "'KP_Add'"
+
+# Mute sound
+# * on numpad
+dconf write $media_keys_keybinding_schema/volume-mute "'KP_Multiply'"
 
 # Previous track
 # 1 on numpad
-dconf write $media_keys_keybinding_schema/previous/command "'KP_End'"
+dconf write $media_keys_keybinding_schema/previous "'KP_End'"
 
 # Next track
 # 2 on numpad
-dconf write $media_keys_keybinding_schema/next/command "'KP_Down'"
+dconf write $media_keys_keybinding_schema/next "'KP_Down'"
 
 # Make screenshot of area
 # F2
