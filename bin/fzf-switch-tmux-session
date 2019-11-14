@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+tmux_session_name=$(tmux ls -F "#{session_name}" | fzf)
+
+tmux switch -t $tmux_session_name
