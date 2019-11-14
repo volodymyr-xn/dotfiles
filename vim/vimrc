@@ -127,6 +127,12 @@ Plug('posva/vim-vue')
 " Coc is an intellisense engine for Vim/Neovim.
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
+" AppArmor syntax highlight
+Plug('ClockworkNet/vim-apparmor')
+
+" Improved nginx vim plugin (incl. syntax highlighting)
+Plug('chr4/nginx.vim')
+
 call plug#end()
 "============================================================================
 " ===================== General settings ====================================
@@ -143,6 +149,16 @@ syntax on
 
 " Use vim, not vi api
 set nocompatible
+
+" Redraw only when we need to (i.e. don't redraw when executing a macro)
+set lazyredraw
+
+" Indicates a fast terminal connection.  More characters will be sent to the
+" screen for redrawing, instead of using insert/delete line commands.
+" Improves smoothness of redrawing when there are multiple windows and the
+" terminal does not support a scrolling region.
+" Experimental
+set ttyfast
 
 " No backup files
 set nobackup
@@ -291,15 +307,11 @@ autocmd VimResized * :wincmd =
 " Highlight crontab and anacrontab files
 autocmd BufNewFile,BufRead crontab,anacrontab set syntax=crontab
 
-" Redraw only when we need to (i.e. don't redraw when executing a macro)
-set lazyredraw
-
 " Highlight a matching [{()}?P] when cursor is placed on start/end character
 set showmatch
 
 " Complete files like a shell.
 set wildmode=list:longest
-
 
 " Show 3 lines of context around the cursor.
 set scrolloff=3
@@ -432,7 +444,6 @@ inoremap <C-Down> <ESC>:m .+1<CR>==gi
 " Move multipe lines down in visual mode
 vnoremap <C-Down> :m '>+1<CR>gv=gv
 
-
 " zoom a vim pane, <C-w>= to re-balance
 " nmap <C-w><cr> <C-W>\| <C-W>_
 
@@ -468,7 +479,8 @@ for i in range(1, 9)
   execute "nnoremap \<C-w>" . i . " " . i . "gt<CR>"
 endfor
 
-" TODO
+" Select tab by nuber
+" 'Leader 1' - selects first tab, etc
 for i in range(1, 5)
   execute "nnoremap \<Leader>" . i . " " . i . "gt<CR>"
 endfor
@@ -507,19 +519,19 @@ nnoremap \ :TComment<CR>
 " fzf
 set rtp+=~/.fzf
 
-nnoremap <C-p> :FZ<cr>
+nnoremap <C-p> :FZ<CR>
 
 " Ack mappings
 nnoremap ! :Ack<SPACE>
 
 " Ack: To go to the next search result
-nnoremap <leader>] :cn<cr>
+nnoremap <leader>] :cn<CR>
 
 " Ack: To go to the previous search results
-nnoremap <leader>[ :cp<cr>
+nnoremap <leader>[ :cp<CR>
 
 " Full text search by FZF AG
-noremap <Leader>p :Ag <cr>
+noremap <Leader>p :Ag <CR>
 
 " Search app/models by FZF
 noremap <Leader>m :FZF app/models<CR>

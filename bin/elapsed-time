@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+ /usr/bin/time -f "\t%Es Elapsed Real Time" "$@"

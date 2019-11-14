@@ -1,6 +1,7 @@
 "" CUSTOM
 " OLD WAVIANT syn match jsxComponentTagName /[A-Z]\w\+/ display contained contains=xmlNamespace,xmlAttribPunct,@xmlTagHook
 syn match jsxComponentTagName /[A-Z]\w\+/ display contained
+syn match jsxComponentTagName /\/[A-Z]\w\+/ display contained
 
 " Add support of jsxComponentTagName to xmlEndTag
 syn match xmlEndTag
