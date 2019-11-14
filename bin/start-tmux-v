@@ -18,11 +18,11 @@ is_session_exist() {
 }
 
 attach_to_session() {
-  tmux attach-session -t $tmux_session_name
+  tmux attach-session -t $tmux_session_name > /dev/null
 }
 
 switch_to_session() {
-  tmux switch -t $tmux_session_name
+  tmux switch -t $tmux_session_name > /dev/null
 }
 
 connect_to_session() {
