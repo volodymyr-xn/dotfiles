@@ -2,6 +2,7 @@
 
 COLUMNS=$(tput cols)
 max_width=80
+# half_of_screen=$(( ($COLUMS / 2) - 10 ))
 
 if [ "$COLUMNS" -lt $max_width ]
 then

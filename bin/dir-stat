@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+dir=${1:-"."}
+
+du -h -d 1 $dir | sort -h -r

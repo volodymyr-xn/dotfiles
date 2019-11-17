@@ -1,4 +1,3 @@
-
 # Use vim as default editor
 export EDITOR='vim'
 
@@ -49,7 +48,7 @@ if [[ -z $TMUX ]]; then
   export PATH="$HOME/dotfiles/bin:$PATH"
 
   # Add vips to PATH
-  export PATH=$PATH:$VIPSHOME/bin
+  export PATH="$PATH:$VIPSHOME/bin"
 
   # Add yarn bin to PATH
   export PATH="$HOME/.yarn/bin:$PATH"
