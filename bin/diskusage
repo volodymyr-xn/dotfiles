@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+df -h -xsquashfs -xtmpfs -xudev
