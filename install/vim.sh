@@ -10,11 +10,12 @@ echo "Stating VIM compile process"
 cd $vim_source_dir
 
 yes | sudo apt-get build-dep vim-gtk
+
 ./configure \
   --enable-gui=gtk2 \
   --enable-gtk2-check \
   --with-x \
-  --prefix=~/.local/
+  --prefix=$HOME/.local/
 
 
 make -j $(nproc)

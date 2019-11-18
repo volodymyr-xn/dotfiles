@@ -216,12 +216,12 @@ set backspace=indent,eol,start
 set background=dark
 
 " Base16 hook
-if filereadable(expand("~/.vimrc_background"))
-  let base16colorspace=256
-  source ~/.vimrc_background
-endif
+" if filereadable(expand("~/.vimrc_background"))
+"   let base16colorspace=256
+"   source ~/.vimrc_background
+" endif
 
-" colorscheme one
+colorscheme one
 
 " if g:colors_name ==# "one" || g:colors_name ==# "base16-onedark"
 " "   " let g:custom_color_regular = '#e06c75'

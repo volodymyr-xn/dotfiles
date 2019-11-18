@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-cd ./install
+cd $HOME/dotfiles/install
 
-./tmux.sh 2.8
+./tmux.sh
 ./vim.sh
 ./fzf.sh
 ./cmake.sh
@@ -17,12 +17,13 @@ cd ./install
 # ./gotop.sh
 ./h2o.sh
 ./htop.sh
-./java.sh # install oracle java
+# ./java.sh # install oracle java
 ./jemalloc.sh
-./nodejs_asdf.sh 10.15.3
+./nodejs_asdf.sh
 ./numix-circle.sh
 ./rclone.sh
-./redis.sh
+
+# ./redis.sh
 ./silver_searcher.sh
 ./tcptrack.sh
 ./tweak_tool.sh
@@ -32,9 +33,10 @@ cd ./install
 ./zsh.sh
 ./oh_my_zsh.sh
 ./xvfb.sh
-./ruby_asdf.sh 2.6.3
-./postgres_asdf.sh 11.3
-./alacritty.sh
-./virtualbox.sh
+./jemalloc.sh
+./ruby_asdf.sh
+./postgres_asdf.sh 12.0
+# ./alacritty.sh
+# ./virtualbox.sh
 ./rofi_from_apt.sh
 ./vips_from_source.sh
