@@ -828,5 +828,3 @@ hi! link TabLineSel Function
 " set tabline="what status line equals, or equaled or whatever"
 " "set or change the color of the tabline
 " hi tablinefill cterm=none ctermbg=blue ctermfg=white gui=none guibg=blue guifg=white
-"
-"

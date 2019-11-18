@@ -2,6 +2,7 @@
 
 yes | sudo apt-get install \
      autotools-dev curl zlib1g-dev build-essential libssl-dev \
+     cmake cmake-data libtool-bin libuv1 ninja-build \
      libreadline-dev libyaml-dev libsqlite3-dev sqlite3 \
      libxml2-dev libxslt1-dev libcurl4-openssl-dev \
      libffi-dev libncurses5-dev \
