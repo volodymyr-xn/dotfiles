@@ -6,7 +6,6 @@
 
 ./setup/dotfiles.sh
 ./setup/software.sh
-./setup/executables.sh
 ./setup/dconf.sh
 
 # Create dir for home log

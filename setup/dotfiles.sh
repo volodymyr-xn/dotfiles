@@ -58,28 +58,29 @@ for file in $files_to_symlink; do
 done
 
 # Create local profile file if exist
-touch $HOME/local_profile
+touch $HOME/.local_profile
 
 # Backup existing Tmux config
 backup_file "tmux.conf"
 
 # Copy Tmux config
 installation_log "Linking .tmux.conf"
-ln -sf $DOTFILES_DIR/tmux/tmux.conf ~/.tmux.conf
+ln -sf $DOTFILES_DIR/tmux/tmux.conf $HOME/.tmux.conf
 
 # Link Alacrity config
 installation_log "Linking alacritty.yml"
-mkdir -p ~/.config/alacritty/
-ln -sf $DOTFILES_DIR/alacritty.yml ~/.config/alacritty/alacritty.yml
+mkdir -p $HOME/.config/alacritty/
+ln -sf $DOTFILES_DIR/alacritty.yml $HOME/.config/alacritty/alacritty.yml
 
 # Install Neovim config
 # Create directory for neovim config
 installation_log "Linking init.vim"
-mkdir -p ~/.config/nvim/
-ln -sf $DOTFILES_DIR/vim/init.vim ~/.config/nvim/init.vim
+mkdir -p $HOME/.config/nvim/
+ln -sf $DOTFILES_DIR/vim/init.vim $HOME/.config/nvim/init.vim
 
 installation_log "Linking htop config"
-ln -sf $DOTFILES_DIR/htop/htoprc ~/.config/htop/htoprc
+mkdir -p $HOME/.config/htop/
+ln -sf $DOTFILES_DIR/htop/htoprc $HOME/.config/htop/htoprc
 
 # Create ~/bin dir in user home for custom scripts and executables
 mkdir -p ~/bin

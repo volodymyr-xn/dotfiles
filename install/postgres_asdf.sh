@@ -2,11 +2,12 @@
 
 asdf plugin-add postgres https://github.com/smashedtoatoms/asdf-postgres.git
 
-$postgres_version=$1
+postgres_version=$1
 
 if [ -z "$postgres_version"]
 then
-  $postgres_version=$(asdf list-all postgres)
+  # if version is not specified take the latest postgres version
+  postgres_version=$(asdf list-all postgres | tail -n 1)
 fi
 
 asdf install postgres $postgres_version
