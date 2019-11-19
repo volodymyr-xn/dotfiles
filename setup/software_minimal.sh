@@ -13,6 +13,7 @@ cd $HOME/dotfiles/install
 ./fzf.sh
 ./cmake.sh
 ./at.sh
+./imagemagic.sh
 ./base16_shell.sh
 ./dconf.sh
 ./htop.sh
@@ -25,6 +26,7 @@ cd $HOME/dotfiles/install
 ./ruby_asdf.sh
 ./nodejs_asdf.sh
 ./postgres_asdf.sh
+./redis_asdf.sh
 ./redis_asdf.sh
 
 ./tweak_tool.sh
