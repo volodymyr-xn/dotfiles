@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# language swtich
+dconf write /org/gnome/desktop/input-sources/xkb-options "['grp:alt_shift_toggle']"
+
+
 # Theme
 dconf write /org/gnome/desktop/wm/preferences/theme "'Arc-Darker'"
 dconf write /org/gnome/desktop/interface/gtk-theme "'Arc-Darker'"
@@ -20,11 +24,11 @@ gsettings set org.gnome.desktop.input-sources xkb-options "['caps:none', 'grp:al
 # Gnome terminal settings
 gnome_terminal=$(gsettings get org.gnome.Terminal.ProfilesList default)
 gnome_terminal=${gnome_terminal:1:-1} # remove leading and trailing single quotes
-gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$gnome_terminal/" font "Fira Mono Medium 14"
+gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$gnome_terminal/" font "Monaco Regular 14"
 
 ### Gnome settings ###
 # Set default monospace font
-dconf write /org/gnome/desktop/interface/monospace-font-name "'Fira Mono Medium 14'"
+dconf write /org/gnome/desktop/interface/monospace-font-name "'Monaco Regular 14'"
 
 # Keybindings
 # Toggle display focus

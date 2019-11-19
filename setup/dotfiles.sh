@@ -45,6 +45,7 @@ files_to_symlink="\
 
 DOTFILES_DIR=$HOME/dotfiles
 
+$HOME/dotfiles/install/oh_my_zsh.sh
 
 #===============================================================
 #================= Instalation =================================
