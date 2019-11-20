@@ -5,7 +5,7 @@ destination_dir=/tmp/zsh-$timestamp
 
 echo 'Download zsh source code to $destination_dir'
 
-sudo apt-get install -y \
+sudo apt install -y \
                       git-core \
                       gcc \
                       make \
