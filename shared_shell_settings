@@ -1,4 +1,4 @@
-# export TERM=xterm-256color TODO
+export TERM=xterm-256color
 
 # Use vim as default editor
 export EDITOR='vim'
