@@ -5,8 +5,8 @@ dconf write /org/gnome/desktop/input-sources/xkb-options "['grp:alt_shift_toggle
 
 
 # Theme
-dconf write /org/gnome/desktop/wm/preferences/theme "'Arc-Darker'"
-dconf write /org/gnome/desktop/interface/gtk-theme "'Arc-Darker'"
+dconf write /org/gnome/desktop/wm/preferences/theme "'Adwaita Dark'"
+dconf write /org/gnome/desktop/interface/gtk-theme "'Adwaita dark'"
 
 # Icon theme
 dconf write /org/gnome/desktop/interface/icon-theme "'Numix-Circle'"
@@ -41,39 +41,39 @@ dconf write $custom_keybinding_0_schema/binding "'<Control>space'"
 
 # Play sound
 # zero on numpad
-dconf write $media_keys_keybinding_schema/play "'KP_Insert'"
+dconf write $media_keys_keybinding_schema/play "['KP_Insert']"
 
 # Volume down
 # minus on numpad
-dconf write $media_keys_keybinding_schema/volume-down "'KP_Subtract'"
+dconf write $media_keys_keybinding_schema/volume-down "['KP_Subtract']"
 
 # Volume up
 # plus on numpad
-dconf write $media_keys_keybinding_schema/volume-up "'KP_Add'"
+dconf write $media_keys_keybinding_schema/volume-up "['KP_Add']"
 
 # Mute sound
 # * on numpad
-dconf write $media_keys_keybinding_schema/volume-mute "'KP_Multiply'"
+dconf write $media_keys_keybinding_schema/volume-mute "['KP_Multiply']"
 
 # Previous track
 # 1 on numpad
-dconf write $media_keys_keybinding_schema/previous "'KP_End'"
+dconf write $media_keys_keybinding_schema/previous "['KP_End']"
 
 # Next track
 # 2 on numpad
-dconf write $media_keys_keybinding_schema/next "'KP_Down'"
+dconf write $media_keys_keybinding_schema/next "['KP_2']"
 
 # Make screenshot of area
 # F2
-dconf write $media_keys_keybinding_schema/area-screenshot-clip "'F2'"
+dconf write $media_keys_keybinding_schema/area-screenshot-clip "['F2']"
 
 # Run media player
 # 4 on numpad
-dconf write $media_keys_keybinding_schema/media "'KP_Left'"
+dconf write $media_keys_keybinding_schema/media "['KP_Left']"
 
 # Toggle terminal fullscreen
 # 4 on numpad
-dconf write /org/gnome/terminal/legacy/keybindings/full-screen "'KP_Begin'"
+dconf write /org/gnome/terminal/legacy/keybindings/full-screen "['KP_Begin']"
 
 # Rofi setup
 custom_keybinding_1_schema=$custom_keybinding_schema/custom1

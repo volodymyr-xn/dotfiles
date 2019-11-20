@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-sudo apt-get install xvfb
+sudo apt install xvfb -y
