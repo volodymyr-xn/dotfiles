@@ -10,6 +10,7 @@ cd $HOME/dotfiles/install
 ./oh_my_zsh.sh
 ./tmux.sh
 ./vim.sh
+./silver_searcher.sh
 ./fzf.sh
 ./cmake.sh
 ./at.sh
@@ -19,7 +20,6 @@ cd $HOME/dotfiles/install
 ./htop.sh
 ./numix-circle.sh
 ./rclone.sh
-./silver_searcher.sh
 
 ./jemalloc.sh
 
