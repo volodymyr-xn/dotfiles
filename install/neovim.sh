@@ -18,7 +18,11 @@ cd $neovim_source_dir
 
 # rm -r build
 make clean
-make CMAKE_BUILD_TYPE=Release -j $(nproc) CMAKE_INSTALL_PREFIX=~/.local/
+make \
+  CMAKE_INSTALL_PREFIX=~/.local/ \
+  CMAKE_BUILD_TYPE=Release \
+  -j $(nproc)
+
 sudo make install
 
 echo "Remove neovim source directory $neovim"

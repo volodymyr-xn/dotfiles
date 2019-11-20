@@ -10,10 +10,11 @@
 [credential]
 	helper = cache --timeout=360000
 [alias]
-	unstage = reset
-	restore-branch-from = reset --hard
-	uncommit = reset --soft HEAD^
-	staged = diff --staged
+  unstage = reset
+  restore-branch-from = reset --hard
+  uncommit = reset --soft HEAD^
+  staged = diff --staged
+  mdiff = diff master...
 	s = status
 [fetch]
 	prune = true
