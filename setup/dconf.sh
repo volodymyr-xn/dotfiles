@@ -18,8 +18,7 @@ dconf write /org/gnome/desktop/interface/cursor-theme "'DMZ-Black'"
 # gsettings set org.gnome.shell.extensions user-theme 'Arc-Dark'
 
 # Disable Caps Lock
-# dconf write /org/gnome/desktop/input-sources/xkb-options "['caps:none']"
-gsettings set org.gnome.desktop.input-sources xkb-options "['caps:none', 'grp:alt_shift_toggle']"
+dconf write /org/gnome/desktop/input-sources/xkb-options "['caps:none']"
 
 # Gnome terminal settings
 gnome_terminal=$(gsettings get org.gnome.Terminal.ProfilesList default)
