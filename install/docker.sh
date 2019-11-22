@@ -22,9 +22,6 @@ sudo add-apt-repository \
    $(lsb_release -cs) \
    stable"
 
-# Update apt package index
-sudo apt-get update
-
 # Install Docker CE
 sudo apt-get install docker-ce
 
