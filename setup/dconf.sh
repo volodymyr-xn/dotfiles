@@ -29,15 +29,10 @@ gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/prof
 # Set default monospace font
 dconf write /org/gnome/desktop/interface/monospace-font-name "'Monaco Regular 14'"
 
-# Keybindings
-# Toggle display focus
-media_keys_keybinding_schema=/org/gnome/settings-daemon/plugins/media-keys
-custom_keybinding_schema=$media_keys_keybinding_schema/custom-keybindings
+########## Keybindings ##########
 
-custom_keybinding_0_schema=$custom_keybinding_schema/custom0
-dconf write $custom_keybinding_0_schema/name "'Toggle display focus'"
-dconf write $custom_keybinding_0_schema/command "'toggle-display-focus'"
-dconf write $custom_keybinding_0_schema/binding "'<Control>space'"
+# Schema shortcuts
+media_keys_keybinding_schema=/org/gnome/settings-daemon/plugins/media-keys
 
 # Play sound
 # zero on numpad
@@ -75,12 +70,25 @@ dconf write $media_keys_keybinding_schema/media "['KP_Left']"
 # 4 on numpad
 dconf write /org/gnome/terminal/legacy/keybindings/full-screen "['KP_Begin']"
 
-# Rofi setup
-custom_keybinding_1_schema=$custom_keybinding_schema/custom1
-dconf write $custom_keybinding_1_schema/name "'Rofi'"
-dconf write $custom_keybinding_1_schema/command "'rofi -combi-modi window,drun -show combi -modi combi'"
+########## Custom keybindings ##########
 
-dconf write $custom_keybinding_1_schema/binding "'<Primary><Shift>p'"
+# Schema shortcuts
+custom_keybinding_schema=$media_keys_keybinding_schema/custom-keybindings
 
+# Toggle display focus keybinding
+toggle_display_focus_keybinding_schema=$custom_keybinding_schema/custom0
+dconf write $toggle_display_focus_keybinding_schema/name "'Toggle display focus'"
+dconf write $toggle_display_focus_keybinding_schema/command "'toggle-display-focus'"
+dconf write $toggle_display_focus_keybinding_schema/binding "'<Control>space'"
+
+# Run universal Rofi launcher keybinding
+universal_rofi_keybinding_schema=$custom_keybinding_schema/custom1
+dconf write $universal_rofi_keybinding_schema/name "'Rofi'"
+dconf write $universal_rofi_keybinding_schema/command "'rofi -combi-modi window,drun -show combi -modi combi'"
+
+# Ctrl+Shift+p
+dconf write $universal_rofi_keybinding_schema/binding "'<Primary><Shift>p'"
+
+# Define list of all keybindings
 # Should be carefull here. It could broke the gnome
-# dconf write $custom_keybinding_schema "['$custom_keybinding_0_schema/', '$custom_keybinding_1_schema/']"
+dconf write $custom_keybinding_schema "['$toggle_display_focus_keybinding_schema/', '$universal_rofi_keybinding_schema/']"

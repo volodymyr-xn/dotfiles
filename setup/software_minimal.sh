@@ -27,9 +27,10 @@ cd $HOME/dotfiles/install
 ./nodejs_asdf.sh
 ./postgres_asdf.sh
 ./redis_asdf.sh
-./redis_asdf.sh
 
 ./tweak_tool.sh
 ./universal-ctags.sh
 ./xdotool.sh
 ./xvfb.sh
+
+./chromium.sh
