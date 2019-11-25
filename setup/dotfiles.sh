@@ -72,6 +72,9 @@ installation_log "Linking kitty.conf"
 mkdir -p $HOME/.config/kitty/
 ln -sf $DOTFILES_DIR/kitty.conf $HOME/.config/kitty/
 
+installation_log "Linking Rofi config dir"
+ln -sf $DOTFILES_DIR/rofi $HOME/.config/rofi
+
 # Install Neovim config
 # Create directory for neovim config
 installation_log "Linking init.vim"

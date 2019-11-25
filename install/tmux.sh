@@ -23,7 +23,5 @@ sh autogen.sh
 make -j $(nproc)
 
 sudo make install
-cd -
-rm -rf $tmux_source_dir
 
 # brew install tmux
