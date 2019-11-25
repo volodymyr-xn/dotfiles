@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-sudo apt-get install gtk2-engines-murrine gtk2-engines-pixbuf
+sudo apt install gtk2-engines-murrine gtk2-engines-pixbuf
 
 destination_dir=$(dotfiles-tempdir-for layan-gtk-theme master)
 

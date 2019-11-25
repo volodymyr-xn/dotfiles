@@ -81,12 +81,17 @@ export LESS_TERMCAP_us=$'\E[1;32m'     # begin underline
 export LESS_TERMCAP_ue=$'\E[0m'        # reset underline
 export GROFF_NO_SGR=1                  # for konsole and gnome-terminal
 
-# # Set onedark fzf theme
-# --color=fg:-1,bg:-1,hl:#c678dd,fg+:#ffffff,bg+:#4b5263,hl+:#d858fe
+# Set Onedark fzf theme
+# export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
+# --color=dark
+# --color=fg:-1,bg:-1,hl:#c678dd,fg+:#ffffff,bg+:-1,hl+:#d858fe
+# --color=info:#98c379,prompt:#61afef,pointer:#e5c07b,marker:#e5c07b,spinner:#61afef,header:#61afef
+# '
+# FZF Dracula colorscheme
 export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
 --color=dark
---color=fg:-1,bg:-1,hl:#c678dd,fg+:#ffffff,bg+:-1,hl+:#d858fe
---color=info:#98c379,prompt:#61afef,pointer:#e5c07b,marker:#e5c07b,spinner:#61afef,header:#61afef
+--color=fg:-1,bg:-1,hl:#e5c07f,fg+:-1,bg+:-1,hl+:#5fff87
+--color=info:#af87ff,prompt:#5fff87,pointer:#e5c07b,marker:#ff87d7,spinner:#ff87d7
 '
 
 # Enable Base16-shell themes
