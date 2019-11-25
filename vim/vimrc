@@ -124,6 +124,9 @@ Plug('benjie/local-npm-bin.vim')
 " Vue syntax
 Plug('posva/vim-vue')
 
+" Coffescript syntax
+Plug('kchmck/vim-coffee-script')
+
 " Coc is an intellisense engine for Vim/Neovim.
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 

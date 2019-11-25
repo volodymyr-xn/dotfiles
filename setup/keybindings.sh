@@ -99,8 +99,26 @@ dconf write \
   $universal_rofi_keybinding_schema/binding \
   "'<Primary><Shift>p'"
 
+
+# TODO
+dconf reset /org/gnome/settings-daemon/plugins/media-keys/terminal
+
+launch_kitty=$custom_keybinding_schema/custom2
+
+dconf write \
+  $launch_kitty/name \
+  "'Launch Kitty'"
+
+dconf write \
+  $launch_kitty/command \
+    "'kitty'"
+
+dconf write \
+  $launch_kitty/binding \
+  "'<Primary><Alt>t'"
+
 # Define list of all keybindings
 # Should be carefull here. It could broke the gnome
 dconf write \
   $custom_keybinding_schema \
-  "['$toggle_display_focus_keybinding_schema/', '$universal_rofi_keybinding_schema/']"
+  "['$toggle_display_focus_keybinding_schema/', '$universal_rofi_keybinding_schema/', '$launch_kitty/']"
