@@ -3,13 +3,9 @@
 cd $HOME/dotfiles/install
 
 ./develop_libs.sh
-./asdf.sh
 ./linuxbrew.sh
 
-./zsh.sh
 ./oh_my_zsh.sh
-./tmux.sh
-./vim.sh
 ./silver_searcher.sh
 ./fzf.sh
 ./cmake.sh
@@ -20,6 +16,7 @@ cd $HOME/dotfiles/install
 ./htop.sh
 ./numix-circle.sh
 ./rclone.sh
+./asdf.sh
 
 ./jemalloc.sh
 
@@ -33,4 +30,9 @@ cd $HOME/dotfiles/install
 ./xdotool.sh
 ./xvfb.sh
 
+./zsh.sh
+./tmux.sh
+./vim.sh
+
+./rofi_apt.sh
 ./chromium.sh

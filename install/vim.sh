@@ -15,16 +15,17 @@ sudo apt-get build-dep vim-gtk
   --enable-gui=gtk2 \
   --enable-gtk2-check \
   --with-x \
-  --prefix=~/.local/
+  --prefix=$HOME/.local/
 
 make -j $(nproc)
-yes | sudo make install
+yes | make install
 
-echo "Remove vim source directory $vim_source_dir"
-rm -rf $vim_source_dir
+# echo "Remove vim source directory $vim_source_dir"
+# rm -rf $vim_source_dir
 
 echo "Installing VIM Plug"
-curl -fLo ~/dotfiles/vim/autoload/plug.vim --create-dirs \
+curl -fLo ~/dotfiles/vim/autoload/plug.vim \
+   --create-dirs \
    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 echo "VIM installed succesfully"
