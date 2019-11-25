@@ -3,5 +3,4 @@
 # Modern ls replacement
 # cargo install exa
 # or
-# brew install exa
-
+brew install exa

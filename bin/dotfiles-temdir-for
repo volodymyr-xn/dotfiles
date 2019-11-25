@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+name=$1-source
+version=${2:-''}
+timestamp=$(timestamp-ms)
+
+if ! [ -z $version ]; then
+  version="-$version-"
+fi
+
+echo "/tmp/$name${version}${timestamp}"

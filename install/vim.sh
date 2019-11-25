@@ -15,8 +15,7 @@ sudo apt-get build-dep vim-gtk
   --enable-gui=gtk2 \
   --enable-gtk2-check \
   --with-x \
-  --prefix=$HOME/.local/
-
+  --prefix=~/.local/
 
 make -j $(nproc)
 yes | sudo make install

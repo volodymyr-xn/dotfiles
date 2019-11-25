@@ -6,7 +6,8 @@
 
 ./setup/dotfiles.sh
 ./setup/software.sh
-./setup/dconf.sh
+./setup/gnome_settings.sh
+./setup/keybindings.sh
 
 # Create dir for home log
 mkdir -p $HOME/.log
