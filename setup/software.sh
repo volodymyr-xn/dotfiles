@@ -2,8 +2,6 @@
 
 cd $HOME/dotfiles/install
 
-./tmux.sh
-./vim.sh
 ./fzf.sh
 ./cmake.sh
 ./at.sh
@@ -11,7 +9,7 @@ cd $HOME/dotfiles/install
 ./base16_shell.sh
 ./brotli.sh
 ./crystal-asdf.sh
-./dconf.sh
+# ./dconf-editor.sh
 # ./faktory.sh
 # ./go.sh
 # ./gotop.sh
@@ -30,10 +28,14 @@ cd $HOME/dotfiles/install
 ./universal-ctags.sh
 ./nvim.sh
 ./xdotool.sh
+
 ./zsh.sh
+./tmux.sh
+./vim.sh
+
 ./oh_my_zsh.sh
+
 ./xvfb.sh
-./jemalloc.sh
 ./ruby_asdf.sh
 ./postgres_asdf.sh 12.0
 # ./alacritty.sh

@@ -20,4 +20,4 @@
 # TO BE CONTINUED...
 # ON NEWER UBUNTU VERSION
 
-sudo apt install rofi -y
+# sudo apt install rofi -y
