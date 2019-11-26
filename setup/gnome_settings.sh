@@ -27,3 +27,4 @@ gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/prof
 ### Gnome settings ###
 # Set default monospace font
 dconf write /org/gnome/desktop/interface/monospace-font-name "'Monaco Regular 14'"
+
