@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 timestamp=$(date +%s)
 destination_dir=/tmp/dunst-$timestamp
 

@@ -476,13 +476,13 @@ nnoremap m :ToggleCurrentWindowZoom <CR>
 " Swith between tabs
 " nnoremap m gt
 
-" Select tab by nuber
+" Select tab by number
 " 'ctrl-m 1' - selects first tab, etc
 for i in range(1, 9)
   execute "nnoremap \<C-w>" . i . " " . i . "gt<CR>"
 endfor
 
-" Select tab by nuber
+" Select tab by number
 " 'Leader 1' - selects first tab, etc
 for i in range(1, 5)
   execute "nnoremap \<Leader>" . i . " " . i . "gt<CR>"

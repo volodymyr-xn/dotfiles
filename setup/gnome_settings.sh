@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+##### Gnome settings #####
+
 # Disable Caps Lock
 # Alt+Shift - language swtich
 dconf write \
@@ -24,6 +26,14 @@ gnome_terminal=$(gsettings get org.gnome.Terminal.ProfilesList default)
 gnome_terminal=${gnome_terminal:1:-1} # remove leading and trailing single quotes
 gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$gnome_terminal/" font "Monaco Regular 14"
 
-### Gnome settings ###
 # Set default monospace font
 dconf write /org/gnome/desktop/interface/monospace-font-name "'Monaco Regular 14'"
+
+### Gnome extensions ###
+### List of enabled extensions
+dconf write /org/gnome/shell/enabled-extensions \
+  "['auto-move-windows@gnome-shell-extensions.gcampax.github.com']"
+
+### Auto move windows extension config
+dconf write /org/gnome/shell/extensions/auto-move-windows/application-list \
+  "[ 'chromium_chromium.desktop:1', 'alacritty.desktop:2', 'slack_slack.desktop:3', 'firefox.desktop:4']"
