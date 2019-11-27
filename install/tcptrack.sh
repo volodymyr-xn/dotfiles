@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-sudo apt-get install tcptrack
+sudo apt install tcptrack
 
