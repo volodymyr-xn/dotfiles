@@ -5,6 +5,10 @@
 # Schema shortcuts
 media_keys_keybinding_schema=/org/gnome/settings-daemon/plugins/media-keys
 
+# Screen lock
+# Ctrl-Alt-l
+dconf write $media_keys_keybinding_schema/screensaver "['<Primary><Alt>l']"
+
 # Play sound
 # zero on numpad
 dconf write $media_keys_keybinding_schema/play "['KP_Insert']"
