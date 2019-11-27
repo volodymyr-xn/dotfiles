@@ -44,5 +44,5 @@ alias rake='bundle exec rake'
 alias bx='bundle exec'
 
 # Ctags
-alias ct='ctags -R --languages=ruby,javascript --sort=yes  --tag-relative=yes --exclude=.git --exclude=log --exclude=node_modules . $(bundle list --paths)'
-alias jt="ctags -R app config lib && sed -i '' -E '/^(if|switch|function|module\.exports|it|describe).+language:js$/d' tags"
+alias ctags-ruby='ctags -R --languages=ruby,javascript --sort=yes  --tag-relative=yes --exclude=.git --exclude=log --exclude=node_modules . $(bundle list --paths)'
+alias ctags-javascript="ctags -R app config lib && sed -i '' -E '/^(if|switch|function|module\.exports|it|describe).+language:js$/d' tags"
