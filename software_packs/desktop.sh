@@ -2,15 +2,13 @@
 
 cd $HOME/dotfiles/install
 
-$HOME/dotfiles/software_development
-
+./arc-theme.sh
+./tweak_tool.sh
 ./numix-circle.sh
 ./rclone.sh
-
-./tweak_tool.sh
-
+./java.sh
+./dconf-editor.sh
+./tcptrack.sh
 ./xdotool.sh
 ./xvfb.sh
-
-./rofi_apt.sh
-./chromium.sh
+./rofi_from_apt.sh
