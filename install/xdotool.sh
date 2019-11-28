@@ -9,4 +9,8 @@ echo "Stating installl"
 git clone https://github.com/jordansissel/xdotool $xdotool_source_dir
 
 echo "Stating compilation process"
-( cd $xdotool_source_dir && make -j 8 && sudo make install -j 8)
+( cd $xdotool_source_dir && make -j $(nproc) && sudo make install)
+
+rm -rf $xdotool_source_dir
+
+# or just brew install xdotool
