@@ -12,3 +12,5 @@ cd $HOME/dotfiles/install
 ./xdotool.sh
 ./xvfb.sh
 ./rofi_from_apt.sh
+./adb.sh
+./chromium

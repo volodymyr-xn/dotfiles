@@ -1,6 +1,6 @@
 rails
 pry
-pry-doc
-gem-ctags
-tmuxinator
-rb-readline
+#pry-doc
+#gem-ctags
+#tmuxinator
+#rb-readline
