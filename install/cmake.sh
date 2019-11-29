@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
-brew install cmake
+# brew install cmake
+yes | sudo apt install cmaka

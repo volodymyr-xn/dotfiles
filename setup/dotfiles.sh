@@ -6,16 +6,16 @@ installation_log() {
   printf "\n✨ \e[32m(Dotfiles) $fmt\n" "$@"
 }
 
-backup_file() {
-  # If file alreay present - backup it
-  if [ -f $HOME/.$1 ]; then
-    installation_log ".$1 already present. Backing up..."
-
-    cp $HOME/.$1 "$HOME/.${1}_backup"
-
-    rm -f $HOME/.$1
-  fi
-}
+# backup_file() {
+#   # If file alreay present - backup it
+#   if [ -f $HOME/.$1 ]; then
+#     installation_log ".$1 already present. Backing up..."
+#
+#     cp $HOME/.$1 "$HOME/.${1}_backup"
+#
+#     rm -f $HOME/.$1
+#   fi
+# }
 
 
 symlink_file() {
@@ -25,7 +25,7 @@ symlink_file() {
 }
 
 setup_settings_file() {
-  backup_file $1
+  # backup_file $1
   symlink_file $1
 }
 
@@ -38,10 +38,10 @@ set -e # Terminate script if anything exits with a non-zero value
 set -u # Prevent unset variables
 
 files_to_symlink="\
-      vim tmux zsh ackrc asdfrc ctags config.reek gemrc \
+      vim tmux zsh ackrc asdfrc ctags gemrc \
       gitconfig gitignore_global gitmessage npmrc zshrc \
       inputrc pryrc default-gems asdfrc bashrc editorconfig \
-      stylelint"
+      rubocop.yml eslintrc.js config.reek stylelint"
 
 DOTFILES_DIR=$HOME/dotfiles
 
@@ -74,6 +74,9 @@ ln -sf $DOTFILES_DIR/kitty.conf $HOME/.config/kitty/
 
 installation_log "Linking Rofi config dir"
 ln -sf $DOTFILES_DIR/rofi $HOME/.config/rofi
+
+installation_log "Linking Rubocop config dir"
+ln -sf $DOTFILES_DIR/rubocop $HOME/.config/rubocop
 
 # Install Neovim config
 # Create directory for neovim config

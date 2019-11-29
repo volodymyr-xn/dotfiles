@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-yes | sudo apt-get install dconf-editor
+yes | sudo apt install dconf-editor

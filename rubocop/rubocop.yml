@@ -1,0 +1,159 @@
+AllCops:
+  Exclude:
+    - 'bin/*'
+    - 'node_modules/**/*'
+    - 'db/**/*'
+    - 'config/**/*'
+    - 'util/**/*'
+    - 'spec/**/*'
+    - 'vendor/**/*'
+    - '.pryrc'
+    - 'Guardfile'
+
+
+Style/EmptyLambdaParameter:
+  Enabled: true
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
+
+Style/BlockDelimiters:
+  Enabled: true
+  EnforcedStyle: 'braces_for_chaining'
+
+# Add a comment describing each gem in Gemfile
+Bundler/GemComment:
+  Enabled: true
+
+Layout/SpaceInLambdaLiteral:
+  Enabled: true
+  EnforcedStyle: 'require_space'
+
+Metrics/ClassLength:
+  Max: 350
+  Exclude:
+    - 'app/models/**/*'
+
+Metrics/MethodLength:
+  Max: 40
+  Exclude:
+    - 'app/searches/**/*'
+
+Metrics/LineLength:
+  Max: 100
+  IgnoredPatterns: ['(\A|\s)#']
+
+Metrics/AbcSize:
+  Max: 30
+
+Metrics/PerceivedComplexity:
+  Max: 8
+
+Metrics/CyclomaticComplexity:
+  Max: 8
+
+Documentation:
+    Enabled: false
+
+Style/CommentAnnotation:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+Naming/AccessorMethodName:
+  Enabled: false
+
+Style/Lambda:
+  Enabled: false
+
+Style/LambdaCall:
+  Enabled: false
+
+Style/SymbolArray:
+  Enabled: false
+
+Style/RegexpLiteral:
+  Enabled: false
+
+Style/WordArray:
+  Enabled: false
+
+Style/RedundantSelf:
+  Enabled: false
+
+
+Layout/MultilineMethodCallIndentation:
+  Enabled: false
+
+Style/SafeNavigation:
+  Enabled: false
+
+Layout/AlignHash:
+  Enabled: false
+
+Style/IfUnlessModifier:
+  Enabled: false
+
+Naming/PredicateName:
+  Enabled: false
+
+Style/AndOr:
+  Enabled: false
+
+Lint/AmbiguousOperator:
+  Enabled: false
+
+Style/NegatedIf:
+ Enabled: false
+
+Lint/UnusedBlockArgument:
+ Enabled: false
+
+Lint/HandleExceptions:
+  Enabled: false
+
+Style/RedundantBegin:
+  Enabled: false
+
+Style/StringLiterals:
+  Enabled: false
+
+Style/MutableConstant:
+  Enabled: false
+
+Style/GuardClause:
+  Enabled: false
+
+Style/Alias:
+  Enabled: false
+
+Layout/SpaceAroundOperators:
+  Enabled: false
+
+Naming/MemoizedInstanceVariableName:
+  Enabled: false
+
+Style/FormatString:
+  Enabled: false
+
+Style/IfInsideElse:
+  Enabled: false
+
+Style/MultilineMemoization:
+  Enabled: false
+
+Style/RescueModifier:
+  Enabled: false
+
+Layout/TrailingBlankLines:
+  Enabled: false
+
+Layout/EmptyLinesAroundClassBody:
+  Enabled: false
+
+Layout/EmptyLinesAroundExceptionHandlingKeywords:
+  Enabled: false
+
+Bundler/OrderedGems:
+  Enabled: false

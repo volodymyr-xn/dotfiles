@@ -9,6 +9,10 @@ media_keys_keybinding_schema=/org/gnome/settings-daemon/plugins/media-keys
 # Ctrl-Alt-l
 dconf write $media_keys_keybinding_schema/screensaver "['<Primary><Alt>l']"
 
+# Close application window
+# Alt-q
+dconf write /org/gnome/desktop/wm/keybindings/close "['<Alt>q']"
+
 # Play sound
 # zero on numpad
 dconf write $media_keys_keybinding_schema/play "['KP_Insert']"
@@ -27,7 +31,7 @@ dconf write $media_keys_keybinding_schema/volume-mute "['KP_Multiply']"
 
 # Previous track
 # 1 on numpad
-dconf write $media_keys_keybinding_schema/previous "['KP_End']"
+dconf write $media_keys_keybinding_schema/previous "['KP_1']"
 
 # Next track
 # 2 on numpad
