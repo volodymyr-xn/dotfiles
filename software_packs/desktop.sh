@@ -14,3 +14,4 @@ cd $HOME/dotfiles/install
 ./rofi_from_apt.sh
 ./adb.sh
 ./chromium
+./zenity

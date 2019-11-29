@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #Install required packages to allow apt to use a repository over HTTPS
-yes | sudo apt-get install \
+yes | sudo apt install \
   apt-transport-https \
   ca-certificates \
   curl \
