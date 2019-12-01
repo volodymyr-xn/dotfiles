@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+# sudo apt install wine
+
+# Enable 32 bit architecture
+sudo dpkg --add-architecture i386
+
+wget -nc https://dl.winehq.org/wine-builds/winehq.key
+sudo apt-key add winehq.key
+
+# For ubuntu 19.10
+sudo apt-add-repository 'deb https://dl.winehq.org/wine-builds/ubuntu/ eoan main'
+
+sudo apt-get install --install-recommends winehq-stable

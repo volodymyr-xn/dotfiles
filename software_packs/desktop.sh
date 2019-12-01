@@ -13,5 +13,7 @@ cd $HOME/dotfiles/install
 ./xvfb.sh
 ./rofi_from_apt.sh
 ./adb.sh
-./chromium
-./zenity
+./chromium.sh
+./zenity.sh
+./wine.sh
+./yacc_reader.sh

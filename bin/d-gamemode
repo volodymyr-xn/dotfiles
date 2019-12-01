@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+systemd_gamemode_unit_name=gamemoded.service
+
+case $1 in
+    s|start)
+      systemctl --user start $systemd_gamemode_unit_name
+      echo "Gamemode is started"
+    ;;
+    stop|stop)
+      systemctl --user stop $systemd_gamemode_unit_name
+      echo "Gamemode is stoped"
+    ;;
+    status)
+      systemctl --user status $systemd_gamemode_unit_name
+    ;;
+    disable)
+      systemctl --user disable $systemd_gamemode_unit_name
+    ;;
+    enable)
+      systemctl --user enable $systemd_gamemode_unit_name
+    ;;
+    *)
+      systemctl --user status $systemd_gamemode_unit_name
+    ;;
+esac
