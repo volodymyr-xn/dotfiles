@@ -546,6 +546,8 @@ noremap <Leader>u :FZF app/javascripts<CR>
 noremap <Leader>c :FZF app/controllers<CR>
 nnoremap <silent> <Leader>f :Ag <C-R><C-W><CR>
 
+" TODO add mapping for spliting tmux and running rails console
+
 " Unmap GitGutter leaders that I don't use. This avoids delays for other leaders.
 " autocmd VimEnter * nunmap <leader>hp
 " autocmd VimEnter * nunmap <leader>hr
