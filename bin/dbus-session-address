@@ -2,10 +2,10 @@
 
 # First implementation
 # OLD implementation
-program_to_detect_dbus=gnome-session
-username=$(/usr/bin/whoami)
-pid=$(pgrep -u $username $program_to_detect_dbus)
-grep -z DBUS_SESSION_BUS_ADDRESS /proc/$pid/environ | sed 's/DBUS_SESSION_BUS_ADDRESS=//'
+# program_to_detect_dbus=gnome-session
+# username=$(/usr/bin/whoami)
+# pid=$(pgrep -u $username $program_to_detect_dbus)
+# grep -z DBUS_SESSION_BUS_ADDRESS /proc/$pid/environ | sed 's/DBUS_SESSION_BUS_ADDRESS=//'
 
 # Second implementation
 # user_id=$(id --user)
@@ -14,8 +14,13 @@ grep -z DBUS_SESSION_BUS_ADDRESS /proc/$pid/environ | sed 's/DBUS_SESSION_BUS_AD
 
 # Third implementation
 # dbus_file_name=$(ls ~/.dbus/session-bus | tail -n 1)
-
+#
 # cat ~/.dbus/session-bus/$dbus_file_name \
 #   | grep -z DBUS_SESSION_BUS_ADDRESS \
 #   | sed 's/DBUS_SESSION_BUS_ADDRESS=//'
-# # dbus-launch | sed 's/DBUS_SESSION_BUS_ADDRESS=//'
+# dbus-launch | sed 's/DBUS_SESSION_BUS_ADDRESS=//'
+
+
+# Ubuntu 19.10 implementation
+user_id=$(id --user)
+echo "unix:path/run/user/$user_id/bus"

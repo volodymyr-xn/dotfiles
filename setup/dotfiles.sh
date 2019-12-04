@@ -90,6 +90,6 @@ ln -sf $DOTFILES_DIR/htop/htoprc $HOME/.config/htop/
 
 # Symlink file templates
 mkdir -p $HOME/Templates
-ln -sf $DOTFILES_DIR/file-templates/gnome/* $HOME/Templates/
+ln -sf $DOTFILES_DIR/file-templates/* $HOME/Templates/
 
 installation_log "Dotfiles installation complete!"
