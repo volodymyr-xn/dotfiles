@@ -21,11 +21,13 @@ git clone \
   $destination_dir
 
 
+# Compile and install YACReader
 cd $destination_dir/YACReader
 qmake PREFIX=/usr/local CONFIG+=no_pdf CONFIG+=unarr
 make -j $(nproc)
 sudo make install
 
+# Compile and install YACReaderLibrary
 cd $destination_dir/YACReaderLibrary
 qmake PREFIX=/usr/local CONFIG+=no_pdf CONFIG+=unarr
 make -j $(nproc)
