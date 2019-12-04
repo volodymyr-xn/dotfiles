@@ -5,6 +5,7 @@ cd $HOME/dotfiles/install
 ./arc-theme.sh
 ./tweak_tool.sh
 ./numix-circle.sh
+./go.sh
 ./rclone.sh
 ./java.sh
 ./dconf-editor.sh
