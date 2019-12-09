@@ -24,7 +24,7 @@ dconf write /org/gnome/desktop/interface/cursor-theme "'DMZ-Black'"
 # Gnome terminal settings
 gnome_terminal=$(gsettings get org.gnome.Terminal.ProfilesList default)
 gnome_terminal=${gnome_terminal:1:-1} # remove leading and trailing single quotes
-gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$gnome_terminal/" font "Monaco Regular 14"
+gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$gnome_terminal/" font "Monego Regular 14"
 
 # Set default monospace font
 dconf write /org/gnome/desktop/interface/monospace-font-name "'Monego Bold 14'"
