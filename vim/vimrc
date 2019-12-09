@@ -136,6 +136,12 @@ Plug('ClockworkNet/vim-apparmor')
 " Improved nginx vim plugin (incl. syntax highlighting)
 Plug('chr4/nginx.vim')
 
+" JSON highlight
+Plug('elzr/vim-json')
+
+" Dracula color scheme
+Plug('dracula/vim')
+
 call plug#end()
 "============================================================================
 " ===================== General settings ====================================
@@ -631,7 +637,7 @@ let g:jsx_ext_required = 0
 
 " ===================== Lightline settings  ====================================
 let g:lightline = {
-      \ 'colorscheme': 'one',
+      \ 'colorscheme': 'dracula',
       \ 'active': {
       \   'left': [ [ 'mode', 'paste' ],
       \             ['filename', 'modified'] ],

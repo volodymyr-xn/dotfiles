@@ -94,13 +94,25 @@ dconf write \
 # Run universal Rofi launcher keybinding
 universal_rofi_keybinding_schema=$custom_keybinding_schema/custom1
 
+# dconf write \
+#   $universal_rofi_keybinding_schema/name \
+#   "'Rofi'"
+#
+# dconf write \
+#   $universal_rofi_keybinding_schema/command \
+#   "'rofi -combi-modi window,drun -show combi -modi combi'"
+#
+# # Ctrl+Shift+p
+# dconf write \
+#   $universal_rofi_keybinding_schema/binding \
+#   "'<Primary><Shift>p'"
 dconf write \
   $universal_rofi_keybinding_schema/name \
-  "'Rofi'"
+  "'Aurora'"
 
 dconf write \
   $universal_rofi_keybinding_schema/command \
-  "'rofi -combi-modi window,drun -show combi -modi combi'"
+  "'aurora-searcher'"
 
 # Ctrl+Shift+p
 dconf write \
