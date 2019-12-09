@@ -13,7 +13,8 @@ dconf write /org/gnome/desktop/wm/preferences/theme "'Adwaita-dark'"
 dconf write /org/gnome/desktop/interface/gtk-theme "'Adwaita-dark'"
 
 # Icon theme
-dconf write /org/gnome/desktop/interface/icon-theme "'Numix-Circle'"
+# Temporary disable
+# dconf write /org/gnome/desktop/interface/icon-theme "'Numix-Circle'"
 
 # Curson theme
 dconf write /org/gnome/desktop/interface/cursor-theme "'DMZ-Black'"
