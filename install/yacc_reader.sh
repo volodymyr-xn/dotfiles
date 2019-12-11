@@ -17,8 +17,8 @@ sudo apt install \
   qtdeclarative5-dev
 
 git clone \
-  https://github.com/YACReader/yacreader \
-  $destination_dir
+    https://github.com/YACReader/yacreader \
+    $destination_dir
 
 
 # Compile and install YACReader
