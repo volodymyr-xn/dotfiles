@@ -1,3 +1,6 @@
+# vim: syntax=bash
+# nvim: syntax=bash
+
 export TERM=xterm-256color
 
 # Use vim as default editor
@@ -43,6 +46,9 @@ export HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX/Homebrew"
 export GOPATH="$HOME/.programing_languages/go"
 
 if [[ -z $TMUX ]]; then
+  # Add linuxbrew to PATH
+  export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin:$PATH"
+
   # Add ~/bin to PATH
   export PATH="$HOME/bin:$PATH"
 
@@ -63,9 +69,6 @@ if [[ -z $TMUX ]]; then
 
   # Add local binaries to path
   export PATH="$HOME/.local/bin:$PATH"
-
-  # Add linuxbrew to PATH
-  export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin:$PATH"
 fi
 
 # Ruby verbose mode
