@@ -2,7 +2,7 @@
 
 dconf write \
   /org/gnome/shell/enabled-extensions \
-  "['user-theme@gnome-shell-extensions.gcampax.github.com', 'workspace-indicator@gnome-shell-extensions.gcampax.github.com', 'auto-move-windows@gnome-shell-extensions.gcampax.github.com', 'openweather-extension@jenslody.de', 'sound-output-device-chooser@kgshank.net', 'gsconnect@andyholmes.github.io']"
+  "['user-theme@gnome-shell-extensions.gcampax.github.com', 'workspace-indicator@gnome-shell-extensions.gcampax.github.com', 'auto-move-windows@gnome-shell-extensions.gcampax.github.com', 'openweather-extension@jenslody.de', 'sound-output-device-chooser@kgshank.net', 'gsconnect@andyholmes.github.io', 'gamemode@christian.kellner.me']"
 
 # dconf write \
   # /org/gnome/shell/extensions/sound-output-device-chooser/ports-settings \

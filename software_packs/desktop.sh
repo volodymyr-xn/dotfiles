@@ -7,7 +7,7 @@ cd $HOME/dotfiles/install
 ./numix-circle.sh
 ./go.sh
 ./rclone.sh
-./java.sh
+# ./java.sh
 ./dconf-editor.sh
 ./tcptrack.sh
 ./xdotool.sh
@@ -17,4 +17,5 @@ cd $HOME/dotfiles/install
 ./chromium.sh
 ./zenity.sh
 ./wine.sh
+./photoshop_wine_dependencies.sh
 ./yacc_reader.sh

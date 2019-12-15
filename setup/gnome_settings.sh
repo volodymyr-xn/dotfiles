@@ -22,6 +22,8 @@ dconf write /org/gnome/desktop/interface/cursor-theme "'DMZ-Black'"
 # Set gnome shell theme
 # gsettings set org.gnome.shell.extensions user-theme 'Arc-Dark'
 
+dconf write /org/gnome/shell/extensions/dash-to-dock/scroll-action "'cycle-windows'"
+
 # Gnome terminal settings
 gnome_terminal=$(gsettings get org.gnome.Terminal.ProfilesList default)
 gnome_terminal=${gnome_terminal:1:-1} # remove leading and trailing single quotes
