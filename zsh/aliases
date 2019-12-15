@@ -5,6 +5,9 @@ alias v='vim'
 alias nv='nvim'
 alias vn='nvim'
 
+# Quickly open current directory
+alias na='xdg-open .'
+
 # General UNIX
 alias mv='mv -iv'
 alias cp='cp -iv'
