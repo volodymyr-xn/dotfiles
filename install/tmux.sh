@@ -12,16 +12,15 @@ git clone https://github.com/tmux/tmux.git $tmux_source_dir
 
 cd $tmux_source_dir
 
-tmux_version=2.9a
+tmux_version=3.0a
 
-# Checkout to last stable version
+Checkout to last stable version
 git checkout $tmux_version
 
 sh autogen.sh
 ./configure --prefix=$HOME/.local/
 
 make -j $(nproc)
-
-sudo make install
+make install
 
 # brew install tmux
