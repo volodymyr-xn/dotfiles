@@ -1,6 +1,7 @@
 rails
 pry
-#pry-doc
-#gem-ctags
-#tmuxinator
-#rb-readline
+solargraph
+pry-doc
+gem-ctags
+tmuxinator
+rb-readline

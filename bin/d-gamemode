@@ -16,9 +16,11 @@ case $1 in
     ;;
     disable)
       systemctl --user disable $systemd_gamemode_unit_name
+      echo "Gamemode is disabled"
     ;;
     enable)
       systemctl --user enable $systemd_gamemode_unit_name
+      echo "Gamemode is enabled"
     ;;
     *)
       systemctl --user status $systemd_gamemode_unit_name

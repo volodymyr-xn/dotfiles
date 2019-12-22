@@ -1,0 +1,5 @@
+# ctrl-f
+bindkey -s "^f" 'git status\n'
+
+# ctrl-e
+bindkey -s "^e" 'git diff --staged\n'
