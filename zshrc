@@ -15,7 +15,7 @@ source $HOME/dotfiles/zsh/oh-my-zsh
 source $HOME/dotfiles/zsh/aliases
 source $HOME/dotfiles/zsh/tmux
 source $HOME/dotfiles/zsh/functions
-source $HOME/dotfiles/zsh/key-bindings
+source $HOME/dotfiles/zsh/keybindings
 
 # Enable fzf
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

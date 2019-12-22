@@ -23,6 +23,7 @@ Plug('tpope/vim-repeat')
 
 " Show changed lines from git
 Plug('airblade/vim-gitgutter')
+" mhinz/vim-signify
 
 " Lightweight support for Ruby's Bundler
 Plug('tpope/vim-bundler')
@@ -141,6 +142,10 @@ Plug('elzr/vim-json')
 
 " Dracula color scheme
 Plug('dracula/vim')
+
+
+Plug 'prabirshrestha/async.vim'
+Plug 'prabirshrestha/vim-lsp'
 
 call plug#end()
 "============================================================================
@@ -839,3 +844,15 @@ hi! link TabLineSel Function
 " set tabline="what status line equals, or equaled or whatever"
 " "set or change the color of the tabline
 " hi tablinefill cterm=none ctermbg=blue ctermfg=white gui=none guibg=blue guifg=white
+
+
+
+if executable('solargraph')
+    " gem install solargraph
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'solargraph',
+        \ 'cmd': {server_info->[&shell, &shellcmdflag, 'solargraph stdio']},
+        \ 'initialization_options': {"diagnostics": "true"},
+        \ 'whitelist': ['ruby'],
+        \ })
+endif

@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 export GTK_DEBUG=interative
 
-@$
+/usr/bin/exec "$@"

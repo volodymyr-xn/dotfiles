@@ -10,7 +10,7 @@ dconf write \
 
 ### Auto move windows extension config
 dconf write /org/gnome/shell/extensions/auto-move-windows/application-list \
-  "[ 'chromium_chromium.desktop:1', 'alacritty.desktop:2', 'slack_slack.desktop:3', 'firefox.desktop:4']"
+  "[ 'chromium_chromium.desktop:1', 'alacritty.desktop:2', 'slack.desktop:3', 'firefox.desktop:4']"
 
 dconf write \
   /org/gnome/desktop/wm/preferences/num-workspaces \
