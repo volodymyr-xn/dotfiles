@@ -4,7 +4,6 @@
 ./installation_scripts/linuxbrew.sh
 ./installation_scripts/asdf.sh
 
-
 ./setup/dotfiles.sh
 ./setup/gnome_settings.sh
 ./setup/keybindings.sh

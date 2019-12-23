@@ -31,3 +31,12 @@ gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/prof
 
 # Set default monospace font
 dconf write /org/gnome/desktop/interface/monospace-font-name "'Monego Bold 14'"
+
+# Remeber recent files in different apps(evince, for example)
+dconf write /org/gnome/desktop/privacy/remember-recent-files true
+
+# Use new nautilus rendering(requires custom theme support for better look)
+# New rendering doent work(end of 2019)
+# dconf write /org/gnome/nautilus/preferences/use-experimental-views true
+
+
