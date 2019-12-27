@@ -23,4 +23,4 @@
 
 # Ubuntu 19.10 implementation
 user_id=$(id --user)
-echo "unix:path/run/user/$user_id/bus"
+echo "unix:path=/run/user/$user_id/bus"

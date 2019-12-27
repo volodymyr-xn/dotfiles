@@ -1,5 +1,10 @@
+# Git status
 # ctrl-f
 bindkey -s "^f" 'git status\n'
 
+# Git diff staged files
 # ctrl-e
 bindkey -s "^e" 'git diff --staged\n'
+
+# Experimental
+bindkey -s "^n" 'cd ~/dev_notes\n'

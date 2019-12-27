@@ -361,6 +361,9 @@ au BufRead,BufNewFile *.md setlocal textwidth=75
 " Frozen string literal for Ruby
 ab fsl # frozen_string_literal: true
 
+" Binding pry abbreviation
+iabbr bpry binding.pry
+
 "============================================================================
 "====================== Mapings ============================================
 "============================================================================
@@ -846,7 +849,7 @@ hi! link TabLineSel Function
 " hi tablinefill cterm=none ctermbg=blue ctermfg=white gui=none guibg=blue guifg=white
 
 
-
+" TODO experiment with ruby language server
 if executable('solargraph')
     " gem install solargraph
     au User lsp_setup call lsp#register_server({
