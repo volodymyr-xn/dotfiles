@@ -31,3 +31,4 @@ cd $HOME/dotfiles/install
 ./gpg_from_homebrew.sh
 
 ./alacritty.sh
+./geckodriver.sh

@@ -15,7 +15,7 @@ yes | sudo apt-get install git build-essential \
 timestamp=$(date +%s)
 destination_dir=/tmp/libvips-source-$timestamp
 
-# git clone https://github.com/jcupitt/libvips.git $destination_dir
+git clone https://github.com/jcupitt/libvips.git $destination_dir
 
 cd $destination_dir
 

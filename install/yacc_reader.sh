@@ -32,3 +32,5 @@ cd $destination_dir/YACReaderLibrary
 qmake PREFIX=/usr/local CONFIG+=no_pdf CONFIG+=unarr
 make -j $(nproc)
 sudo make install
+
+# run qt app with "-style adwaita-dark" argument to desktop file

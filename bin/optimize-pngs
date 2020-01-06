@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-quality=80
+quality=90
 
 mogrify -format jpg -quality $quality *.png
 
