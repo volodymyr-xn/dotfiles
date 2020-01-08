@@ -608,6 +608,9 @@ nnoremap <C-\> <NOP>
 nnoremap <C-\> :NERDTreeToggle<CR>
 autocmd VimEnter * nnoremap <C-\> :NERDTreeToggle<CR>
 
+" Disable json plugin conceal
+let g:vim_json_syntax_conceal = 0
+
 " ===================== Emmet settings  ====================================
 " Expand tag
 " imap <C-l> <C-y>,
