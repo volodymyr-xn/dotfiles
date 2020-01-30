@@ -123,7 +123,8 @@ Plug('junegunn/fzf.vim')
 Plug('benjie/local-npm-bin.vim')
 
 " Vue syntax
-Plug('posva/vim-vue')
+" Plug('posva/vim-vue')
+Plug('storyn26383/vim-vue')
 
 " Coffescript syntax
 Plug('kchmck/vim-coffee-script')
@@ -501,7 +502,7 @@ endfor
 for i in range(1, 5)
   execute "nnoremap \<Leader>" . i . " " . i . "gt<CR>"
 endfor
-
+"
 " Yank, comment and paster (usefull for refactoring)
 vnoremap M yV'] :TComment<CR>']pj
 nnoremap M yy']:TComment<CR>']pj
@@ -571,6 +572,9 @@ nnoremap <silent> <Leader>f :Ag <C-R><C-W><CR>
 "====================== Plugins settings ====================================
 "============================================================================
 
+" Set vue plugin supported preprocessors
+let g:vue_pre_processors = 'detect_on_enter'
+
 "Open ruby test in tmux pane
 let test#strategy = "vimux"
 "
@@ -578,7 +582,8 @@ let test#strategy = "vimux"
 let test#ruby#bundle_exec = 1
 
 " Run rspec with spring preloader
-let test#ruby#rspec#executable = 'rsx'
+" Temporary disable for current project without spring
+" let test#ruby#rspec#executable = 'rsx'
 
 " Use vertical tmux slpit for vimux commands
 let g:VimuxOrientation = "h"

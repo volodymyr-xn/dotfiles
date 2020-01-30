@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Books directory
+# Main directory
 MAIN_DIR=$1
 PATTERN=${2:-".*"}
 
@@ -41,10 +41,10 @@ gen_list(){
 
 main() {
   get_files
-  book=$( (gen_list) | rofi -dmenu -i -matching fuzzy -no-custom -location 0 -p "File" )
+  file=$( (gen_list) | rofi -dmenu -i -matching fuzzy -no-custom -location 0 -p "File" )
 
-  if [ -n "$book" ]; then
-    xdg-open "${FILES[$book]}"
+  if [ -n "$file" ]; then
+    xdg-open "${FILES[$file]}"
   fi
 }
 

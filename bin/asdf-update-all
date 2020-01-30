@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+asdf update
+
+asdf plugin-update --all
