@@ -19,3 +19,4 @@ cd $HOME/dotfiles/install
 ./wine.sh
 ./photoshop_wine_dependencies.sh
 ./yacc_reader.sh
+./fd-find.sh

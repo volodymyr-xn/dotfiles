@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+# Main directory
+MAIN_DIR=$1
+
+# readarray -t FILES_PATH_LIST <<< "$(fdfind "." "$MAIN_DIR")"
+readarray -t FILES_PATH_LIST <<< "$(find "$MAIN_DIR" -type f)"
+
+declare -A FILES
+
+if [[ ! -z ${FILES_PATH_LIST[@]} ]]; then
+  for i in "${!FILES_PATH_LIST[@]}"
+  do
+    path=${FILES_PATH_LIST[$i]}
+    filename=$(basename "${FILES_PATH_LIST[$i]}")
+
+    FILES+=([$filename]="$path")
+  done
+else
+  echo "$MAIN_DIR is empty!"
+  exit
+fi
+
+generate_display_list(){
+  for i in "${!FILES[@]}"
+  do
+    echo "$i"
+  done
+}
+
+command_file=$( (generate_display_list) | rofi -dmenu -i -matching fuzzy -no-custom -location 0 -p "Command" )
+
+if [ -n "$command_file" ]; then
+  bash "${FILES[$command_file]}"
+fi
+
+exit 0
