@@ -28,9 +28,7 @@ dconf write /org/gnome/shell/extensions/dash-to-dock/scroll-action "'cycle-windo
 gnome_terminal=$(gsettings get org.gnome.Terminal.ProfilesList default)
 gnome_terminal=${gnome_terminal:1:-1} # remove leading and trailing single quotes
 terminal_font="Monego Regular 14"
-gsettings set \
-  "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$gnome_terminal/" \
-  font $terminal_font
+# gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$gnome_terminal/" font $terminal_font
 
 # Set default monospace font
 dconf write /org/gnome/desktop/interface/monospace-font-name "'Monego Bold 14'"
