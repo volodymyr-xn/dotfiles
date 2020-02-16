@@ -15,10 +15,10 @@ sudo apt-get build-dep vim-gtk
   --enable-gui=gtk2 \
   --enable-gtk2-check \
   --with-x \
-  --prefix=$HOME/.local/
+  # --prefix=$HOME/.local/
 
 make -j $(nproc)
-yes | make install
+yes | sudo make install
 
 # echo "Remove vim source directory $vim_source_dir"
 # rm -rf $vim_source_dir
