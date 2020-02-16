@@ -6,7 +6,7 @@ git clone https://github.com/doitsujin/dxvk $destination_dir
 
 cd $destination_dir
 
-# git checkout v1.4.6
+# git checkout v1.5.0
 
 export WINEPREFIX=$HOME/.wine
 chmod +x ./setup_dxvk.sh

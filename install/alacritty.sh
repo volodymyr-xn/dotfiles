@@ -1,13 +1,5 @@
 #!/usr/bin/env bash
 
-# Install Rustup
-curl https://sh.rustup.rs -sSf | sh
-source $HOME/.cargo/env
-
-# Install last stable version of Rust
-rustup override set stable
-rustup update stable
-
 # install dependencies
 yes | sudo apt-get install cmake libfreetype6-dev libfontconfig1-dev xclip
 

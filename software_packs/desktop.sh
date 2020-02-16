@@ -20,3 +20,5 @@ cd $HOME/dotfiles/install
 ./photoshop_wine_dependencies.sh
 ./yacc_reader.sh
 ./fd-find.sh
+./lm-sensors.sh
+./psensor.sh

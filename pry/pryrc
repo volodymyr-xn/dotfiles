@@ -9,7 +9,7 @@ def fzf_installed?
   !`which fzf`&.size&.zero?
 end
 
-if fzf_installed?
+if fzf_installed? && defined?(RbReadline)
   def RbReadline.rl_reverse_search_history(_sign, _key)
     command = `cat #{Pry.config.history.file} | fzf --tac |  tr '\n' ' '`
 
