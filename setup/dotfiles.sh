@@ -38,7 +38,7 @@ files_to_symlink="\
       inputrc default-gems asdfrc bashrc editorconfig \
       eslintrc.js config.reek stylelint"
 
-dirs_to_symlink="alacritty kitty rofi rubocop pry htop"
+dirs_to_symlink="alacritty bundle kitty rofi rubocop pry htop"
 
 #===============================================================
 #================= Instalation =================================

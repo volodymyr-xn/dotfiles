@@ -2,6 +2,7 @@
 
 # Main directory
 MAIN_DIR=$1
+COMMAND_RUNNER_TITLE=${2:-"Command"}
 
 # readarray -t FILES_PATH_LIST <<< "$(fdfind "." "$MAIN_DIR")"
 readarray -t FILES_PATH_LIST <<< "$(find "$MAIN_DIR" -type f)"
@@ -28,7 +29,7 @@ generate_display_list(){
   done
 }
 
-command_file=$( (generate_display_list) | rofi -dmenu -i -matching fuzzy -no-custom -location 0 -p "Command" )
+command_file=$( (generate_display_list) | rofi -dmenu -i -matching fuzzy -no-custom -location 0 -p "$COMMAND_RUNNER_TITLE" )
 
 if [ -n "$command_file" ]; then
   bash "${FILES[$command_file]}"
