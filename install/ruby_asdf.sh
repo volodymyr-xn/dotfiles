@@ -2,7 +2,7 @@
 
 asdf plugin-add ruby https://github.com/asdf-vm/asdf-ruby.git
 
-ruby_version=${1:-2.6.3}
+ruby_version=${1:-2.6.5}
 
 RUBY_CONFIGURE_OPTS=--with-jemalloc asdf install ruby $ruby_version
 
