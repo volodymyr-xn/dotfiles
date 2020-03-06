@@ -130,7 +130,7 @@ Plug('storyn26383/vim-vue')
 Plug('kchmck/vim-coffee-script')
 
 " Coc is an intellisense engine for Vim/Neovim.
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " AppArmor syntax highlight
 Plug('ClockworkNet/vim-apparmor')

@@ -1,12 +1,15 @@
+# vim: syntax=bash
+# nvim: syntax=bash
+
 export ZSH=$HOME/.oh-my-zsh
+
 DISABLE_UPDATE_PROMPT=true
 DISABLE_AUTO_UPDATE=true
 COMPLETION_WAITING_DOTS="true"
 
-ZSH_THEME="robbyrussell"
+#  ZSH_THEME="robbyrussell"
+ZSH_THEME="avit"
 
 plugins=(git vi-mode)
 
 source $ZSH/oh-my-zsh.sh
-
-

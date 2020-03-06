@@ -7,4 +7,6 @@
 #   corefonts mfc40 mfc42
 
 # from habr
-winetricks fontsmooth=rgb allfonts corefonts vcrun2008 vcrun2010 gdiplus vcrun2012 vcrun2013 vcrun2015 atmlib msxml3 msxml6 d3dx9 d3dx10 d3dx11_42 d3dx11_43 dxvk vulkanrt
+winetricks fontsmooth=rgb allfonts corefonts vcrun2008 vcrun2010 gdiplus \
+  vcrun2012 vcrun2013 vcrun2015 atmlib msxml3 msxml6 d3dx9 d3dx10 d3dx11_42 d3dx11_43 dxvk_master vulkanrt \
+  vb6run vcrun6 wsh57 vcrun2005  mfc40 mfc42

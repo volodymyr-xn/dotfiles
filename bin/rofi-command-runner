@@ -4,18 +4,17 @@
 MAIN_DIR=$1
 COMMAND_RUNNER_TITLE=${2:-"Command"}
 
-# readarray -t FILES_PATH_LIST <<< "$(fdfind "." "$MAIN_DIR")"
-readarray -t FILES_PATH_LIST <<< "$(find "$MAIN_DIR" -type f)"
+readarray -t COMMAND_FILES <<< "$(find "$MAIN_DIR" -type f -maxdepth 1)"
 
-declare -A FILES
+declare -A COMMAND_FILES_MAP
 
-if [[ ! -z ${FILES_PATH_LIST[@]} ]]; then
-  for i in "${!FILES_PATH_LIST[@]}"
+if [[ ! -z ${COMMAND_FILES[@]} ]]; then
+  for i in "${!COMMAND_FILES[@]}"
   do
-    path=${FILES_PATH_LIST[$i]}
-    filename=$(basename "${FILES_PATH_LIST[$i]}")
+    path=${COMMAND_FILES[$i]}
+    filename=$(basename "${COMMAND_FILES[$i]}")
 
-    FILES+=([$filename]="$path")
+    COMMAND_FILES_MAP+=([$filename]="$path")
   done
 else
   echo "$MAIN_DIR is empty!"
@@ -23,16 +22,16 @@ else
 fi
 
 generate_display_list(){
-  for i in "${!FILES[@]}"
+  for i in "${!COMMAND_FILES_MAP[@]}"
   do
     echo "$i"
   done
 }
 
-command_file=$( (generate_display_list) | rofi -dmenu -i -matching fuzzy -no-custom -location 0 -p "$COMMAND_RUNNER_TITLE" )
+selected_command=$( (generate_display_list) | rofi -dmenu -i -matching fuzzy -no-custom -location 0 -p "$COMMAND_RUNNER_TITLE" )
 
-if [ -n "$command_file" ]; then
-  bash "${FILES[$command_file]}"
+if [ -n "$selected_command" ]; then
+  bash "${COMMAND_FILES_MAP[$selected_command]}"
 fi
 
 exit 0
