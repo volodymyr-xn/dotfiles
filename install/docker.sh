@@ -11,7 +11,6 @@ yes | sudo apt install \
 # Add Docker’s official GPG key
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 
-
 # Verification for gpg key
 sudo apt-key fingerprint 0EBFCD88
 

@@ -867,3 +867,43 @@ if executable('solargraph')
         \ 'whitelist': ['ruby'],
         \ })
 endif
+
+
+
+" TODO display component hierarcy in tab
+" let g:lightline = {
+"       \ 'component_expand': {
+"       \  'tabs': 'LightlineTabs'
+"       \ }
+"       \ }
+"
+" function! LightlineTabs() abort
+"   let [x, y, z] = [[], [], []]
+"   let nr = tabpagenr()
+"   let cnt = tabpagenr('$')
+"   for i in range(1, cnt)
+"     call add(i < nr ? x : i == nr ? y : z,
+"           \ '%' . i . '%%{lightline#onetab(' . i . ',' . (i == nr) . ')}'
+"           \ . (i == cnt ? '%T' : ''))
+"   endfor
+"   if len(x) > 3
+"     let x = x[len(x)-3:]
+"     let x[0] = '<' . x[0]
+"   endif
+"   if len(z) > 3
+"     let z = z[:2]
+"     let z[len(z)-1] = z[len(z)-1] . '>'
+"   endif
+"   return [x, y, z]
+" endfunction
+
+
+" Use the Tab key for autocompletion.
+" function! Tab_Or_Complete()
+"   if col('.')>1 && strpart( getline('.'), col('.')-2, 3 ) =~ '^\w'
+"     return "\<C-N>"
+"   else
+"     return "\<Tab>"
+"   endif
+" endfunction
+" :inoremap <Tab> <C-R>=Tab_Or_Complete()<CR>
