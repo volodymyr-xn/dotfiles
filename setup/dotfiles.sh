@@ -84,4 +84,3 @@ ln -sf $DOTFILES_DIR/file-templates/* $HOME/Templates/
 
 
 installation_log "Dotfiles installation complete!"
-
