@@ -21,6 +21,11 @@ symlink_file_to_home_dir() {
   symlink_to_destination "$DOTFILES_DIR/$1" "$HOME/.$1"
 }
 
+symlink_fallback_file_to_home_dir() {
+  file_basename=$(basename $1)
+  symlink_to_destination "$DOTFILES_DIR/$1" "$HOME/.$file_basename"
+}
+
 symlink_directory_to_config_dir() {
   symlink_to_destination "$DOTFILES_DIR/$1" "$HOME/.config/$1"
 }
@@ -39,6 +44,7 @@ files_to_symlink="\
       eslintrc.js config.reek stylelint"
 
 dirs_to_symlink="alacritty bundle kitty rofi rubocop pry htop"
+fallback_files_to_symlink="rubocop/rubocop.yml tmux/tmux.conf"
 
 #===============================================================
 #================= Instalation =================================
@@ -51,6 +57,11 @@ for file in $files_to_symlink; do
   symlink_file_to_home_dir $file
 done
 
+# Symlink fallback files
+for fallback_file in $fallback_files_to_symlink; do
+  symlink_fallback_file_to_home_dir $fallback_file
+done
+
 # Symlink configuration directories to config directory
 for dir in $dirs_to_symlink; do
   symlink_directory_to_config_dir $dir
@@ -58,10 +69,6 @@ done
 
 # Create local profile file if exist
 touch $HOME/.local_profile
-
-# Copy Tmux config
-installation_log "Linking .tmux.conf"
-ln -sf $DOTFILES_DIR/tmux/tmux.conf $HOME/.tmux.conf
 
 ###### .config directory links #####
 # Install Neovim config
@@ -75,4 +82,6 @@ ln -sf $DOTFILES_DIR/vim/init.vim $HOME/.config/nvim/
 mkdir -p $HOME/Templates
 ln -sf $DOTFILES_DIR/file-templates/* $HOME/Templates/
 
+
 installation_log "Dotfiles installation complete!"
+
