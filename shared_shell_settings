@@ -47,7 +47,11 @@ export GOPATH="$HOME/.programing_languages/go"
 
 if [[ -z $TMUX ]]; then
   # Add linuxbrew to PATH
-  export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin:$PATH"
+  export PATH="$PATH:$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin"
+  # Old format(homebrew binaries has lowest priority
+  # With this i have openssl bug(broken certificates), that prevents me from install
+  # Docker or just use "curl -fsSL"
+  # export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin:$PATH"
 
   # Add ~/bin to PATH
   export PATH="$HOME/bin:$PATH"

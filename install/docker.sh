@@ -12,19 +12,19 @@ yes | sudo apt install \
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 
 # Verification for gpg key
-sudo apt-key fingerprint 0EBFCD88
+yes | sudo apt-key fingerprint 0EBFCD88
 
 
 # Add docker stable respository for ubuntu
-sudo add-apt-repository \
+yes | sudo add-apt-repository \
    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
    $(lsb_release -cs) \
    stable"
 
 # Install Docker CE
-sudo apt-get install docker-ce
+yes | sudo apt-get install docker-ce docker-ce-cli containerd.io
 
 # Verify docker installation by running docker test image
-sudo docker run hello-world
+yes | sudo docker run hello-world
 
 brew install docker-compose
