@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+rm $1
+
+full_path_to_file=$(readlink -f $1)
+
+ln -s /dev/null $full_path_to_file

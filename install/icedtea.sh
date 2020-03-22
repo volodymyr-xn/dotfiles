@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Install Open JDK Java first
+https://linuxize.com/post/install-java-on-ubuntu-18-04/
+
 sudo add-apt-repository ppa:maarten-fonville/ppa
 sudo apt-get update
 sudo apt-get install icedtea-8-plugin

@@ -117,4 +117,10 @@ export GROFF_NO_SGR=1                  # for konsole and gnome-terminal
 # export XDG_USER_CONFIG_DIR=$HOME/.config
 # export XDG_CONFIG_HOME=$HOME/.config
 
+JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64/"
+
+# SSL certificates workaround for homebrew version of openssl
+export SSL_CERT_DIR=/usr/lib/ssl/certs/
+export SSL_CERT_FILE=/usr/lib/ssl/certs/ca-certificates.crt
+
 source ~/.local_profile
