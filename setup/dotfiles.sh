@@ -43,7 +43,7 @@ files_to_symlink="\
       inputrc default-gems asdfrc bashrc editorconfig \
       eslintrc.js config.reek stylelint"
 
-dirs_to_symlink="alacritty bundle kitty rofi rubocop pry htop"
+dirs_to_symlink="alacritty bundle nvim vim tmux kitty rofi rubocop pry htop"
 fallback_files_to_symlink="rubocop/rubocop.yml tmux/tmux.conf"
 
 #===============================================================
@@ -67,20 +67,17 @@ for dir in $dirs_to_symlink; do
   symlink_directory_to_config_dir $dir
 done
 
+local_shell_profile_path=$HOME/.local_profile
+
+installation_log "Create local shell profile file $local_shell_profile_path"
 # Create local profile file if exist
-touch $HOME/.local_profile
+touch $local_shell_profile_path
 
-###### .config directory links #####
-# Install Neovim config
-# Create directory for neovim config
-# TODO
-installation_log "Linking init.vim"
-mkdir -p $HOME/.config/nvim/
-ln -sf $DOTFILES_DIR/vim/init.vim $HOME/.config/nvim/
-
+file_templates_destination=$HOME/Templates/
+installation_log "Symlink file templates to $file_templates_destination"
 # Symlink file templates
 mkdir -p $HOME/Templates
-ln -sf $DOTFILES_DIR/file-templates/* $HOME/Templates/
+ln -sf "$DOTFILES_DIR/file-templates/*" "$file_templates_destination"
 
-
-installation_log "Dotfiles installation complete!"
+echo ''
+echo "✨✨✨Dotfiles installation complete!🍰✨✨✨"

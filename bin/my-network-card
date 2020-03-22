@@ -24,7 +24,7 @@
 #
 # puts network_cards_detailed_info
 #
-
+#
 module PCIDevicesInfo
   NETWORK_DEVICE_NAME_REGEX = /[Nn]et/
 
