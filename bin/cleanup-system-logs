@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+sudo journalctl --vacuum-time=7d
+sudo journalctl --vacuum-size=200M

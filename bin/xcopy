@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
+# Copies stdin into clipboard
 xclip -selection clipboard
