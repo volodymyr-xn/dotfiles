@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
 
+# Replaces file with symlink to "/dev/null"
+# Usefull for different variants of log files on development
+
 set -euo pipefail
 
-rm $1
+filename=$1
+full_path_to_file=$(readlink -f $filename)
 
-full_path_to_file=$(readlink -f $1)
+# Delete provided file
+rm $filename
 
+# Create /dev/null synlink to the provided file
 ln -s /dev/null $full_path_to_file
