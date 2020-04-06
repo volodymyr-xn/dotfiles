@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 
+# Displays disk usage statistics
+
+set -euo pipefail
+
 df -h -xsquashfs -xtmpfs -xudev

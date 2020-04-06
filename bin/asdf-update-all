@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
-asdf update
+# Updates asdf itself and update all plugins
 
+set -euo pipefail
+
+asdf update
 asdf plugin-update --all

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
-dir=${1:-"."}
+# Get size of specified dir
+# Uses current dir if dir is not specified
 
+set -euo pipefail
+
+dir=${1:-"."}
 du -h -d 1 $dir | sort -h -r

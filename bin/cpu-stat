@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 
+# Shows current CPU frequency
+
+set -euo pipefail
+
 lscpu | grep MHz

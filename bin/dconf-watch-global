@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 
+# Watches various changes to dconf settings: gtk settings, fotns, themes, keybindings...
+
+set -euo pipefail
+
 dconf watch /

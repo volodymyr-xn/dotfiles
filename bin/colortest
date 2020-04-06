@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-#!/usr/bin/env bash
+
+# Base16 and TRUECOLOR test
+
+set -euo pipefail
 
 theme=${1:-base16-default.dark.sh}
 if [ -f $theme ]; then

@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 
+# Clears journalctl logs
+
+set -euo pipefail
+
 sudo journalctl --vacuum-time=7d
 sudo journalctl --vacuum-size=200M

@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
+# Lists all running systemd services
 systemctl list-units --type=service --state=running

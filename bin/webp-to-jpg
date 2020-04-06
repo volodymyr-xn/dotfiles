@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 image_file=$1
+
 image_file_without_extenstion="${image_file%%.*}"
 
 if [ ${image_file: -5} == ".webp" ]; then
-  ffmpeg -i "$1" "$image_file_without_extenstion.png"
+  ffmpeg -i $image_file $image_file_without_extenstion.png | convert - $image_file_without_extenstion.jpg
 fi

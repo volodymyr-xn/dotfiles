@@ -8,6 +8,5 @@ cd $destination_dir
 
 # git checkout v1.5.0
 
-export WINEPREFIX=$HOME/.wine
 chmod +x ./setup_dxvk.sh
 ./setup_dxvk.sh install

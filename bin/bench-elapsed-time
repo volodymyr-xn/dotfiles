@@ -1,3 +1,8 @@
 #!/usr/bin/env bash
 
- /usr/bin/time -f "\t%Es Elapsed Real Time" "$@"
+# CLI commands benchmark util
+# Check how many time specified command takes to execute
+
+set -euo pipefail
+
+ /usr/bin/time -f "Command took %Es" "$@"

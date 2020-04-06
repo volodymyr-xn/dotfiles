@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 read -p "Enter your password: " -s pass
 
 decrypted_content=$(gpg --batch --passphrase $pass -d $1)

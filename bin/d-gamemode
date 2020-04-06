@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# Manages gamemode service
+
+set -euo pipefail
+
 systemd_gamemode_unit_name=gamemoded.service
 
 case $1 in

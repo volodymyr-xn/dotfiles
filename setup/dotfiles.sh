@@ -38,12 +38,14 @@ set -e # Terminate script if anything exits with a non-zero value
 set -u # Prevent unset variables
 
 files_to_symlink="\
-      vim tmux zsh ackrc asdfrc ctags gemrc \
-      gitconfig gitignore_global gitmessage npmrc zshrc \
-      inputrc default-gems asdfrc bashrc editorconfig \
-      eslintrc.js config.reek stylelint"
+  vim tmux zsh ackrc asdfrc ctags gemrc \
+  gitconfig gitignore_global gitmessage npmrc zshrc \
+  inputrc default-gems asdfrc bashrc editorconfig \
+  eslintrc.js config.reek stylelint"
 
-dirs_to_symlink="alacritty bundle nvim vim tmux kitty rofi rubocop pry htop"
+dirs_to_symlink_to_config="\
+  alacritty bundle nvim vim tmux kitty rofi rubocop pry htop"
+
 fallback_files_to_symlink="rubocop/rubocop.yml tmux/tmux.conf"
 
 #===============================================================
@@ -63,9 +65,13 @@ for fallback_file in $fallback_files_to_symlink; do
 done
 
 # Symlink configuration directories to config directory
-for dir in $dirs_to_symlink; do
+for dir in $dirs_to_symlink_to_config; do
   symlink_directory_to_config_dir $dir
 done
+
+# Symlink PulseAudio config
+mkdir -p $HOME/.config/pulse
+ln -nsf "$DOTFILES_DIR/pulse/daemon.conf" ~/.config/pulse/daemon.conf
 
 local_shell_profile_path=$HOME/.local_profile
 

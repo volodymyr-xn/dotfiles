@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 
+# Gets current session DBUS address
+# Usefull in background scripts and schedulers(cron, anacron)
+
+set -euo pipefail
+
+######## Old implementations ########
 # First implementation
-# OLD implementation
+# Old implementation
 # program_to_detect_dbus=gnome-session
 # username=$(/usr/bin/whoami)
 # pid=$(pgrep -u $username $program_to_detect_dbus)
@@ -19,6 +25,7 @@
 #   | grep -z DBUS_SESSION_BUS_ADDRESS \
 #   | sed 's/DBUS_SESSION_BUS_ADDRESS=//'
 # dbus-launch | sed 's/DBUS_SESSION_BUS_ADDRESS=//'
+######################################
 
 
 # Ubuntu 19.10 implementation
