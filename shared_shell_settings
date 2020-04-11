@@ -114,8 +114,10 @@ export GROFF_NO_SGR=1                  # for konsole and gnome-terminal
 # eval "$(rbenv init -)"
 
 # TODO check if this variable required
-# export XDG_USER_CONFIG_DIR=$HOME/.config
-# export XDG_CONFIG_HOME=$HOME/.config
+export XDG_USER_CONFIG_DIR=$HOME/.config
+
+# Good to have this defined mannualy
+export XDG_CONFIG_HOME=$HOME/.config
 
 JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64/"
 

@@ -5,9 +5,6 @@ alias v='vim'
 alias nv='nvim'
 alias vn='nvim'
 
-# Git
-alias gstaged='git diff --staged'
-
 # Quickly open current directory
 alias na='xdg-open .'
 
