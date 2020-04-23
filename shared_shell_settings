@@ -113,11 +113,14 @@ export GROFF_NO_SGR=1                  # for konsole and gnome-terminal
 # export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"
 # eval "$(rbenv init -)"
 
-# TODO check if this variable required
+# Good to have this defined mannualy
 export XDG_USER_CONFIG_DIR=$HOME/.config
 
 # Good to have this defined mannualy
 export XDG_CONFIG_HOME=$HOME/.config
+
+# used by
+export XDG_DATA_HOME=$HOME/.local/share
 
 JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64/"
 

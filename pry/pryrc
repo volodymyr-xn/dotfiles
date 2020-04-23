@@ -11,7 +11,7 @@ end
 
 if fzf_installed? && defined?(RbReadline)
   def RbReadline.rl_reverse_search_history(_sign, _key)
-    command = `cat #{Pry.config.history.file} | fzf --tac |  tr '\n' ' '`
+    command = `cat #{Pry.config.history_file} | fzf --tac |  tr '\n' ' '`
 
     rl_insert_text(command)
   end
