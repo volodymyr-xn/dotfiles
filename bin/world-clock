@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 datetime="date +%H:%M"
 
 printf "NYC:\t%s\n" "$(TZ="America/New_York" ${datetime})"

@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 # Main directory
-MAIN_DIR=$1
+MAIN_DIR="$1"
 PATTERN=${2:-".*"}
 
 # Save find result to F_ARRAY

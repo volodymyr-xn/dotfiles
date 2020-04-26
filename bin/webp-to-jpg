@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-image_file=$1
+set -euo pipefail
+
+image_file="$1"
 
 image_file_without_extenstion="${image_file%%.*}"
 

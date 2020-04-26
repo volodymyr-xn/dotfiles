@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 getwindowat() {
   # move mouse to coordinates provided, get window id beneath it, move mouse back
   eval `xdotool mousemove $1 $2 getmouselocation --shell mousemove restore`

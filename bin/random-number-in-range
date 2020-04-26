@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 START_NUMBER=$1
 END_NUMBER=$2
 

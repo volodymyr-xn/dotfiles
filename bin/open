@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
-xdg-open $@
+set -euo pipefail
+
+xdg-open "$@"

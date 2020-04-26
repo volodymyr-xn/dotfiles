@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 quality=90
 
 mogrify -format jpg -quality $quality *.png

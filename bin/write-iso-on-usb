@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
-iso=$1
-disk=$2
+set -euo pipefail
+
+iso="$1"
+disk="$2"
 
 write_on_disk () {
   echo "\nFake write"

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 export GTK_DEBUG=interative
 
 /usr/bin/exec "$@"

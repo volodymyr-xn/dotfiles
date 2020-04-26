@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 COLUMNS=$(tput cols)
 max_width=80
 # half_of_screen=$(( ($COLUMS / 2) - 10 ))

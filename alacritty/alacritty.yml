@@ -89,7 +89,7 @@ tabspaces: 8
 font:
   # Normal (roman) font face
   normal:
-    family: Monaco
+    family: Monego
     # family: Fira Mono
     # The `style` can be specified to pick a specific face.
     style: Bold
@@ -197,6 +197,43 @@ draw_bold_text_with_bright_colors: true
   # When these are not set, they're filled with sensible defaults.
   #indexed_colors:
   #  - { index: 16, color: '0x000000' }
+
+#################################################################
+#################################################################
+#################################################################
+
+# Colors (Tender)
+colors:
+  # Default colors
+  primary:
+    background: '0x282828'
+    foreground: '0xeeeeee'
+
+  # Normal colors
+  normal:
+    black:   '0x282828'
+    red:     '0xf43753'
+    green:   '0xc9d05c'
+    yellow:  '0xffc24b'
+    blue:    '0xb3deef'
+    magenta: '0xd3b987'
+    cyan:    '0x73cef4'
+    white:   '0xeeeeee'
+
+  # Bright colors
+  bright:
+    black:   '0x4c4c4c'
+    red:     '0xf43753'
+    green:   '0xc9d05c'
+    yellow:  '0xffc24b'
+    blue:    '0xb3deef'
+    magenta: '0xd3b987'
+    cyan:    '0x73cef4'
+    white:   '0xfeffff'
+
+#################################################################
+#################################################################
+#################################################################
 
 # Visual Bell
 #

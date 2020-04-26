@@ -3,7 +3,7 @@
 # Get local ip
 #
 
-set -eu
+set -euo pipefail
 
 # silently determine existence of executable
 __has() {

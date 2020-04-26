@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 git ls-tree --name-only -r HEAD \
   | xargs -n1 git blame --line-porcelain \

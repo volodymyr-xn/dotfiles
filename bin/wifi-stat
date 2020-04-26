@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 sudo tcptrack -i wlp3s0

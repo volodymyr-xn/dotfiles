@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 convert "$1" -flatten "$2"

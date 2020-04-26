@@ -1,3 +1,9 @@
 #!/usr/bin/env bash
 
-cat /dev/urandom | tr -dc '0-9' | fold -w 256 | head -n 1 | head --bytes 20
+set -euo pipefail
+
+cat /dev/urandom \
+  | tr -dc '0-9' \
+  | fold -w 256 \
+  | head -n 1 \
+  | head --bytes 20

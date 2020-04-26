@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 # Determine size of a file or total size of a directory
 __fs() {
   local arg

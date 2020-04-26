@@ -27,6 +27,7 @@ export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$VIPSHOME/lib/pkgconfig
 export PYTHONPATH=$VIPSHOME/lib/python2.7/site-packages
 export GI_TYPELIB_PATH="/usr/local/lib/girepository-1.0"
 
+# Configule BASE16 shell colorthemes
 export BASE16_SHELL=$HOME/.config/base16-shell/
 
 # Use ag instead of the default find command for listing candidates.

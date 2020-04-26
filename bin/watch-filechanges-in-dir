@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
-inotifywait -m -r $1
+set -euo pipefail
+
+inotifywait -m -r "$1"

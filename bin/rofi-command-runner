@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 # Main directory
-MAIN_DIR=$1
+MAIN_DIR="$1"
 COMMAND_RUNNER_TITLE=${2:-"Command"}
 
 readarray -t COMMAND_FILES <<< "$(find "$MAIN_DIR" -type f -maxdepth 1)"
