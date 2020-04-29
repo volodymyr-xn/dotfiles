@@ -5,4 +5,4 @@
 
 sudo add-apt-repository ppa:linrunner/tlp
 
-yes | sudo apt install tlp tlp-rdw x86_energy_perf_policy
+yes | sudo apt install tlp tlp-rdw # x86_energy_perf_policy
