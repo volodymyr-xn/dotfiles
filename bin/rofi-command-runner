@@ -6,7 +6,7 @@ set -euo pipefail
 MAIN_DIR="$1"
 COMMAND_RUNNER_TITLE=${2:-"Command"}
 
-readarray -t COMMAND_FILES <<< "$(find "$MAIN_DIR" -type f -maxdepth 1)"
+readarray -t COMMAND_FILES <<< "$(find "$MAIN_DIR" -type f,l -maxdepth 1)"
 
 declare -A COMMAND_FILES_MAP
 
