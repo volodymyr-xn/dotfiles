@@ -10,7 +10,13 @@ Plug('scrooloose/nerdtree')
 Plug('tomtom/tcomment_vim')
 
 " Autocomplete
-Plug('lifepillar/vim-mucomplete')
+" Plug('lifepillar/vim-mucomplete')
+" Old autocomplete
+
+Plug 'prabirshrestha/asyncomplete.vim'
+Plug 'prabirshrestha/async.vim'
+Plug 'prabirshrestha/vim-lsp'
+Plug 'prabirshrestha/asyncomplete-lsp.vim'
 
 " Statusline
 Plug('itchyny/lightline.vim')
@@ -149,7 +155,7 @@ Plug('dracula/vim')
 
 Plug 'prabirshrestha/async.vim'
 
-Plug 'prabirshrestha/vim-lsp'
+" Plug 'prabirshrestha/vim-lsp'
 
 Plug 'jacoborus/tender.vim'
 
@@ -157,6 +163,8 @@ call plug#end()
 "============================================================================
 " ===================== General settings ====================================
 "============================================================================
+
+set completeopt+=preview
 
 " use the space key as our leader. put this near the top of your vimrc
 " Disable default space mapping
@@ -365,6 +373,9 @@ autocmd BufWritePre * :%s/\s\+$//e
 " Set textwidth 75 for markdown files
 au BufRead,BufNewFile *.md setlocal textwidth=75
 
+" Force Ruby syntax for Pry config file
+autocmd BufRead,BufNewFile .pryrc setlocal syntax=ruby
+
 
 "============================================================================
 "====================== Abbreviations ============================================
@@ -378,6 +389,9 @@ iabbr bpry binding.pry
 "============================================================================
 "====================== Mapings ============================================
 "============================================================================
+
+" Double click on left mouse button trigers Insert mode
+map <2-LeftMouse> a
 
 " Remap VIM 0 to first non-blank character
 nnoremap 0 ^
@@ -873,7 +887,6 @@ hi! link TabLineSel Function
 
 " TODO experiment with ruby language server
 if executable('solargraph')
-    " gem install solargraph
     au User lsp_setup call lsp#register_server({
         \ 'name': 'solargraph',
         \ 'cmd': {server_info->[&shell, &shellcmdflag, 'solargraph stdio']},
@@ -881,7 +894,7 @@ if executable('solargraph')
         \ 'whitelist': ['ruby'],
         \ })
 endif
-
+"
 
 
 " TODO display component hierarcy in tab
@@ -913,11 +926,32 @@ endif
 
 
 " Use the Tab key for autocompletion.
-" function! Tab_Or_Complete()
-"   if col('.')>1 && strpart( getline('.'), col('.')-2, 3 ) =~ '^\w'
-"     return "\<C-N>"
-"   else
-"     return "\<Tab>"
-"   endif
+function! Tab_Or_Complete()
+  if col('.')>1 && strpart( getline('.'), col('.')-2, 3 ) =~ '^\w'
+    return "\<C-N>"
+  else
+    return "\<Tab>"
+  endif
+endfunction
+inoremap <Tab> <C-R>=Tab_Or_Complete()<CR>
+
+" inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
+" inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+" inoremap <expr> <cr>    pumvisible() ? "\<C-y>" : "\<cr>"
+"
+" set completeopt+=preview
+"
+" let g:asyncomplete_auto_popup = 0
+" function! s:check_back_space() abort
+"     let col = col('.') - 1
+"     return !col || getline('.')[col - 1]  =~ '\s'
 " endfunction
-" :inoremap <Tab> <C-R>=Tab_Or_Complete()<CR>
+"
+" inoremap <silent><expr> <TAB>
+"   \ pumvisible() ? "\<C-n>" :
+"   \ <SID>check_back_space() ? "\<TAB>" :
+"   \ asyncomplete#force_refresh()
+" inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+hi NonText guifg=#bebebe ctermfg=238 guibg=NONE ctermbg=NONE gui=NONE cterm=NONE
+hi SpecialKey guifg=#bebebe ctermfg=238 guibg=NONE ctermbg=NONE gui=NONE cterm=NONE

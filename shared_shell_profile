@@ -1,9 +1,6 @@
 # vim: syntax=bash
 # nvim: syntax=bash
 
-# True color support in TMUX
-export TERM=xterm-256color
-
 # Use vim as default editor
 export EDITOR='nvim'
 
@@ -80,16 +77,6 @@ fi
 # Ruby verbose mode
 export RUBYOPT="-W1"
 
-# Better less highlight
-export LESS_TERMCAP_mb=$'\E[1;31m'     # begin bold
-export LESS_TERMCAP_md=$'\E[1;36m'     # begin blink
-export LESS_TERMCAP_me=$'\E[0m'        # reset bold/blink
-export LESS_TERMCAP_so=$'\E[7;93m'     # begin reverse video
-export LESS_TERMCAP_se=$'\E[0m'        # reset reverse video
-export LESS_TERMCAP_us=$'\E[1;32m'     # begin underline
-export LESS_TERMCAP_ue=$'\E[0m'        # reset underline
-export GROFF_NO_SGR=1                  # for konsole and gnome-terminal
-
 # Set Onedark fzf theme
 # export FZF_DEFAULT_OPTS='
 # --color=dark
@@ -102,12 +89,6 @@ export GROFF_NO_SGR=1                  # for konsole and gnome-terminal
 # --color=fg:-1,bg:-1,hl:#e5c07f,fg+:-1,bg+:-1,hl+:#5fff87
 # --color=info:#af87ff,prompt:#5fff87,pointer:#e5c07b,marker:#ff87d7,spinner:#ff87d7
 # '
-
-# Enable Base16-shell themes
-[ -n "$PS1"  ] && [ -s $BASE16_SHELL/profile_helper.sh  ] && eval "$($BASE16_SHELL/profile_helper.sh)"
-
-# Enable asdf
-. $HOME/.asdf/asdf.sh
 
 # DEPRECATED
 # rbenv
@@ -124,7 +105,7 @@ export XDG_CONFIG_HOME=$HOME/.config
 # used by
 export XDG_DATA_HOME=$HOME/.local/share
 
-JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64/"
+# JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64/"
 
 # SSL certificates workaround for homebrew version of openssl
 export SSL_CERT_DIR=/usr/lib/ssl/certs/

@@ -38,7 +38,7 @@ set -e # Terminate script if anything exits with a non-zero value
 set -u # Prevent unset variables
 
 files_to_symlink="\
-  vim tmux zsh ackrc asdfrc ctags gemrc \
+  profile vim tmux zsh ackrc asdfrc ctags gemrc \
   gitconfig gitignore_global gitmessage npmrc zshrc \
   inputrc default-gems asdfrc bashrc editorconfig \
   eslintrc.js config.reek stylelint"

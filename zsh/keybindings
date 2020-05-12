@@ -1,3 +1,7 @@
+# CTRL-o runs fzf switch tmux session
+# bindkey -s "^o" "tmux split-window -h 'fzf-switch-tmux-session'\n"
+bindkey -s "^o" 'fzf-switch-tmux-session\n'
+
 # Git status
 # ctrl-f
 bindkey -s "^f" 'git status\n'

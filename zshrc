@@ -1,12 +1,5 @@
-source ~/dotfiles/shared_shell_settings
-
 # CTRL-o runs fzf branch search
 # bindkey -s "^o" 'ch\n'
-
-# CTRL-o runs fzf switch tmux session
-# bindkey -s "^o" "tmux split-window -h 'fzf-switch-tmux-session'\n"
-bindkey -s "^o" 'fzf-switch-tmux-session\n'
-
 
 stty -ixon
 
@@ -21,4 +14,6 @@ source $HOME/dotfiles/zsh/keybindings
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # Include local settings
-[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+# [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+
+source ~/dotfiles/shared_shell_rc_file

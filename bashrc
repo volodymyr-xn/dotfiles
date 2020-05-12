@@ -1,5 +1,3 @@
-source ~/dotfiles/shared_shell_settings
-
 parse_git_branch() {
   git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
 }
@@ -11,3 +9,5 @@ export DISABLE_AUTO_TITLE=true
 
 # Enable fzf shortcuts
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+source ~/dotfiles/shared_shell_rc_file
