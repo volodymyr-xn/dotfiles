@@ -1,0 +1,6 @@
+
+mount_point="/mnt/iso_image"
+mkdir $mount_point -p
+
+mount -t iso9660 -o loop "$1" "$mount_point"
+

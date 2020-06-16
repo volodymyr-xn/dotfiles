@@ -4,4 +4,5 @@ set -euo pipefail
 
 # Prints current physical location
 
+# -P - avoid symlincs
 pwd -P

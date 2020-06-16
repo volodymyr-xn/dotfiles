@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+
+# %a - access rights in octal form
+# %A - access rights in human readable form
+stat -c "%a %A" $1

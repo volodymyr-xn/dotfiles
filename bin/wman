@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+COLUMNS=$(tput cols)
+max_width=85
+# half_of_screen=$(( ($COLUMS / 2) - 10 ))
+
+if [ "$COLUMNS" -lt $max_width ]
+then
+  man_width=$COLUMNS
+else
+ man_width=$max_width
+fi
+
+MANWIDTH=$man_width /usr/bin/man "$@"

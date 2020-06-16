@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-systemctl list-sockets
+systemctl --no-pager list-timers

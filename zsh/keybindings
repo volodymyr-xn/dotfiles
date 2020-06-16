@@ -1,6 +1,6 @@
 # CTRL-o runs fzf switch tmux session
 # bindkey -s "^o" "tmux split-window -h 'fzf-switch-tmux-session'\n"
-bindkey -s "^o" 'fzf-switch-tmux-session\n'
+# bindkey -s "^o" 'fzf-switch-tmux-session\n'
 
 # Git status
 # ctrl-f
@@ -8,7 +8,9 @@ bindkey -s "^f" 'git status\n'
 
 # Git diff staged files
 # ctrl-e
-bindkey -s "^e" 'git diff --staged\n'
+bindkey -s "^o" 'git diff --staged\n'
+
+bindkey -s "^n" 'clear\n'
 
 # Experimental
-bindkey -s "^n" 'cd ~/dev_notes\n'
+# bindkey -s "^n" 'cd ~/dev_notes\n'

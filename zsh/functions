@@ -4,7 +4,7 @@ fk() {
 
   if [ "x$pid" != "x" ]
   then
-    echo $pid | xargs kill -${1:-9}
+    kill -${1:-9} "$pid"
   fi
 }
 

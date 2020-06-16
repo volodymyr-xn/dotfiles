@@ -12,5 +12,5 @@ brew install the_silver_searcher
 # Clone fzf repo from gitgub
 git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 
-# Run fzf installation
-yes | ~/.fzf/install
+# # Run fzf installation
+yes | ~/.fzf/install --xdg

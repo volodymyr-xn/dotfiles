@@ -30,6 +30,9 @@ alias la='ls -lAFh'   #long list, show almost all, show type, human readable
 alias lr='ls -tRFh'   #sorted by date, recursive, show type, human readable
 alias ll='ls -l'      #long list
 
+# Display only hidden files
+alias l.='ls -d .* --color=auto'
+
 # Finding stuff!
 alias fd='find . -type d -name'
 alias ff='find . -type f -name'

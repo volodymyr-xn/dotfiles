@@ -8,19 +8,19 @@ module PCIDevicesInfo
 
   def self.network_devices
     # Select those that match network device name
-    all.select { _1.match(NETWORK_DEVICE_NAME_REGEX) }
+    all.select { |e| e.match(NETWORK_DEVICE_NAME_REGEX) }
   end
 
   # Get only network devices
   def self.network_devices_details
     network_devices
       # Map ids of devices
-      .map {
-        _1.split(/\s/).first
+      .map { |e|
+        e.split(/\s/).first
       }
       # Use this ids to obtain device info
-      .map {
-        `lspci -ks #{_1}` + "\n"
+      .map { |e|
+        `lspci -ks #{e}` + "\n"
       }
   end
 
@@ -29,4 +29,4 @@ module PCIDevicesInfo
   end
 end
 
-puts PCIDevicesInfo.network_devices_details_full
+puts PCIDevicesInfo.network_devices_details

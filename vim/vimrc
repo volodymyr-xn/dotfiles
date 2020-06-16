@@ -12,7 +12,6 @@ Plug('tomtom/tcomment_vim')
 " Autocomplete
 " Plug('lifepillar/vim-mucomplete')
 " Old autocomplete
-
 Plug 'prabirshrestha/asyncomplete.vim'
 Plug 'prabirshrestha/async.vim'
 Plug 'prabirshrestha/vim-lsp'
@@ -23,6 +22,9 @@ Plug('itchyny/lightline.vim')
 
 " Linting
 Plug('w0rp/ale')
+
+" ALE indicator for the lightline vim plugin
+Plug('maximbaz/lightline-ale')
 
 " Enable repeating supported plugin maps with '.'
 Plug('tpope/vim-repeat')
@@ -153,11 +155,12 @@ Plug('dracula/vim')
 " A vim colorscheme for use with wal
 " Plug('dylanaraps/wal.vim')
 
-Plug 'prabirshrestha/async.vim'
+" Colorscheme
+Plug('jacoborus/tender.vim')
 
-" Plug 'prabirshrestha/vim-lsp'
+" Better markdown support
+Plug('plasticboy/vim-markdown')
 
-Plug 'jacoborus/tender.vim'
 
 call plug#end()
 "============================================================================
@@ -391,7 +394,10 @@ iabbr bpry binding.pry
 "============================================================================
 
 " Double click on left mouse button trigers Insert mode
-map <2-LeftMouse> a
+map <2-LeftMouse> #
+
+map <RightMouse> n
+map <2-RightMouse> n
 
 " Remap VIM 0 to first non-blank character
 nnoremap 0 ^
@@ -640,6 +646,10 @@ autocmd VimEnter * nnoremap <C-\> :NERDTreeToggle<CR>
 " Disable json plugin conceal
 let g:vim_json_syntax_conceal = 0
 
+" ===================== vim-markdown settings  ====================================
+" Disabled folding of headers by default
+let g:vim_markdown_folding_disabled = 1
+
 " ===================== Emmet settings  ====================================
 " Expand tag
 " imap <C-l> <C-y>,
@@ -676,12 +686,13 @@ let g:jsx_ext_required = 0
 
 
 " ===================== Lightline settings  ====================================
+
 let g:lightline = {
       \'colorscheme': 'tender',
       \ 'active': {
       \   'left': [ [ 'mode', 'paste' ],
       \             ['filename', 'modified'] ],
-      \   'right': [['zoom_status'], ['total_lines']],
+      \   'right': [ [ 'linter_checking', 'linter_errors', 'linter_warnings', 'linter_infos', 'linter_ok' ], ['zoom_status'], ['total_lines']],
       \ },
       \ 'inactive': {
       \   'left': [['filename'] ],
@@ -696,8 +707,25 @@ let g:lightline = {
       \}
 
 
-" set lighline theme inside lightline config
+" Ale integration
+let g:lightline.component_expand = {
+      \  'linter_checking': 'lightline#ale#checking',
+      \  'linter_infos': 'lightline#ale#infos',
+      \  'linter_warnings': 'lightline#ale#warnings',
+      \  'linter_errors': 'lightline#ale#errors',
+      \  'linter_ok': 'lightline#ale#ok',
+      \ }
 
+let g:lightline.component_type = {
+      \     'linter_checking': 'right',
+      \     'linter_infos': 'right',
+      \     'linter_warnings': 'warning',
+      \     'linter_errors': 'error',
+      \     'linter_ok': 'right',
+      \ }
+
+
+" set lighline theme inside lightline config
 " set airline theme
 function! IsCurrentWindowZoomed()
   if !exists("t:currentWindowZoomed")
