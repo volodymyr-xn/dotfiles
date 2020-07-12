@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Get dirname size
+dirname=${1:-"."}
+du -sh $dirname

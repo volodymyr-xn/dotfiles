@@ -8,7 +8,7 @@ git clone https://github.com/FeralInteractive/gamemode $destination_dir
 
 cd $destination_dir
 
-RELEASE_VERSION=1.4
+RELEASE_VERSION=1.5.1
 
 git checkout $RELEASE_VERSION
 

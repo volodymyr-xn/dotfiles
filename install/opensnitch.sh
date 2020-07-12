@@ -19,9 +19,10 @@ cd $GOPATH/src/github.com/gustavo-iniguez-goya/opensnitch
 # cd ui
 # sudo pip3 install -r requirements.txt
 
+git checkout v1.0.0rc10
 make
 sudo make install
-# enable opensnitchd as a systemd service and start the UI
+# # enable opensnitchd as a systemd service and start the UI
 sudo systemctl enable opensnitchd
 sudo service opensnitchd start
 opensnitch-ui

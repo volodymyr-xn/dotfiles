@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# Copies current git branch name to clipboard
+
+git symbolic-ref --short HEAD | xcopy
