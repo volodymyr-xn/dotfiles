@@ -6,4 +6,4 @@
 set -euo pipefail
 
 dir=${1:-"."}
-du -h -d 1 $dir | sort -h -r
+sudo du -h -d 1 $dir | sort -h -r

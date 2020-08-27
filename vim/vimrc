@@ -110,7 +110,7 @@ Plug('bfontaine/brewfile.vim')
 Plug('alvan/vim-closetag')
 
 " Emmet
-" Plug('mattn/emmet-vim')
+Plug('mattn/emmet-vim')
 
 " Base16 color schemes
 Plug('chriskempson/base16-vim')
@@ -447,7 +447,7 @@ nnoremap <Leader>n :nohl<CR>
 nnoremap <Leader>r :%s/
 
 " Edit vim config
-nnoremap <Leader>ve :e $MYVIMRC<cr>
+nnoremap <Leader>ve :e ~/.vim/vimrc<cr>
 
 " Reload vim config
 nnoremap <Leader>vr :source $MYVIMRC<cr>
@@ -542,14 +542,15 @@ nnoremap M yy']:TComment<CR>']pj
 nnoremap <C-c> <C-w>q
 
 " Test runner mappings
-nnoremap <silent> <leader>t :TestNearest<CR>
-nnoremap <silent> <leader>j :TestNearest<CR>
-nnoremap <silent> <leader>T :TestFile<CR>
-nnoremap <silent> <leader>a :TestSuite<CR>
-nnoremap <silent> <leader>l :TestLast<CR>
+nnoremap <silent> <Leader>t :TestNearest<CR>
+nnoremap <silent> <Leader>T :TestFile<CR>
+nnoremap <silent> <Leader>a :TestSuite<CR>
+nnoremap <silent> <Leader>l :TestLast<CR>
 
 " "Go to test file
 " nmap t :A<CR> DEPRECATED
+
+nnoremap <silent> <Leader>j :Ack <C-R><C-W><CR>
 
 " Go to related file
 nnoremap <Leader>e :R<CR>
@@ -652,13 +653,14 @@ let g:vim_markdown_folding_disabled = 1
 
 " ===================== Emmet settings  ====================================
 " Expand tag
-" imap <C-l> <C-y>,
+" Ctrl-l expands emmet shortcut in JSX
+imap <C-l> <C-y>,
 " imap <expr>k<tab> emmet#expandAbbrIntelligent("\<tab>")
-" let g:user_emmet_settings = {
-"   \  'javascript.jsx' : {
-"     \      'extends' : 'jsx',
-"     \  },
-"   \}
+let g:user_emmet_settings = {
+  \  'javascript.jsx' : {
+    \      'extends' : 'jsx',
+    \  },
+  \}
 
 " ===================== Syntastic settings  ====================================
 
@@ -704,7 +706,35 @@ let g:lightline = {
       \ 'component_function': {
       \   'zoom_status': 'IsCurrentWindowZoomed'
       \ },
+      \ 'tab': {
+      \   'active': [ 'tabnum', 'cwd', 'modified' ],
+      \   'inactive': [ 'tabnum', 'cwd','modified' ]
+      \  },
+      \ 'tab_component_function': {
+      \   'cwd': 'LightlineCurrentDirectory'
+      \  }
       \}
+
+function! LightlineCurrentDirectory(n) abort
+  " TODO
+  " return fnamemodify(getcwd(tabpagewinnr(a:n), a:n), ':t')
+  " return substitute( expand( '%:p' ), '.\+\/\(.\+\)\/.\+', '\1', '' )
+  " return substitute( expand( '%:p' ), '.\+\/\(.\+\)\/.\+', '\1', '') . "///"
+  " return expand('%M%t')
+   let buflist = tabpagebuflist(a:n)
+  let winnr = tabpagewinnr(a:n)
+  let bufnum = buflist[winnr - 1]
+  let bufname = expand('#'.bufnum.':t')
+  let buffullname = expand('#'.bufnum.':a')
+  " let buffullname = expand('#')
+  " return buffullname
+  " return substitute(buffullname, '.*/\([^/]\+/\)', '\1', '')
+  if strlen(bufname)
+    return substitute(buffullname, '.*/\([^/]\+/\)', '\1', '')
+  else
+    return strlen(bufname) ? bufname : '[No Name]'
+  endif
+endfunction
 
 
 " Ale integration
@@ -724,6 +754,25 @@ let g:lightline.component_type = {
       \     'linter_ok': 'right',
       \ }
 
+" "================================= vim-rails settings ========================
+" " example projections: https://gist.github.com/henrik/5676109
+let g:rails_projections = {
+\   'app/*.rb': {
+\     'alternate': 'spec/{}_spec.rb'
+\   },
+\   'app/admin/*.rb': {
+\     'alternate': 'spec/controllers/admin/{}_controller_spec.rb'
+\   },
+\   'spec/controllers/admin/*_controller_spec.rb': {
+\     'alternate': 'app/admin/{}.rb'
+\   },
+\   'config/locales/*ru.yml': {
+\     'alternate': 'config/locales/{}en.yml'
+\   },
+\   'config/locales/*en.yml': {
+\     'alternate': 'config/locales/{}ru.yml'
+\   }
+\ }
 
 " set lighline theme inside lightline config
 " set airline theme
@@ -983,3 +1032,6 @@ inoremap <Tab> <C-R>=Tab_Or_Complete()<CR>
 
 hi NonText guifg=#bebebe ctermfg=238 guibg=NONE ctermbg=NONE gui=NONE cterm=NONE
 hi SpecialKey guifg=#bebebe ctermfg=238 guibg=NONE ctermbg=NONE gui=NONE cterm=NONE
+let g:vim_jsx_pretty_colorful_config = 1 " default 0
+
+
