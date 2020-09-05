@@ -10,8 +10,8 @@ Plug('scrooloose/nerdtree')
 Plug('tomtom/tcomment_vim')
 
 " Autocomplete
-" Plug('lifepillar/vim-mucomplete')
 " Old autocomplete
+" Plug('lifepillar/vim-mucomplete')
 Plug 'prabirshrestha/asyncomplete.vim'
 Plug 'prabirshrestha/async.vim'
 Plug 'prabirshrestha/vim-lsp'
@@ -809,6 +809,7 @@ endfunction
 "============================================================================
 "====================== Commands ===========================================
 "============================================================================
+" Toggles current window zoom
 command! ToggleCurrentWindowZoom :call ToggleCurrentWindowZoom()
 
 " Fix save file typos
