@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-filename="$1"
+filename=${1:-"."}
 
 format='Filename: %n (%F)\nOwner: %U(%u):%G(%g)\nPermissions: %A(%a)\n'
 

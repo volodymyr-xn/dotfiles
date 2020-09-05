@@ -1,15 +1,13 @@
 #!/usr/bin/env bash
 
 # Creates tempdir for sources code or installation fies in "/tmp" directory
-# Add version and timestamp
-
 set -euo pipefail
 
-name=$1-source
+name="$1-source"
 version=${2:-''}
 timestamp=$(timestamp-ms)
 
-if ! [ -z $version ]; then
+if ! [ -z "$version" ]; then
   version="-$version-"
 fi
 

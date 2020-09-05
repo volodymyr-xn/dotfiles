@@ -5,4 +5,4 @@
 
 set -euo pipefail
 
- /usr/bin/time -f "Command took %Es" "$@"
+/usr/bin/time -f "Command took %Es" "$@"

@@ -2,4 +2,5 @@
 
 # %a - access rights in octal form
 # %A - access rights in human readable form
-stat -c "%a %A" $1
+file=${1:-"."}
+stat -c "%a %A" "$file"

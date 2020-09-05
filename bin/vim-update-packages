@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-vim +PlugUpdate! +PlugClean +qall
+nvim +PlugUpdate! +PlugClean +qall

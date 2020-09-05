@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
-# Get dirname size
+# Get dir size in megabytes
+# Uses current dir if dir is not specified
 dirname=${1:-"."}
 du -sh $dirname

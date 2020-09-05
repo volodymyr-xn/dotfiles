@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Get size of specified dir
+# Get dir stat
 # Uses current dir if dir is not specified
 
 set -euo pipefail
