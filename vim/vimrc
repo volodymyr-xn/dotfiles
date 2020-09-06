@@ -149,6 +149,9 @@ Plug('chr4/nginx.vim')
 " JSON highlight
 Plug('elzr/vim-json')
 
+" Syntax highlighting and filetype detection for systemd unit files
+Plug('wgwoods/vim-systemd-syntax')
+
 " Dracula color scheme
 Plug('dracula/vim')
 
