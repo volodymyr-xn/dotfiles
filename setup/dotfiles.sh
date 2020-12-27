@@ -41,7 +41,7 @@ files_to_symlink="\
   profile vim tmux zsh ackrc asdfrc ctags gemrc \
   gitconfig gitignore_global gitmessage npmrc zshrc \
   inputrc default-gems asdfrc bashrc editorconfig \
-  eslintrc.js config.reek stylelint"
+  config.reek stylelint"
 
 dirs_to_symlink_to_config="\
   alacritty bundle nvim vim tmux kitty rofi rubocop pry htop"

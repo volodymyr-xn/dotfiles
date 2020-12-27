@@ -6,8 +6,7 @@ iso="$1"
 disk="$2"
 
 write_on_disk () {
-  echo "\nFake write"
-  # sudo dd if="$iso" of="$disk" bs=1M status=progress
+  sudo dd if="$iso" of="$disk" bs=1M status=progress
 }
 
 echo "You are going to write $iso on $disk"

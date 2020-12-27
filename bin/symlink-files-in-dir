@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+target="$1"
+destination="$2"
+
+[ -z "$target" ] && echo "target is empty" && exit 1
+[ ! -d "$target" ] && echo "Directory $target does not exist" && exit 1
+
+
+[ -z "$destination" ] && echo "destination is empty" && exit 1
+[ ! -d "$destination" ] && echo "Directory $destination does not exist" && exit 1
+
+
+for file in $target/*; do
+  target_file_full_path=$(readlink -f "$file")
+  target_file_basename=$(basename "$file")
+
+  ln -nsf "$target_file_full_path" "$destination/$target_file_basename"
+done

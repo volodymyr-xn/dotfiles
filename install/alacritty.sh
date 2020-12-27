@@ -9,7 +9,9 @@ alacritty_source_tmp_path=/tmp/alacritty-$(timestamp-ms)
 git clone https://github.com/jwilm/alacritty $alacritty_source_tmp_path
 
 # build alacritty from source
-cd $alacritty_source_tmp_path && cargo build --release
+cd $alacritty_source_tmp_path
+
+cargo build --release
 
 yes | sudo cp -rf $alacritty_source_tmp_path/target/release/alacritty /usr/local/bin/alacritty
 sudo cp extra/logo/alacritty-term.svg /usr/share/pixmaps/Alacritty.svg

@@ -16,7 +16,7 @@ npm i yarn -g
 npm i eslint -g
 
 # Install eslint globally
-npm i stylelint -g
+# npm i stylelint -g
 
 # Install stylelint globally
-npm install stylelint-config-standard -g
+# npm install stylelint-config-standard -g

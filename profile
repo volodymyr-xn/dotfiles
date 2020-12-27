@@ -149,6 +149,8 @@ export XDG_DATA_HOME=$HOME/.local/share
 # SSL certificates workaround for homebrew version of openssl
 export SSL_CERT_DIR=/usr/lib/ssl/certs/
 export SSL_CERT_FILE=/usr/lib/ssl/certs/ca-certificates.crt
+
+# Set default wineprefix
 export WINEPREFIX=~/WineVersions/wine-5
 
 local_profile_path="$HOME/.local_profile"

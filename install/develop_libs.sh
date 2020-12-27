@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 yes | sudo apt-get install \
-      automake autoconf bison \
+     automake autoconf bison \
      autotools-dev curl zlib1g-dev build-essential libssl-dev \
      cmake cmake-data libtool-bin libuv1  \
      libreadline-dev libyaml-dev libsqlite3-dev sqlite3 \

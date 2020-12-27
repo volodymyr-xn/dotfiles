@@ -116,7 +116,7 @@ Plug('mattn/emmet-vim')
 Plug('chriskempson/base16-vim')
 
 " Onedark colorscheme
-Plug('rakr/vim-one')
+" Plug('rakr/vim-one')
 
 " Highligh color codes
 Plug('lilydjwg/colorizer')
@@ -153,13 +153,14 @@ Plug('elzr/vim-json')
 Plug('wgwoods/vim-systemd-syntax')
 
 " Dracula color scheme
-Plug('dracula/vim')
+" Plug('dracula/vim')
 
 " A vim colorscheme for use with wal
 " Plug('dylanaraps/wal.vim')
 
 " Colorscheme
-Plug('jacoborus/tender.vim')
+" Plug('jacoborus/tender.vim')
+Plug('nolo18/base16lightline')
 
 " Better markdown support
 Plug('plasticboy/vim-markdown')
@@ -250,17 +251,17 @@ set backspace=indent,eol,start
 set background=dark
 
 " Base16 hook
-" if filereadable(expand("~/.vimrc_background"))
-"    let base16colorspace=256
-"    source ~/.vimrc_background
-" endif
+if filereadable(expand("~/.vimrc_background"))
+   let base16colorspace=256
+   source ~/.vimrc_background
+endif
 
 " Use pywal colorscheme
 " colorscheme wal
 
 " colorscheme one
 
-colorscheme tender
+" colorscheme tender
 
 " if g:colors_name ==# "one" || g:colors_name ==# "base16-onedark"
 " "   " let g:custom_color_regular = '#e06c75'
@@ -692,8 +693,8 @@ let g:jsx_ext_required = 0
 
 " ===================== Lightline settings  ====================================
 
+" \'colorscheme': 'tender',
 let g:lightline = {
-      \'colorscheme': 'tender',
       \ 'active': {
       \   'left': [ [ 'mode', 'paste' ],
       \             ['filename', 'modified'] ],

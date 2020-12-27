@@ -9,4 +9,4 @@ git clone https://github.com/vinceliuice/Layan-gtk-theme $destination_dir
 
 cd $destination_dir
 
-# ./install
+./install

@@ -10,7 +10,19 @@ bindkey -s "^f" 'git status\n'
 # ctrl-e
 bindkey -s "^o" 'git diff --staged\n'
 
+# Clears console
+# ctrl-n
 bindkey -s "^n" 'clear\n'
+
+# bindkey -s "^f" 'git status\n'
+#
+# # bindkey -s "^i" 'git diff --staged\n'
+# bindkey -s "^o" 'git diff --staged\n'
+#
+# # Git diff with "ctrl-m"
+# bindkey -s "^x" 'git diff\n'
+#
+# bindkey -s "^n" 'clear\n'
 
 # Experimental
 # bindkey -s "^n" 'cd ~/dev_notes\n'
