@@ -16,6 +16,7 @@ __localip() {
   # VERIFIED on OS X Yosemite   (10.10.5) via wifi
   # VERIFIED on Mavericks
   if __has "ifconfig"; then
+    echo "test1"
     ifconfig | grep "inet " | grep -v 127.0.0.1 | awk '{print $2}'
     exit
   fi
@@ -35,7 +36,7 @@ __localip() {
 
   # this would be used for debian chroot
   if __has "ip"; then
-    ip addr | grep "inet 192"
+    ip route get 1.2.3.4 | awk '{print $7}'
     exit
   fi
 
