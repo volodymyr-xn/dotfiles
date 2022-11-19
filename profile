@@ -11,6 +11,8 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
+echo "profile run"
+
 # If running bash
 if [ -n "$BASH_VERSION" ]; then
     # include .bashrc if it exists
@@ -37,6 +39,7 @@ fi
 #     PATH="$HOME/.local/bin:$PATH"
 # fi
 
+
 # Use vim as default editor
 export EDITOR='nvim'
 
@@ -49,7 +52,17 @@ export FZF_COMPLETION_TRIGGER='~~'
 export FZF_COMPLETION_OPTS='+c -x'
 
 # FZF will ignore .git and hidden files
-export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
+# export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
+# export FZF_DEFAULT_COMMAND='fd --type file --hidden --no-ignore'
+# export FZF_DEFAULT_COMMAND="command rg -uu -g '!.git' --files"
+export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git/*"'
+
+_fzf_compgen_path() {
+  command rg -uu -g '!.git' --files "${1}"
+}
+export FZF_CTRL_T_OPTS="--preview 'command bat --color=always --line-range :500 {}' ${FZF_CTRL_T_OPTS}"
+#
+# export FZF_DEFAULT_OPTS="--ansi --preview-window 'right:60%' --preview 'bat --color=always --style=header,grid --line-range :300 {}'"
 
 # DEPRECATED
 # export FZF_CTRL_T_OPTS="--preview '(highlight -O ansi -l {} 2> /dev/null || cat {} || tree -C {}) 2> /dev/null | head -200'"
@@ -62,16 +75,16 @@ export PYTHONPATH=$VIPSHOME/lib/python2.7/site-packages
 export GI_TYPELIB_PATH="/usr/local/lib/girepository-1.0"
 
 # Configule BASE16 shell colorthemes
-export BASE16_SHELL=$HOME/.config/base16-shell/
+export BASE16_SHELL="$HOME/.config/base16-shell/"
 
 # Use ag instead of the default find command for listing candidates.
 # - The first argument to the function is the base path to start traversal
 # - Note that ag only lists files not directories
 # - See the source code (completion.{bash,zsh}) for the details.
-_fzf_compgen_path() {
-  ag -g "" "$1"
-}
-
+# _fzf_compgen_path() {
+  # ag -g "" "$1"
+# }
+#
 # Homebrew settings
 export HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
 export HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar"
@@ -80,7 +93,7 @@ export HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX/Homebrew"
 # gopath dir
 export GOPATH="$HOME/.programing_languages/go"
 
-if [[ -z $TMUX ]]; then
+# if [[ -z $TMUX ]]; then
   # Add linuxbrew to PATH
   export PATH="$PATH:$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin"
   # Old format(homebrew binaries has lowest priority
@@ -101,14 +114,14 @@ if [[ -z $TMUX ]]; then
   export PATH="$HOME/.yarn/bin:$PATH"
 
   # Add rust package manager binaries to PATH
-  export PATH="$HOME/.programing_languages/cargo/bin:$PATH"
+  export PATH="$HOME/.programing_languages/rust/cargo/bin:$PATH"
 
   # Add packages installed by go to path
   export PATH="$GOPATH/bin:$PATH"
 
   # Add local binaries to path
   export PATH="$HOME/.local/bin:$PATH"
-fi
+# fi
 
 # Ruby verbose mode
 export RUBYOPT="-W1"
@@ -135,27 +148,59 @@ export RUBYOPT="-W1"
 ### XDG variables
 
 # Good to have this defined mannualy
-export XDG_USER_CONFIG_DIR=$HOME/.config
+#export XDG_USER_CONFIG_DIR=$HOME/.config
 
 # Good to have this defined mannualy
 # XDG config dir
-export XDG_CONFIG_HOME=$HOME/.config
+#export XDG_CONFIG_HOME=$HOME/.config
 
 # XDG_DATA HOME
-export XDG_DATA_HOME=$HOME/.local/share
+#export XDG_DATA_HOME=$HOME/.local/share
+
+#export GTK_THEME=Adwaita:dark
+
+# Docker config dir
+export DOCKER_CONFIG="$HOME/.config/docker"
 
 # JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64/"
 
 # SSL certificates workaround for homebrew version of openssl
-export SSL_CERT_DIR=/usr/lib/ssl/certs/
-export SSL_CERT_FILE=/usr/lib/ssl/certs/ca-certificates.crt
+# WARNING: ENABLE ONLY IF HOMEBREW IS USED
+# OTHERWISE BREAKS HTTPS REQUESTS IN SYSTEM
+# export SSL_CERT_DIR=/usr/lib/ssl/certs/
+# export SSL_CERT_FILE=/usr/lib/ssl/certs/ca-certificates.crt
 
 # Set default wineprefix
-export WINEPREFIX=~/WineVersions/wine-5
+export WINEPREFIX="$HOME/WineVersions/wine-5"
+
+# True color support in TMUX
+export TERM=xterm-256color
+
+# Better less highlight
+export LESS_TERMCAP_mb=$'\E[1;31m'     # begin bold
+export LESS_TERMCAP_md=$'\E[1;36m'     # begin blink
+export LESS_TERMCAP_me=$'\E[0m'        # reset bold/blink
+export LESS_TERMCAP_so=$'\E[7;93m'     # begin reverse video
+export LESS_TERMCAP_se=$'\E[0m'        # reset reverse video
+export LESS_TERMCAP_us=$'\E[1;32m'     # begin underline
+export LESS_TERMCAP_ue=$'\E[0m'        # reset underline
+export GROFF_NO_SGR=1                  # for konsole and gnome-terminal
+
+# Use less as man page viewer
+# export MANPAGER="less"
+
+# Use neovim as man page viewer
+export MANPAGER='nvim +Man!'
+
+# Always use number of processing cores with make
+# shopt -s checkwinsize
+
+export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
 
 local_profile_path="$HOME/.local_profile"
 
 # If local profile file exist - source it
 if [ -f "$local_profile_path" ] ; then
-  source "$local_profile_path"
+  . "$local_profile_path"
 fi
+

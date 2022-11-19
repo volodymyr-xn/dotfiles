@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+# Creates tempdir for sources code or installation fies in "/tmp" directory
+
+destination_dir=$(dotfiles-tempdir-for "$1")
+
+git clone $2 $destination_dir
+
+cd $destination_dir

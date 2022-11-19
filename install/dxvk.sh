@@ -8,7 +8,7 @@ git clone https://github.com/doitsujin/dxvk $destination_dir
 
 cd $destination_dir
 
-# git checkout v1.6.1
+git checkout v1.8
 
 chmod +x ./setup_dxvk.sh
-./setup_dxvk.sh install
+WINEPREFIX=/home/tech/StandaloneApps/Photoshop/Wine/WinePrefixes/wine-experiment ./setup_dxvk.sh install

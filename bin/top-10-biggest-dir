@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-set -euo pipefail
-
-# Show top 10 biggest dirs under path
-path=${1:-"."}
-du -hs "$path"/* | sort -hr | head

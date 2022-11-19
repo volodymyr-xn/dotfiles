@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# Updates asdf itself and update all plugins
+
+set -euo pipefail
+
+systemd-analyze blame | head -n 30

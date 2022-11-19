@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# sudo lshw "$@"
+sudo lshw

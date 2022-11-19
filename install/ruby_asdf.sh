@@ -2,13 +2,18 @@
 
 asdf plugin-add ruby https://github.com/asdf-vm/asdf-ruby.git
 
-ruby_version=${1:-2.6.5}
+ruby_version=$1
 
-RUBY_CONFIGURE_OPTS=--with-jemalloc asdf install ruby $ruby_version
+if [ -z "$ruby_version"]
+then
+  ruby_version="latest"
+fi
+
+RUBY_CONFIGURE_OPTS=--with-jemalloc asdf install ruby "$ruby_version"
 
 
-asdf global ruby $ruby_version
+asdf global ruby latest
 asdf reshim ruby
 
-echo "\nBuilt with libs:"
+echo "\nRuby built with libs:"
 ruby -r rbconfig -e "puts RbConfig::CONFIG['MAINLIBS']"

@@ -4,18 +4,29 @@
 
 # Git status
 # ctrl-f
+# bindkey -s "^f" 'git status\n'
 bindkey -s "^f" 'git status\n'
 
 # Git diff staged files
 # ctrl-e
-bindkey -s "^o" 'git diff --staged\n'
+# bindkey -s "^o" 'git diff --staged\n'
 
 # Clears console
-# ctrl-n
-bindkey -s "^n" 'clear\n'
+# ctrl-m
+#bindkey -s "^b" 'clear\n'
 
-# bindkey -s "^f" 'git status\n'
-#
+# Run rails console
+# ctrl-o
+bindkey -s "^o" 'bin/rails c\n'
+
+bindkey "^w" forward-word
+bindkey "^b" backward-word
+bindkey "^s" backward-delete-word
+bindkey "^v" delete-word
+# bindkey "^e" beginning-of-line
+# bindkey "^]" end-of-line
+bindkey "^u" backward-kill-line
+
 # # bindkey -s "^i" 'git diff --staged\n'
 # bindkey -s "^o" 'git diff --staged\n'
 #

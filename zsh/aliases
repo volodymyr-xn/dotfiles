@@ -7,6 +7,7 @@ alias vn='nvim'
 
 # Quickly open current directory
 alias na='xdg-open .'
+# alias na='nautilus .'
 
 # General UNIX
 alias mv='mv -iv'
@@ -14,7 +15,8 @@ alias cp='cp -iv'
 alias df='df -h'
 alias du='du -h'
 alias dud='du -d 1 -h'
-alias duf='du -sh *'
+alias duff='du -sh *'
+alias duf='duf -hide-fs squashfs '
 alias mkdir='mkdir -pv'
 alias src='source ~/.zshrc'
 
@@ -34,7 +36,7 @@ alias ll='ls -l'      #long list
 alias l.='ls -d .* --color=auto'
 
 # Finding stuff!
-alias fd='find . -type d -name'
+# alias fd='find . -type d -name'
 alias ff='find . -type f -name'
 
 # Tree
@@ -50,6 +52,6 @@ alias rake='bundle exec rake'
 alias bx='bundle exec'
 
 # Ctags
-alias ctags-ruby='ctags -R --languages=ruby,javascript --sort=yes  --tag-relative=yes --exclude=.git --exclude=log --exclude=node_modules . $(bundle list --paths)'
+alias ctags-ruby='ctags -R --languages=ruby,javascript --langmap=javascript:.js.es6.es.jsx--javascript-kinds=-c-f-m-p-v  --sort=yes  --quiet=yes --tag-relative=yes --exclude=.git --exclude=log --exclude=app/assets/builds --exclude=node_modules . $(bundle list --paths)'
 alias ct='ctags-ruby'
-alias ctags-javascript="ctags -R app config lib && sed -i '' -E '/^(if|switch|function|module\.exports|it|describe).+language:js$/d' tags"
+alias ctags-javascript="ctags -R app config lib --langmap=javascript:.js.es6.es.jsx--javascript-kinds=-c-f-m-p-v ."

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+samba_user="$1"
+
+sudo smbpasswd -a "$samba_user"

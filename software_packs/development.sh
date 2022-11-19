@@ -11,4 +11,8 @@ cd $HOME/dotfiles/install
 ./redis_asdf.sh
 ./crystal_asdf.sh
 
-./geckodriver.sh
+./universal-ctags.sh
+
+./vips_from_homebrew.sh
+# TODO: temporary not used
+# ./geckodriver.sh

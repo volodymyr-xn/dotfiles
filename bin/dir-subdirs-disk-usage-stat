@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# Prints the list of sizes of subdirs for specified dir
+# Defaults to check the subdirs of current dir
+# Uses current dir if dir is not specified
+
+set -euo pipefail
+
+dir=${1:-"."}
+sudo du -h -d 1 $dir | sort -h -r

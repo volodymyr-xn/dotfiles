@@ -17,3 +17,4 @@ node_modules/
 *.local
 tags
 dump.rdb
+.solargraph.yml

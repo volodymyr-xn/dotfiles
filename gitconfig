@@ -1,8 +1,9 @@
 [user]
 	name = Volodymyr Shevchuk
-	email = volodymyr.shevchuk93@gmail.com
+	email = volodymyr.shevchuk.dev@gmail.com
 [core]
 	editor = vim
+	excludesfile = /home/tech/.gitignore_global
 [color]
 	ui = true
 [push]
@@ -15,8 +16,32 @@
   uncommit = reset --soft HEAD^
   staged = diff --staged
   mdiff = diff master...
-	s = status
 [fetch]
 	prune = true
 [commit]
 	gpgsign = false
+
+[alias]
+# Add all files and display the status. (`g a`)
+a = !git add -A && git status
+
+# Commit the current index with a message. (`g c "Initial commit."`)
+c = commit
+
+# Amend the last commit message. (`g ca`)
+ca = commit --amend
+
+# Pull updates. (`g pl`)
+pl = pull
+
+# Push updates. (`g ps origin master`)
+ps = push
+
+# Pull and rebase the current branch. (`g plre`)
+plre = pull --rebase
+
+# Display the status. (`g st`)
+st = status
+
+# Rebase the current branch from an up-to-date origin/master. (`g up`)
+up = !git fetch origin && git rebase origin/master

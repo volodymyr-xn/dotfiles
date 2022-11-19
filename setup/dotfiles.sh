@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
 
-DOTFILES_DIR=$HOME/dotfiles
+DOTFILES_DIR="$HOME/dotfiles"
+
+symlink_files_from_dir() {
+  target=$1
+
+  for file in $target/*; do
+    target_file_full_path=$(readlink -f "$file")
+    target_file_basename=$(basename "$file")
+
+    ln -nsf "$target_file_full_path" "$destination/$target_file_basename"
+  done
+}
 
 installation_log() {
   local fmt="$1"; shift
@@ -8,26 +19,26 @@ installation_log() {
   printf "\n✨ \e[32m(Dotfiles) $fmt\n" "$@"
 }
 
-symlink_to_destination() {
+symlink_to() {
   target=$1
   destination=$2
 
-  installation_log "-> Linking $target to $destination..."
+  installation_log "Linking $target to $destination"
 
   ln -nfs "$target" "$destination"
 }
 
 symlink_file_to_home_dir() {
-  symlink_to_destination "$DOTFILES_DIR/$1" "$HOME/.$1"
+  symlink_to "$DOTFILES_DIR/$1" "$HOME/.$1"
 }
 
 symlink_fallback_file_to_home_dir() {
   file_basename=$(basename $1)
-  symlink_to_destination "$DOTFILES_DIR/$1" "$HOME/.$file_basename"
+  symlink_to "$DOTFILES_DIR/$1" "$HOME/.$file_basename"
 }
 
 symlink_directory_to_config_dir() {
-  symlink_to_destination "$DOTFILES_DIR/$1" "$HOME/.config/$1"
+  symlink_to "$DOTFILES_DIR/$1" "$HOME/.config/$1"
 }
 
 #===============================================================
@@ -38,15 +49,16 @@ set -e # Terminate script if anything exits with a non-zero value
 set -u # Prevent unset variables
 
 files_to_symlink="\
-  profile vim tmux zsh ackrc asdfrc ctags gemrc \
+  profile zprofile bash_profile vim tmux zsh ackrc asdfrc ctags gemrc \
   gitconfig gitignore_global gitmessage npmrc zshrc \
   inputrc default-gems asdfrc bashrc editorconfig \
   config.reek stylelint"
 
-dirs_to_symlink_to_config="\
-  alacritty bundle nvim vim tmux kitty rofi rubocop pry htop"
+dirs_to_symlink_to_xdg_config="\
+  fish alacritty bundle docker nvim vim tmux pipewire wireplumber kitty rofi rubocop pry htop"
 
-fallback_files_to_symlink="rubocop/rubocop.yml tmux/tmux.conf"
+# fallback_files_to_symlink="rubocop/rubocop.yml tmux/tmux.conf"
+fallback_files_to_symlink="tmux/tmux.conf"
 
 #===============================================================
 #================= Instalation =================================
@@ -65,25 +77,26 @@ for fallback_file in $fallback_files_to_symlink; do
 done
 
 # Symlink configuration directories to config directory
-for dir in $dirs_to_symlink_to_config; do
+for dir in $dirs_to_symlink_to_xdg_config; do
   symlink_directory_to_config_dir $dir
 done
 
-# Symlink PulseAudio config
-mkdir -p $HOME/.config/pulse
-ln -nsf "$DOTFILES_DIR/pulse/daemon.conf" ~/.config/pulse/daemon.conf
 
-local_shell_profile_path=$HOME/.local_profile
+installation_log "-> Linking $HOME/gitignore_global to $HOME/.gitignore"
+ln -nsf "$HOME/gitignore_global" "$HOME/.gitignore"
 
+# Create local_profile file
+local_shell_profile_path="$HOME/.local_profile"
 installation_log "Create local shell profile file $local_shell_profile_path"
-# Create local profile file if exist
 touch $local_shell_profile_path
 
-file_templates_destination=$HOME/Templates/
-installation_log "Symlink file templates to $file_templates_destination"
 # Symlink file templates
-mkdir -p $HOME/Templates
-ln -sf "$DOTFILES_DIR/file-templates/*" "$file_templates_destination"
+file_templates_destination="$HOME/Templates/"
+installation_log "Symlink file templates to $file_templates_destination"
+mkdir -p "$HOME/Templates"
+ln -nsf "$DOTFILES_DIR/file-templates/*" "$file_templates_destination"
+
+# symlink_files_from_dir "$DOTFILES_DIR/file-templates/"
 
 echo ''
 echo "✨✨✨Dotfiles installation complete!🍰✨✨✨"

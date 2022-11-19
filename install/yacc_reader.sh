@@ -6,7 +6,7 @@ destination_dir=$(dotfiles-tempdir-for "yacc-reader" "master")
 # unrar-free
   # libqt5script5 \
 
-sudo apt install \
+sudo apt install -y \
   p7zip-full \
   libunarr-dev \
   qt5-default \

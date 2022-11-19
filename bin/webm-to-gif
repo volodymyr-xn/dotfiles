@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+webm_file="$1"
+
+webem_file_name="${webm_file%%.*}"
+
+if [ ${webm_file: -5} == ".webm" ]; then
+  ffmpeg -y -i "$1" "$image_file_without_extenstion.gif"
+fi

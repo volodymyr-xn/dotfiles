@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-# Get dir stat
-# Uses current dir if dir is not specified
-
-set -euo pipefail
-
-dir=${1:-"."}
-sudo du -h -d 1 $dir | sort -h -r

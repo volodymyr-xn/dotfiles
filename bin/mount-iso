@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 mount_point="/mnt/iso_image"
 mkdir $mount_point -p

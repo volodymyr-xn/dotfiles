@@ -7,7 +7,10 @@ export PS1="\u@\h \W\[\033[32m\]\$(parse_git_branch)\[\033[00m\] $ "
 
 export DISABLE_AUTO_TITLE=true
 
-# Enable fzf shortcuts
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
-
 source ~/dotfiles/shared_shell_rc_file
+
+# Enable fzf shortcuts (old)
+# [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+# Enable fzf shortcuts
+[ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash ] && source "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash

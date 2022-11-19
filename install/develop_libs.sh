@@ -9,5 +9,7 @@ yes | sudo apt-get install \
      libffi-dev libncurses5-dev \
      libncursesw5-dev xclip git
 
+yes | sudo pacman -S automake autoconf bison autotools curl libssl cmake
+
 
 # ninja-build

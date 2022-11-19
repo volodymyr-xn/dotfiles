@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+mp4_file_path="$1"
+
+mp4_file_basename=$(basename "$mp4_file_path" .mp4)
+
+ffmpeg -i "$mp4_file_path" \
+       -vn \
+       -acodec libmp3lame \
+       -ac 2 \
+       -ab 160k \
+       -ar 48000 \
+       "$mp4_file_basename".mp3

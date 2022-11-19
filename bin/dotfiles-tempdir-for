@@ -8,7 +8,7 @@ version=${2:-''}
 timestamp=$(timestamp-ms)
 
 if ! [ -z "$version" ]; then
-  version="-$version-"
+  version="$version-"
 fi
 
-echo "/tmp/$name${version}${timestamp}"
+echo "/tmp/${name}-${version}${timestamp}"

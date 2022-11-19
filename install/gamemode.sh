@@ -8,6 +8,6 @@ git clone https://github.com/FeralInteractive/gamemode $destination_dir
 
 cd $destination_dir
 
-git checkout 1.5.1
+git checkout 1.6.1
 
-./bootstrap.sh
+yes | ./bootstrap.sh

@@ -2,18 +2,21 @@
 # bindkey -s "^o" 'ch\n'
 
 stty -ixon
-
-# ZSH extensions
-source $HOME/dotfiles/zsh/oh-my-zsh
-source $HOME/dotfiles/zsh/aliases
-source $HOME/dotfiles/zsh/tmux
-source $HOME/dotfiles/zsh/functions
-source $HOME/dotfiles/zsh/keybindings
-
-# Enable fzf
+bindkey -v
+#
+# # ZSH extensions
+. $HOME/dotfiles/zsh/oh-my-zsh
+. $HOME/dotfiles/zsh/aliases
+. $HOME/dotfiles/zsh/tmux
+. $HOME/dotfiles/zsh/functions
+. $HOME/dotfiles/zsh/keybindings
+#
+# # Enable fzf
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
-# Include local settings
+#
+# # Include local settings
 # [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+#
+source "$HOME/dotfiles/shared_shell_rc_file"
 
-source ~/dotfiles/shared_shell_rc_file
+[ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.zsh ] && source "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.zsh

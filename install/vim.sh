@@ -9,7 +9,8 @@ git clone https://github.com/vim/vim $vim_source_dir
 echo "Stating VIM compile process"
 cd $vim_source_dir
 
-sudo apt-get build-dep vim-gtk
+# sudo apt-get build-dep vim-gtk
+# sudo pacman build-dep vim-gtk
 
 ./configure \
   --enable-gui=gtk2 \
@@ -27,5 +28,7 @@ echo "Installing VIM Plug"
 curl -fLo ~/dotfiles/vim/autoload/plug.vim \
    --create-dirs \
    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+vim +PlugUpdate! +PlugClean +qall
 
 echo "VIM installed succesfully"

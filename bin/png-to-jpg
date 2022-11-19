@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
 
+# Converts png file to jpg
+# Uses imagegmagic "convert" util
+
 image_file=$1
 image_file_without_extenstion="${image_file%%.*}"
 
+# Check if file is png
 if [ ${image_file: -4} == ".png" ] ; then
   convert "$image_file" "$image_file_without_extenstion.jpg"
+
+  # Move original file to trash
   gvfs-trash "$image_file"
 fi

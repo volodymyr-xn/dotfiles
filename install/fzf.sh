@@ -10,7 +10,7 @@ brew install the_silver_searcher
 # sudo apt-get install -y automake pkg-config libpcre3-dev zlib1g-dev liblzma-dev
 
 # Clone fzf repo from gitgub
-git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"
 
 # # Run fzf installation
-yes | ~/.fzf/install --xdg
+yes | . "$HOME/.fzf/install" --xdg

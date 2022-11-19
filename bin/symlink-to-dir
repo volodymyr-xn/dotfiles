@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+# Symlinks one dir as other dir expanding relative paths as full real paths
+
+set -euo pipefail
+
+dir_to_symlink="$1"
+destination_dir="$2"
+
+dir_to_symlink_full_path=$(readlink -f "$dir_to_symlink")
+dir_to_symlink_basename=$(basename "$dir_to_symlink")
+echo "dirname $0"
+
+echo "full path $dir_to_symlink_full_path"
+ln -nsf "$dir_to_symlink_full_path" "$destination_dir/$dir_to_symlink_basename"

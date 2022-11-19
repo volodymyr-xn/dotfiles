@@ -3,7 +3,7 @@
 timestamp=$(date +%s)
 destination_dir=/tmp/zsh-$timestamp
 
-echo 'Download zsh source code to $destination_dir'
+echo "Download zsh source code to $destination_dir"
 
 sudo apt install -y \
                       git-core \
@@ -19,6 +19,7 @@ git clone https://github.com/zsh-users/zsh $destination_dir
 cd $destination_dir
 
 git checkout $(git tag | tail -n 1)
+# git checkout 5.5.1
 
 ./Util/preconfig
 
@@ -37,7 +38,7 @@ rm -rf $destination_dir
 which zsh | sudo tee -a /etc/shells
 
 # Set Zsh as the default shell for the current user.
-sudo chsh -s $(which zsh)
+yes | sudo chsh -s $(which zsh)
 
-echo 'ZSH installation done'
+echo 'ZSH installation complete'
 echo $(zsh --version)

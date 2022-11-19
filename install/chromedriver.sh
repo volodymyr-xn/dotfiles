@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-version=83.0.4103.39
+version=93.0.4577.63
 
-cd /tmp && wget https://chromedriver.storage.googleapis.com/$version/chromedriver_linux64.zip
+cd /tmp
+wget https://chromedriver.storage.googleapis.com/$version/chromedriver_linux64.zip
 sudo unzip chromedriver_linux64.zip -d /usr/local/bin
 rm -f chromedriver_linux64.zip

@@ -1,0 +1,1 @@
+{"Name":"desktop-linux","Metadata":{},"Endpoints":{"docker":{"Host":"unix:///home/tech/.docker/desktop/docker.sock","SkipTLSVerify":false}}}

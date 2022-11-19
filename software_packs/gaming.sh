@@ -5,3 +5,4 @@
 ./install/dxvk.sh
 ./install/d9vk.sh
 ./install/gamemode.sh
+./install/gamemode32.sh

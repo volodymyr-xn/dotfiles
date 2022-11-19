@@ -1,0 +1,3 @@
+{
+ "default.profile.alsa_card.usb-Logitech_Inc_Logitech_H570e_Stereo_00000000-00": { "name": "output:analog-stereo+input:analog-stereo" }
+}

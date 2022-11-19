@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-sudo apt install zenity
+sudo apt install -y zenity

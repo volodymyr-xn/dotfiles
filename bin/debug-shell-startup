@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# echo exit | strace bash -li |& grep '^open'
+echo exit | strace zsh -li |& grep '^open'

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# Retrieves the name of screen on Laptop
+
+set -euo pipefail
+
+match_string="Alphanumeric Data String"
+
+sudo get-edid 2> /dev/null \
+  | edid-decode \
+  | grep "$match_string" \
+  | sed  "s/$match_string//" \
+  | sed  "s/:\s//"

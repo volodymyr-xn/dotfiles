@@ -1,0 +1,7 @@
+#!/usr/bin/sh
+
+# Doesnt show app name
+ #ss -nlt
+
+# Shows app names
+netstat -tulpn | grep LISTEN

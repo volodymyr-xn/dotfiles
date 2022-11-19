@@ -4,6 +4,10 @@
 # cd rclone
 # go build
 
-go get -u -v github.com/ncw/rclone
+source "$HOME/.profile"
 
-mv ${GOPATH}/bin/rclone $HOME/.local/bin/rclone
+# go get -u -v github.com/ncw/rclone
+
+# mv ${GOPATH}/bin/rclone "$HOME/.local/bin/rclone"
+
+brew install rclone

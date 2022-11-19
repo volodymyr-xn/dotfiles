@@ -8,7 +8,7 @@ git clone https://github.com/FeralInteractive/gamemode $destination_dir
 
 cd $destination_dir
 
-RELEASE_VERSION=1.5.1
+RELEASE_VERSION=1.6.1
 
 git checkout $RELEASE_VERSION
 
@@ -19,5 +19,5 @@ meson build32 -Dwith-daemon=false -Dwith-examples=false -Dwith-systemd=false --p
 sed -i 's/x86_64-linux-gnu\/libdbus/i386-linux-gnu\/libdbus/g' build32/build.ninja
 ninja -C build32
 
-sudo ninja -C build32 install
+yes | sudo ninja -C build32 install
 sudo ldconfig

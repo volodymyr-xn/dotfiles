@@ -3,12 +3,11 @@
 set -euo pipefail
 
 columns=$(tput cols)
-max_width=70
-# half_of_screen=$(( ($COLUMS / 2) - 10 ))
+max_width=80
 
 if [ "$columns" -lt "$max_width" ]
 then
-  man_width="$COLUMNS"
+  man_width="$columns"
 else
  man_width="$max_width"
 fi

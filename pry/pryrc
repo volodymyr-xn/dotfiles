@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-require 'rb-readline'
 require 'readline'
 
-# Search in pry history with fzf(https://github.com/junegunn/fzf)
+# Search in pry history with fzf
+# (https://github.com/junegunn/fzf)
 
 def fzf_installed?
   !`which fzf`&.size&.zero?

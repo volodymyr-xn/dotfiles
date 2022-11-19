@@ -11,13 +11,13 @@ yes | sudo apt-get install git build-essential \
   libgtk2.0-dev flex bison \
   glib-2.0 gmodule-2.0 gobject-2.0
 
+destination_dir=$(dotfiles-tempdir-for 'vips' 'master')
 
-timestamp=$(date +%s)
-destination_dir=/tmp/libvips-source-$timestamp
-
-git clone https://github.com/jcupitt/libvips.git $destination_dir
+git clone https://github.com/libvips/libvips $destination_dir
 
 cd $destination_dir
+
+git checkout v8.10.5
 
 ./autogen.sh
 make -j $(nproc)

@@ -7,13 +7,19 @@ version=2.2.5
 mkdir -p $destination_dir
 cd $destination_dir
 
-wget https://github.com/h2o/h2o/archive/v$version.tar.gz
+# archive_name=v$version.tar.gz
+#
+# wget https://github.com/h2o/h2o/archive/$archive_name
+#
+# tar -xzvf $archive_name
 
-tar -xzvf $(ls | tail -n 1)
+git clone https://github.com/h2o/h2o
 
-cd h2o-$version
+# cd h2o-$version
+cd h2o
 
 cmake -DWITH_BUNDLED_SSL=on .
 
 make -j $(nproc)
+
 sudo make install

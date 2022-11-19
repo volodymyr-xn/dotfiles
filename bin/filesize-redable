@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+filename="$1"
+
+size=$(du -h "$filename" | awk '{print $1}')
+
+file_basename=$(basename "$filename")
+
+echo "Size of \"$file_basename\" - $size"

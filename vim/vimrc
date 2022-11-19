@@ -1,33 +1,93 @@
 call plug#begin('~/.vim/plugged')
 
+" let g:ale_disable_lsp = 1
+
 " Global search by ack cli util
 Plug('mileszs/ack.vim')
+" Plug('wincent/ferret')
 
 " Filetree
 Plug('scrooloose/nerdtree')
 
+" TODO: Replace nerdtree with fern
+" Plug('lambdalisue/fern.vim')
+
+" Plug('lambdalisue/fern.vim')
+" let g:fern#disable_default_mappings   = 1
+" let g:fern#disable_drawer_auto_quit   = 1
+" let g:fern#disable_viewer_hide_cursor = 1
+" let g:fern#mark_symbol                       = '●'
+" let g:fern#renderer#default#collapsed_symbol = '▷ '
+" let g:fern#renderer#default#expanded_symbol  = '▼ '
+" let g:fern#renderer#default#leading          = ' '
+" let g:fern#renderer#default#leaf_symbol      = ' '
+" let g:fern#renderer#default#root_symbol      = '~ '
+" Plug('lambdalisue/fern-git-status.vim')
+" let g:fern_git_status#disable_ignored    = 1
+" let g:fern_git_status#disable_untracked  = 1
+" let g:fern_git_status#disable_submodules = 1
+
 " Comments
 Plug('tomtom/tcomment_vim')
 
-" Autocomplete
-" Old autocomplete
-" Plug('lifepillar/vim-mucomplete')
-Plug 'prabirshrestha/asyncomplete.vim'
-Plug 'prabirshrestha/async.vim'
-Plug 'prabirshrestha/vim-lsp'
-Plug 'prabirshrestha/asyncomplete-lsp.vim'
+" Perform all your vim insert mode completions with Tab
+" Plug('ervandew/supertab')
 
-" Statusline
-Plug('itchyny/lightline.vim')
+" Most old autocomplete
+" Plug('lifepillar/vim-mucomplete')
+
+" Autocomplete
+" Plug 'prabirshrestha/asyncomplete.vim'
+" Plug 'prabirshrestha/async.vim'
+" Plug 'prabirshrestha/vim-lsp'
+" Plug 'prabirshrestha/asyncomplete-lsp.vim'
+
+" Autocomplete & intellisense
+" Coc is an intellisense engine for Vim/Neovim.
+" Also adds linting and snipets
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
+" Enable in 2023
+" if has('nvim')
+"   Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+" endif
+
+" Popup for VIM built-in autocomplete https://github.com/vim-scripts/AutoComplPop
+"Plug("vim-scripts/AutoComplPop")
+
+" Additional sources for coc
+" https://github.com/neoclide/coc-sources
+
+
+" Deoplete autocomplete
+if has('nvim')
+  " Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+else
+  " Plug 'Shougo/deoplete.nvim'
+  " Plug 'roxma/nvim-yarp'
+  " Plug 'roxma/vim-hug-neovim-rpc'
+endif
 
 " Linting
 Plug('w0rp/ale')
 
-" ALE indicator for the lightline vim plugin
-Plug('maximbaz/lightline-ale')
+" Statusline
+Plug('itchyny/lightline.vim')
+
+" Base16 colors for lightline
+Plug('daviesjamie/vim-base16-lightline')
+"
+" Show ale errors in lightline
+" Plug('maximbaz/lightline-ale')
+
+" Alternative linting plugin(Consider to switch in future)
+" Plug('neomake/neomake')
 
 " Enable repeating supported plugin maps with '.'
 Plug('tpope/vim-repeat')
+
+" FZF integration
+Plug 'junegunn/fzf.vim'
 
 " Show changed lines from git
 Plug('airblade/vim-gitgutter')
@@ -38,6 +98,11 @@ Plug('tpope/vim-bundler')
 
 " Ruby on Rails power tool
 " This is a massive (in a good way) Vim plugin for editing Ruby on Rails applications.
+" Partial and concern extraction. In a view, :Extract {file} replaces the
+" desired range (typically selected in visual line mode) with render '{file}',
+" which is automatically created with your content. In a model or controller, a
+" concern is created, with the appropriate include declaration left behind.
+" :help rails-:Extract
 Plug('tpope/vim-rails')
 
 " Minimal rbenv support
@@ -46,8 +111,14 @@ Plug('tpope/vim-rbenv')
 " Better rspec syntax highlighting for Vim
 Plug('keith/rspec.vim')
 
+" Ruby syntax highlighting
+Plug('vim-ruby/vim-ruby')
+
 " Vim highlighting & completion for MiniTest
 Plug('sunaku/vim-ruby-minitest')
+
+" Create your own text objects
+Plug('kana/vim-textobj-user')
 
 " Make text objects with various ruby block structures.
 Plug('rhysd/vim-textobj-ruby')
@@ -57,6 +128,15 @@ Plug('tpope/vim-endwise')
 
 " quoting/parenthesizing made simple
 Plug('tpope/vim-surround')
+
+" Provides additional text objects
+" Example:
+" ci* - change inside star
+" va| - visually select around pipe
+" ci_ - change inside underscore
+" ca/aa/Ia/Aa  - change inside function/method argument
+
+Plug('wellle/targets.vim')
 
 " Run various tests from vim
 Plug('janko-m/vim-test')
@@ -76,9 +156,6 @@ Plug('tpope/vim-fugitive')
 " Make terminal vim and tmux work better together.
 Plug('tmux-plugins/vim-tmux-focus-events')
 
-" Create your own text objects
-Plug('kana/vim-textobj-user')
-
 " Provides insert mode auto-completion for quotes, parens, brackets
 Plug('Raimondi/delimitMate')
 
@@ -89,19 +166,23 @@ Plug('Raimondi/delimitMate')
 Plug('rhysd/vim-crystal')
 
 " Reslove git conflicts
-Plug('christoomey/vim-conflicted')
+" Plug('christoomey/vim-conflicted')
 
 " Improved JavaScript syntax
 Plug('pangloss/vim-javascript')
 
 " Alternative JavaScript syntax
-" Plug('othree/yajs.vim')
+" Plug 'maxmellon/vim-jsx-pretty'
+
 
 " JSX syntax support
 Plug('mxw/vim-jsx')
 
 " Multiple cursors
-Plug('terryma/vim-multiple-cursors')
+" Plug('terryma/vim-multiple-cursors') " This plugin is deprecated
+
+" Multiple cursors
+Plug('mg979/vim-visual-multi')
 
 " Brewfile syntax highlighting
 Plug('bfontaine/brewfile.vim')
@@ -114,31 +195,34 @@ Plug('mattn/emmet-vim')
 
 " Base16 color schemes
 Plug('chriskempson/base16-vim')
+"" shows yaml path under cursor,
+" allows to search by YAML key
+Plug('Einenlum/yaml-revealer')
 
-" Onedark colorscheme
-" Plug('rakr/vim-one')
+" Snippets
+" Plug('SirVer/ultisnips')
+Plug 'MarcWeber/vim-addon-mw-utils'
+Plug 'tomtom/tlib_vim'
+Plug('garbas/vim-snipmate')
+
+" Snippets usging coc.nvim
+" https://github.com/neoclide/coc-snippets
+
+" Automatically highlighting other uses of the current word under the cursor
+Plug('RRethy/vim-illuminate')
+
+" Better yaml folding
+Plug 'pedrohdz/vim-yaml-folds'
+
+" Lighline base16 themes
+Plug 'nolo18/base16lightline'
 
 " Highligh color codes
 Plug('lilydjwg/colorizer')
 
-" Search and replace
-Plug('brooth/far.vim')
-
-" FZF
-Plug('junegunn/fzf.vim')
-
-" Local eslint
-Plug('benjie/local-npm-bin.vim')
-
 " Vue syntax
 " Plug('posva/vim-vue')
-Plug('storyn26383/vim-vue')
-
-" Coffescript syntax
-Plug('kchmck/vim-coffee-script')
-
-" Coc is an intellisense engine for Vim/Neovim.
-" Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" Plug('storyn26383/vim-vue')
 
 " AppArmor syntax highlight
 Plug('ClockworkNet/vim-apparmor')
@@ -151,6 +235,9 @@ Plug('elzr/vim-json')
 
 " Syntax highlighting and filetype detection for systemd unit files
 Plug('wgwoods/vim-systemd-syntax')
+
+" " Syntax highlighting for Nix configs
+" Plug('LnL7/vim-nix')
 
 " Dracula color scheme
 " Plug('dracula/vim')
@@ -165,13 +252,38 @@ Plug('nolo18/base16lightline')
 " Better markdown support
 Plug('plasticboy/vim-markdown')
 
+" unimpaired.vim: Pairs of handy bracket mappings
+Plug('tpope/vim-unimpaired')
+
+" GTK Blueprint syntax
+Plug('thetek42/vim-blueprint-syntax')
+
+" Switch between multiline and signleline code
+Plug('AndrewRadev/splitjoin.vim')
+
+" Switch between different things
+Plug('AndrewRadev/switch.vim')
+
+" Better YAML folding
+Plug('pedrohdz/vim-yaml-folds')
+
+" YAML revealer: shows yaml path under cursor,
+" allows to search by YAML key
+Plug('Einenlum/yaml-revealer')
+
 
 call plug#end()
 "============================================================================
 " ===================== General settings ====================================
 "============================================================================
 
-set completeopt+=preview
+" VIM built-in autocomplete options
+" Autocomple word spelling
+set spell "kpelllang=en_us
+set complete+=kspell
+set completeopt+=preview,menuone
+" Don't pass messages to |ins-completion-menu|.
+set shortmess+=c
 
 " use the space key as our leader. put this near the top of your vimrc
 " Disable default space mapping
@@ -181,6 +293,7 @@ let mapleader = "\<space>"
 
 " r For auto indent filetype plugin indent on
 syntax on
+filetype plugin on
 
 " Use vim, not vi api
 set nocompatible
@@ -237,13 +350,17 @@ set smartcase
 " Turn word wrap off
 set nowrap
 
+" Wrap lines at convenient points
+set linebreak
+
 " Indent settings
 set autoindent
 set smartindent
 
 " Performance
-syntax sync maxlines=256
-set synmaxcol=120
+" syntax sync maxlines=256
+syntax sync maxlines=1000
+set synmaxcol=200
 
 " Allow backspace to delete end of line, indent and start of line characters
 set backspace=indent,eol,start
@@ -251,10 +368,12 @@ set backspace=indent,eol,start
 set background=dark
 
 " Base16 hook
-if filereadable(expand("~/.vimrc_background"))
-   let base16colorspace=256
-   source ~/.vimrc_background
-endif
+" if filereadable(expand("~/.vimrc_background"))
+"    let base16colorspace=256
+"    source ~/.vimrc_background
+" endif
+
+colorscheme base16-horizon-dark
 
 " Use pywal colorscheme
 " colorscheme wal
@@ -344,8 +463,12 @@ set wildmenu
 " Automatically rebalance windows on vim resize
 autocmd VimResized * :wincmd =
 
+" ========== Additional syntax definitions ========================
 " Highlight crontab and anacrontab files
 autocmd BufNewFile,BufRead crontab,anacrontab set syntax=crontab
+
+" Highlight ActiveAdmin rails administation framework templates
+autocmd BufRead,BufNewFile *.arb setfiletype ruby
 
 " Highlight a matching [{()}?P] when cursor is placed on start/end character
 set showmatch
@@ -359,9 +482,14 @@ set scrolloff=3
 " Set the terminal's title
 set title
 
-" Yank to system clipboard
+" Yank to vim clipboard
 set clipboard+=unnamed
 
+" Yank to system clipboard
+" set clipboard+=nnamedplus
+
+set nofoldenable
+set foldlevelstart=3
 
 "============================================================================
 "====================== Highlight ============================================
@@ -383,35 +511,59 @@ au BufRead,BufNewFile *.md setlocal textwidth=75
 " Force Ruby syntax for Pry config file
 autocmd BufRead,BufNewFile .pryrc setlocal syntax=ruby
 
+if has("nvim")
+  " Highligh text on yank
+  au TextYankPost * silent! lua vim.highlight.on_yank {higroup="Type", timeout=250}
+endif
+
+" Resize all buffers on vim resize
+" augroup on_vim_resized
+"   autocmd!
+"   autocmd VimResized * wincmd =
+" augroup END
+
 
 "============================================================================
-"====================== Abbreviations ============================================
+"================== YAML settings ===========================================
 "============================================================================
-" Frozen string literal for Ruby
-ab fsl # frozen_string_literal: true
+" Set folding rules for yaml
+au! BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml foldmethod=indent
+" By default fold just opened yaml file
+autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab foldenable
 
-" Binding pry abbreviation
-iabbr bpry binding.pry
+" Set folding rules for html and erb files
+au! BufNewFile,BufReadPost *.{html} set filetype=html foldmethod=indent
+au! BufNewFile,BufReadPost *.{erb} set filetype=eruby foldmethod=indent
+autocmd FileType html setlocal ts=2 sts=2 sw=2 expandtab
+autocmd FileType eruby setlocal ts=2 sts=2 sw=2 expandtab
+
+
+
+" Remember last position when reopening files
+" set viminfo='10,\"100,:20,%,n~/.viminfo
+" if has("autocmd")
+"     au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+" endif
+
 
 "============================================================================
-"====================== Mapings ============================================
+"====================== Mapings =============================================
 "============================================================================
 
 " Double click on left mouse button trigers Insert mode
-map <2-LeftMouse> #
+" map <2-LeftMouse> #
 
-map <RightMouse> n
-map <2-RightMouse> n
+" map <RightMouse> n
+" map <2-RightMouse> n
 
 " Remap VIM 0 to first non-blank character
 nnoremap 0 ^
 
 " Pressing ,ss will toggle and untoggle spell checking
-map <Leader>ss :setlocal spell!<cr>
+" map <Leader>ss :setlocal spell!<cr>
 
 " Save current file
 nnoremap <Leader>w :w<CR>
-nnoremap <C-s> :w<CR>
 
 " Go to the begining of line
 noremap H ^
@@ -420,16 +572,19 @@ noremap H ^
 noremap L $
 
 " Run 'git blame' on a selection of code
-nmap <Leader>gb :Gblame<CR>
+nmap <Leader>gb :Git blame<CR>
 
 " Run 'git status' for current file
-nmap <Leader>gs :Gstatus<CR>
+" nmap <Leader>gs :Gstatus<CR>
 
 " Change surround double quotes to plain quotes
 nmap <Leader>' cs"'<CR>
+"
+" Change surround single quotes to double quotes
+nmap <Leader>" cs'"<CR>
 
-" Expand word to tag
-nmap <F4> byei<<ESC>ea></<C-R>0><ESC>bba
+" Shift + q - Quit
+map Q <C-W>q
 
 " Faster search
 " nnoremap s /
@@ -442,13 +597,13 @@ vnoremap > >gv
 nnoremap <C-t> <esc>:tabnew<CR>
 
 " For indenting code
-map <Leader>i mmgg=G`m<CR>
+" map <Leader>i mmgg=G`m<CR>
 
 " Disable selection
 nnoremap <Leader>n :nohl<CR>
 
 " Enter replace command
-nnoremap <Leader>r :%s/
+" nnoremap <Leader>r :%s/
 
 " Edit vim config
 nnoremap <Leader>ve :e ~/.vim/vimrc<cr>
@@ -461,7 +616,7 @@ nnoremap <Leader>vr :source $MYVIMRC<cr>
 " nnoremap q :call
 
 " Reload chrome tab
-nnoremap R :call ReloadActiveChromeTab() <CR>
+" nnoremap R :call ReloadActiveChromeTab() <CR>
 
 " Move up and down by visible lines if current line is wrapped
 nmap j gj
@@ -476,35 +631,65 @@ vnoremap m "+y
 " Copy current line to system clipboard
 nnoremap ` "+yy
 
+" Copy full path of the current file to the clipboard
+" nnoremap <silent> R :let @+ = expand('%:p')<CR>
+"
+" Copy relative path of the current file to the clipboard
+nnoremap <silent> R :let @+ = expand('%')<CR>
+
+" nnoremap ` :q<CR>
+
 " Easily resize windows
 nnoremap < <C-w>5<
 nnoremap > <C-w>5>
 nnoremap + <C-w>5+
 nnoremap _ <C-w>5-
 
+"=========== Move lines ===============
 " Move current line up
-nnoremap <C-Up> :m .-2<CR>==
-inoremap <C-Up> <ESC>:m .-2<CR>==gi
+" nnoremap <S-Up> :m .-2<CR>==
+" inoremap <S-Up> <ESC>:m .-2<CR>==gi
 
-" Move multipe lines up in visual mode
-vnoremap <C-Up> :m '<-2<CR>gv=gv
 
 " Move current line down
-nnoremap <C-Down> :m .+1<CR>==
-inoremap <C-Down> <ESC>:m .+1<CR>==gi
+" nnoremap <S-Down> :m .+1<CR>==
+" inoremap <S-Down> <ESC>:m .+1<CR>==gi
+
+" Move multipe lines up in visual mode
+" vnoremap <C-k> :m '<-2<CR>gv=gv
+vnoremap K :m '<-2<CR>gv=gv
 
 " Move multipe lines down in visual mode
-vnoremap <C-Down> :m '>+1<CR>gv=gv
+" vnoremap <C-j> :m '<-2<CR>gv=gv
+vnoremap J :m '>+1<CR>gv=gv
+
+" " Move multiple lines selected
+" vmap <C-k> [egv
+" vmap <C-j> ]egv
+
 
 " zoom a vim pane, <C-w>= to re-balance
 " nmap <C-w><cr> <C-W>\| <C-W>_
 
 " Switch between tabs
-nnoremap <C-e> gt
+nnoremap <C-q> :tabprev<cr>
+nnoremap <C-e> :tabnext<cr>
+
+" Toggle folding
+" nnoremap <C-s> za
+nnoremap K za
+
+" Toggle folding with left mouse button click
+map <2-LeftMouse> za
 
 " Tabs
 nnoremap <C-Left> :tabprev<cr>
 nnoremap <C-Right> :tabnext<cr>
+
+" nnoremap H gT
+nnoremap <A-k> :tabprev<CR>
+nnoremap <A-j> :tabnext<CR>
+" noremap L gt
 
 " Map text align to tab button in visual mode
 vnoremap <TAB> =
@@ -513,8 +698,8 @@ vnoremap <TAB> =
 nmap " <C-W>\| <C-W>_
 
 " Toggle windows layout mode
-nnoremap K <C-w>H
-nnoremap F <C-w>J
+" nnoremap K <C-w>H
+" nnoremap F <C-w>J
 
 " Re-balance panes
 nnoremap = <C-W>=
@@ -536,10 +721,14 @@ endfor
 for i in range(1, 5)
   execute "nnoremap \<Leader>" . i . " " . i . "gt<CR>"
 endfor
+
+" for i in range(1, 7)
+"   execute "nnoremap \<C-" . i . "> " . I . "GT<cr>"
+" endfor
 "
-" Yank, comment and paster (usefull for refactoring)
-vnoremap M yV'] :TComment<CR>']pj
-nnoremap M yy']:TComment<CR>']pj
+" Yank, comment and paste (usefull for refactoring)
+vnoremap M yV'] :TComment<CR>']pjj
+nnoremap M yy']:TComment<CR>']pjj
 
 " Faster close windows and quit
 " nnoremap <C-c> <C-w>q
@@ -554,13 +743,28 @@ nnoremap <silent> <Leader>l :TestLast<CR>
 " "Go to test file
 " nmap t :A<CR> DEPRECATED
 
-nnoremap <silent> <Leader>j :Ack <C-R><C-W><CR>
+" nnoremap <silent> <Leader>k :Ack <C-R><C-W><CR>
 
 " Go to related file
 nnoremap <Leader>e :R<CR>
 
 " Go to alternate file
 nnoremap q :A<CR>
+
+" Auto indent pasted text
+nnoremap p p=`]<C-o>
+nnoremap P P=`]<C-o>
+
+" Move to the end of yanked text after yank and paste
+nnoremap p p`]
+vnoremap y y`]
+vnoremap p p`]
+
+" Fixes pasting after visual selection.
+xnoremap p "_dP
+
+" Switch to last file
+" nnoremap R <c-^>
 
 " Tcomment
 " Comment line in visual mode
@@ -569,11 +773,213 @@ vnoremap \ :TComment<CR>
 " Comment line in normal mode
 nnoremap \ :TComment<CR>
 
+
+" if has('nvim')
+" " Treesitter config in Lua
+" lua <<EOF
+"   require'nvim-treesitter.configs'.setup {
+"     -- A list of parser names, or "all"
+"     ensure_installed = { "css", "scss", "ruby", "javascript" },
+"
+"     -- Install parsers synchronously (only applied to `ensure_installed`)
+"     sync_install = false,
+"
+"     -- Automatically install missing parsers when entering buffer
+"     auto_install = true,
+"
+"     -- List of parsers to ignore installing (for "all")
+"     highlight = {
+"       -- `false` will disable the whole extension
+"       enable = true,
+"
+"       -- NOTE: these are the names of the parsers and not the filetype. (for example if you want to
+"       -- disable highlighting for the `tex` filetype, you need to include `latex` in this list as this is
+"       -- the name of the parser)
+"       -- list of language that will be disabled
+"       -- disable = { "c", "rust" },
+"
+"       -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
+"       -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
+"       -- Using this option may slow down your editor, and you may see some duplicate highlights.
+"       -- Instead of true it can also be a list of languages
+"       -- additional_vim_regex_highlighting = false,
+"     },
+"   }
+" EOF
+" endif
+
+"=========================================================================
+" Free keybindings
+"=========================================================================
+" nnoremap <Leader>r :%s/
+
+
+"=========================================================================
+"=========================================================================
+
+"=========================================================================
+"====================== FZF settings =====================================
+"=========================================================================
+
 " fzf
 set rtp+=~/.fzf
 
-nnoremap <C-p> :FZ<CR>
+let g:fzf_layout = { 'window': { 'width': 1, 'height': 0.8 } }
+" let g:fzf_colors = {
+"   \ 'fg':      ['fg', 'Normal'],
+"   \ 'bg':      ['bg', 'Normal'],
+"   \ 'hl':      ['fg', 'Comment'],
+"   \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
+"   \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
+"   \ 'hl+':     ['fg', 'Statement'],
+"   \ 'info':    ['fg', 'PreProc'],
+"   \ 'border':  ['fg', 'Ignore'],
+"   \ 'prompt':  ['fg', 'Conditional'],
+"   \ 'pointer': ['fg', 'Exception'],
+"   \ 'marker':  ['fg', 'Keyword'],
+"   \ 'spinner': ['fg', 'Label'],
+"   \ 'header':  ['fg', 'Comment'],
+"   \ }
+" Customize fzf colors to match your color scheme
+" let g:fzf_colors =
+" \ { 'fg':      ['fg', 'Normal'],
+"   \ 'bg':      ['bg', 'Normal'],
+"   \ 'hl':      ['fg', 'Comment'],
+"   \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
+"   \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
+"   \ 'hl+':     ['fg', 'Type'],
+"   \ 'info':    ['fg', 'PreProc'],
+"   \ 'border':  ['fg', 'Ignore'],
+"   \ 'prompt':  ['fg', 'Conditional'],
+"   \ 'pointer': ['fg', 'Exception'],
+"   \ 'marker':  ['fg', 'Statement'],
+"   \ 'spinner': ['fg', 'Label'],
+"   \ 'header':  ['fg', 'Comment'] }
 
+command! -bang -nargs=? -complete=dir Files
+      \ call fzf#vim#files(<q-args>, { 'window': { 'height': 1, 'width': 1 }, 'options': ['--info=inline', '--preview', '~/.vim/plugged/fzf.vim/bin/preview.sh {}']}, <bang>0)
+
+" Files fzf command shows preview
+command! -nargs=1 FuzzySearchFileInDir FZF <args>
+
+nnoremap <C-p> :FZF<CR>
+" nnoremap <C-p> :Files<CR>
+
+"To learn more about preview window options, see `--preview-window` section of `man fzf`.
+let g:fzf_preview_window = ['right:50%', 'ctrl-/']
+
+
+" Custom full text search by FZF and AG(no preview window)
+noremap <Leader>p :CustomFullTextSearch <CR>
+
+" fzf.vim Full text search in fullscreen by AG(with preview window)
+" "!" indicates for FZF that FZf should be opened in fullscreen
+noremap <Leader>o :Ag! <CR>
+
+" Search sibling files in same directory as current file(with preview window)
+noremap <Leader>i :FuzzySerchSiblingFilesInCurrentDir <CR>
+
+" Search by files in different opened buffers(with preview window)
+noremap <Leader>j :Buffers <CR>
+
+" Search app/models by FZF
+noremap <Leader>m :FuzzySearchFileInDir app/models<CR>
+
+" Search app/assets/stylesheets by FZF
+noremap <Leader>s :FuzzySearchFileInDir app/assets/stylesheets<CR>
+
+" Search app/components by FZF
+noremap <Leader>h :FuzzySearchFileInDir app/components<CR>
+
+" Search app/views by FZF
+nnoremap <Leader>f :FuzzySearchFileInDir app/views<CR>
+
+" Search app/components by FZF
+nnoremap <Leader>x :FuzzySearchFileInDir app/components<CR>
+
+" Search app/locales by FZF
+nnoremap <Leader>d :FuzzySearchFileInDir config/locales/custom_updates<CR>
+
+" Search app/controllers by FZF
+noremap <Leader>c :FuzzySearchFileInDir app/controllers<CR>
+
+" Search javascripts
+" noremap <Leader>u :FZF app/javascripts<CR>
+
+function! s:fzf_neighbouring_files()
+  let current_file =expand("%")
+  " Shows full absolute path
+  " let cwd = fnamemodify(current_file, ':p:h')
+  " Shows filename and dirname path
+  let cwd = fnamemodify(current_file, ':h')
+  " let command = 'ag -g "" -f ' . cwd . ' --depth 0'
+  let command = 'ag -g "" -f ' . cwd . ' --depth 0'
+
+  call fzf#run({
+        \ 'source': command,
+        \ 'sink':   'e',
+        \ 'options': ['-m', '-x', '+s', '--info=inline', '--preview', '~/.vim/plugged/fzf.vim/bin/preview.sh {}'],
+        \ 'window':  { 'height': 0.8 , 'width': 1 } })
+endfunction
+
+command! FuzzySerchSiblingFilesInCurrentDir call s:fzf_neighbouring_files()
+
+" Full text search support for FZF
+function! s:ag_to_qf(line)
+  let parts = split(a:line, ':')
+  return {'filename': parts[0], 'lnum': parts[1], 'col': parts[2],
+        \ 'text': join(parts[3:], ':')}
+endfunction
+
+function! s:ag_handler(lines)
+  if len(a:lines) < 2 | return | endif
+
+  let cmd = get({'ctrl-x': 'split',
+               \ 'ctrl-v': 'vertical split',
+               \ 'ctrl-t': 'tabe'}, a:lines[0], 'e')
+  let list = map(a:lines[1:], 's:ag_to_qf(v:val)')
+
+  let first = list[0]
+  execute cmd escape(first.filename, ' %#\')
+  execute first.lnum
+  execute 'normal!' first.col.'|zz'
+
+  if len(list) > 1
+    call setqflist(list)
+    copen
+    wincmd p
+  endif
+endfunction
+
+" CustomFullTextSearch command does full text search by FZF
+command! -nargs=* CustomFullTextSearch call fzf#run({
+      \ 'source':  printf('ag --nogroup --column --color "%s"',
+      \                   escape(empty(<q-args>) ? '^(?=.)' : <q-args>, '"\')),
+      \ 'sink*':    function('<sid>ag_handler'),
+      \ 'options': '--ansi --expect=ctrl-t,ctrl-v,ctrl-x --delimiter : --nth 4.. '.
+      \            '--multi --bind=ctrl-a:select-all,ctrl-d:deselect-all '.
+      \            '--color hl:68,hl+:110',
+      \ 'down':    '50%'
+      \ })
+
+
+command! ProjectFiles execute 'Files!' s:find_git_root()
+
+function! s:find_git_root()
+  return system('git rev-parse --show-toplevel 2> /dev/null')[:-2]
+endfunction
+
+command! -bang -nargs=* ProjectRg
+  \ call fzf#vim#grep(
+  \   'rg --column --line-number --no-heading --color=always --glob "!yarn.lock*" '.shellescape(<q-args>), 1,
+  \   <bang>0 ? fzf#vim#with_preview('up:60%')
+  \           : fzf#vim#with_preview({ 'dir': s:find_git_root() }),
+  \   <bang>0)
+
+
+"=========================================================================
+"====================== Ack settings =====================================
+"=========================================================================
 " Ack mappings
 nnoremap ! :Ack<SPACE>
 
@@ -583,19 +989,6 @@ nnoremap <leader>] :cn<CR>
 " Ack: To go to the previous search results
 nnoremap <leader>[ :cp<CR>
 
-" Full text search by FZF AG
-noremap <Leader>p :Ag <CR>
-
-" Search app/models by FZF
-noremap <Leader>m :FZF app/models<CR>
-
-" Search javascripts
-noremap <Leader>u :FZF app/javascripts<CR>
-
-" Search app/controllers by FZF
-noremap <Leader>c :FZF app/controllers<CR>
-nnoremap <silent> <Leader>f :Ag <C-R><C-W><CR>
-
 " TODO add mapping for spliting tmux and running rails console
 
 " Unmap GitGutter leaders that I don't use. This avoids delays for other leaders.
@@ -603,13 +996,104 @@ nnoremap <silent> <Leader>f :Ag <C-R><C-W><CR>
 " autocmd VimEnter * nunmap <leader>hr
 " autocmd VimEnter * nunmap <leader>hs
 
+" Maps gX to use xdg-open with the filepath under cursor
+" nnoremap gX :silent :execute "!xdg-open" expand('%:p:h') . "/" . expand("<cfile>") " &"<cr>
+nnoremap gx :silent :execute "!xdg-open" expand('%:p:h') . "/" . expand("<cfile>") " &"<cr>
+
 "============================================================================
-"====================== Plugins settings ====================================
+"================== Ctags additional mappings ===============================
+"============================================================================
+" " To to prev tag
+nnoremap <Leader>= :tprev<CR>
+"
+" " To to next tag
+nnoremap <Leader>- :tnext<CR>
+
+
+"============================================================================
+"================== Snippets mappings =======================================
 "============================================================================
 
-" Set vue plugin supported preprocessors
-let g:vue_pre_processors = 'detect_on_enter'
+" Snipmate go to previos stop point in snippet
+imap <C-o> <C-R>=snipMate#BackwardsSnippet()<CR>
+vnoremap <C-o> :call snipMate#BackwardsSnippet()<CR>
+smap <C-o> <Esc>a<C-R>=snipMate#BackwardsSnippet()<CR>
 
+" Snipmate expand snippet
+imap <silent><C-k> <C-R>=snipMate#TriggerSnippet()<CR>
+smap <C-k> :call snipMate#TriggerSnippet() <CR>
+smap <silent><C-k> <Esc>a<C-R>=snipMate#TriggerSnippet()<CR>
+
+
+"============================================================================
+"============================================================================
+"================= Plugins settings =========================================
+"============================================================================
+"============================================================================
+"
+"
+"============================================================================
+"================= Splitjoin settings  ======================================
+"============================================================================
+" Split one line of code into multiple
+nmap <Leader>8 gS
+vmap <Leader>8 gS
+"
+" " Split multiple lines of code into one
+nmap <Leader>7 gJ
+vmap <Leader>7 gJ
+
+" Search yaml line by key provided by Einenlum/yaml-revealer
+" map <Leader>b :call SearchYamlKey()<CR>
+" nnoremap <Leader>u :call SearchYamlKey()<CR>
+" nnoremap R :call SearchYamlKey()<CR>
+
+"============================================================================
+"================= Snipmate settings  =======================================
+"============================================================================
+
+let g:snipMate = { 'snippet_version' : 1 }
+
+" Old parser of snipets
+let g:snipMate.no_default_aliases = 1
+" let g:snipMate = { 'snippet_version' : 0 }
+" let g:snipMate.scope_aliases.ruby = 'ruby,rails'
+" let g:snipMate = get(g:, 'snipMate', {})
+let g:snipMate.scope_aliases = {}
+let g:snipMate.scope_aliases.ruby = 'ruby,rails'
+let g:snipMate.scope_aliases['scss'] = 'css'
+" let g:snipMate.scope_aliases.eruby = 'eruby,html'
+" echo g:snipMate
+" let g:snipMate.scope_aliases.ruby = 'ruby,rails'
+
+
+"============================================================================
+"=================== RRethy/vim-illuminate settings =========================
+"============================================================================
+" Enable only for certain filetypes
+let g:Illuminate_ftwhitelist = ['vim', 'sh', 'python', 'ruby', 'eruby', 'javascript']
+
+" Set deplay before highlight
+let g:Illuminate_delay = 500
+
+" Change highlight style
+augroup illuminate_augroup
+    autocmd!
+    " autocmd VimEnter * hi illuminatedWord guibg=#2b2f40
+    " autocmd VimEnter * hi illuminatedWord guibg=#292d3d
+    " autocmd VimEnter * hi illuminatedWord guibg=#2e3345
+    " autocmd VimEnter * hi illuminatedWord guibg=#303547
+    autocmd VimEnter * hi illuminatedWord guibg=#34394d
+    " autocmd VimEnter * hi illuminatedWord cterm=underline gui=underline
+    " autocmd VimEnter * hi illuminatedWord cterm=italic gui=italic
+    " autocmd VimEnter * hi illuminatedCurWord cterm=italic gui=italic
+    autocmd VimEnter * hi illuminatedCurWord cterm=NONE gui=NONE
+augroup END
+
+"
+"============================================================================
+"=================== vim-test settings ======================================
+"============================================================================
 "Open ruby test in tmux pane
 let test#strategy = "vimux"
 "
@@ -620,6 +1104,9 @@ let test#ruby#bundle_exec = 1
 " Temporary disable for current project without spring
 " let test#ruby#rspec#executable = 'rsx'
 
+"============================================================================
+"=================== vimux settings =========================================
+"============================================================================
 " Use vertical tmux slpit for vimux commands
 let g:VimuxOrientation = "h"
 
@@ -631,11 +1118,15 @@ let g:ackprg="ag"
 
 let g:closetag_filenames = '*.html,*.xhtml,*.jsx, *.js'
 
+"============================================================================
 " ===================== Fugitive settings ====================================
+"============================================================================
 " Froce to split window verticaly when fugitive opens git diff
 set diffopt+=vertical
 
+"============================================================================
 " ===================== Nerdtree settings  ====================================
+"============================================================================
 " Show hidden files
 let NERDTreeShowHidden=1
 
@@ -646,7 +1137,10 @@ nnoremap <C-\> <NOP>
 
 " Toggle NERDTree
 nnoremap <C-\> :NERDTreeToggle<CR>
+nnoremap <Leader>0 :NERDTreeFind<CR>
+
 autocmd VimEnter * nnoremap <C-\> :NERDTreeToggle<CR>
+autocmd VimEnter * nnoremap <Leader>0 :NERDTreeFind<CR>
 
 " Disable json plugin conceal
 let g:vim_json_syntax_conceal = 0
@@ -656,9 +1150,10 @@ let g:vim_json_syntax_conceal = 0
 let g:vim_markdown_folding_disabled = 1
 
 " ===================== Emmet settings  ====================================
-" Expand tag
-" Ctrl-l expands emmet shortcut in JSX
+" Expand html tag by Emmet
+" imap <C-j> <C-y>,
 imap <C-l> <C-y>,
+
 " imap <expr>k<tab> emmet#expandAbbrIntelligent("\<tab>")
 let g:user_emmet_settings = {
   \  'javascript.jsx' : {
@@ -666,20 +1161,35 @@ let g:user_emmet_settings = {
     \  },
   \}
 
-" ===================== Syntastic settings  ====================================
+" ===================== DEPRECATED! Syntastic settings  ====================================
 
 " let g:syntastic_javascript_checkers = ['eslint']
-let g:syntastic_error_symbol = '✗✗'
-let g:syntastic_style_error_symbol = '✠✠'
-let g:syntastic_warning_symbol = '∆∆'
-let g:syntastic_style_warning_symbol = '≈≈'
-let g:syntastic_ruby_checkers = ["mri", "rubocop -P -R"]
+" let g:syntastic_error_symbol = '✗✗'
+" let g:syntastic_style_error_symbol = '✠✠'
+" let g:syntastic_warning_symbol = '∆∆'
+" let g:syntastic_style_warning_symbol = '≈≈'
+let g:syntastic_ruby_checkers = ["mri", "bundle exec rubocop -P"]
 
 " ===================== ALE settings  ====================================
 let g:ale_sign_error = '✗✗'
 let g:ale_sign_warning = '∆∆'
 let g:ale_lint_delay = 1000
 let g:ale_lint_on_text_changed = 'never'
+let g:ale_set_balloons = 1
+let g:ale_hover_to_preview = 1
+" let g:ale_hover_to_floating_preview = 1
+
+let g:ale_linters = {
+\   'ruby': ['rubocop', 'reek'],
+\}
+
+let g:ale_fixers = {
+\   '*': ['remove_trailing_lines', 'trim_whitespace'],
+\   'ruby': ['rubocop'],
+\   'javascript': ['prettier', 'eslint'],
+\   'typescript': ['eslint'],
+\   'css': ['prettier']
+\}
 
 " ===================== vim-jsx ====================================
 " default 0
@@ -690,14 +1200,14 @@ let g:vim_jsx_pretty_colorful_config = 1
 " files with the .jsx extension. If you would like JSX in .js files, add
 let g:jsx_ext_required = 0
 
-
 " ===================== Lightline settings  ====================================
 
 " \'colorscheme': 'tender',
 let g:lightline = {
+      \ 'colorscheme': 'base16',
       \ 'active': {
       \   'left': [ [ 'mode', 'paste' ],
-      \             ['filename', 'modified'] ],
+      \             ['dirname','filename', 'modified', 'filetype'] ],
       \   'right': [ [ 'linter_checking', 'linter_errors', 'linter_warnings', 'linter_infos', 'linter_ok' ], ['zoom_status'], ['total_lines']],
       \ },
       \ 'inactive': {
@@ -715,11 +1225,11 @@ let g:lightline = {
       \   'inactive': [ 'tabnum', 'cwd','modified' ]
       \  },
       \ 'tab_component_function': {
-      \   'cwd': 'LightlineCurrentDirectory'
+      \   'cwd': 'LighlineTabFilenameWithParentDir'
       \  }
       \}
 
-function! LightlineCurrentDirectory(n) abort
+function! LighlineTabFilenameWithParentDir(n) abort
   " TODO
   " return fnamemodify(getcwd(tabpagewinnr(a:n), a:n), ':t')
   " return substitute( expand( '%:p' ), '.\+\/\(.\+\)\/.\+', '\1', '' )
@@ -740,8 +1250,19 @@ function! LightlineCurrentDirectory(n) abort
   endif
 endfunction
 
+function! IsCurrentWindowZoomed()
+  if !exists("t:currentWindowZoomed")
+    let t:currentWindowZoomed = 0
+  end
 
-" Ale integration
+  if t:currentWindowZoomed
+    return '  ///          VIM WINDOW ZOOM            ///'
+  else
+    return ''
+  endif
+endfunction
+
+" ========= Lighline Ale integration =====================
 let g:lightline.component_expand = {
       \  'linter_checking': 'lightline#ale#checking',
       \  'linter_infos': 'lightline#ale#infos',
@@ -758,9 +1279,47 @@ let g:lightline.component_type = {
       \     'linter_ok': 'right',
       \ }
 
+" Go to next ALE error
+" nmap <silent> <Leader># <Plug>(ale_next_wrap)
+
+" let g:lightline#ale#indicator_checking = "\uf110"
+" let g:lightline#ale#indicator_infos = "\uf129"
+" let g:lightline#ale#indicator_warnings = "\uf071"
+" let g:lightline#ale#indicator_errors = "\uf05e"
+" let g:lightline#ale#indicator_ok = "\uf00c"
+
+" \   'app/components/*.rb': {
+" \     'alternate': 'app/components/{}.html.haml'
+" \   },
+" \   'app/components/*.html.haml': {
+" \     'alternate': 'app/components/{}.scss',
+" \     'related': 'app/components/{}.js'
+" \   },
+" \   'app/components/*.js': {
+" \     'alternate': 'app/components/{}.scss'
+" \   },
+" \   'app/components/*.scss': {
+" \     'alternate': 'app/components/{}.rb'
+" \   },
+
 " "================================= vim-rails settings ========================
 " " example projections: https://gist.github.com/henrik/5676109
 let g:rails_projections = {
+ \   'app/components/*.rb': {
+ \     'alternate': 'app/components/{}.haml',
+ \     'related': 'app/components/{}.js'
+ \   },
+ \   'app/components/*.haml': {
+ \     'alternate': 'app/components/{}.scss',
+ \     'related': 'app/components/{}.js'
+ \   },
+ \   'app/components/*.js': {
+ \     'alternate': 'app/components/{}.rb',
+ \     'related': 'app/components/{}.scss'
+ \   },
+ \   'app/components/*.scss': {
+ \     'alternate': 'app/components/{}.rb'
+ \   },
 \   'app/*.rb': {
 \     'alternate': 'spec/{}_spec.rb'
 \   },
@@ -769,46 +1328,223 @@ let g:rails_projections = {
 \   },
 \   'spec/controllers/admin/*_controller_spec.rb': {
 \     'alternate': 'app/admin/{}.rb'
-\   },
-\   'config/locales/*ru.yml': {
-\     'alternate': 'config/locales/{}en.yml'
-\   },
-\   'config/locales/*en.yml': {
-\     'alternate': 'config/locales/{}ru.yml'
 \   }
 \ }
 
+let g:rails_gem_projections = {
+  \ "activeadmin": {
+  \   "app/admin/*.rb": {
+  \     "command": "admin",
+  \     "affinity": "model",
+  \     "alternate": "app/models/{}.rb",
+  \     "template": "ActiveAdmin.register {} do\nend",
+  \    }
+  \}
+  \}
+
+"======================= Lightline settings ===============
+" let g:lightline = {}
+"
+
 " set lighline theme inside lightline config
 " set airline theme
-function! IsCurrentWindowZoomed()
-  if !exists("t:currentWindowZoomed")
-    let t:currentWindowZoomed = 0
-  end
 
-  if t:currentWindowZoomed
-    return '  ///          VIM WINDOW ZOOM            ///'
+" ===================== coc.vim settings  ====================================
+" " Set internal encoding of vim, not needed on neovim, since coc.nvim using some
+" unicode characters in the file autoload/float.vim
+set encoding=utf-8
+
+" TextEdit might fail if hidden is not set.
+" Buffers persist in the background without being opened in window
+set hidden
+
+" Some servers have issues with backup files, see #649.
+set nobackup
+set nowritebackup
+
+" Give more space for displaying messages.
+" set cmdheight=2
+
+" Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
+" delays and poor user experience.
+set updatetime=300
+
+let g:coc_global_extensions = ['coc-tsserver', 'coc-solargraph', 'coc-css']
+
+" Always show the signcolumn, otherwise it would shift the text each time
+" diagnostics appear/become resolved.
+if has("nvim-0.5.0") || has("patch-8.1.1564")
+  " Recently vim can merge signcolumn and number column into one
+  set signcolumn=number
+else
+  set signcolumn=yes
+endif
+
+" Use tab for trigger completion with characters ahead and navigate.
+" NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
+" other plugin before putting this into your config.
+
+inoremap <silent><expr> <Tab>
+      \ coc#pum#visible() ? coc#pum#next(1) :
+      \ CheckBackspace() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
+
+
+function! CheckBackspace() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+" Make <CR> auto-select the first completion item and notify coc.nvim to
+" format on enter, <cr> could be remapped by other vim plugin
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm()
+                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+
+" Use <c-space> to trigger completion.
+if has('nvim')
+  inoremap <silent><expr> <c-space> coc#refresh()
+else
+  inoremap <silent><expr> <c-@> coc#refresh()
+endif
+
+" Use `[g` and `]g` to navigate diagnostics
+" Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
+nmap <silent> [g <Plug>(coc-diagnostic-prev)
+nmap <silent> ]g <Plug>(coc-diagnostic-next)
+
+" GoTo code navigation.
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+
+" Use K to show documentation in preview window.
+nnoremap <Leader>k :call ShowDocumentation()<CR>
+
+function! ShowDocumentation()
+  if CocAction('hasProvider', 'hover')
+    call CocActionAsync('doHover')
   else
-    return ''
+    call feedkeys('K', 'in')
   endif
 endfunction
 
-" ===================== FZF settings  ====================================
-" Customize fzf colors to match your color scheme
-" let g:fzf_colors =
-" \ { 'fg':      ['fg', 'Normal'],
-"   \ 'bg':      ['bg', 'Normal'],
-"   \ 'hl':      ['fg', 'Comment'],
-"   \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
-"   \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
-"   \ 'hl+':     ['fg', 'Type'],
-"   \ 'info':    ['fg', 'PreProc'],
-"   \ 'border':  ['fg', 'Ignore'],
-"   \ 'prompt':  ['fg', 'Conditional'],
-"   \ 'pointer': ['fg', 'Exception'],
-"   \ 'marker':  ['fg', 'Statement'],
-"   \ 'spinner': ['fg', 'Label'],
-"   \ 'header':  ['fg', 'Comment'] }
+" Symbol renaming.
+nmap <leader>t <Plug>(coc-rename)
 
+" Highlight the symbol and its references when holding the cursor.
+autocmd CursorHold * silent call CocActionAsync('highlight')
+
+" Symbol renaming.
+nmap <leader>rn <Plug>(coc-rename)
+
+" Formatting selected code.
+xmap <Leader>)  <Plug>(coc-format-selected)
+nmap <Leader>)  <Plug>(coc-format-selected)
+
+" Coc vim support for scss
+autocmd FileType scss setl iskeyword+=@-@
+
+" augroup mygroup
+"   autocmd!
+"   " Setup formatexpr specified filetype(s).
+"   autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
+"   " Update signature help on jump placeholder.
+"   autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
+" augroup end
+
+" " Applying codeAction to the selected region.
+" " Example: `<leader>aap` for current paragraph
+" xmap <leader>a  <Plug>(coc-codeaction-selected)
+" nmap <leader>a  <Plug>(coc-codeaction-selected)
+"
+" " Remap keys for applying codeAction to the current buffer.
+" nmap <leader>ac  <Plug>(coc-codeaction)
+" " Apply AutoFix to problem on the current line.
+" nmap <leader>qf  <Plug>(coc-fix-current)
+"
+" " Run the Code Lens action on the current line.
+" nmap <leader>cl  <Plug>(coc-codelens-action)
+"
+" " Map function and class text objects
+" " NOTE: Requires 'textDocument.documentSymbol' support from the language server.
+" xmap if <Plug>(coc-funcobj-i)
+" omap if <Plug>(coc-funcobj-i)
+" xmap af <Plug>(coc-funcobj-a)
+" omap af <Plug>(coc-funcobj-a)
+" xmap ic <Plug>(coc-classobj-i)
+" omap ic <Plug>(coc-classobj-i)
+" xmap ac <Plug>(coc-classobj-a)
+" omap ac <Plug>(coc-classobj-a)
+"
+" " Remap <C-f> and <C-b> for scroll float windows/popups.
+" if has('nvim-0.4.0') || has('patch-8.2.0750')
+"   nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+"   nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+"   inoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"
+"   inoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
+"   vnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+"   vnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+" endif
+"
+" " Use CTRL-S for selections ranges.
+" " Requires 'textDocument/selectionRange' support of language server.
+" nmap <silent> <C-s> <Plug>(coc-range-select)
+" xmap <silent> <C-s> <Plug>(coc-range-select)
+"
+" " Add `:Format` command to format current buffer.
+" command! -nargs=0 Format :call CocActionAsync('format')
+"
+" " Add `:Fold` command to fold current buffer.
+" command! -nargs=? Fold :call     CocAction('fold', <f-args>)
+"
+" " Add `:OR` command for organize imports of the current buffer.
+" command! -nargs=0 OR   :call     CocActionAsync('runCommand', 'editor.action.organizeImport')
+
+" Add (Neo)Vim's native statusline support.
+" NOTE: Please see `:h coc-status` for integrations with external plugins that
+" provide custom statusline: lightline.vim, vim-airline.
+" set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
+
+" Mappings for CoCList
+" Show all diagnostics.
+" nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
+" " Manage extensions.
+" nnoremap <silent><nowait> <space>e  :<C-u>CocList extensions<cr>
+" " Show commands.
+" nnoremap <silent><nowait> <space>c  :<C-u>CocList commands<cr>
+" " Find symbol of current document.
+" nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
+" " Search workspace symbols.
+" nnoremap <silent><nowait> <space>s  :<C-u>CocList -I symbols<cr>
+" " Do default action for next item.
+" nnoremap <silent><nowait> <space>j  :<C-u>CocNext<CR>
+" " Do default action for previous item.
+" nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
+" " Resume latest coc list.
+" nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
+
+
+" " Coc plugins that we add here will be automatically installed and updated by Coc.
+" " If you add a new extension just open vim in a new window to install it
+" " Alternately inside vim: :CocInstall coc-tsserver coc-html coc-css coc-json
+" " coc-blade
+" " More Extensions: https://github.com/neoclide/coc.nvim/wiki/Using-coc-extensions#use-vims-plugin-manager-for-coc-extension
+" let g:coc_global_extensions = [
+"   \ 'coc-tsserver',
+"   \ 'coc-html',
+"   \ 'coc-css',
+"   \ 'coc-json',
+"   \ 'coc-blade',
+"   \ 'coc-sql',
+"   \ 'coc-docker',
+"   \ 'coc-emmet',
+"   \ '@yaegassy/coc-tailwindcss3',
+"   \ '@yaegassy/coc-intelephense',
+"   \ ]
+" " https://github.com/neoclide/coc.nvim
+" ========================= End coc.vim config =============================
 
 "============================================================================
 "====================== Commands ===========================================
@@ -864,45 +1600,6 @@ function! ToggleCurrentWindowZoom()
   endif
 endfunction
 
-
-" ===================== FZF-AG functions  ====================================
-" Full text search support for FZF
-function! s:ag_to_qf(line)
-  let parts = split(a:line, ':')
-  return {'filename': parts[0], 'lnum': parts[1], 'col': parts[2],
-        \ 'text': join(parts[3:], ':')}
-endfunction
-
-function! s:ag_handler(lines)
-  if len(a:lines) < 2 | return | endif
-
-  let cmd = get({'ctrl-x': 'split',
-               \ 'ctrl-v': 'vertical split',
-               \ 'ctrl-t': 'tabe'}, a:lines[0], 'e')
-  let list = map(a:lines[1:], 's:ag_to_qf(v:val)')
-
-  let first = list[0]
-  execute cmd escape(first.filename, ' %#\')
-  execute first.lnum
-  execute 'normal!' first.col.'|zz'
-
-  if len(list) > 1
-    call setqflist(list)
-    copen
-    wincmd p
-  endif
-endfunction
-
-" Ag command does full text search by FZF
-command! -nargs=* Ag call fzf#run({
-      \ 'source':  printf('ag --nogroup --column --color "%s"',
-      \                   escape(empty(<q-args>) ? '^(?=.)' : <q-args>, '"\')),
-      \ 'sink*':    function('<sid>ag_handler'),
-      \ 'options': '--ansi --expect=ctrl-t,ctrl-v,ctrl-x --delimiter : --nth 4.. '.
-      \            '--multi --bind=ctrl-a:select-all,ctrl-d:deselect-all '.
-      \            '--color hl:68,hl+:110',
-      \ 'down':    '50%'
-      \ })
 
 " Custom highlight function
 " Requires vim 'set termguicolors'
@@ -968,14 +1665,14 @@ hi! link TabLineSel Function
 
 
 " TODO experiment with ruby language server
-if executable('solargraph')
-    au User lsp_setup call lsp#register_server({
-        \ 'name': 'solargraph',
-        \ 'cmd': {server_info->[&shell, &shellcmdflag, 'solargraph stdio']},
-        \ 'initialization_options': {"diagnostics": "true"},
-        \ 'whitelist': ['ruby'],
-        \ })
-endif
+" if executable('solargraph')
+"     au User lsp_setup call lsp#register_server({
+"         \ 'name': 'solargraph',
+"         \ 'cmd': {server_info->[&shell, &shellcmdflag, 'solargraph stdio']},
+"         \ 'initialization_options': {"diagnostics": "true"},
+"         \ 'whitelist': ['ruby'],
+"         \ })
+" endif
 "
 
 
@@ -1008,14 +1705,14 @@ endif
 
 
 " Use the Tab key for autocompletion.
-function! Tab_Or_Complete()
-  if col('.')>1 && strpart( getline('.'), col('.')-2, 3 ) =~ '^\w'
-    return "\<C-N>"
-  else
-    return "\<Tab>"
-  endif
-endfunction
-inoremap <Tab> <C-R>=Tab_Or_Complete()<CR>
+" function! Tab_Or_Complete()
+"   if col('.')>1 && strpart( getline('.'), col('.')-2, 3 ) =~ '^\w'
+"     return "\<C-N>"
+"   else
+"     return "\<Tab>"
+"   endif
+" endfunction
+" inoremap <Tab> <C-R>=Tab_Or_Complete()<CR>
 
 " inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
 " inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
@@ -1040,3 +1737,34 @@ hi SpecialKey guifg=#bebebe ctermfg=238 guibg=NONE ctermbg=NONE gui=NONE cterm=N
 let g:vim_jsx_pretty_colorful_config = 1 " default 0
 
 
+" ============================ Deoplete settings ======================
+" let g:deoplete#enable_at_startup = 1
+
+" inoremap <silent><expr> <TAB>
+"       \ pumvisible() ? "\<C-n>" :
+"       \ <SID>check_back_space() ? "\<TAB>" :
+"       \ deoplete#mappings#manual_complete()
+" function! s:check_back_space() abort "{{{
+"   let col = col('.') - 1
+"   return !col || getline('.')[col - 1]  =~ '\s'
+" endfunction"}}}
+
+" let g:LanguageClient_serverCommands = {
+"     \ 'ruby': ['~/.asdf/shims/solargraph', 'stdio'],
+"     \ }
+
+" let g:VM_leader = {'default': '|', 'visual': '|', 'buffer': '|'}
+
+" ========================= Helper for vim snippets =======================
+fun! Current_Filename(...)
+  let template = get(a:000, 0, "$1")
+  let arg2 = get(a:000, 1, "")
+
+  let basename = expand('%:t:r')
+
+  if basename == ''
+    return arg2
+  else
+    return substitute(template, '$1', basename, 'g')
+  endif
+endf

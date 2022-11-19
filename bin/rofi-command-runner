@@ -30,7 +30,7 @@ generate_display_list(){
   done
 }
 
-selected_command=$( (generate_display_list) | rofi -dmenu -i -matching fuzzy -no-custom -location 0 -p "$COMMAND_RUNNER_TITLE" )
+selected_command=$( (generate_display_list) | rofi -dmenu -i -matching fuzzy -sorting-method fzf -no-custom -location 0 -p "$COMMAND_RUNNER_TITLE" )
 
 if [ -n "$selected_command" ]; then
   bash "${COMMAND_FILES_MAP[$selected_command]}"

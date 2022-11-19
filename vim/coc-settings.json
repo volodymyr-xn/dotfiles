@@ -1,0 +1,9 @@
+{
+  "diagnostic.displayByAle": true,
+  "coc.source.around.priority": 102,
+  "coc.source.around.firstMatch": false,
+  "coc.source.buffer.priority": 101,
+  "coc.source.tag.priority": 100
+
+
+}

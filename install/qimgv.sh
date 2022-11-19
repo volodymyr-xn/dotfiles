@@ -13,6 +13,6 @@ mkdir -p build && cd build
 
 cmake ../ -DCMAKE_INSTALL_PREFIX=/usr/ -DCMAKE_INSTALL_LIBDIR=lib
 
-make -j`nproc --ignore=1`
+make -j $(nproc)
 
 sudo make install

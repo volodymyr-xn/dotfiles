@@ -4,4 +4,5 @@
 
 set -euo pipefail
 
+# Ignore squeashfs, tmpfs and udev
 df -h -xsquashfs -xtmpfs -xudev

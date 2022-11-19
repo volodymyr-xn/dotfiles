@@ -5,7 +5,6 @@ configuration {
 	show-icons: true;
 	window-match-fields: "all";
 	drun-match-fields: "name,generic,exec,categories";
-	theme: "neodracula";
 /*	modi: "window,run,ssh";*/
 /*	width: 50;*/
 /*	lines: 15;*/
@@ -145,3 +144,4 @@ me-select-entry: "MousePrimary";
 me-accept-entry: "MouseDPrimary";
 me-accept-custom: "Control+MouseDPrimary";
 }
+
