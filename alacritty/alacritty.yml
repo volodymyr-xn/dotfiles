@@ -89,34 +89,32 @@ tabspaces: 8
 font:
   # Normal (roman) font face
   normal:
-    # family: Monego
-    family: JetBrains Mono
+    family: Monego
     # family: Fira Mono
+    # family: DejaVu Sans Mono
     # The `style` can be specified to pick a specific face.
     style: Bold
 
   # Bold font face
   bold:
-    # family: Monego
+    family: Monego
     # family: Fira Mono
     # family: DejaVu Sans Mono
     # family: DejaVu Sans Mono
-    family: JetBrains Mono
     # The `style` can be specified to pick a specific face.
     style: Bold
 
   # Italic font face
   italic:
-    # family: Monego
+    family: Monego
     # family: Fira Mono
     # family: DejaVu Sans Mono
     # family: DejaVu Sans Mono
-    family: JetBrains Mono
+    # style: Italic Bold
     # The `style` can be specified to pick a specific face.
-    style: Bold Oblique
 
   # Point size
-  size: 15.0
+  size: 12
 
   # Offset is the extra space around each character. `offset.y` can be thought of
   # as modifying the line spacing, and `offset.x` as modifying the letter spacing.
