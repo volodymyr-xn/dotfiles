@@ -86,7 +86,13 @@ for dir in $dirs_to_symlink_to_xdg_config; do
   symlink_directory_to_config_dir $dir
 done
 
-ln -nsf $HOME/dotfiles/alacritty_mac $HOME/.config/alacritty
+if [[  c-is-mac == 'true' ]]; then
+  echo "Setup alacritty for mac"
+  ln -nsf $HOME/dotfiles/alacritty_mac $HOME/.config/alacritty
+else
+  echo "Setup alacritty for linux"
+  ln -nsf $HOME/dotfiles/alacritty_linux $HOME/.config/alacritty
+fi
 
 installation_log "-> Linking $HOME/gitignore_global to $HOME/.gitignore"
 ln -nsf "$HOME/gitignore_global" "$HOME/.gitignore"
