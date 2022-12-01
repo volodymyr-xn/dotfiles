@@ -55,7 +55,10 @@ files_to_symlink="\
   config.reek stylelint"
 
 dirs_to_symlink_to_xdg_config="\
-  fish alacritty bundle docker nvim vim tmux pipewire wireplumber kitty rofi rubocop pry htop"
+  fish bundle docker nvim vim tmux rubocop pry htop"
+
+dirs_to_symlink_to_xdg_config_linux_only="\
+  pipewire wireplumber kitty rofi"
 
 # fallback_files_to_symlink="rubocop/rubocop.yml tmux/tmux.conf"
 fallback_files_to_symlink="tmux/tmux.conf"
@@ -71,6 +74,8 @@ for file in $files_to_symlink; do
   symlink_file_to_home_dir $file
 done
 
+
+
 # Symlink fallback files
 for fallback_file in $fallback_files_to_symlink; do
   symlink_fallback_file_to_home_dir $fallback_file
@@ -81,6 +86,7 @@ for dir in $dirs_to_symlink_to_xdg_config; do
   symlink_directory_to_config_dir $dir
 done
 
+ln -nsf $HOME/dotfiles/alacritty_mac $HOME/.config/alacritty
 
 installation_log "-> Linking $HOME/gitignore_global to $HOME/.gitignore"
 ln -nsf "$HOME/gitignore_global" "$HOME/.gitignore"
@@ -94,6 +100,7 @@ touch $local_shell_profile_path
 file_templates_destination="$HOME/Templates/"
 installation_log "Symlink file templates to $file_templates_destination"
 mkdir -p "$HOME/Templates"
+
 ln -nsf "$DOTFILES_DIR/file-templates/*" "$file_templates_destination"
 
 # symlink_files_from_dir "$DOTFILES_DIR/file-templates/"

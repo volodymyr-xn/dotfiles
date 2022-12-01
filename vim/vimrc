@@ -279,7 +279,7 @@ call plug#end()
 
 " VIM built-in autocomplete options
 " Autocomple word spelling
-set spell "kpelllang=en_us
+" set spell "kpelllang=en_us
 set complete+=kspell
 set completeopt+=preview,menuone
 " Don't pass messages to |ins-completion-menu|.
@@ -445,7 +445,7 @@ set number
 
 " UTF encoding
 set encoding=utf-8
-set spelllang=en
+" set spelllang=en
 
 " Autoload files that have changed outside of vim
 set autoread

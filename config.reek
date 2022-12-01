@@ -16,4 +16,3 @@ IrresponsibleModule:
 "app/mailers":
   InstanceVariableAssumption:
     enabled: false
-

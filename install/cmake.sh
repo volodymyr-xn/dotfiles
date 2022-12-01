@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
 
-# brew install cmake
-yes | sudo apt install cmaka
+if [[ c-is-mac ]]; then
+  brew install cmake
+else
+  yes | sudo apt install cmake
+fi

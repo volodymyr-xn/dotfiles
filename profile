@@ -11,8 +11,6 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
-echo "profile run"
-
 # If running bash
 if [ -n "$BASH_VERSION" ]; then
     # include .bashrc if it exists
@@ -85,8 +83,14 @@ export BASE16_SHELL="$HOME/.config/base16-shell/"
   # ag -g "" "$1"
 # }
 #
+
+if [[ $(uname -m) == 'arm64' ]]; then
+  export HOMEBREW_PREFIX="/opt/homebrew"
+else
+  export HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
+fi
+
 # Homebrew settings
-export HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
 export HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar"
 export HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX/Homebrew"
 
@@ -94,8 +98,15 @@ export HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX/Homebrew"
 export GOPATH="$HOME/.programing_languages/go"
 
 # if [[ -z $TMUX ]]; then
-  # Add linuxbrew to PATH
+  # Add homebrew to PATH
+  #
+
+  if [[ $(uname -m) == 'arm64' ]]; then
+    export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin:$PATH"
+  else
   export PATH="$PATH:$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin"
+  fi
+
   # Old format(homebrew binaries has lowest priority
   # With this i have openssl bug(broken certificates), that prevents me from install
   # Docker or just use "curl -fsSL"
