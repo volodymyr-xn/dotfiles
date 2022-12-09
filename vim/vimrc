@@ -603,7 +603,7 @@ nnoremap <C-t> <esc>:tabnew<CR>
 nnoremap <Leader>n :nohl<CR>
 
 " Enter replace command
-" nnoremap <Leader>r :%s/
+nnoremap <Leader>r :%s/
 
 " Edit vim config
 nnoremap <Leader>ve :e ~/.vim/vimrc<cr>
