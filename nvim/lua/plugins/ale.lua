@@ -1,0 +1,20 @@
+-- ===================== ALE settings  ====================================
+-- vim.g.ale_sign_error = '✗✗'
+-- vim.g.ale_sign_warning = '∆∆'
+-- vim.g.ale_lint_delay = 1000
+-- vim.g.ale_lint_on_text_changed = 'never'
+-- vim.g.ale_set_balloons = 1
+-- vim.g.ale_hover_to_preview = 1
+-- -- vim.g.ale_hover_to_floating_preview = 1
+--
+-- vim.g.ale_linters = {
+--   ruby = {'rubocop', 'reek'},
+-- }
+--
+-- vim.g.ale_fixers = {
+--   ['*'] = {'remove_trailing_lines', 'trim_whitespace'},
+--   ruby = {'rubocop'},
+--   javascript = {'prettier', 'eslint'},
+--   typescript = {'eslint'},
+--   css = {'prettier'},
+-- }

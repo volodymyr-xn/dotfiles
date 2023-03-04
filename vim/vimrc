@@ -9,23 +9,10 @@ Plug('mileszs/ack.vim')
 " Filetree
 Plug('scrooloose/nerdtree')
 
+" Plug('github/copilot.vim')
+
 " TODO: Replace nerdtree with fern
 " Plug('lambdalisue/fern.vim')
-
-" Plug('lambdalisue/fern.vim')
-" let g:fern#disable_default_mappings   = 1
-" let g:fern#disable_drawer_auto_quit   = 1
-" let g:fern#disable_viewer_hide_cursor = 1
-" let g:fern#mark_symbol                       = '●'
-" let g:fern#renderer#default#collapsed_symbol = '▷ '
-" let g:fern#renderer#default#expanded_symbol  = '▼ '
-" let g:fern#renderer#default#leading          = ' '
-" let g:fern#renderer#default#leaf_symbol      = ' '
-" let g:fern#renderer#default#root_symbol      = '~ '
-" Plug('lambdalisue/fern-git-status.vim')
-" let g:fern_git_status#disable_ignored    = 1
-" let g:fern_git_status#disable_untracked  = 1
-" let g:fern_git_status#disable_submodules = 1
 
 " Comments
 Plug('tomtom/tcomment_vim')
@@ -35,12 +22,6 @@ Plug('tomtom/tcomment_vim')
 
 " Most old autocomplete
 " Plug('lifepillar/vim-mucomplete')
-
-" Autocomplete
-" Plug 'prabirshrestha/asyncomplete.vim'
-" Plug 'prabirshrestha/async.vim'
-" Plug 'prabirshrestha/vim-lsp'
-" Plug 'prabirshrestha/asyncomplete-lsp.vim'
 
 " Autocomplete & intellisense
 " Coc is an intellisense engine for Vim/Neovim.
@@ -54,19 +35,6 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " Popup for VIM built-in autocomplete https://github.com/vim-scripts/AutoComplPop
 "Plug("vim-scripts/AutoComplPop")
-
-" Additional sources for coc
-" https://github.com/neoclide/coc-sources
-
-
-" Deoplete autocomplete
-if has('nvim')
-  " Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-else
-  " Plug 'Shougo/deoplete.nvim'
-  " Plug 'roxma/nvim-yarp'
-  " Plug 'roxma/vim-hug-neovim-rpc'
-endif
 
 " Linting
 Plug('w0rp/ale')
@@ -271,6 +239,11 @@ Plug('pedrohdz/vim-yaml-folds')
 " allows to search by YAML key
 Plug('Einenlum/yaml-revealer')
 
+" Line indentation
+" Plug 'Yggdroot/indentLine', { 'for': ['html', 'eruby'] }
+
+" Highlight matching HTML tag
+Plug('leafOfTree/vim-matchtag')
 
 call plug#end()
 "============================================================================
@@ -368,10 +341,10 @@ set backspace=indent,eol,start
 set background=dark
 
 " Base16 hook
-" if filereadable(expand("~/.vimrc_background"))
-"    let base16colorspace=256
-"    source ~/.vimrc_background
-" endif
+if filereadable(expand("~/.vimrc_background"))
+   let base16colorspace=256
+   source ~/.vimrc_background
+endif
 
 colorscheme base16-horizon-dark
 
@@ -382,17 +355,6 @@ colorscheme base16-horizon-dark
 
 " colorscheme tender
 
-" if g:colors_name ==# "one" || g:colors_name ==# "base16-onedark"
-" "   " let g:custom_color_regular = '#e06c75'
-" "   " let g:custom_color_secondary_regular = '#be5046'
-" "   " let g:custom_color_statement = '#c678dd'
-" "   " let g:custom_color_noise = 'gray'
-" "   " let g:custom_color_type = '#e5c07b'
-" "   " let g:custom_color_special = '#61afef'
-"   " let g:custom_color_character = '#98c379'
-" elseif g:colors_name == "base16-gruvbox-dark-medium" || g:colors_name == "base16-gruvbox-dark-pale" || g:colors_name == "base16-gruvbox-dark-soft"
-"   " let g:custom_color_character = '#98c379'
-" endif
 let g:custom_color_character = '#98c379'
 
 " Access colors present in 256 colorspace
@@ -516,13 +478,6 @@ if has("nvim")
   au TextYankPost * silent! lua vim.highlight.on_yank {higroup="Type", timeout=250}
 endif
 
-" Resize all buffers on vim resize
-" augroup on_vim_resized
-"   autocmd!
-"   autocmd VimResized * wincmd =
-" augroup END
-
-
 "============================================================================
 "================== YAML settings ===========================================
 "============================================================================
@@ -537,15 +492,6 @@ au! BufNewFile,BufReadPost *.{erb} set filetype=eruby foldmethod=indent
 autocmd FileType html setlocal ts=2 sts=2 sw=2 expandtab
 autocmd FileType eruby setlocal ts=2 sts=2 sw=2 expandtab
 
-
-
-" Remember last position when reopening files
-" set viminfo='10,\"100,:20,%,n~/.viminfo
-" if has("autocmd")
-"     au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
-" endif
-
-
 "============================================================================
 "====================== Mapings =============================================
 "============================================================================
@@ -559,8 +505,8 @@ autocmd FileType eruby setlocal ts=2 sts=2 sw=2 expandtab
 " Remap VIM 0 to first non-blank character
 nnoremap 0 ^
 
-" Pressing ,ss will toggle and untoggle spell checking
-" map <Leader>ss :setlocal spell!<cr>
+" Pressing will toggle and untoggle spell checking
+" map <Leader>custom :setlocal spell!<cr>
 
 " Save current file
 nnoremap <Leader>w :w<CR>
@@ -623,7 +569,9 @@ nmap j gj
 nmap k gk
 nmap K k
 
-" nnoremap V 0v$
+" Easily navigate between tabs
+nnoremap E gT
+nnoremap R gt
 
 " Copy selected text to system clipboard
 vnoremap m "+y
@@ -646,15 +594,6 @@ nnoremap + <C-w>5+
 nnoremap _ <C-w>5-
 
 "=========== Move lines ===============
-" Move current line up
-" nnoremap <S-Up> :m .-2<CR>==
-" inoremap <S-Up> <ESC>:m .-2<CR>==gi
-
-
-" Move current line down
-" nnoremap <S-Down> :m .+1<CR>==
-" inoremap <S-Down> <ESC>:m .+1<CR>==gi
-
 " Move multipe lines up in visual mode
 " vnoremap <C-k> :m '<-2<CR>gv=gv
 vnoremap K :m '<-2<CR>gv=gv
@@ -666,7 +605,6 @@ vnoremap J :m '>+1<CR>gv=gv
 " " Move multiple lines selected
 " vmap <C-k> [egv
 " vmap <C-j> ]egv
-
 
 " zoom a vim pane, <C-w>= to re-balance
 " nmap <C-w><cr> <C-W>\| <C-W>_
@@ -718,14 +656,10 @@ endfor
 
 " Select tab by number
 " 'Leader 1' - selects first tab, etc
-for i in range(1, 5)
+for i in range(1, 9)
   execute "nnoremap \<Leader>" . i . " " . i . "gt<CR>"
 endfor
 
-" for i in range(1, 7)
-"   execute "nnoremap \<C-" . i . "> " . I . "GT<cr>"
-" endfor
-"
 " Yank, comment and paste (usefull for refactoring)
 vnoremap M yV'] :TComment<CR>']pjj
 nnoremap M yy']:TComment<CR>']pjj
@@ -739,11 +673,6 @@ nnoremap <silent> <Leader>t :TestNearest<CR>
 nnoremap <silent> <Leader>T :TestFile<CR>
 nnoremap <silent> <Leader>a :TestSuite<CR>
 nnoremap <silent> <Leader>l :TestLast<CR>
-
-" "Go to test file
-" nmap t :A<CR> DEPRECATED
-
-" nnoremap <silent> <Leader>k :Ack <C-R><C-W><CR>
 
 " Go to related file
 nnoremap <Leader>e :R<CR>
@@ -774,87 +703,27 @@ vnoremap \ :TComment<CR>
 nnoremap \ :TComment<CR>
 
 
-" if has('nvim')
-" " Treesitter config in Lua
-" lua <<EOF
-"   require'nvim-treesitter.configs'.setup {
-"     -- A list of parser names, or "all"
-"     ensure_installed = { "css", "scss", "ruby", "javascript" },
-"
-"     -- Install parsers synchronously (only applied to `ensure_installed`)
-"     sync_install = false,
-"
-"     -- Automatically install missing parsers when entering buffer
-"     auto_install = true,
-"
-"     -- List of parsers to ignore installing (for "all")
-"     highlight = {
-"       -- `false` will disable the whole extension
-"       enable = true,
-"
-"       -- NOTE: these are the names of the parsers and not the filetype. (for example if you want to
-"       -- disable highlighting for the `tex` filetype, you need to include `latex` in this list as this is
-"       -- the name of the parser)
-"       -- list of language that will be disabled
-"       -- disable = { "c", "rust" },
-"
-"       -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-"       -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-"       -- Using this option may slow down your editor, and you may see some duplicate highlights.
-"       -- Instead of true it can also be a list of languages
-"       -- additional_vim_regex_highlighting = false,
-"     },
-"   }
-" EOF
-" endif
-
-"=========================================================================
-" Free keybindings
-"=========================================================================
-" nnoremap <Leader>r :%s/
-
-
-"=========================================================================
-"=========================================================================
-
 "=========================================================================
 "====================== FZF settings =====================================
 "=========================================================================
-
 " fzf
 set rtp+=~/.fzf
 
 let g:fzf_layout = { 'window': { 'width': 1, 'height': 0.8 } }
-" let g:fzf_colors = {
-"   \ 'fg':      ['fg', 'Normal'],
-"   \ 'bg':      ['bg', 'Normal'],
-"   \ 'hl':      ['fg', 'Comment'],
-"   \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
-"   \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
-"   \ 'hl+':     ['fg', 'Statement'],
-"   \ 'info':    ['fg', 'PreProc'],
-"   \ 'border':  ['fg', 'Ignore'],
-"   \ 'prompt':  ['fg', 'Conditional'],
-"   \ 'pointer': ['fg', 'Exception'],
-"   \ 'marker':  ['fg', 'Keyword'],
-"   \ 'spinner': ['fg', 'Label'],
-"   \ 'header':  ['fg', 'Comment'],
-"   \ }
-" Customize fzf colors to match your color scheme
-" let g:fzf_colors =
-" \ { 'fg':      ['fg', 'Normal'],
-"   \ 'bg':      ['bg', 'Normal'],
-"   \ 'hl':      ['fg', 'Comment'],
-"   \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
-"   \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
-"   \ 'hl+':     ['fg', 'Type'],
-"   \ 'info':    ['fg', 'PreProc'],
-"   \ 'border':  ['fg', 'Ignore'],
-"   \ 'prompt':  ['fg', 'Conditional'],
-"   \ 'pointer': ['fg', 'Exception'],
-"   \ 'marker':  ['fg', 'Statement'],
-"   \ 'spinner': ['fg', 'Label'],
-"   \ 'header':  ['fg', 'Comment'] }
+let g:fzf_colors =
+\ { 'fg':      ['fg', 'Normal'],
+  \ 'bg':      ['bg', 'Normal'],
+  \ 'hl':      ['fg', 'Conditional'],
+  \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
+  \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
+  \ 'hl+':     ['fg', 'Conditional'],
+  \ 'info':    ['fg', 'PreProc'],
+  \ 'border':  ['fg', 'Ignore'],
+  \ 'prompt':  ['fg', 'Conditional'],
+  \ 'pointer': ['fg', 'Exception'],
+  \ 'marker':  ['fg', 'Statement'],
+  \ 'spinner': ['fg', 'Label'],
+  \ 'header':  ['fg', 'Comment'] }
 
 command! -bang -nargs=? -complete=dir Files
       \ call fzf#vim#files(<q-args>, { 'window': { 'height': 1, 'width': 1 }, 'options': ['--info=inline', '--preview', '~/.vim/plugged/fzf.vim/bin/preview.sh {}']}, <bang>0)
@@ -866,8 +735,7 @@ nnoremap <C-p> :FZF<CR>
 " nnoremap <C-p> :Files<CR>
 
 "To learn more about preview window options, see `--preview-window` section of `man fzf`.
-let g:fzf_preview_window = ['right:50%', 'ctrl-/']
-
+let g:fzf_preview_window = ['up:52%', 'ctrl-/']
 
 " Custom full text search by FZF and AG(no preview window)
 noremap <Leader>p :CustomFullTextSearch <CR>
@@ -877,10 +745,10 @@ noremap <Leader>p :CustomFullTextSearch <CR>
 noremap <Leader>o :Ag! <CR>
 
 " Search sibling files in same directory as current file(with preview window)
-noremap <Leader>i :FuzzySerchSiblingFilesInCurrentDir <CR>
+noremap <Leader>i :FuzzySearchSiblingFilesInCurrentDir <CR>
 
-" Search by files in different opened buffers(with preview window)
-noremap <Leader>j :Buffers <CR>
+" Search javascripts
+noremap <Leader>j :FuzzySearchFileInDir app/assets/javascripts <CR>
 
 " Search app/models by FZF
 noremap <Leader>m :FuzzySearchFileInDir app/models<CR>
@@ -888,23 +756,17 @@ noremap <Leader>m :FuzzySearchFileInDir app/models<CR>
 " Search app/assets/stylesheets by FZF
 noremap <Leader>s :FuzzySearchFileInDir app/assets/stylesheets<CR>
 
-" Search app/components by FZF
-noremap <Leader>h :FuzzySearchFileInDir app/components<CR>
-
 " Search app/views by FZF
-nnoremap <Leader>f :FuzzySearchFileInDir app/views<CR>
+nnoremap <Leader>d :FuzzySearchFileInDir app/views<CR>
 
 " Search app/components by FZF
-nnoremap <Leader>x :FuzzySearchFileInDir app/components<CR>
+nnoremap <Leader>f :FuzzySearchFileInDir app/components<CR>
 
 " Search app/locales by FZF
-nnoremap <Leader>d :FuzzySearchFileInDir config/locales/custom_updates<CR>
+nnoremap <Leader>b :FuzzySearchFileInDir config/locales/custom_updates<CR>
 
 " Search app/controllers by FZF
 noremap <Leader>c :FuzzySearchFileInDir app/controllers<CR>
-
-" Search javascripts
-" noremap <Leader>u :FZF app/javascripts<CR>
 
 function! s:fzf_neighbouring_files()
   let current_file =expand("%")
@@ -922,7 +784,7 @@ function! s:fzf_neighbouring_files()
         \ 'window':  { 'height': 0.8 , 'width': 1 } })
 endfunction
 
-command! FuzzySerchSiblingFilesInCurrentDir call s:fzf_neighbouring_files()
+command! FuzzySearchSiblingFilesInCurrentDir call s:fzf_neighbouring_files()
 
 " Full text search support for FZF
 function! s:ag_to_qf(line)
@@ -969,13 +831,6 @@ function! s:find_git_root()
   return system('git rev-parse --show-toplevel 2> /dev/null')[:-2]
 endfunction
 
-command! -bang -nargs=* ProjectRg
-  \ call fzf#vim#grep(
-  \   'rg --column --line-number --no-heading --color=always --glob "!yarn.lock*" '.shellescape(<q-args>), 1,
-  \   <bang>0 ? fzf#vim#with_preview('up:60%')
-  \           : fzf#vim#with_preview({ 'dir': s:find_git_root() }),
-  \   <bang>0)
-
 
 "=========================================================================
 "====================== Ack settings =====================================
@@ -990,25 +845,17 @@ nnoremap <leader>] :cn<CR>
 nnoremap <leader>[ :cp<CR>
 
 " TODO add mapping for spliting tmux and running rails console
-
-" Unmap GitGutter leaders that I don't use. This avoids delays for other leaders.
-" autocmd VimEnter * nunmap <leader>hp
-" autocmd VimEnter * nunmap <leader>hr
-" autocmd VimEnter * nunmap <leader>hs
-
 " Maps gX to use xdg-open with the filepath under cursor
-" nnoremap gX :silent :execute "!xdg-open" expand('%:p:h') . "/" . expand("<cfile>") " &"<cr>
 nnoremap gx :silent :execute "!xdg-open" expand('%:p:h') . "/" . expand("<cfile>") " &"<cr>
 
 "============================================================================
 "================== Ctags additional mappings ===============================
 "============================================================================
-" " To to prev tag
+" To to prev tag
 nnoremap <Leader>= :tprev<CR>
-"
-" " To to next tag
-nnoremap <Leader>- :tnext<CR>
 
+" To to next tag
+nnoremap <Leader>- :tnext<CR>
 
 "============================================================================
 "================== Snippets mappings =======================================
@@ -1025,13 +872,6 @@ smap <C-k> :call snipMate#TriggerSnippet() <CR>
 smap <silent><C-k> <Esc>a<C-R>=snipMate#TriggerSnippet()<CR>
 
 
-"============================================================================
-"============================================================================
-"================= Plugins settings =========================================
-"============================================================================
-"============================================================================
-"
-"
 "============================================================================
 "================= Splitjoin settings  ======================================
 "============================================================================
@@ -1051,21 +891,11 @@ vmap <Leader>7 gJ
 "============================================================================
 "================= Snipmate settings  =======================================
 "============================================================================
-
 let g:snipMate = { 'snippet_version' : 1 }
-
-" Old parser of snipets
 let g:snipMate.no_default_aliases = 1
-" let g:snipMate = { 'snippet_version' : 0 }
-" let g:snipMate.scope_aliases.ruby = 'ruby,rails'
-" let g:snipMate = get(g:, 'snipMate', {})
 let g:snipMate.scope_aliases = {}
 let g:snipMate.scope_aliases.ruby = 'ruby,rails'
 let g:snipMate.scope_aliases['scss'] = 'css'
-" let g:snipMate.scope_aliases.eruby = 'eruby,html'
-" echo g:snipMate
-" let g:snipMate.scope_aliases.ruby = 'ruby,rails'
-
 
 "============================================================================
 "=================== RRethy/vim-illuminate settings =========================
@@ -1079,14 +909,7 @@ let g:Illuminate_delay = 500
 " Change highlight style
 augroup illuminate_augroup
     autocmd!
-    " autocmd VimEnter * hi illuminatedWord guibg=#2b2f40
-    " autocmd VimEnter * hi illuminatedWord guibg=#292d3d
-    " autocmd VimEnter * hi illuminatedWord guibg=#2e3345
-    " autocmd VimEnter * hi illuminatedWord guibg=#303547
     autocmd VimEnter * hi illuminatedWord guibg=#34394d
-    " autocmd VimEnter * hi illuminatedWord cterm=underline gui=underline
-    " autocmd VimEnter * hi illuminatedWord cterm=italic gui=italic
-    " autocmd VimEnter * hi illuminatedCurWord cterm=italic gui=italic
     autocmd VimEnter * hi illuminatedCurWord cterm=NONE gui=NONE
 augroup END
 
@@ -1119,7 +942,7 @@ let g:ackprg="ag"
 let g:closetag_filenames = '*.html,*.xhtml,*.jsx, *.js'
 
 "============================================================================
-" ===================== Fugitive settings ====================================
+"===================== Fugitive settings ====================================
 "============================================================================
 " Froce to split window verticaly when fugitive opens git diff
 set diffopt+=vertical
@@ -1160,15 +983,6 @@ let g:user_emmet_settings = {
     \      'extends' : 'jsx',
     \  },
   \}
-
-" ===================== DEPRECATED! Syntastic settings  ====================================
-
-" let g:syntastic_javascript_checkers = ['eslint']
-" let g:syntastic_error_symbol = '✗✗'
-" let g:syntastic_style_error_symbol = '✠✠'
-" let g:syntastic_warning_symbol = '∆∆'
-" let g:syntastic_style_warning_symbol = '≈≈'
-let g:syntastic_ruby_checkers = ["mri", "bundle exec rubocop -P"]
 
 " ===================== ALE settings  ====================================
 let g:ale_sign_error = '✗✗'
@@ -1230,12 +1044,7 @@ let g:lightline = {
       \}
 
 function! LighlineTabFilenameWithParentDir(n) abort
-  " TODO
-  " return fnamemodify(getcwd(tabpagewinnr(a:n), a:n), ':t')
-  " return substitute( expand( '%:p' ), '.\+\/\(.\+\)\/.\+', '\1', '' )
-  " return substitute( expand( '%:p' ), '.\+\/\(.\+\)\/.\+', '\1', '') . "///"
-  " return expand('%M%t')
-   let buflist = tabpagebuflist(a:n)
+  let buflist = tabpagebuflist(a:n)
   let winnr = tabpagewinnr(a:n)
   let bufnum = buflist[winnr - 1]
   let bufname = expand('#'.bufnum.':t')
@@ -1279,29 +1088,6 @@ let g:lightline.component_type = {
       \     'linter_ok': 'right',
       \ }
 
-" Go to next ALE error
-" nmap <silent> <Leader># <Plug>(ale_next_wrap)
-
-" let g:lightline#ale#indicator_checking = "\uf110"
-" let g:lightline#ale#indicator_infos = "\uf129"
-" let g:lightline#ale#indicator_warnings = "\uf071"
-" let g:lightline#ale#indicator_errors = "\uf05e"
-" let g:lightline#ale#indicator_ok = "\uf00c"
-
-" \   'app/components/*.rb': {
-" \     'alternate': 'app/components/{}.html.haml'
-" \   },
-" \   'app/components/*.html.haml': {
-" \     'alternate': 'app/components/{}.scss',
-" \     'related': 'app/components/{}.js'
-" \   },
-" \   'app/components/*.js': {
-" \     'alternate': 'app/components/{}.scss'
-" \   },
-" \   'app/components/*.scss': {
-" \     'alternate': 'app/components/{}.rb'
-" \   },
-
 " "================================= vim-rails settings ========================
 " " example projections: https://gist.github.com/henrik/5676109
 let g:rails_projections = {
@@ -1342,12 +1128,10 @@ let g:rails_gem_projections = {
   \}
   \}
 
-"======================= Lightline settings ===============
-" let g:lightline = {}
-"
+" ====================== Vim highlight tag settings ==========
+highlight link matchTagError Todo
 
-" set lighline theme inside lightline config
-" set airline theme
+let g:vim_matchtag_highlight_cursor_on = 1
 
 " ===================== coc.vim settings  ====================================
 " " Set internal encoding of vim, not needed on neovim, since coc.nvim using some
@@ -1445,105 +1229,6 @@ nmap <Leader>)  <Plug>(coc-format-selected)
 
 " Coc vim support for scss
 autocmd FileType scss setl iskeyword+=@-@
-
-" augroup mygroup
-"   autocmd!
-"   " Setup formatexpr specified filetype(s).
-"   autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
-"   " Update signature help on jump placeholder.
-"   autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
-" augroup end
-
-" " Applying codeAction to the selected region.
-" " Example: `<leader>aap` for current paragraph
-" xmap <leader>a  <Plug>(coc-codeaction-selected)
-" nmap <leader>a  <Plug>(coc-codeaction-selected)
-"
-" " Remap keys for applying codeAction to the current buffer.
-" nmap <leader>ac  <Plug>(coc-codeaction)
-" " Apply AutoFix to problem on the current line.
-" nmap <leader>qf  <Plug>(coc-fix-current)
-"
-" " Run the Code Lens action on the current line.
-" nmap <leader>cl  <Plug>(coc-codelens-action)
-"
-" " Map function and class text objects
-" " NOTE: Requires 'textDocument.documentSymbol' support from the language server.
-" xmap if <Plug>(coc-funcobj-i)
-" omap if <Plug>(coc-funcobj-i)
-" xmap af <Plug>(coc-funcobj-a)
-" omap af <Plug>(coc-funcobj-a)
-" xmap ic <Plug>(coc-classobj-i)
-" omap ic <Plug>(coc-classobj-i)
-" xmap ac <Plug>(coc-classobj-a)
-" omap ac <Plug>(coc-classobj-a)
-"
-" " Remap <C-f> and <C-b> for scroll float windows/popups.
-" if has('nvim-0.4.0') || has('patch-8.2.0750')
-"   nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
-"   nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
-"   inoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"
-"   inoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
-"   vnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
-"   vnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
-" endif
-"
-" " Use CTRL-S for selections ranges.
-" " Requires 'textDocument/selectionRange' support of language server.
-" nmap <silent> <C-s> <Plug>(coc-range-select)
-" xmap <silent> <C-s> <Plug>(coc-range-select)
-"
-" " Add `:Format` command to format current buffer.
-" command! -nargs=0 Format :call CocActionAsync('format')
-"
-" " Add `:Fold` command to fold current buffer.
-" command! -nargs=? Fold :call     CocAction('fold', <f-args>)
-"
-" " Add `:OR` command for organize imports of the current buffer.
-" command! -nargs=0 OR   :call     CocActionAsync('runCommand', 'editor.action.organizeImport')
-
-" Add (Neo)Vim's native statusline support.
-" NOTE: Please see `:h coc-status` for integrations with external plugins that
-" provide custom statusline: lightline.vim, vim-airline.
-" set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
-
-" Mappings for CoCList
-" Show all diagnostics.
-" nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
-" " Manage extensions.
-" nnoremap <silent><nowait> <space>e  :<C-u>CocList extensions<cr>
-" " Show commands.
-" nnoremap <silent><nowait> <space>c  :<C-u>CocList commands<cr>
-" " Find symbol of current document.
-" nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
-" " Search workspace symbols.
-" nnoremap <silent><nowait> <space>s  :<C-u>CocList -I symbols<cr>
-" " Do default action for next item.
-" nnoremap <silent><nowait> <space>j  :<C-u>CocNext<CR>
-" " Do default action for previous item.
-" nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
-" " Resume latest coc list.
-" nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
-
-
-" " Coc plugins that we add here will be automatically installed and updated by Coc.
-" " If you add a new extension just open vim in a new window to install it
-" " Alternately inside vim: :CocInstall coc-tsserver coc-html coc-css coc-json
-" " coc-blade
-" " More Extensions: https://github.com/neoclide/coc.nvim/wiki/Using-coc-extensions#use-vims-plugin-manager-for-coc-extension
-" let g:coc_global_extensions = [
-"   \ 'coc-tsserver',
-"   \ 'coc-html',
-"   \ 'coc-css',
-"   \ 'coc-json',
-"   \ 'coc-blade',
-"   \ 'coc-sql',
-"   \ 'coc-docker',
-"   \ 'coc-emmet',
-"   \ '@yaegassy/coc-tailwindcss3',
-"   \ '@yaegassy/coc-intelephense',
-"   \ ]
-" " https://github.com/neoclide/coc.nvim
 " ========================= End coc.vim config =============================
 
 "============================================================================
@@ -1558,11 +1243,9 @@ command! WQ wq
 command! Wq wq
 command! Q q
 
-
 "============================================================================
 "====================== Functions ===========================================
 "============================================================================
-
 " DEPRECATED
 " function! RestartServers()
 "   execute system("tmux send-keys -t 2.left C-c \" bundle exec rails s\" C-m")
@@ -1581,8 +1264,6 @@ function! ReloadActiveChromeTab()
   echo "Chrome tab reloaded"
 endfunction
 
-
-
 " Toggle zoom of current window
 function! ToggleCurrentWindowZoom()
   if !exists("t:currentWindowZoomed")
@@ -1600,7 +1281,6 @@ function! ToggleCurrentWindowZoom()
   endif
 endfunction
 
-
 " Custom highlight function
 " Requires vim 'set termguicolors'
 function! Highlight(group, color)
@@ -1614,146 +1294,10 @@ function! ItalicHighlight(group, color)
 endfunction
 
 " ===================== Custom highlighting  ====================================
-" hi! TabLine S
 hi! link TabLineSel Function
-" call Highlight('NERDTreeFile', 'gray')
-
-" ===================== Experimental ====================================
-" function! ToggleBackground()
-" 	if ! exists('g:colors_name')
-" 		echomsg 'No colorscheme set'
-" 		return
-" 	endif
-" 	let l:scheme = g:colors_name
-"
-" 	if l:scheme =~# 'dark' || l:scheme =~# 'light'
-" 		" Rotate between different theme backgrounds
-" 		execute 'colorscheme' (l:scheme =~# 'dark'
-" 					\ ? substitute(l:scheme, 'dark', 'light', '')
-" 					\ : substitute(l:scheme, 'light', 'dark', ''))
-" 	else
-" 		execute 'set background='.(&background ==# 'dark' ? 'light' : 'dark')
-" 		if ! exists('g:colors_name')
-" 			execute 'colorscheme' l:scheme
-" 			echomsg 'The colorscheme `'.l:scheme
-" 				\ .'` doesn''t have background variants!'
-" 		else
-" 			echo 'Set colorscheme to '.&background.' mode'
-" 		endif
-" 	endif
-" endfunction
-
-" Save file
-" nnoremap s :w<cr>
-
-" Cursorline {{{
-" Only show cursorline in the current window and in normal mode.
-" augroup cline
-"     au!
-"     au WinLeave,InsertEnter * set nocursorline
-"     au WinEnter,InsertLeave * set cursorline
-" augroup END
-
-" Save when losing focus
-" au FocusLost * :silent! wall
-
-" Modificate tabline
-"turn off status line
-" set tabline="what status line equals, or equaled or whatever"
-" "set or change the color of the tabline
-" hi tablinefill cterm=none ctermbg=blue ctermfg=white gui=none guibg=blue guifg=white
-
-
-" TODO experiment with ruby language server
-" if executable('solargraph')
-"     au User lsp_setup call lsp#register_server({
-"         \ 'name': 'solargraph',
-"         \ 'cmd': {server_info->[&shell, &shellcmdflag, 'solargraph stdio']},
-"         \ 'initialization_options': {"diagnostics": "true"},
-"         \ 'whitelist': ['ruby'],
-"         \ })
-" endif
-"
-
-
-" TODO display component hierarcy in tab
-" let g:lightline = {
-"       \ 'component_expand': {
-"       \  'tabs': 'LightlineTabs'
-"       \ }
-"       \ }
-"
-" function! LightlineTabs() abort
-"   let [x, y, z] = [[], [], []]
-"   let nr = tabpagenr()
-"   let cnt = tabpagenr('$')
-"   for i in range(1, cnt)
-"     call add(i < nr ? x : i == nr ? y : z,
-"           \ '%' . i . '%%{lightline#onetab(' . i . ',' . (i == nr) . ')}'
-"           \ . (i == cnt ? '%T' : ''))
-"   endfor
-"   if len(x) > 3
-"     let x = x[len(x)-3:]
-"     let x[0] = '<' . x[0]
-"   endif
-"   if len(z) > 3
-"     let z = z[:2]
-"     let z[len(z)-1] = z[len(z)-1] . '>'
-"   endif
-"   return [x, y, z]
-" endfunction
-
-
-" Use the Tab key for autocompletion.
-" function! Tab_Or_Complete()
-"   if col('.')>1 && strpart( getline('.'), col('.')-2, 3 ) =~ '^\w'
-"     return "\<C-N>"
-"   else
-"     return "\<Tab>"
-"   endif
-" endfunction
-" inoremap <Tab> <C-R>=Tab_Or_Complete()<CR>
-
-" inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
-" inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-" inoremap <expr> <cr>    pumvisible() ? "\<C-y>" : "\<cr>"
-"
-" set completeopt+=preview
-"
-" let g:asyncomplete_auto_popup = 0
-" function! s:check_back_space() abort
-"     let col = col('.') - 1
-"     return !col || getline('.')[col - 1]  =~ '\s'
-" endfunction
-"
-" inoremap <silent><expr> <TAB>
-"   \ pumvisible() ? "\<C-n>" :
-"   \ <SID>check_back_space() ? "\<TAB>" :
-"   \ asyncomplete#force_refresh()
-" inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
-
 hi NonText guifg=#bebebe ctermfg=238 guibg=NONE ctermbg=NONE gui=NONE cterm=NONE
 hi SpecialKey guifg=#bebebe ctermfg=238 guibg=NONE ctermbg=NONE gui=NONE cterm=NONE
 let g:vim_jsx_pretty_colorful_config = 1 " default 0
-
-
-" ============================ Deoplete settings ======================
-" let g:deoplete#enable_at_startup = 1
-
-" inoremap <silent><expr> <TAB>
-"       \ pumvisible() ? "\<C-n>" :
-"       \ <SID>check_back_space() ? "\<TAB>" :
-"       \ deoplete#mappings#manual_complete()
-" function! s:check_back_space() abort "{{{
-"   let col = col('.') - 1
-"   return !col || getline('.')[col - 1]  =~ '\s'
-" endfunction"}}}
-
-" let g:LanguageClient_serverCommands = {
-"     \ 'ruby': ['~/.asdf/shims/solargraph', 'stdio'],
-"     \ }
-
-" let g:VM_leader = {'default': '|', 'visual': '|', 'buffer': '|'}
 
 " ========================= Helper for vim snippets =======================
 fun! Current_Filename(...)

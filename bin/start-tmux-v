@@ -2,8 +2,20 @@
 
 # set -euo pipefail
 
-tmux_session_name="$1"
-directory_name="$2"
+# tmux_session_name="$1"
+# directory_name="$2"
+
+# Parse command line arguments
+while getopts "d:n:" opt; do
+  case ${opt} in
+    d ) directory_name=$OPTARG ;;
+    n ) tmux_session_name=$OPTARG ;;
+    \? ) echo "Usage: $0 [-d DIRECTORY] [-n SESSION_NAME]"
+         exit 1 ;;
+  esac
+done
+
+
 vim_executable="nvim"
 
 echo "$tmux_session_name"

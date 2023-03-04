@@ -1,4 +1,0 @@
-{
- "default.configured.audio.source": { "name": "alsa_input.usb-Logitech_Inc_Logitech_H570e_Stereo_00000000-00.analog-stereo" },
- "default.configured.audio.sink": { "name": "alsa_output.usb-Logitech_Inc_Logitech_H570e_Stereo_00000000-00.analog-stereo" }
-}
