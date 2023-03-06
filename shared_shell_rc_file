@@ -18,7 +18,8 @@
 # echo "shared_shell_rc_file loaded and executed"
 [ -n "$PS1"  ] && [ -s $BASE16_SHELL/profile_helper.sh  ] && source "$BASE16_SHELL/profile_helper.sh"
 
-# Enable asdf
-if [ -f $HOME/.asdf/asdf.sh ]; then
-  source $HOME/.asdf/asdf.sh
-fi
+# # Enable asdf
+# if [ -f $HOME/.asdf/asdf.sh ]; then
+# echo 'Source asdf from shared_shell_rc_file'
+#   source $HOME/.asdf/asdf.sh
+# fi

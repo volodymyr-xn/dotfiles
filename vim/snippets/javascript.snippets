@@ -7,6 +7,42 @@ snippet cl "console.log2"
 snippet con "console.log2"
 	console.log(${0})
 
+snippet st
+  import StimulusApplicationController from 'StimulusApplicationController'
+  import stimulusApp from 'stimulusApp'
+
+  stimulusApp.register('${1}', class extends StimulusApplicationController {
+    ${0}
+  })
+
+snippet sti
+  import StimulusApplicationController from 'StimulusApplicationController'
+  import stimulusApp from 'stimulusApp'
+
+  stimulusApp.register('${1}', class extends StimulusApplicationController {
+    connect() {
+      ${0}
+    }
+  })
+
+snippet sta
+  import StimulusApplicationController from 'StimulusApplicationController'
+  import stimulusApp from 'stimulusApp'
+
+  stimulusApp.register('`luaeval("GenerateStimulusControllerNameFromCurrentFilename()")`', class extends StimulusApplicationController {
+    ${0}
+  })
+
+snippet stc
+  import StimulusApplicationController from 'StimulusApplicationController'
+  import stimulusApp from 'stimulusApp'
+
+  stimulusApp.register('${1}', class extends StimulusApplicationController {
+    connect() {
+      ${0}
+    }
+  })
+
 # # Functions
 # # prototype
 # snippet proto

@@ -7,7 +7,7 @@ postgres_version=$1
 if [ -z "$postgres_version"]
 then
   # if version is not specified take the latest postgres version
-  postgres_version=$(asdf list-all postgres | tail -n 1)
+  postgres_version="latest"
 fi
 
 asdf install postgres $postgres_version

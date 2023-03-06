@@ -1,11 +1,6 @@
 asdf plugin-add mysql
 
-$mysql_version=$1
+yay -S curl libaio ncurses5-compat-libs numactl
 
-if [ -z "$mysql_version"]
-then
-  $mysql_version=$(asdf list-all mysql)
-fi
-
-asdf install mysql $mysql_version
-asdf global postgres $postgres_version
+asdf install mysql latest
+asdf global mysql latest

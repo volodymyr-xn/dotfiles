@@ -2,4 +2,38 @@
 
 set -euo pipefail
 
-postgres -D $(asdf where postgres)/data
+port="5432"
+
+# Parse command-line arguments
+while getopts ":p:" opt; do
+  case $opt in
+    p)
+      port="$OPTARG"
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      echo "Usage: $0 [-p <port>]" >&2
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      echo "Usage: $0 [-p <port>]" >&2
+      exit 1
+      ;;
+  esac
+done
+
+# Check if the port is a valid integer
+if ! [[ "$port" =~ ^[0-9]+$ ]]; then
+  echo "Error: Port must be a valid integer."
+  exit 1
+fi
+
+postgres -D $(asdf where postgres)/data -p $port
+
+# Check if PostgreSQL started successfully
+if [ $? -eq 0 ]; then
+  echo "PostgreSQL is now running on port $port."
+else
+  echo "Error: PostgreSQL failed to start on port $port."
+fi

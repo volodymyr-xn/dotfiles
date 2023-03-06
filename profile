@@ -136,6 +136,10 @@ export GOPATH="$HOME/.programing_languages/go"
 
 # Ruby verbose mode
 export RUBYOPT="-W1"
+# Always use jemmaloc to install ruby
+# export RUBY_CONFIGURE_OPTS=--with-jemalloc
+export RUBY_CONFIGURE_OPTS="--with-jemalloc --enable-yjit"
+# export RUBY_CONFIGURE_OPTS="--with-jemalloc"
 
 # Set Onedark fzf theme
 # export FZF_DEFAULT_OPTS='
@@ -182,7 +186,6 @@ export DOCKER_CONFIG="$HOME/.config/docker"
 # export SSL_CERT_FILE=/usr/lib/ssl/certs/ca-certificates.crt
 
 # Set default wineprefix
-export WINEPREFIX="$HOME/WineVersions/wine-5"
 
 # True color support in TMUX
 export TERM=xterm-256color
@@ -208,10 +211,17 @@ export MANPAGER='nvim +Man!'
 
 export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
 
+export ASDF_FORCE_PREPEND=yes
+
+# Enable asdf
+if [ -f $HOME/.asdf/asdf.sh ]; then
+  echo 'Source asdf from profile'
+  source $HOME/.asdf/asdf.sh
+fi
+
 local_profile_path="$HOME/.local_profile"
 
 # If local profile file exist - source it
 if [ -f "$local_profile_path" ] ; then
   . "$local_profile_path"
 fi
-

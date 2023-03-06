@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # install dependencies
-yes | sudo apt-get install cmake libfreetype6-dev libfontconfig1-dev xclip
+# yes | sudo apt-get install cmake libfreetype6-dev libfontconfig1-dev xclip
 
 alacritty_source_tmp_path=/tmp/alacritty-$(timestamp-ms)
 

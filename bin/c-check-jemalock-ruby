@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+ruby -e "p RbConfig::CONFIG['MAINLIBS']" | grep jemalloc

@@ -2,7 +2,6 @@ rails
 pry
 solargraph
 solargraph-rails
-steep
 pry-doc
 gem-ctags
 tmuxinator

@@ -9,7 +9,7 @@ then
   ruby_version="latest"
 fi
 
-RUBY_CONFIGURE_OPTS=--with-jemalloc asdf install ruby "$ruby_version"
+RUBY_CONFIGURE_OPTS="--with-jemalloc --enable-yjit" asdf install ruby "$ruby_version"
 
 
 asdf global ruby latest

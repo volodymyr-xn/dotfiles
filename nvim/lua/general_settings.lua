@@ -27,6 +27,7 @@ vim.cmd("filetype plugin on")
 vim.o.compatible = false
 
 -- Redraw only when we need to (i.e. don't redraw when executing a macro)
+-- Experimental
 vim.o.lazyredraw = true
 
 -- Indicates a fast terminal connection. More characters will be sent to the
@@ -34,7 +35,7 @@ vim.o.lazyredraw = true
 -- Improves smoothness of redrawing when there are multiple windows and the
 -- terminal does not support a scrolling region.
 -- Experimental
-vim.o.ttyfast = true
+-- vim.o.ttyfast = true
 
 -- No backup files
 vim.o.backup = false
@@ -87,9 +88,10 @@ vim.o.autoindent = true
 vim.o.smartindent = true
 
 -- Performance
--- syntax sync maxlines=256
-vim.o.syntaxsync = "maxlines:1000"
-vim.o.synmaxcol = 200
+vim.cmd [[
+  syntax sync maxlines=500
+  set synmaxcol=150
+]]
 
 -- Allow backspace to delete end of line, indent and start of line characters
 vim.o.backspace = "indent,eol,start"
@@ -97,12 +99,20 @@ vim.o.backspace = "indent,eol,start"
 vim.o.background = "dark"
 
 -- Base16 hook
-if vim.fn.filereadable(vim.env.HOME .. '/.vimrc_background') then
-   vim.g.base16colorspace = 256
-   vim.cmd('source ~/.vimrc_background')
-end
-
--- vim.cmd("colorscheme base16-horizon-dark")
+-- vim.cmd [[
+--   if exists('$BASE16_THEME')
+--         \ && (!exists('g:colors_name') || g:colors_name != 'base16-$BASE16_THEME')
+--       let base16colorspace=256
+--       colorscheme base16-$BASE16_THEME
+--   endif
+-- ]]
+--
+-- vim.cmd("colorscheme dracula")
+vim.cmd("colorscheme gruvbox")
+-- vim.cmd("colorscheme sonokai")
+-- vim.cmd[[
+--  let g:gruvbox_material_background = 'soft'
+-- ]]
 
 vim.g.custom_color_character = "#98c379"
 
@@ -182,3 +192,10 @@ vim.o.clipboard='unnamed'
 
 vim.o.foldenable=false
 vim.o.foldlevelstart=3
+
+vim.opt.inccommand = "split"
+
+-- Always show the signcolumn, otherwise it would shift the text each time
+-- diagnostics appear/become resolved.
+-- vim.o.signcolumn = "yes"
+vim.o.signcolumn = "number"

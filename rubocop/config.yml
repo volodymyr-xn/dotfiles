@@ -94,7 +94,7 @@ Layout/MultilineMethodCallIndentation:
 Style/SafeNavigation:
   Enabled: false
 
-Layout/AlignHash:
+Layout/HashAlignment:
   Enabled: false
 
 Style/IfUnlessModifier:
@@ -151,7 +151,7 @@ Style/MultilineMemoization:
 Style/RescueModifier:
   Enabled: false
 
-Layout/TrailingBlankLines:
+Layout/TrailingEmptyLines:
   Enabled: false
 
 Layout/EmptyLinesAroundClassBody:

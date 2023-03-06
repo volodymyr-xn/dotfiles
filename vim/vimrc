@@ -239,9 +239,6 @@ Plug('pedrohdz/vim-yaml-folds')
 " allows to search by YAML key
 Plug('Einenlum/yaml-revealer')
 
-" Line indentation
-" Plug 'Yggdroot/indentLine', { 'for': ['html', 'eruby'] }
-
 " Highlight matching HTML tag
 Plug('leafOfTree/vim-matchtag')
 
@@ -453,6 +450,15 @@ set clipboard+=unnamed
 set nofoldenable
 set foldlevelstart=3
 
+" Always show the signcolumn, otherwise it would shift the text each time
+" diagnostics appear/become resolved.
+if has("nvim-0.5.0") || has("patch-8.1.1564")
+  " Recently vim can merge signcolumn and number column into one
+  set signcolumn=number
+else
+  set signcolumn=yes
+endif
+
 "============================================================================
 "====================== Highlight ============================================
 "============================================================================
@@ -546,10 +552,15 @@ nnoremap <C-t> <esc>:tabnew<CR>
 " map <Leader>i mmgg=G`m<CR>
 
 " Disable selection
-nnoremap <Leader>n :nohl<CR>
+nnoremap <silent> <Leader>n :nohl<CR>
 
 " Enter replace command
-nnoremap <Leader>r :%s/
+" Global search and replace in quickfix menu
+" nnoremap <Leader>r :%s/
+" nnoremap s :%s///gy<Left><Left><Left><Left>
+nnoremap @ :%s///g<Left><Left><Left><Left>
+nnoremap <leader>r :cfdo %s///g \| update <left><left><left><left><left><left><left><left><left><left><left><left><left>
+
 
 " Edit vim config
 nnoremap <Leader>ve :e ~/.vim/vimrc<cr>
@@ -623,14 +634,17 @@ map <2-LeftMouse> za
 " Tabs
 nnoremap <C-Left> :tabprev<cr>
 nnoremap <C-Right> :tabnext<cr>
+nnoremap <TAB> :tabnext<cr>
 
 " nnoremap H gT
-nnoremap <A-k> :tabprev<CR>
-nnoremap <A-j> :tabnext<CR>
+" nnoremap <A-k> :tabprev<CR>
+" nnoremap <A-j> :tabnext<CR>
 " noremap L gt
 
 " Map text align to tab button in visual mode
 vnoremap <TAB> =
+
+" nnoremap <TAB> gt
 
 " Expand window
 nmap " <C-W>\| <C-W>_
@@ -660,7 +674,7 @@ for i in range(1, 9)
   execute "nnoremap \<Leader>" . i . " " . i . "gt<CR>"
 endfor
 
-" Yank, comment and paste (usefull for refactoring)
+" Yank(copy), comment and paste (usefull for refactoring)
 vnoremap M yV'] :TComment<CR>']pjj
 nnoremap M yy']:TComment<CR>']pjj
 
@@ -1065,7 +1079,7 @@ function! IsCurrentWindowZoomed()
   end
 
   if t:currentWindowZoomed
-    return '  ///          VIM WINDOW ZOOM            ///'
+    return '  ///   VIM WINDOW ZOOM    ///'
   else
     return ''
   endif
@@ -1154,15 +1168,6 @@ set nowritebackup
 set updatetime=300
 
 let g:coc_global_extensions = ['coc-tsserver', 'coc-solargraph', 'coc-css']
-
-" Always show the signcolumn, otherwise it would shift the text each time
-" diagnostics appear/become resolved.
-if has("nvim-0.5.0") || has("patch-8.1.1564")
-  " Recently vim can merge signcolumn and number column into one
-  set signcolumn=number
-else
-  set signcolumn=yes
-endif
 
 " Use tab for trigger completion with characters ahead and navigate.
 " NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by

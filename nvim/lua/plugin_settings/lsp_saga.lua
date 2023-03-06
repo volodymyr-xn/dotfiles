@@ -1,0 +1,41 @@
+-- require("lspsaga").setup({
+--   lightbulb = {
+--     enable = true,
+--     enable_in_insert = true,
+--     sign = true,
+--     sign_priority = 40,
+--     virtual_text = true,
+--   },
+--
+--   outline = {
+--     win_position = "right",
+--     win_width = 50,
+--     show_detail = true,
+--     auto_preview = false,
+--     auto_refresh = false,
+--     auto_close = true,
+--     custom_sort = nil,
+--     keys = {
+--       jump = "<Leader>]",
+--       expand_collapse = "K",
+--       quit = "q",
+--     },
+--   },
+--
+--   rename = {
+--     quit = "<C-c>",
+--     exec = "<CR>",
+--     mark = "x",
+--     confirm = "<CR>",
+--     in_select = true,
+--   },
+-- })
+--
+-- local keymap = vim.keymap
+--
+-- --- Actualy cool & works ------------------------------------------
+-- -- Show IDE-like class summary with list of grouped methods and constants in
+-- -- floting sidebar panel on the right side
+-- vim.keymap.set("n", "gm", "<cmd>Lspsaga outline<CR>", opts) -- show documentation for what is under cursor
+--
+-- -----------------------------------------------------------

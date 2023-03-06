@@ -20,11 +20,16 @@
 #   vcrun2012 vcrun2013 vcrun2015 atmlib msxml3 msxml6 \
 #   vb6run vcrun6 vcrun2005 mfc40 mfc42
 
-WINEPREFIX=/media/tech/Files-SSD-2TB/Games/WindowsInstalled/Wine-6 winetricks \
+
+echo "Using wineprefix: $WINEPREFIX"
+
+winetricks \
   fontsmooth=rgb \
   allfonts \
   corefonts \
   gdiplus \
+  vcrun2008 \
+  vcrun2010 \
   vcrun2012 \
   vcrun2013 \
   vcrun2015 \
@@ -38,8 +43,8 @@ WINEPREFIX=/media/tech/Files-SSD-2TB/Games/WindowsInstalled/Wine-6 winetricks \
   ie6\
   fontsmooth-rgb \
   gecko \
-  # dxvk \
-  # vulkanrt \
+  dxvk \
+  vulkanrt
 # WINEPREFIX=/home/tech/StandaloneApps/Photoshop/Wine/WinePrefixes/wine-experiment winetricks atmlib \
 #   fontsmooth=rgb vcrun2008 vcrun2010 vcrun2012 vcrun2013 \
 #   atmlib msxml3 msxml6

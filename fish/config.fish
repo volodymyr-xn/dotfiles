@@ -4,6 +4,7 @@ if status is-interactive
     fzf_key_bindings
   alias na='xdg-open .'
 # alias na='nautilus .'
+Adipisicing harum eaque amet neque incidunt vero, blanditiis dolor accusamus Repellat fugit minus ratione quibusdam modi harum? Molestiae aliquam itaque quae autem incidunt? Optio dolore rerum aperiam repellendus consequuntur? Facilis
 
 # General UNIX
   alias mv='mv -iv'

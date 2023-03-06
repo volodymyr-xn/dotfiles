@@ -19,10 +19,6 @@ require("lazy").setup({
   -- TODO: Replace nerdtree with fern
   -- "lambdalisue/fern.vim",
 
-  -- Provides devicons
-  -- Requires nerdfont: (https://www.nerdfonts.com/)
-  "nvim-tree/nvim-web-devicons",
-
   -- Nerdtree like file exploer
   -- 'nvim-tree/nvim-tree.lua',
 
@@ -30,16 +26,23 @@ require("lazy").setup({
   "nvim-neo-tree/neo-tree.nvim",
     dependencies = {
       "nvim-lua/plenary.nvim",
-      "nvim-tree/nvim-web-devicons",
       "MunifTanjim/nui.nvim",
     }
   },
 
+  -- Provides devicons
+  -- Requires nerdfont: (https://www.nerdfonts.com/)
+  "nvim-tree/nvim-web-devicons",
+
   -- Comment helper
   "tomtom/tcomment_vim",
+  -- Alternative plugin:
+  -- "preservim/nerdcommenter",
+
+  "tpope/vim-haml",
 
   -- Enable in future
-  "nvim-treesitter/nvim-treesitter",
+  -- "nvim-treesitter/nvim-treesitter",
 
   -- Linting
   -- "w0rp/ale",
@@ -51,14 +54,31 @@ require("lazy").setup({
   "tpope/vim-repeat",
 
   -- FZF integration
-  -- "junegunn/fzf.vim",
   {
-    'nvim-telescope/telescope.nvim', tag = '0.1.1',
+    "junegunn/fzf.vim",
+    dependencies = { 'junegunn/fzf' }
+  },
+
+  -- Lua port of FZF for neovim
+  -- (https://github.com/ibhagwan/fzf-lua)
+
+  {
+    'nvim-telescope/telescope.nvim',
     dependencies = { 'nvim-lua/plenary.nvim' }
   },
 
+  {
+    'nvim-telescope/telescope-fzf-native.nvim',
+    build = 'make'
+    -- build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build'
+  },
+
+  "piersolenski/telescope-import.nvim",
+
   -- Show changed lines from git
   "airblade/vim-gitgutter",
+  -- TODO: Consider switch to
+  -- 'lewis6991/gitsigns.nvim',
 
   -- Lightweight support for Ruby's Bundler
   "tpope/vim-bundler",
@@ -108,9 +128,6 @@ require("lazy").setup({
   -- Run various tests from vim
   "janko-m/vim-test",
 
-  -- Easily navigate between vim and tmux panes
-  "christoomey/vim-tmux-navigator",
-
   -- Allows vim to communicate and run commands in tmux
   "benmills/vimux",
 
@@ -128,7 +145,7 @@ require("lazy").setup({
   -- "Raimondi/delimitMate",
 
   -- Crystal syntax support
-  "rhysd/vim-crystal",
+  -- "rhysd/vim-crystal",
 
   -- Improved JavaScript syntax
   "pangloss/vim-javascript",
@@ -145,65 +162,88 @@ require("lazy").setup({
   -- Auto close (X)HTML tags
   "alvan/vim-closetag",
 
-  -- Emmet
-  "mattn/emmet-vim",
+  -- Use treesitter to autoclose and autorename html tag
+  -- https://github.com/windwp/nvim-ts-autotag
+  -- "windwp/nvim-ts-autotag",
+  -- "windwp/nvim-ts-autotag",
 
   -- Base16 color schemes
+  -- "rose-pine/neovim""
+  -- "Mofiqul/dracula.nvim",
+  -- "folke/tokyonight.nvim",
   "tinted-theming/base16-vim",
-  -- "RRethy/nvim-base16",
-  -- TODO: replace with:
-  -- (https://github.com/RRethy/nvim-base16)
-  -- OR with (https://github.com/tinted-theming/base16-vim)
+  "ellisonleao/gruvbox.nvim",
+  -- "sainnhe/sonokai",
 
- -- Shows yaml path under cursor,
- -- allows to search by YAML key
- "Einenlum/yaml-revealer",
+  -- Shows yaml path under cursor,
+  -- allows to search by YAML key
+  "Einenlum/yaml-revealer",
 
- -- Better yaml folding
- "pedrohdz/vim-yaml-folds",
+  -- Better yaml folding
+  "pedrohdz/vim-yaml-folds",
 
-  -- Snippets
-  -- "MarcWeber/vim-addon-mw-utils",
-  -- "L3MON4D3/LuaSnip",
-  'dcampos/nvim-snippy',
-  -- addition for nvim-cmp
-  -- 'dcampos/cmp-snippy'
+  -- Portable package manager for Neovim that runs everywhere Neovim runs.
+  -- easily install and manage LSP servers, DAP servers, linters, and
+  -- formatters.
+  "williamboman/mason.nvim",
+  -- mason-lspconfig bridges mason.nvim with the lspconfig plugin - making it
+  -- easier to use both plugins together.
+  "williamboman/mason-lspconfig.nvim",
+
+  -- Configs for the Nvim LSP client (:help lsp).(Quickstart configs for Nvim LSP )
+  "neovim/nvim-lspconfig",
+  "hrsh7th/cmp-nvim-lsp",
+  "hrsh7th/cmp-buffer",
+  "hrsh7th/cmp-path",
+  "hrsh7th/cmp-cmdline",
+  -- {
+  --   "tzachar/cmp-fuzzy-buffer",
+  --   dependencies = {
+  --     "tzachar/fuzzy.nvim"
+  --   }
+  -- },
+  "hrsh7th/nvim-cmp",
+  -- "lukas-reineke/cmp-rg",
+
+  -- 'zbirenbaum/copilot.lua',
+  -- "zbirenbaum/copilot-cmp",
+  -- "ray-x/cmp-treesitter",
 
 
   -- Automatically highlighting other uses of the current word under the cursor
   "RRethy/vim-illuminate",
+  -- Alternative to vim-illuminate
+  -- "tzachar/local-highlight.nvim",
 
-  -- Lighline base16 themes
-  -- TODO: replace with NEOVIM equvivalent
-  -- "nolo18/base16lightline",
-  -- -- Statusline
-  -- "itchyny/lightline.vim",
-  -- -- Base16 colors for lightline
-  -- "daviesjamie/vim-base16-lightline",
-  -- -- Show ale errors in lightline
-  -- "maximbaz/lightline-ale",
-
-
-  -- Statusline plugin
+  -- Utility functions for getting diagnostic status and progress messages from
+  -- LSP servers, for use in the Neovim statusline
+  "nvim-lua/lsp-status.nvim",
+  -- Statusline
   "nvim-lualine/lualine.nvim",
   -- Alternative statusline
   -- "rebelot/heirline.nvim",
 
-
   -- Highligh color codes
-  "lilydjwg/colorizer",
+  -- "lilydjwg/colorizer", -- Old plugin
+  -- A high-performance color highlighter for Neovim which has no
+  -- external dependencies! Written in performant Luajit.
+  -- "norcalli/nvim-colorizer.lua",
+  -- 'brenoprata10/nvim-highlight-colors',
 
   -- AppArmor syntax highlight
   -- 'ClockworkNet/vim-apparmor')
 
   -- Improved nginx vim plugin (incl. syntax highlighting)
-  "chr4/nginx.vim",
+  -- "chr4/nginx.vim",
 
   -- JSON highlight
-  "elzr/vim-json",
+  -- "elzr/vim-json",
 
   -- Syntax highlighting and filetype detection for systemd unit files
   "wgwoods/vim-systemd-syntax",
+
+  -- Auto close quotes, parenthesiz, etc
+  "windwp/nvim-autopairs",
 
   --- Syntax highlighting for Nix configs
   -- "LnL7/vim-nix",
@@ -212,13 +252,13 @@ require("lazy").setup({
   -- 'dracula/vim',
 
   -- Better markdown support
-  "plasticboy/vim-markdown",
+  -- "plasticboy/vim-markdown",
 
   -- unimpaired.vim: Pairs of handy bracket mappings
   "tpope/vim-unimpaired",
 
   -- GTK Blueprint syntax
-  "thetek42/vim-blueprint-syntax",
+  -- "thetek42/vim-blueprint-syntax",
 
   -- Switch between multiline and signleline code
   "AndrewRadev/splitjoin.vim",
@@ -230,8 +270,93 @@ require("lazy").setup({
   -- "Yggdroot/indentLine", { 'for': ['html', 'eruby'] }
 
   -- Highlight matching HTML tag
-  "leafOfTree/vim-matchtag",
+  -- "leafOfTree/vim-matchtag",
 
   -- Global search by ack cli util
-  "mileszs/ack.vim"
+  -- "mileszs/ack.vim",
+  -- "wincent/ferret",
+
+  -- Emmet
+  "mattn/emmet-vim",
+
+  -- Indent line guides
+  -- "lukas-reineke/indent-blankline.nvim",
+
+  -- Easily navigate between vim and tmux panes
+  "christoomey/vim-tmux-navigator",
+
+  -- Old broken
+  -- 'dcampos/nvim-snippy',
+  -- addition for nvim-cmp
+  -- 'dcampos/cmp-snippy',
+  -- Snippets
+  -- "MarcWeber/vim-addon-mw-utils",
+  "L3MON4D3/LuaSnip",
+  'saadparwaiz1/cmp_luasnip',
+
+  -- Tabline
+  "akinsho/bufferline.nvim",
+
+  -- Show scrollbar for VIM buffer(SUPER COOL!)
+  -- 'dstein64/nvim-scrollview',
+   'petertriho/nvim-scrollbar',
+
+  -- Run linters and formaters as fake LSP
+  -- 'jose-elias-alvarez/null-ls.nvim',
+
+  'mfussenegger/nvim-lint',
+
+  -- "jonsmithers/vim-html-template-literals",
+
+  -- ============= CURRENT EXPERIMENTAL PLUGINS ======================
+
+  -- VSCode bulb bulb for neovim's built-in LSP.
+  -- 'kosayoda/nvim-lightbulb',
+
+  -- A lightweight LSP plugin based on Neovim's built-in LSP with a highly
+  -- performant UI.
+  -- 'glepnir/lspsaga.nvim',
+
+  -- A plugin to visualise and resolve merge conflicts in neovim
+  -- 'akinsho/git-conflict.nvim',
+  -- 'rhysd/conflict-marker.vim',
+
+  -- 'folke/neodev.nvim',
+
+  -- A pretty list for showing diagnostics, references, telescope results,
+  -- quickfix and location lists to help you solve all the trouble your code is
+  -- causing.
+
+  -- 'MunifTanjim/prettier.nvim',
+
+  ----------------- NEXT IN LINE ========================
+  -- "folke/trouble.nvim",
+
+  -- Neovim setup for init.lua and plugin development with full signature help,
+  -- docs and completion for the nvim lua API.
+  -- 'folke/neodev.nvim',
+  -- A tree like view for symbols in Neovim using the Language Server Protocol.
+  -- Supports all your favourite languages.
+  -- 'simrat39/symbols-outline.nvim'
+  -- Easily navigate between related files
+  -- 'rgroli/other.nvim'
+  -- Run various commands with Telescope
+  -- 'octarect/telescope-menu.nvim'
+  -- Like other.nvim but using telescope
+  -- 'otavioschwanck/telescope-alternate.nvim'
+
+  -- ============= TRY THIS PLUGINS IN FUTURE ======================
+  -- 🚦 A pretty diagnostics, references, telescope
+  -- results, quickfix and location list to help you solve all the trouble your
+  -- code is causing.
+  -- folke/trouble.nvim
+  -- Use treesitter to auto close and auto rename html tag
+  -- windwp/nvim-ts-autotag
+  -- kevinhwang91/nvim-hlslens
+  -- kevinhwang91/nvim-ufo
+  --
+  -- Easy navigation like EasyMotion.vim
+  -- 'phaazon/hop.nvim/'
+  -- folke/noice.nvim
+  -- 'm-demare/hlargs.nvim'
 })
