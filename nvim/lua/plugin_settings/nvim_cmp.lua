@@ -83,22 +83,25 @@ local luasnip = require('luasnip')
 --   },
 -- })
 
-local fuzzy_buffer_source_config =
-    {
-      name = 'fuzzy_buffer',
-      option = {
-        keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%([^-.,;\s]\w*\)*\)]],
-        max_item_count = 7,
-        max_matches = 7,
-        keyword_length = 8,
-        -- get_bufnrs = getVisibleBuffers,
-        -- -- All buffers
-        fuzzy_extra_arg = 2,
-        get_bufnrs = function()
-          return vim.api.nvim_list_bufs()
-        end
-      }
-    }
+
+-- local fuzzy_buffer_source_config =
+--     {
+--       name = 'fuzzy_buffer',
+--       option = {
+--         keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%([^-.,;\s]\w*\)*\)]],
+--         max_item_count = 7,
+--         max_matches = 7,
+--         keyword_length = 8,
+--         -- get_bufnrs = getVisibleBuffers,
+--         -- -- All buffers
+--         fuzzy_extra_arg = 2,
+--         get_bufnrs = function()
+--           return vim.api.nvim_list_bufs()
+--         end
+--       }
+--     }
+
+local lspkind = require('lspkind')
 
 cmp.setup({
   snippet = {
@@ -106,6 +109,7 @@ cmp.setup({
       luasnip.lsp_expand(args.body)
     end,
   },
+
   mapping = cmp.mapping.preset.insert({
     ['<C-b>'] = cmp.mapping.scroll_docs(-4),
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
@@ -148,6 +152,7 @@ cmp.setup({
       name = 'buffer',
       option = {
         max_item_count = 5,
+        max_matches = 5,
         keyword_length = 1,
         get_bufnrs = getVisibleBuffers,
         -- -- All buffers
@@ -158,8 +163,9 @@ cmp.setup({
     },
     {
       name = 'nvim_lsp',
+      max_matches = 5,
       max_item_count = 5,
-      keyword_length = 2,
+      keyword_length = 1,
     }
     -- {
     --   name = "rg",
@@ -167,25 +173,36 @@ cmp.setup({
     --   keyword_length = 12
     -- },
   }),
+  -- formatting = {
+  --   format = function(entry, vim_item)
+  --     local lspkind_ok, lspkind = pcall(require, "lspkind")
+  --     if not lspkind_ok then
+  --       -- From kind_icons array
+  --       vim_item.kind = string.format('%s %s', kind_icons[vim_item.kind], vim_item.kind) -- This concatonates the icons with the name of the item kind
+  --       -- Source
+  --       vim_item.menu = ({
+  --         buffer = "[Buffer]",
+  --         nvim_lsp = "[LSP]",
+  --         luasnip = "[LuaSnip]",
+  --         nvim_lua = "[Lua]",
+  --       })[entry.source.name]
+  --       return vim_item
+  --     else
+  --       -- From lspkind
+  --       return lspkind.cmp_format()
+  --     end
+  --   end
   formatting = {
-    format = function(entry, vim_item)
-      local lspkind_ok, lspkind = pcall(require, "lspkind")
-      if not lspkind_ok then
-        -- From kind_icons array
-        vim_item.kind = string.format('%s %s', kind_icons[vim_item.kind], vim_item.kind) -- This concatonates the icons with the name of the item kind
-        -- Source
-        vim_item.menu = ({
-          buffer = "[Buffer]",
-          nvim_lsp = "[LSP]",
-          luasnip = "[LuaSnip]",
-          nvim_lua = "[Lua]",
-        })[entry.source.name]
-        return vim_item
-      else
-        -- From lspkind
-        return lspkind.cmp_format()
-      end
-    end
+    format = lspkind.cmp_format({
+      mode = "symbol_text",
+      menu = ({
+        buffer = "[Buffer]",
+        nvim_lsp = "[LSP]",
+        luasnip = "[LuaSnip]",
+        nvim_lua = "[Lua]",
+        latex_symbols = "[Latex]",
+      })
+    }),
   }
 })
 
@@ -322,3 +339,19 @@ cmp.setup.cmdline(':', {
     { name = 'cmdline' }
   })
 })
+-- gray
+vim.api.nvim_set_hl(0, 'CmpItemAbbrDeprecated', { bg='NONE', strikethrough=true, fg='#808080' })
+-- blue
+vim.api.nvim_set_hl(0, 'CmpItemAbbrMatch', { bg='NONE', fg='#569CD6' })
+vim.api.nvim_set_hl(0, 'CmpItemAbbrMatchFuzzy', { link='CmpIntemAbbrMatch' })
+-- light blue
+vim.api.nvim_set_hl(0, 'CmpItemKindVariable', { bg='NONE', fg='#9CDCFE' })
+vim.api.nvim_set_hl(0, 'CmpItemKindInterface', { link='CmpItemKindVariable' })
+vim.api.nvim_set_hl(0, 'CmpItemKindText', { link='CmpItemKindVariable' })
+-- pink
+vim.api.nvim_set_hl(0, 'CmpItemKindFunction', { bg='NONE', fg='#C586C0' })
+vim.api.nvim_set_hl(0, 'CmpItemKindMethod', { link='CmpItemKindFunction' })
+-- front
+vim.api.nvim_set_hl(0, 'CmpItemKindKeyword', { bg='NONE', fg='#D4D4D4' })
+vim.api.nvim_set_hl(0, 'CmpItemKindProperty', { link='CmpItemKindKeyword' })
+vim.api.nvim_set_hl(0, 'CmpItemKindUnit', { link='CmpItemKindKeyword' })

@@ -73,6 +73,8 @@ require("lazy").setup({
     -- build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build'
   },
 
+  -- An extension for telescope.nvim that allows you to import modules faster
+  -- based on what you've already imported in your project.
   "piersolenski/telescope-import.nvim",
 
   -- Show changed lines from git
@@ -173,6 +175,8 @@ require("lazy").setup({
   -- "folke/tokyonight.nvim",
   "tinted-theming/base16-vim",
   "ellisonleao/gruvbox.nvim",
+  "rebelot/kanagawa.nvim",
+  "dracula/vim",
   -- "sainnhe/sonokai",
 
   -- Shows yaml path under cursor,
@@ -196,6 +200,7 @@ require("lazy").setup({
   "hrsh7th/cmp-buffer",
   "hrsh7th/cmp-path",
   "hrsh7th/cmp-cmdline",
+  "onsails/lspkind.nvim",
   -- {
   --   "tzachar/cmp-fuzzy-buffer",
   --   dependencies = {
@@ -224,7 +229,8 @@ require("lazy").setup({
   -- "rebelot/heirline.nvim",
 
   -- Highligh color codes
-  -- "lilydjwg/colorizer", -- Old plugin
+  "lilydjwg/colorizer", -- Old plugin, works OK
+  -- "NvChad/nvim-colorizer.lua",
   -- A high-performance color highlighter for Neovim which has no
   -- external dependencies! Written in performant Luajit.
   -- "norcalli/nvim-colorizer.lua",
@@ -244,6 +250,8 @@ require("lazy").setup({
 
   -- Auto close quotes, parenthesiz, etc
   "windwp/nvim-autopairs",
+  -- Alternative plugin
+  -- "echasnovski/mini.pairs",
 
   --- Syntax highlighting for Nix configs
   -- "LnL7/vim-nix",
