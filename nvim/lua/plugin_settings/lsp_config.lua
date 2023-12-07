@@ -129,11 +129,11 @@ lspconfig['solargraph'].setup{
 }
 
 -- textDocument/diagnostic support until 0.10.0 is released
-require("lspconfig").ruby_ls.setup({
-  on_attach = function(client, buffer)
-    setup_diagnostics(client, buffer)
-  end,
-})
+-- require("lspconfig").ruby_ls.setup({
+--   on_attach = function(client, buffer)
+--     setup_diagnostics(client, buffer)
+--   end,
+-- })
 
 -- lspconfig['html'].setup{
 --   on_attach = on_attach,

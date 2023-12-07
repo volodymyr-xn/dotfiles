@@ -55,6 +55,7 @@
   "vim-surround": { "branch": "master", "commit": "3d188ed2113431cf8dac77be61b842acb64433d9" },
   "vim-systemd-syntax": { "branch": "master", "commit": "2f788c627efa7a50baa5766cfacf1852528eca28" },
   "vim-test": { "branch": "master", "commit": "d11dc6f9c3e2f062646e3e265f878dcdfbb6a8ca" },
+  "vim-textobj-ruby": { "branch": "master", "commit": "fb99d918273a65010b3ac4084371a19c34260c66" },
   "vim-textobj-user": { "branch": "master", "commit": "41a675ddbeefd6a93664a4dc52f302fe3086a933" },
   "vim-tmux-focus-events": { "branch": "master", "commit": "b1330e04ffb95ede8e02b2f7df1f238190c67056" },
   "vim-tmux-navigator": { "branch": "master", "commit": "7db70e08ea03b3e4d91f63713d76134512e28d7e" },

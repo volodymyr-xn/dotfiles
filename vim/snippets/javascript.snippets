@@ -1,18 +1,27 @@
 snippet c "console.log"
 	console.log(${0})
 
-snippet cl "console.log2"
-	console.log(${0})
-
 snippet con "console.log2"
 	console.log(${0})
+
+snippet m "objectMehtod"
+	${1}({$0}) {
+
+  }
+
+snippet cl "class"
+  class ${1} {
+    ${0}
+  }
 
 snippet st
   import StimulusApplicationController from 'StimulusApplicationController'
   import stimulusApp from 'stimulusApp'
 
   stimulusApp.register('${1}', class extends StimulusApplicationController {
-    ${0}
+    connect() {
+      ${0}
+    }
   })
 
 snippet sti

@@ -64,6 +64,17 @@ require('telescope').setup{
     --     return { "-L" }
     --   end
     -- },
+    buffers = {
+      show_all_buffers = true,
+      sort_lastused = true,
+      -- theme = "dropdown",
+      previewer = false,
+      mappings = {
+        i = {
+          ["<c-d>"] = "delete_buffer",
+        }
+      }
+    },
     find_files = {
       hidden = true,
       find_command = {'fd', '--type', 'f', '--hidden', '--follow', '--exclude', '.git'},
@@ -114,16 +125,43 @@ function find_sibling_files()
   -- telescope.find_files( { cwd = vim.fn.expand('%:p:h') })
   telescope.find_files( {
     cwd = vim.fn.expand('%:h'),
-    -- We need to directly call CLI searcher "rg" to set "max depth for searching in dirs"
+    -- We need to directly call CLI searcher "rg" to set max depth for searching in dirs
     find_command = { 'rg', '--files', '--no-ignore', '--hidden', '-g', '!.git', '--max-depth', '1' }
   })
 end
 
-function find_word()
-  telescope.grep_string({
-    only_sort_text = true
+function full_text_search_only_in_opened_buffers()
+  telescope.live_grep({
+    prompt_title = 'Find in opened buffers',
+    -- layout_strategy = "horizontal",
+    vimgrep_arguments = {
+      -- "rg",
+      -- "-L",
+      -- "--color=never",
+      -- "--no-heading",
+      -- "--with-filename",
+      -- "--line-number",
+      -- "--column",
+      -- "--smart-case",
+      "ag",
+      "--nocolor",
+      "--noheading",
+      -- "--numbers",
+      "--column",
+      "--smart-case",
+      "--silent",
+      "--vimgrep"
+    },
+    -- previewer = false,
+    grep_open_files = true
   })
 end
+
+-- function find_word()
+--   telescope.grep_string({
+--     only_sort_text = true
+--   })
+-- end
 
 local find_models = find_reource_in_dir("app/models")
 local find_controllers = find_reource_in_dir("app/controllers")
@@ -134,19 +172,19 @@ local find_view_components = find_reource_in_dir("app/view_components")
 local find_components = find_reource_in_dir("app/components")
 local find_views = find_reource_in_dir("app/views")
 local find_i18n = find_reource_in_dir("config/locales/custom_updates")
--- " Search sibling files in same directory as current file(with preview window)
--- noremap <Leader>i :FuzzySearchSiblingFilesInCurrentDir <CR>
 
 -- Search files
 -- vim.keymap.set('n', '<C-p>', telescope.find_files, { noremap = true })
 vim.keymap.set('n', '<C-p>', find_files_wihout_preview, { noremap = true })
-
+-- " Search sibling files in same directory as current file(with preview window)
 vim.keymap.set('n', '<Leader>i', find_sibling_files, { noremap = true })
 vim.keymap.set('n', 's', find_sibling_files, { noremap = true })
 
 -- Full text search
 -- vim.keymap.set('n', '<Leader>o', telescope.live_grep, {})
 -- vim.keymap.set('n', '<Leader>p', full_text_search_wihout_preview, {})
+vim.keymap.set('n', '<Leader>q', full_text_search_only_in_opened_buffers, {})
+-- vim.keymap.set('n', '<Leader>q', Buffers, {})
 
 -- Find in varios Rails projekt dirs
 vim.keymap.set('n', '<Leader>m', find_models, {})

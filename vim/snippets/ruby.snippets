@@ -165,6 +165,11 @@ snippet con
      ${0}
   end
 
+snippet ct
+  class ` luaeval("GenerateRubyClassNameFromCurrentFilename()")` < ApplicationController
+     ${0}
+  end
+
 snippet c
   class ` luaeval("GenerateRubyClassNameFromCurrentFilename()")` < ApplicationViewComponent
     def initialize(${1})

@@ -111,7 +111,7 @@ require("lazy").setup({
 
   -- Make text objects with various ruby block structures.
   -- TODO: replace with NEOVIM equvivalent
-  -- "rhysd/vim-textobj-ruby",
+  "rhysd/vim-textobj-ruby",
 
   -- Automaticaly add end in ruby scrips
   "tpope/vim-endwise",
