@@ -159,6 +159,12 @@ cmp.setup({
   -- },
   sources = cmp.config.sources({
     {
+      name = 'nvim_lsp',
+      max_matches = 5,
+      max_item_count = 5,
+      keyword_length = 1,
+    },
+    {
       name = 'buffer',
       option = {
         max_item_count = 5,
@@ -171,12 +177,6 @@ cmp.setup({
         -- end,
       }
     },
-    {
-      name = 'nvim_lsp',
-      max_matches = 5,
-      max_item_count = 5,
-      keyword_length = 1,
-    }
     -- {
     --   name = "rg",
     --   -- Try it when you feel cmp performance is poor

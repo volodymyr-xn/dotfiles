@@ -208,7 +208,7 @@ Plug('wgwoods/vim-systemd-syntax')
 " Plug('LnL7/vim-nix')
 
 " Dracula color scheme
-" Plug('dracula/vim')
+Plug('dracula/vim')
 
 " A vim colorscheme for use with wal
 " Plug('dylanaraps/wal.vim')
@@ -241,6 +241,9 @@ Plug('Einenlum/yaml-revealer')
 
 " Highlight matching HTML tag
 Plug('leafOfTree/vim-matchtag')
+
+" Measure startuptime
+Plug('dstein64/vim-startuptime')
 
 call plug#end()
 "============================================================================
@@ -343,10 +346,11 @@ set background=dark
 "    source ~/.vimrc_background
 " endif
 
-colorscheme base16-horizon-dark
+" colorscheme base16-horizon-dark
 
 " Use pywal colorscheme
 " colorscheme wal
+colorscheme dracula
 
 " colorscheme one
 

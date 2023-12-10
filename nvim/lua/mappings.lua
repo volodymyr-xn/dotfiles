@@ -77,9 +77,6 @@ vim.api.nvim_set_keymap('n', '<C-e>', ':tabnext<CR>', {noremap = true})
 -- vim.api.nvim_set_keymap('n', '<C-Right>', ':tabnext<CR>', {noremap = true})
 -- vim.api.nvim_set_keymap('n', 'q', ':tabnext<CR>', {noremap = true})
 
--- Buffer select
-vim.api.nvim_set_keymap('n', 'q', ':Telescope buffers<CR>', {noremap = true})
-
 -- Copy selected text to system clipboard
 vim.api.nvim_set_keymap('v', 'm', '"+y', { noremap = true })
 

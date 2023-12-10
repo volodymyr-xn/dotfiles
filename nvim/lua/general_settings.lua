@@ -99,13 +99,13 @@ vim.o.backspace = "indent,eol,start"
 vim.o.background = "dark"
 
 -- Base16 hook
-vim.cmd [[
-  if exists('$BASE16_THEME')
-        \ && (!exists('g:colors_name') || g:colors_name != 'base16-$BASE16_THEME')
-      let base16colorspace=256
-      colorscheme base16-$BASE16_THEME
-  endif
-]]
+-- vim.cmd [[
+--   if exists('$BASE16_THEME')
+--         \ && (!exists('g:colors_name') || g:colors_name != 'base16-$BASE16_THEME')
+--       let base16colorspace=256
+--       colorscheme base16-$BASE16_THEME
+--   endif
+-- ]]
 --
 vim.cmd("colorscheme dracula")
 -- vim.cmd("colorscheme gruvbox")

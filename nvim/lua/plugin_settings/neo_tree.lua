@@ -8,6 +8,9 @@ require("neo-tree").setup({
   use_popups_for_input = false,
   sort_case_insensitive = false,
 
+  sources = { "filesystem", "buffers", "git_status", "document_symbols" },
+  open_files_do_not_replace_types = { "terminal", "Trouble", "trouble", "qf", "Outline" },
+
   default_component_configs = {
     container = {
       enable_character_fade = true
@@ -88,6 +91,9 @@ require("neo-tree").setup({
   },
   nesting_rules = {},
   filesystem = {
+    bind_to_cwd = false,
+    follow_current_file = { enabled = true },
+    use_libuv_file_watcher = true,
     filtered_items = {
       visible = false, -- when true, they will just be displayed differently than normal items
       hide_dotfiles = false,
@@ -95,8 +101,8 @@ require("neo-tree").setup({
     }
   },
   never_show = { -- remains hidden even if visible is toggled to true, this overrides always_show
-  ".DS_Store",
-  "thumbs.db"
+    ".DS_Store",
+    "thumbs.db"
   },
 })
 

@@ -67,6 +67,9 @@ require("lazy").setup({
     dependencies = { 'nvim-lua/plenary.nvim' }
   },
 
+  -- Enabled live grep in dir
+  "nvim-telescope/telescope-live-grep-args.nvim",
+
   {
     'nvim-telescope/telescope-fzf-native.nvim',
     build = 'make'
@@ -83,7 +86,7 @@ require("lazy").setup({
   -- 'lewis6991/gitsigns.nvim',
 
   -- Lightweight support for Ruby's Bundler
-  "tpope/vim-bundler",
+  -- "tpope/vim-bundler",
 
   -- Ruby on Rails power tool
   -- This is a massive (in a good way) Vim plugin for editing Ruby on Rails applications.
@@ -111,7 +114,7 @@ require("lazy").setup({
 
   -- Make text objects with various ruby block structures.
   -- TODO: replace with NEOVIM equvivalent
-  "rhysd/vim-textobj-ruby",
+  -- "rhysd/vim-textobj-ruby",
 
   -- Automaticaly add end in ruby scrips
   "tpope/vim-endwise",
@@ -125,7 +128,7 @@ require("lazy").setup({
   -- va| - visually select around pipe
   -- ci_ - change inside underscore
   -- ca/aa/Ia/Aa  - change inside function/method argument
-  "wellle/targets.vim",
+  -- "wellle/targets.vim",
 
   -- Run various tests from vim
   "janko-m/vim-test",
@@ -174,8 +177,8 @@ require("lazy").setup({
   -- "Mofiqul/dracula.nvim",
   -- "folke/tokyonight.nvim",
   "tinted-theming/base16-vim",
-  "ellisonleao/gruvbox.nvim",
-  "rebelot/kanagawa.nvim",
+  -- "ellisonleao/gruvbox.nvim",
+  -- "rebelot/kanagawa.nvim",
   "dracula/vim",
   -- "sainnhe/sonokai",
 
@@ -282,7 +285,6 @@ require("lazy").setup({
 
   -- Global search by ack cli util
   -- "mileszs/ack.vim",
-  -- "wincent/ferret",
 
   -- Emmet
   "mattn/emmet-vim",
@@ -311,8 +313,14 @@ require("lazy").setup({
 
   -- Run linters and formaters as fake LSP
   -- 'jose-elias-alvarez/null-ls.nvim',
-
+  -- Linting syntastic like plugin
   'mfussenegger/nvim-lint',
+
+  -- Formating
+  "stevearc/conform.nvim",
+
+  -- Measure startuptime
+  "dstein64/vim-startuptime",
 
   -- "jonsmithers/vim-html-template-literals",
 

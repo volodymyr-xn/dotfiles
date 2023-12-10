@@ -18,7 +18,7 @@ require('telescope').setup{
       "--silent",
       "--vimgrep"
     },
-    prompt_prefix = "   ",
+    -- prompt_prefix = "   ",
     prompt_prefix = " 🔍  ",
     selection_caret = "  ",
     entry_prefix = "  ",
@@ -157,6 +157,9 @@ function full_text_search_only_in_opened_buffers()
   })
 end
 
+function full_text_search_only_in_opened_buffers_fzf_version()
+  vim.cmd[[ Buffers! ]]
+end
 -- function find_word()
 --   telescope.grep_string({
 --     only_sort_text = true
@@ -180,11 +183,14 @@ vim.keymap.set('n', '<C-p>', find_files_wihout_preview, { noremap = true })
 vim.keymap.set('n', '<Leader>i', find_sibling_files, { noremap = true })
 vim.keymap.set('n', 's', find_sibling_files, { noremap = true })
 
+-- Buffer select
+vim.api.nvim_set_keymap('n', 'q', ':Buffers!<CR>', {noremap = true})
+
 -- Full text search
 -- vim.keymap.set('n', '<Leader>o', telescope.live_grep, {})
 -- vim.keymap.set('n', '<Leader>p', full_text_search_wihout_preview, {})
 vim.keymap.set('n', '<Leader>q', full_text_search_only_in_opened_buffers, {})
--- vim.keymap.set('n', '<Leader>q', Buffers, {})
+-- vim.keymap.set('n', '<Leader>q', full_text_search_only_in_opened_buffers_fzf_version, {})
 
 -- Find in varios Rails projekt dirs
 vim.keymap.set('n', '<Leader>m', find_models, {})
@@ -196,6 +202,14 @@ vim.keymap.set('n', '<Leader>k', find_components, {})
 vim.keymap.set('n', '<Leader>d', find_views, {})
 vim.keymap.set('n', '<Leader>b', find_i18n, {})
 -- vim.keymap.set('n', '@', find_word, {})
+
+-- It enables passing arguments to the grep command, rg examples:
+-- foo → press <C-k> → "foo"  → "foo" -tmd
+-- Only works if you set up the <C-k> mapping
+--no-ignore foo
+-- "foo bar" bazdir
+-- "foo" --iglob **/bar/**
+vim.keymap.set("n", "<leader>z", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>")
 
 
 -- Define a new highlight group for the border color
