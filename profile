@@ -136,8 +136,7 @@ export GOPATH="$HOME/.programing_languages/go"
 
 # Ruby verbose mode
 export RUBYOPT="-W1"
-# Always use jemmaloc to install ruby
-# export RUBY_CONFIGURE_OPTS=--with-jemalloc
+# Always use jemmaloc and yjit to install ruby
 export RUBY_CONFIGURE_OPTS="--with-jemalloc --enable-yjit"
 # export RUBY_CONFIGURE_OPTS="--with-jemalloc"
 
