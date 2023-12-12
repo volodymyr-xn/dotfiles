@@ -24,6 +24,7 @@ require('plugin_settings/nvim_scrollview')
 -- require('plugin_settings/colorizer')
 require('plugin_settings/vim_illuminate')
 require('plugin_settings/gitsigns')
+require('plugin_settings/yaml_nvim')
 -- require('plugin_settings/indent_blankline')
 
 

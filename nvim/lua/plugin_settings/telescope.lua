@@ -77,8 +77,12 @@ require('telescope').setup{
     },
     find_files = {
       hidden = true,
+      previewer = false,
       find_command = {'fd', '--type', 'f', '--hidden', '--follow', '--exclude', '.git'},
-    }
+    },
+    -- quickfix = {
+    --   previewer = false
+    -- }
   },
   extensions = {
     import = {

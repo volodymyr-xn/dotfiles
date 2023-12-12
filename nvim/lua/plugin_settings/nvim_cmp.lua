@@ -10,6 +10,10 @@ local function getVisibleBuffers()
   return vim.tbl_keys(bufs)
 end
 
+local function getAllBuffers()
+  return vim.api.nvim_list_bufs()
+end
+
 local kind_icons = {
   Text = "",
   Method = "",
@@ -160,9 +164,11 @@ cmp.setup({
   sources = cmp.config.sources({
     {
       name = 'nvim_lsp',
-      max_matches = 5,
-      max_item_count = 5,
-      keyword_length = 1,
+      option = {
+        max_matches = 5,
+        max_item_count = 5,
+        keyword_length = 1,
+      }
     },
     {
       name = 'buffer',
@@ -170,11 +176,8 @@ cmp.setup({
         max_item_count = 5,
         max_matches = 5,
         keyword_length = 1,
-        get_bufnrs = getVisibleBuffers,
-        -- -- All buffers
-        -- get_bufnrs = function()
-        --   return vim.api.nvim_list_bufs()
-        -- end,
+        -- get_bufnrs = getVisibleBuffers,
+        get_bufnrs = getAllBuffers
       }
     },
     -- {
@@ -219,51 +222,33 @@ cmp.setup({
 local cmp_autopairs = require("nvim-autopairs.completion.cmp")
 cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done({ map_char = { tex = "" } }))
 
-cmp.setup.filetype({'eruby'}, {
-  sources = cmp.config.sources({
-    {
-      name = 'buffer',
-      -- get_bufnrs = getVisibleBuffers,
-      -- All buffers
-      get_bufnrs = function()
-        return vim.api.nvim_list_bufs()
-      end,
-      keyword_length = 1,
-    },
-    {
-      name = 'nvim_lsp',
-      -- max_item_count = 5
-      keyword_length = 1,
-    },
-    -- fuzzy_buffer_source_config,
-    {
-      name = 'rg',
-      keyword_length = 5
-    },
-  }),
-})
+-- local html_config = cmp.config.sources({
+--     {
+--       name = 'nvim_lsp',
+--     },
+--     {
+--       name = 'buffer',
+--       option = {
+--         max_item_count = 7,
+--         max_matches = 3,
+--         keyword_length = 1,
+--         get_bufnrs = getVisibleBuffers,
+--       }
+--     },
+--     -- -- fuzzy_buffer_source_config,
+--     -- {
+--     --   name = 'rg',
+--     --   keyword_length = 2
+--     -- },
+--   })
 
-cmp.setup.filetype({'haml'}, {
-  sources = cmp.config.sources({
-    {
-      name = 'nvim_lsp'
-    },
-    -- fuzzy_buffer_source_config,
-    {
-      name = 'buffer',
-      -- get_bufnrs = getVisibleBuffers,
-      -- All buffers
-      keyword_length = 2,
-      get_bufnrs = function()
-        return vim.api.nvim_list_bufs()
-      end
-    },
-    {
-      name = 'rg',
-      keyword_length = 8
-    },
-  }),
-})
+-- cmp.setup.filetype({'eruby'}, {
+--   sources = html_config
+-- })
+--
+-- cmp.setup.filetype({'haml'}, {
+--   sources = html_config
+-- })
 
 cmp.setup.filetype('scss', {
   sources = cmp.config.sources({
@@ -274,18 +259,9 @@ cmp.setup.filetype('scss', {
       name = 'buffer',
       -- max_item_count = 5,
       option = {
-        -- keyword_length = 3,
-        keyword_length = 2,
-
+        keyword_length = 1,
         -- Only visible buffers
-        -- get_bufnrs = getVisibleBuffers,
-        get_bufnrs = function()
-          local bufs = {}
-          for _, win in ipairs(vim.api.nvim_list_wins()) do
-            bufs[vim.api.nvim_win_get_buf(win)] = true
-          end
-          return vim.tbl_keys(bufs)
-        end
+        get_bufnrs = getVisibleBuffers
       }
     },
   }),
@@ -306,7 +282,6 @@ cmp.setup.filetype('scss', {
       -- from the word indexer to sort completion results based on the distance
       -- of the word from the cursor line
       -- function(...) return cmp_buffer:compare_locality(...) end,
-
       lspkind_comparator({
         kind_priority = {
           Property = 11,

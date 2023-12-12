@@ -184,7 +184,10 @@ require("lazy").setup({
 
   -- Shows yaml path under cursor,
   -- allows to search by YAML key
-  "Einenlum/yaml-revealer",
+  -- "Einenlum/yaml-revealer",
+
+  "nvim-treesitter/nvim-treesitter",
+  "cuducos/yaml.nvim",
 
   -- Better yaml folding
   "pedrohdz/vim-yaml-folds",
