@@ -107,11 +107,36 @@ local luasnip = require('luasnip')
 
 local lspkind = require('lspkind')
 
+local border = {
+    { "╭", "CmpBorder" },
+    { "─", "CmpBorder" },
+    { "╮", "CmpBorder" },
+    { "│", "CmpBorder" },
+    { "╯", "CmpBorder" },
+    { "─", "CmpBorder" },
+    { "╰", "CmpBorder" },
+    { "│", "CmpBorder" },
+}
+
+vim.cmd [[
+  hi! link CmpBorder Comment
+]]
+
+
 cmp.setup({
   snippet = {
     expand = function(args)
       luasnip.lsp_expand(args.body)
     end,
+  },
+
+  window = {
+    documentation = {
+      border = border,
+    },
+    completion = {
+      border = border,
+    },
   },
 
   mapping = cmp.mapping.preset.insert({
@@ -162,6 +187,7 @@ cmp.setup({
   --   }
   -- },
   sources = cmp.config.sources({
+    { name = "luasnip" },
     {
       name = 'nvim_lsp',
       option = {
@@ -208,13 +234,13 @@ cmp.setup({
   formatting = {
     format = lspkind.cmp_format({
       mode = "symbol_text",
-      menu = ({
-        buffer = "[Buffer]",
-        nvim_lsp = "[LSP]",
-        luasnip = "[LuaSnip]",
-        nvim_lua = "[Lua]",
-        latex_symbols = "[Latex]",
-      })
+      -- menu = ({
+      --   buffer = "[Buffer]",
+      --   nvim_lsp = "[LSP]",
+      --   luasnip = "[LuaSnip]",
+      --   nvim_lua = "[Lua]",
+      --   latex_symbols = "[Latex]",
+      -- })
     }),
   }
 })
@@ -324,6 +350,7 @@ cmp.setup.cmdline(':', {
     { name = 'cmdline' }
   })
 })
+
 -- gray
 vim.api.nvim_set_hl(0, 'CmpItemAbbrDeprecated', { bg='NONE', strikethrough=true, fg='#808080' })
 -- blue

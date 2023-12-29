@@ -113,7 +113,8 @@ vim.api.nvim_set_keymap('x', '<2-LeftMouse>', 'za', {noremap = true})
 -- vim.api.nvim_set_keymap('n', '<A-w>', ':tabnext<CR>', {noremap = true})
 
 -- Map text align to tab button in visual mode
-vim.api.nvim_set_keymap('v', '<TAB>', '=', {noremap = true})
+vim.api.nvim_set_keymap('v', '<Tab>', '=', {noremap = true})
+-- vim.api.nvim_set_keymap('v', '<Leader><Tab>', '=', {noremap = true})
 
 -- Expand window
 vim.api.nvim_set_keymap('n', '"', '<C-W>|<C-W>_', {noremap = true})
@@ -136,7 +137,7 @@ for i=1,9 do
   vim.api.nvim_set_keymap('n', '<Leader>'..i, i..'gt<CR>', {noremap = true})
 end
 
-vim.api.nvim_set_keymap('v', 'M', "yV\'] :TComment<CR>\']jp", {noremap = true})
+-- vim.api.nvim_set_keymap('v', 'M', "yV\'] :TComment<CR>\']jp", {noremap = true})
 -- vim.api.nvim_set_keymap('n', 'M', 'yy\']:TComment<CR>\']pjj', {noremap = true})
 
 -- Faster close windows and quit
@@ -171,10 +172,10 @@ vim.api.nvim_set_keymap('x', 'p', '"_dP', { noremap = true })
 
 -- Tcomment
 -- Comment line in visual mode
-vim.api.nvim_set_keymap('v', '\\', ':TComment<CR>', { noremap = true })
+-- vim.api.nvim_set_keymap('v', '\\', ':TComment<CR>', { noremap = true })
 
 -- Comment line in normal mode
-vim.api.nvim_set_keymap('n', '\\', ':TComment<CR>', { noremap = true })
+-- vim.api.nvim_set_keymap('n', '\\', ':TComment<CR>', { noremap = true })
 
 
 -- vim.api.nvim_set_keymap('n', '<leader>-', ':vsplit<CR>', { noremap = true })

@@ -2,8 +2,7 @@ require("mason").setup()
 require("mason-lspconfig").setup({
   -- A list of servers to automatically install if they're not already installed. Example: { "rust_analyzer@nightly", "lua_ls" }
   -- This setting has no relation with the `automatic_installation` setting.
-  -- ensure_installed = { "lua_ls", "ruby_ls", "tsserver" },
-  ensure_installed = { "lua_ls", "tsserver", "cssls"},
+  ensure_installed = { "lua_ls", "tsserver", "ruby_ls", "cssls", "tailwindcss"},
   -- Whether servers that are set up (via lspconfig) should be automatically installed if they're not already installed.
   -- This setting has no relation with the `ensure_installed` setting.
   -- Can either be:
@@ -112,28 +111,48 @@ lspconfig['tsserver'].setup{
   capabilities = capabilities
 }
 
-lspconfig['solargraph'].setup{
-  on_attach = on_attach,
-  flags = lsp_flags,
-  capabilities = capabilities,
-  filetypes = { 'ruby', 'eruby'},
-  -- filetypes = { 'ruby' },
-  -- Disable built in Solargraph Rubocop diagnostics
-  -- Use null-ls as LSP proxy for direct use of Rubocop
-  settings = {
-    solargraph = {
-      diagnostics = false
-    }
-  },
-  useBundler = true
-}
 
--- textDocument/diagnostic support until 0.10.0 is released
--- require("lspconfig").ruby_ls.setup({
---   on_attach = function(client, buffer)
---     setup_diagnostics(client, buffer)
---   end,
--- })
+function configureSolargraph()
+  lspconfig['solargraph'].setup{
+    on_attach = on_attach,
+    flags = lsp_flags,
+    capabilities = capabilities,
+    filetypes = { 'ruby', 'eruby'},
+    filetypes = { 'ruby' },
+    -- Disable built in Solargraph Rubocop diagnostics
+    -- Use linter
+    settings = {
+      solargraph = {
+        diagnostics = false
+      }
+    },
+    useBundler = true
+  }
+end
+
+function configureRubyLS()
+  lspconfig['ruby_ls'].setup({
+    on_attach = function(client, buffer)
+      setup_diagnostics(client, buffer)
+    end,
+  })
+end
+
+local ruby_major_version = readRubyVersion()
+
+if (ruby_major_version and ruby_major_version >= 3) then
+  -- Enable Ruby-lsp on Ruby 3.0+ projekts
+  configureRubyLS()
+  print("Ruby version: " .. ruby_major_version .. ". Using ruby_ls LSP")
+elseif ruby_major_version then
+  configureSolargraph()
+  -- Enable solargraph on "ruby"
+  print("Ruby version: " .. ruby_major_version .. ". Using Solargraph LSP")
+else
+  configureSolargraph()
+end
+
+lspconfig['tailwindcss'].setup{}
 
 -- lspconfig['html'].setup{
 --   on_attach = on_attach,
@@ -142,10 +161,10 @@ lspconfig['solargraph'].setup{
 --   -- diagnostics = true,
 --   filetypes = { 'html', 'eruby'},
 -- }
+
 ---------------------------------
 -- Floating diagnostics message
 ---------------------------------
-
 vim.diagnostic.config({
   -- float = { source = "always", border = border },
   float = { source = "always"},

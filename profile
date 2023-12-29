@@ -218,6 +218,7 @@ if [ -f $HOME/.asdf/asdf.sh ]; then
   source $HOME/.asdf/asdf.sh
 fi
 
+
 local_profile_path="$HOME/.local_profile"
 
 # If local profile file exist - source it

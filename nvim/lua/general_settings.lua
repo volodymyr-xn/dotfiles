@@ -108,6 +108,8 @@ vim.o.background = "dark"
 -- ]]
 --
 vim.cmd("colorscheme dracula")
+-- vim.cmd("colorscheme rose-pine")
+-- vim.cmd("colorscheme nightfox")
 -- vim.cmd("colorscheme gruvbox")
 -- vim.cmd("colorscheme sonokai")
 -- vim.cmd("colorscheme kanagawa")
@@ -198,5 +200,9 @@ vim.opt.inccommand = "split"
 
 -- Always show the signcolumn, otherwise it would shift the text each time
 -- diagnostics appear/become resolved.
--- vim.o.signcolumn = "yes"
-vim.o.signcolumn = "number"
+vim.o.signcolumn = "yes"
+-- vim.o.signcolumn = "number"
+
+-- vim.cmd [[
+-- -- let test#ruby#rspec#executable = 'spring rspec'
+-- ]]

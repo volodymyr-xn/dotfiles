@@ -121,6 +121,10 @@ local function full_text_search_wihout_preview()
   telescope.live_grep({ previewer = false })
 end
 
+local function find_changed_files()
+  telescope.git_status()
+end
+
 function find_reource_in_dir(dir)
   return function() telescope.find_files({ cwd = dir, previewer = false }) end
 end
@@ -176,7 +180,22 @@ local find_css = find_reource_in_dir("app/assets/stylesheets")
 local find_js = find_reource_in_dir("app/assets/javascripts")
 -- local find_components = find_reource_in_dir("app/components")
 local find_view_components = find_reource_in_dir("app/view_components")
-local find_components = find_reource_in_dir("app/components")
+
+local resulting_components_dir = nil
+
+local current_app_dir = vim.fn.getcwd() .. "/"
+local components_dir_path = "app/components"
+local view_components_dir_path = "app/view_components"
+local components_dir = io.open(current_app_dir .. components_dir_path, "r")
+local view_components_dir = io.open(current_app_dir .. view_components_dir_path, "r")
+
+if (view_components_dir) then
+  resulting_components_dir = view_components_dir_path
+elseif (components_dir) then
+  resulting_components_dir = components_dir_path
+end
+
+local find_components = find_reource_in_dir(resulting_components_dir)
 local find_views = find_reource_in_dir("app/views")
 local find_i18n = find_reource_in_dir("config/locales/custom_updates")
 
@@ -188,12 +207,13 @@ vim.keymap.set('n', '<Leader>i', find_sibling_files, { noremap = true })
 vim.keymap.set('n', 's', find_sibling_files, { noremap = true })
 
 -- Buffer select
-vim.api.nvim_set_keymap('n', 'q', ':Buffers!<CR>', {noremap = true})
+vim.api.nvim_set_keymap('n', '<Leader>q', ':Buffers!<CR>', {noremap = true})
 
 -- Full text search
 -- vim.keymap.set('n', '<Leader>o', telescope.live_grep, {})
 -- vim.keymap.set('n', '<Leader>p', full_text_search_wihout_preview, {})
-vim.keymap.set('n', '<Leader>q', full_text_search_only_in_opened_buffers, {})
+-- vim.keymap.set('n', '<Leader>q', full_text_search_only_in_opened_buffers, {})
+vim.keymap.set('n', 'q', find_changed_files, {})
 -- vim.keymap.set('n', '<Leader>q', full_text_search_only_in_opened_buffers_fzf_version, {})
 
 -- Find in varios Rails projekt dirs

@@ -14,6 +14,39 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
+   performance = {
+    rtp = {
+      disabled_plugins = {
+        "2html_plugin",
+        "tohtml",
+        "getscript",
+        "getscriptPlugin",
+        "gzip",
+        "logipat",
+        "netrw",
+        "netrwPlugin",
+        "netrwSettings",
+        "netrwFileHandlers",
+        "matchit",
+        "tar",
+        "tarPlugin",
+        "rrhelper",
+        "spellfile_plugin",
+        "vimball",
+        "vimballPlugin",
+        "zip",
+        "zipPlugin",
+        "tutor",
+        "rplugin",
+        "syntax",
+        "synmenu",
+        "optwin",
+        "compiler",
+        "bugreport",
+        "ftplugin",
+      },
+    },
+  },
   -- Filetree
   -- "scrooloose/nerdtree",
   -- TODO: Replace nerdtree with fern
@@ -35,9 +68,10 @@ require("lazy").setup({
   "nvim-tree/nvim-web-devicons",
 
   -- Comment helper
-  "tomtom/tcomment_vim",
+  -- "tomtom/tcomment_vim",
   -- Alternative plugin:
   -- "preservim/nerdcommenter",
+  "numToStr/Comment.nvim",
 
   "tpope/vim-haml",
 
@@ -173,7 +207,8 @@ require("lazy").setup({
   -- "windwp/nvim-ts-autotag",
 
   -- Base16 color schemes
-  -- "rose-pine/neovim""
+  -- "rose-pine/neovim",
+  -- "EdenEast/nightfox.nvim",
   -- "Mofiqul/dracula.nvim",
   -- "folke/tokyonight.nvim",
   "tinted-theming/base16-vim",
@@ -324,6 +359,32 @@ require("lazy").setup({
 
   -- Measure startuptime
   "dstein64/vim-startuptime",
+
+  -- Open in split select for NeoTree
+  {
+    's1n7ax/nvim-window-picker',
+    name = 'window-picker',
+    event = 'VeryLazy',
+    version = '2.*',
+    config = function()
+      require'window-picker'.setup({
+        hint = 'floating-big-letter',
+             floating_big_letter = {
+            -- window picker plugin provides bunch of big letter fonts
+            -- fonts will be lazy loaded as they are being requested
+            -- additionally, user can pass in a table of fonts in to font
+            -- property to use instead
+
+            font = 'ansi-shadow', -- ansi-shadow |
+        },
+      })
+    end,
+  }
+
+
+  -- "rcarriga/nvim-notify",
+  -- "stevearc/dressing.nvim",
+  -- "weizheheng/ror.nvim",
 
   -- "jonsmithers/vim-html-template-literals",
 

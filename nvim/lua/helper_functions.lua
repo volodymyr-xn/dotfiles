@@ -45,3 +45,19 @@ function GenerateStimulusControllerNameFromCurrentFilename()
 
   return DasherizeFilename(moduleName) .. string.gsub(DasherizeFilename(class), '-component', '')
 end
+
+function readRubyVersion()
+  -- Create the full file path
+  local ruby_version_path = vim.fn.getcwd() .. "/.ruby-version"
+  -- Open the file in read mode
+  local ruby_version_file = io.open(ruby_version_path, "r")
+
+  if ruby_version_file then
+    -- Read the content of the ruby_version_file
+    local content = ruby_version_file:read("*all")
+    ruby_version_file:close()
+
+    -- Match the major version using pattern matching
+    return tonumber(string.match(content, "%d+"))
+  end
+end

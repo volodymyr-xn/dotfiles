@@ -25,9 +25,10 @@ require('plugin_settings/nvim_scrollview')
 require('plugin_settings/vim_illuminate')
 require('plugin_settings/gitsigns')
 require('plugin_settings/yaml_nvim')
+require('plugin_settings/comment_nvim')
+-- require('plugin_settings/1_ror')
+
 -- require('plugin_settings/indent_blankline')
-
-
 -- require('plugin_settings/treesitter')
 -- require('plugin_settings/local_highlight')
 -- require('plugin_settings/ale')
