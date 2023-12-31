@@ -186,8 +186,10 @@ local resulting_components_dir = nil
 local current_app_dir = vim.fn.getcwd() .. "/"
 local components_dir_path = "app/components"
 local view_components_dir_path = "app/view_components"
-local components_dir = io.open(current_app_dir .. components_dir_path, "r")
-local view_components_dir = io.open(current_app_dir .. view_components_dir_path, "r")
+-- local components_dir = io.open(current_app_dir .. components_dir_path, "r")
+-- local view_components_dir = io.open(current_app_dir .. view_components_dir_path, "r")
+local components_dir = io.open(components_dir_path, "r")
+local view_components_dir = io.open(view_components_dir_path, "r")
 
 if (view_components_dir) then
   resulting_components_dir = view_components_dir_path

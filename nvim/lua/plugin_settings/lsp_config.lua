@@ -67,9 +67,12 @@ local on_attach = function(client, bufnr)
   -- vim.keymap.set('n', 'gD', vim.lsp.buf.type_definition, bufopts)
   -- vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
   -- vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
-  vim.keymap.set('n', '<space>gc', vim.lsp.buf.code_action, bufopts)
+  vim.keymap.set('n', '<Leader>gv', vim.lsp.buf.code_action, bufopts)
 
   -- This mapping conflict with vim-tmux-navigator
+    -- on_attach = function(client, buffer)
+  setup_diagnostics(client, buffer)
+    -- end,
 end
 
 local lsp_flags = {
@@ -78,7 +81,6 @@ local lsp_flags = {
 }
 
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
-
 local lspconfig = require('lspconfig')
 
 -- lspconfig['lua_ls'].setup{
@@ -118,7 +120,6 @@ function configureSolargraph()
     flags = lsp_flags,
     capabilities = capabilities,
     filetypes = { 'ruby', 'eruby'},
-    filetypes = { 'ruby' },
     -- Disable built in Solargraph Rubocop diagnostics
     -- Use linter
     settings = {
@@ -130,11 +131,38 @@ function configureSolargraph()
   }
 end
 
+local enabled_features = {
+}
+
 function configureRubyLS()
   lspconfig['ruby_ls'].setup({
-    on_attach = function(client, buffer)
-      setup_diagnostics(client, buffer)
-    end,
+    on_attach = on_attach,
+    flags = lsp_flags,
+    capabilities = capabilities,
+    filetypes = { 'ruby', 'eruby'},
+    init_options = {
+				enabledFeatures = {
+          "documentSymbol",
+          "documentLink",
+          "hover",
+          "foldingRange",
+          "selectionRange",
+          -- "semanticHighlighting",
+          "formatting",
+          "onTypeFormatting",
+          "diagnostic",
+          "codeAction",
+          "codeActionResolve",
+          "documentHighlight",
+          "inlayHint",
+          "completion",
+          "codeLens",
+          "definition",
+          "showSyntaxTree",
+          "workspaceSymbol",
+          "signatureHelp",
+        }
+			},
   })
 end
 
@@ -143,6 +171,7 @@ local ruby_major_version = readRubyVersion()
 if (ruby_major_version and ruby_major_version >= 3) then
   -- Enable Ruby-lsp on Ruby 3.0+ projekts
   configureRubyLS()
+  -- configureSolargraph()
   print("Ruby version: " .. ruby_major_version .. ". Using ruby_ls LSP")
 elseif ruby_major_version then
   configureSolargraph()

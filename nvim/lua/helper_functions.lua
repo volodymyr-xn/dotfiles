@@ -46,10 +46,19 @@ function GenerateStimulusControllerNameFromCurrentFilename()
   return DasherizeFilename(moduleName) .. string.gsub(DasherizeFilename(class), '-component', '')
 end
 
+function RailsViewComponenbaseClassName()
+  local application_view_component = io.open("app/view_components/application_view_component.rb", "r")
+
+  if (application_view_component) then
+    return "ApplicationViewComponent"
+  else
+    return "ViewComponent::Base"
+  end
+end
+
 function readRubyVersion()
-  -- Create the full file path
-  local ruby_version_path = vim.fn.getcwd() .. "/.ruby-version"
-  -- Open the file in read mode
+  -- local ruby_version_path = vim.fn.getcwd() .. "/.ruby-version"
+  local ruby_version_path = ".ruby-version"
   local ruby_version_file = io.open(ruby_version_path, "r")
 
   if ruby_version_file then

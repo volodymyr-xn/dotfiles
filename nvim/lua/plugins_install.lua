@@ -75,9 +75,6 @@ require("lazy").setup({
 
   "tpope/vim-haml",
 
-  -- Enable in future
-  -- "nvim-treesitter/nvim-treesitter",
-
   -- Linting
   -- "w0rp/ale",
 
@@ -129,7 +126,7 @@ require("lazy").setup({
   -- which is automatically created with your content. In a model or controller, a
   -- concern is created, with the appropriate include declaration left behind.
   -- :help rails-:Extract
-  "tpope/vim-rails",
+  -- "tpope/vim-rails",
 
   -- Minimal rbenv support
   "tpope/vim-rbenv",
@@ -203,7 +200,6 @@ require("lazy").setup({
 
   -- Use treesitter to autoclose and autorename html tag
   -- https://github.com/windwp/nvim-ts-autotag
-  -- "windwp/nvim-ts-autotag",
   -- "windwp/nvim-ts-autotag",
 
   -- Base16 color schemes
@@ -354,7 +350,10 @@ require("lazy").setup({
   -- Linting syntastic like plugin
   'mfussenegger/nvim-lint',
 
-  -- Formating
+  -- Use Ollama AI in VIM
+  -- "David-Kunz/gen.nvim",
+
+  -- Formating framework (like null-ls, syntastic, etc)
   "stevearc/conform.nvim",
 
   -- Measure startuptime

@@ -1,4 +1,3 @@
--- ---------------------------------
 require("nvim-treesitter.configs").setup({
   -- auto_install = true,
   ensure_installed = {
@@ -8,49 +7,30 @@ require("nvim-treesitter.configs").setup({
     "json",
     "lua",
     "regex",
-    "ruby",
+    -- "ruby",
     "elixir",
     "sql",
     "vim",
     "yaml",
-    'markdown',
-    'markdown_inline'
   },
-  highlight = { enable = false },
-  indent = { enable = true },
-
-  -- For HTML tags
-  autotag = {
+  illuminate = {
+    -- disable = {"ruby"},
     enable = true,
-    filetypes = {
-      "html",
-      "javascript",
-    },
+    loaded = false,
+    module_path = "illuminate.providers.treesitter"
   },
-
-  -- - EXPERIMENTAL settings
-  refactor = {
-    smart_rename = { enable = true, keymaps = { smart_rename = 'grr' } },
-    highlight_definitions = { enable = true },
-  },
-  textsubjects = {
+  highlight = {
     enable = true,
-    lookahead = true,
-    keymaps = {
-      ['.'] = 'textsubjects-smart',
-      [';'] = 'textsubjects-container-outer',
-      ['i;'] = 'textsubjects-container-inner',
-    },
+    -- disable = { "c", "ruby" },
+    additional_vim_regex_highlighting = false,
   },
-  endwise = { enable = true },
-  matchup = { enable = true },
 })
 
 
--- Treesitter dosen't highlight Ruby symbols correctly
--- Highlight ruby symbols the same as classes
-vim.api.nvim_set_hl(0, "@symbol.ruby", { link = "Type" })
--- Highlight regular ruby variables
-vim.api.nvim_set_hl(0, "@variable.ruby", { link = "@character.special" })
--- Highlight ruby instance variables as properties
-vim.api.nvim_set_hl(0, "@label.ruby", { link = "@property" })
+-- -- Treesitter dosen't highlight Ruby symbols correctly
+-- -- Highlight ruby symbols the same as classes
+-- vim.api.nvim_set_hl(0, "@symbol.ruby", { link = "Type" })
+-- -- Highlight regular ruby variables
+-- vim.api.nvim_set_hl(0, "@variable.ruby", { link = "@character.special" })
+-- -- Highlight ruby instance variables as properties
+-- vim.api.nvim_set_hl(0, "@label.ruby", { link = "@property" })
