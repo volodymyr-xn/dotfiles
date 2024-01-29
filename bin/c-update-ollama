@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+sudo curl -L https://ollama.ai/download/ollama-linux-amd64 -o /usr/bin/ollama
+sudo chmod +x /usr/bin/ollama

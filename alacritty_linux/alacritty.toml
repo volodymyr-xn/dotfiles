@@ -1,0 +1,34 @@
+[env]
+# term = "xterm-256color"
+
+# ########
+# # FONT #
+# ########
+[font]
+#
+# # Normal font style
+normal = { family = "Monego", style = "Bold" }  # Default for Linux/BSD: "monospace", Regular
+#
+# # Bold font style
+# bold = { style = "Bold" }  # Inherits family from normal, Default style: Bold
+#
+# # Italic font style
+# italic = { style = "Italic" }  # Inherits family from normal, Default style: Italic
+#
+# # Bold Italic font style
+# bold_italic = { style = "Bold Italic" }  # Inherits family from normal, Default style: Bold Italic
+#
+# # Font size in points
+size = 15  # Default: 11.25
+#
+# # Offset is extra space around each character
+offset = { x = 0, y = 0 }  # Default: x = 0, y = 0
+#
+# # Glyph offset determines the locations of the glyphs within their cells
+glyph_offset = { x = 0, y = 0 }  # Default: x = 0, y = 0
+#
+# # Use built-in font for box drawing characters
+builtin_box_drawing = true  # Default: true
+#
+# ##########
+#

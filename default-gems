@@ -6,3 +6,4 @@ pry-doc
 gem-ctags
 tmuxinator
 rb-readline
+ruby-lsp

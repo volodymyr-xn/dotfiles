@@ -9,6 +9,12 @@ then
   ruby_version="latest"
 fi
 
+# Install rust for yjit support
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Add cargot to PATH
+# export PATH="$HOME/.cargo/bin:$PATH"
+
 RUBY_CONFIGURE_OPTS="--with-jemalloc --enable-yjit" asdf install ruby "$ruby_version"
 
 

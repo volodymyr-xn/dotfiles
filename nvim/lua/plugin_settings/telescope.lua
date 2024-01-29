@@ -1,3 +1,5 @@
+local telescope_global = require("telescope")
+
 require('telescope').setup{
   defaults = {
     vimgrep_arguments = {
@@ -57,7 +59,6 @@ require('telescope').setup{
       i = { ["<esc>"] = require("telescope.actions").close },
     },
   },
-  extensions_list = { "themes", "terms" },
   pickers = {
     -- live_grep = {
     --   additional_args = function()
@@ -84,7 +85,24 @@ require('telescope').setup{
     --   previewer = false
     -- }
   },
+  extensions_list = { "themes", "terms" },
   extensions = {
+    ["ui-select"] = {
+      require("telescope.themes").get_dropdown { }
+      -- pseudo code / specification for writing custom displays, like the one
+      -- for "codeactions"
+      -- specific_opts = {
+      --   [kind] = {
+      --     make_indexed = function(items) -> indexed_items, width,
+      --     make_displayer = function(widths) -> displayer
+      --     make_display = function(displayer) -> function(e)
+      --     make_ordinal = function(e) -> string
+      --   },
+      --   -- for example to disable the custom builtin "codeactions" display
+      --      do the following
+      --   codeactions = false,
+      -- }
+    },
     import = {
       -- Add imports to the top of the file keeping the cursor in place
       insert_at_top = true,
@@ -94,19 +112,17 @@ require('telescope').setup{
     -- implements few functions to support calculating the score.
     fzf = {
       fuzzy = true,                    -- false will only do exact matching
-      -- override_generic_sorter = true,  -- override the generic sorter
-      -- override_file_sorter = true,     -- override the file sorter
+      override_generic_sorter = true,  -- override the generic sorter
+      override_file_sorter = true,     -- override the file sorter
       -- case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
       case_mode = "ignore_case",        -- or "ignore_case" or "respect_case"
     }
   }
 }
-
-local telescope_global = require("telescope")
-
+-- require('telescope').load_extension("ag")
 telescope_global.load_extension('import')
 telescope_global.load_extension('fzf')
--- require('telescope').load_extension("ag")
+telescope_global.load_extension("ui-select")
 
 -- ========================= Telescope VIM mappings ==============================
 local telescope = require('telescope.builtin')
@@ -178,8 +194,6 @@ local find_models = find_reource_in_dir("app/models")
 local find_controllers = find_reource_in_dir("app/controllers")
 local find_css = find_reource_in_dir("app/assets/stylesheets")
 local find_js = find_reource_in_dir("app/assets/javascripts")
--- local find_components = find_reource_in_dir("app/components")
-local find_view_components = find_reource_in_dir("app/view_components")
 
 local resulting_components_dir = nil
 
@@ -197,7 +211,7 @@ elseif (components_dir) then
   resulting_components_dir = components_dir_path
 end
 
-local find_components = find_reource_in_dir(resulting_components_dir)
+local find_view_components = find_reource_in_dir(resulting_components_dir)
 local find_views = find_reource_in_dir("app/views")
 local find_i18n = find_reource_in_dir("config/locales/custom_updates")
 
@@ -206,15 +220,16 @@ local find_i18n = find_reource_in_dir("config/locales/custom_updates")
 vim.keymap.set('n', '<C-p>', find_files_wihout_preview, { noremap = true })
 -- " Search sibling files in same directory as current file(with preview window)
 vim.keymap.set('n', '<Leader>i', find_sibling_files, { noremap = true })
-vim.keymap.set('n', 's', find_sibling_files, { noremap = true })
+vim.keymap.set('n', 'R', telescope.grep_string, { noremap = true })
+-- vim.keymap.set('n', 's', find_sibling_files, { noremap = true })
 
 -- Buffer select
-vim.api.nvim_set_keymap('n', '<Leader>q', ':Buffers!<CR>', {noremap = true})
+-- vim.api.nvim_set_keymap('n', '<Leader>q', ':Buffers!<CR>', {noremap = true})
 
 -- Full text search
 -- vim.keymap.set('n', '<Leader>o', telescope.live_grep, {})
 -- vim.keymap.set('n', '<Leader>p', full_text_search_wihout_preview, {})
--- vim.keymap.set('n', '<Leader>q', full_text_search_only_in_opened_buffers, {})
+vim.keymap.set('n', '<Leader>q', full_text_search_only_in_opened_buffers, {})
 vim.keymap.set('n', 'q', find_changed_files, {})
 -- vim.keymap.set('n', '<Leader>q', full_text_search_only_in_opened_buffers_fzf_version, {})
 
@@ -224,10 +239,12 @@ vim.keymap.set('n', '<Leader>c', find_controllers, {})
 vim.keymap.set('n', '<Leader>j', find_js, {})
 vim.keymap.set('n', '<Leader>s', find_css, {})
 vim.keymap.set('n', '<Leader>f', find_view_components, {})
-vim.keymap.set('n', '<Leader>k', find_components, {})
 vim.keymap.set('n', '<Leader>d', find_views, {})
 vim.keymap.set('n', '<Leader>b', find_i18n, {})
 -- vim.keymap.set('n', '@', find_word, {})
+
+local builtin = require('telescope.builtin')
+-- vim.keymap.set('n', 'gt', builtin.tags, { desc = '[G]o to C[T]ags (telescope)', noremap = true })
 
 -- It enables passing arguments to the grep command, rg examples:
 -- foo → press <C-k> → "foo"  → "foo" -tmd
@@ -235,7 +252,7 @@ vim.keymap.set('n', '<Leader>b', find_i18n, {})
 --no-ignore foo
 -- "foo bar" bazdir
 -- "foo" --iglob **/bar/**
-vim.keymap.set("n", "<leader>z", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>")
+-- vim.keymap.set("n", "<leader>z", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>")
 
 
 -- Define a new highlight group for the border color

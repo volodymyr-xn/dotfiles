@@ -42,7 +42,7 @@ require("neo-tree").setup({
     },
   },
   window = {
-    width = 25,
+    width = 45,
     mappings = {
       ["x"] = "close_node",
       -- ['C'] = 'close_all_subnodes',

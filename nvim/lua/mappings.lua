@@ -26,7 +26,8 @@ vim.api.nvim_set_keymap('n', '<Leader>gb', ':Git blame<CR>', { noremap = true })
 -- vim.api.nvim_set_keymap('n', '<Leader>8', 'cs\'"', { noremap = true })
 
 -- Quit
-vim.api.nvim_set_keymap('n', 'Q', '<C-W>q', { noremap = true })
+-- vim.api.nvim_set_keymap('n', 'Q', '<C-W>q', { noremap = true })
+vim.api.nvim_set_keymap('n', 'Q', ':A<CR>', { noremap = true })
 
 -- Faster search
 -- vim.api.nvim_set_keymap('n', 's', '/', { noremap = true })
@@ -45,7 +46,7 @@ vim.api.nvim_set_keymap('n', '<Leader>n', ':nohl<CR>', { silent = true, noremap 
 
 -- Enter replace command
 -- Global search and replace in quickfix menu
-vim.api.nvim_set_keymap('n', '@', ':%s///g<Left><Left><Left><Left>', { noremap = true })
+vim.api.nvim_set_keymap('n', '@', ':%s///g<Left><Left><Left>', { noremap = true })
 -- vim.api.nvim_set_keymap('n', 's', ':w<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<Leader>r', ":cfdo %s///g | update <c-b><right><right><right><right><right><right><right><right>", { noremap = true })
 
@@ -68,14 +69,13 @@ vim.api.nvim_set_keymap('n', 'e', 'E', { noremap = true })
 -- Easily navigate between tabs
 -- vim.api.nvim_set_keymap('n', 'E', ':tabprev<CR>', { noremap = true })
 -- Tab nad <C-I> in terminal returns the same code
-vim.api.nvim_set_keymap('n', 'R', ':tabnext<CR>', { noremap = true })
 -- Switch between tabs
 vim.api.nvim_set_keymap('n', '<C-q>', ':tabprev<CR>', {noremap = true})
-vim.api.nvim_set_keymap('n', '<C-e>', ':tabnext<CR>', {noremap = true})
+-- vim.api.nvim_set_keymap('n', '<C-e>', ':tabnext<CR>', {noremap = true})
 -- Tabs
--- vim.api.nvim_set_keymap('n', '<C-Left>', ':tabprev<CR>', {noremap = true})
--- vim.api.nvim_set_keymap('n', '<C-Right>', ':tabnext<CR>', {noremap = true})
--- vim.api.nvim_set_keymap('n', 'q', ':tabnext<CR>', {noremap = true})
+vim.api.nvim_set_keymap('n', '<C-Left>', ':tabprev<CR>', {noremap = true})
+vim.api.nvim_set_keymap('n', '<C-Right>', ':tabnext<CR>', {noremap = true})
+vim.api.nvim_set_keymap('n', 's', ':tabnext<CR>', {noremap = true})
 
 -- Copy selected text to system clipboard
 vim.api.nvim_set_keymap('v', 'm', '"+y', { noremap = true })
@@ -104,6 +104,7 @@ vim.api.nvim_set_keymap('i', '<S-Down>', '<ESC>:m .+1<CR>==gi', { noremap = true
 vim.api.nvim_set_keymap('x', 'K', ':m \'<-2<CR>gv=gv', { noremap = true })
 
 -- Toggle folding
+-- vim.api.nvim_set_keymap('n', 'N', 'za', {noremap = true})
 vim.api.nvim_set_keymap('n', 'K', 'za', {noremap = true})
 vim.api.nvim_set_keymap('x', '<2-LeftMouse>', 'za', {noremap = true})
 

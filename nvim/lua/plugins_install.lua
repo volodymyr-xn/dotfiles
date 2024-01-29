@@ -84,6 +84,8 @@ require("lazy").setup({
   -- Enable repeating supported plugin maps with '.'
   "tpope/vim-repeat",
 
+  'alvan/vim-closetag',
+
   -- FZF integration
   {
     "junegunn/fzf.vim",
@@ -97,19 +99,21 @@ require("lazy").setup({
     'nvim-telescope/telescope.nvim',
     dependencies = { 'nvim-lua/plenary.nvim' }
   },
+  "nvim-telescope/telescope-ui-select.nvim",
 
   -- Enabled live grep in dir
   "nvim-telescope/telescope-live-grep-args.nvim",
 
   {
     'nvim-telescope/telescope-fzf-native.nvim',
-    build = 'make'
-    -- build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build'
+    -- build = 'make'
+    build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build'
   },
 
   -- An extension for telescope.nvim that allows you to import modules faster
   -- based on what you've already imported in your project.
-  "piersolenski/telescope-import.nvim",
+  -- "piersolenski/telescope-import.nvim",
+  'piersolenski/telescope-import.nvim',
 
   -- Show changed lines from git
   "airblade/vim-gitgutter",
@@ -126,7 +130,7 @@ require("lazy").setup({
   -- which is automatically created with your content. In a model or controller, a
   -- concern is created, with the appropriate include declaration left behind.
   -- :help rails-:Extract
-  -- "tpope/vim-rails",
+  "tpope/vim-rails",
 
   -- Minimal rbenv support
   "tpope/vim-rbenv",
@@ -187,7 +191,7 @@ require("lazy").setup({
   "pangloss/vim-javascript",
 
   -- JSX syntax support
-  "mxw/vim-jsx",
+  -- "mxw/vim-jsx",
 
   -- Multiple cursors
   "mg979/vim-visual-multi",
@@ -203,15 +207,16 @@ require("lazy").setup({
   -- "windwp/nvim-ts-autotag",
 
   -- Base16 color schemes
-  -- "rose-pine/neovim",
-  -- "EdenEast/nightfox.nvim",
   -- "Mofiqul/dracula.nvim",
   -- "folke/tokyonight.nvim",
+  "rose-pine/neovim",
+  -- "EdenEast/nightfox.nvim",
+  "catppuccin/nvim",
   "tinted-theming/base16-vim",
-  -- "ellisonleao/gruvbox.nvim",
-  -- "rebelot/kanagawa.nvim",
+  "ellisonleao/gruvbox.nvim",
+  "rebelot/kanagawa.nvim",
   "dracula/vim",
-  -- "sainnhe/sonokai",
+  "sainnhe/sonokai",
 
   -- Shows yaml path under cursor,
   -- allows to search by YAML key
@@ -230,6 +235,10 @@ require("lazy").setup({
   -- mason-lspconfig bridges mason.nvim with the lspconfig plugin - making it
   -- easier to use both plugins together.
   "williamboman/mason-lspconfig.nvim",
+
+  -- A neovim plugin that preview code with LSP code actions applied.
+  -- The following backends are available:
+  "aznhe21/actions-preview.nvim",
 
   -- Configs for the Nvim LSP client (:help lsp).(Quickstart configs for Nvim LSP )
   "neovim/nvim-lspconfig",
@@ -323,6 +332,8 @@ require("lazy").setup({
   -- Emmet
   "mattn/emmet-vim",
 
+  "olrtg/nvim-emmet",
+
   -- Indent line guides
   -- "lukas-reineke/indent-blankline.nvim",
 
@@ -337,6 +348,7 @@ require("lazy").setup({
   -- "MarcWeber/vim-addon-mw-utils",
   "L3MON4D3/LuaSnip",
   'saadparwaiz1/cmp_luasnip',
+  -- "rafamadriz/friendly-snippets",
 
   -- Tabline
   "akinsho/bufferline.nvim",
@@ -350,8 +362,21 @@ require("lazy").setup({
   -- Linting syntastic like plugin
   'mfussenegger/nvim-lint',
 
-  -- Use Ollama AI in VIM
-  -- "David-Kunz/gen.nvim",
+  -- Use local Ollama AI in VIM
+  "David-Kunz/gen.nvim",
+
+  -- {
+  --   "huynle/ogpt.nvim",
+  --   event = "VeryLazy",
+  --   config = function()
+  --     require("ogpt").setup()
+  --   end,
+  --   dependencies = {
+  --     "MunifTanjim/nui.nvim",
+  --     "nvim-lua/plenary.nvim",
+  --     "nvim-telescope/telescope.nvim"
+  --   }
+  -- },
 
   -- Formating framework (like null-ls, syntastic, etc)
   "stevearc/conform.nvim",

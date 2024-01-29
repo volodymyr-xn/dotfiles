@@ -74,7 +74,7 @@ local function get_attached_clients()
 	end
 
 	local client_names_str = table.concat(unique_client_names, ", ")
-	local language_servers = string.format("|%s|", client_names_str)
+	local language_servers = string.format("🚥 %s", client_names_str)
 
 	return language_servers
 end
@@ -100,7 +100,8 @@ require('lualine').setup {
     icons_enabled = true,
     -- theme = 'horizon',
     -- theme = 'gruvbox',
-    theme = 'dracula',
+    theme = "catppuccin",
+    -- theme = 'dracula',
     -- component_separators = { left = '|', right = '|'},
     component_separators = { left = '', right = ''},
     -- section_separators = { left = '◤', right = '◢'},

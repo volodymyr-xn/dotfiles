@@ -12,6 +12,7 @@
 -- vim.api.nvim_set_keymap('s', '<C-k>', ':call snipMate#TriggerSnippet()<CR>', {noremap=true})
 -- vim.api.nvim_set_keymap('s', '<silent><C-k>', '<Esc>a<C-R>=snipMate#TriggerSnippet()<CR>', {noremap=true})
 require("luasnip.loaders.from_snipmate").lazy_load()
+require("luasnip.loaders.from_vscode").lazy_load()
 
 -- press <Tab> to expand or jump in a snippet. These can also be mapped separately
 vim.cmd [[ imap <silent><expr> <C-k> luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<C-k>']]

@@ -91,11 +91,12 @@ local luasnip = require('luasnip')
 -- local fuzzy_buffer_source_config =
 --     {
 --       name = 'fuzzy_buffer',
+--         keyword_length = 8,
+--         max_item_count = 3,
 --       option = {
 --         keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%([^-.,;\s]\w*\)*\)]],
---         max_item_count = 7,
+--         -- this option works only for nvim-buffer-fzf
 --         max_matches = 7,
---         keyword_length = 8,
 --         -- get_bufnrs = getVisibleBuffers,
 --         -- -- All buffers
 --         fuzzy_extra_arg = 2,
@@ -139,6 +140,10 @@ cmp.setup({
     },
   },
 
+  completion = {
+    keyword_length = 1
+  },
+
   mapping = cmp.mapping.preset.insert({
     ['<C-b>'] = cmp.mapping.scroll_docs(-4),
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
@@ -172,36 +177,29 @@ cmp.setup({
     end,
 
   }),
-  -- sorting = {
-  --   comparators = {
-  --     -- Locality bonus comparator (distance-based sorting)
-  --     function(...) return cmp_buffer:compare_locality(...) end,
-  --     compare.offset,
-	-- 		compare.exact,
-	-- 		compare.score,
-	-- 		compare.recently_used,
-	-- 		compare.kind,
-	-- 		compare.sort_text,
-	-- 		compare.length,
-	-- 		compare.order
-  --   }
-  -- },
+  sorting = {
+    comparators = {
+			compare.exact,
+      -- Locality bonus comparator (distance-based sorting)
+      function(...) return cmp_buffer:compare_locality(...) end,
+      compare.offset,
+			compare.score,
+			compare.recently_used,
+			compare.kind,
+			compare.sort_text,
+			compare.length,
+			compare.order
+    }
+  },
   sources = cmp.config.sources({
-    { name = "luasnip" },
     {
       name = 'nvim_lsp',
-      option = {
-        max_matches = 5,
-        max_item_count = 5,
-        keyword_length = 1,
-      }
+      max_item_count = 7,
     },
     {
       name = 'buffer',
+      max_item_count = 7,
       option = {
-        max_item_count = 5,
-        max_matches = 5,
-        keyword_length = 1,
         -- get_bufnrs = getVisibleBuffers,
         get_bufnrs = getAllBuffers
       }
@@ -227,7 +225,7 @@ cmp.setup({
   --       })[entry.source.name]
   --       return vim_item
   --     else
-  --       -- From lspkind
+  --       -- Frog lspkind
   --       return lspkind.cmp_format()
   --     end
   --   end
@@ -256,7 +254,6 @@ cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done({ map_char = { tex = 
 --       name = 'buffer',
 --       option = {
 --         max_item_count = 7,
---         max_matches = 3,
 --         keyword_length = 1,
 --         get_bufnrs = getVisibleBuffers,
 --       }
@@ -279,14 +276,13 @@ cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done({ map_char = { tex = 
 cmp.setup.filetype('scss', {
   sources = cmp.config.sources({
     {
-      name = 'nvim_lsp'
+      name = 'nvim_lsp',
+      max_item_count = 5,
     },
     {
       name = 'buffer',
-      -- max_item_count = 5,
+      max_item_count = 5,
       option = {
-        keyword_length = 1,
-        -- Only visible buffers
         get_bufnrs = getVisibleBuffers
       }
     },
