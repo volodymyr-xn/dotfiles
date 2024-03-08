@@ -1,5 +1,5 @@
 [env]
-# term = "xterm-256color"
+term = "xterm-256color"
 
 # ########
 # # FONT #

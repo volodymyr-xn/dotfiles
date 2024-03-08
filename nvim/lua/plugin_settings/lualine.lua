@@ -81,19 +81,19 @@ end
 
 local relative_path_flag = 1
 
-local function is_yaml()
-  return vim.bo.filetype == "yaml"
-end
-
-local yaml_nvim = require("yaml_nvim")
-
-local function get_yaml_key()
-  local yaml_key = yaml_nvim.get_yaml_key()
-  local index = yaml_key:find('%.') -- Find the index of the first dot
-  local cleared_yaml_key = yaml_key:sub(index + 1) -- Extract substring after the first dot
-
-  return cleared_yaml_key
-end
+-- local function is_yaml()
+--   return vim.bo.filetype == "yaml"
+-- end
+--
+-- local yaml_nvim = require("yaml_nvim")
+--
+-- local function get_yaml_key()
+--   local yaml_key = yaml_nvim.get_yaml_key()
+--   local index = yaml_key:find('%.') -- Find the index of the first dot
+--   local cleared_yaml_key = yaml_key:sub(index + 1) -- Extract substring after the first dot
+--
+--   return cleared_yaml_key
+-- end
 
 require('lualine').setup {
   options = {
@@ -132,7 +132,7 @@ require('lualine').setup {
       }
     },
     lualine_x = {
-      { get_yaml_key, cond = is_yaml },
+      -- { get_yaml_key, cond = is_yaml },
       {
         is_curent_window_zoomed,
         color = function(section)

@@ -222,11 +222,11 @@ require("lazy").setup({
   -- allows to search by YAML key
   -- "Einenlum/yaml-revealer",
 
-  "nvim-treesitter/nvim-treesitter",
-  "cuducos/yaml.nvim",
+  -- "nvim-treesitter/nvim-treesitter",
+  -- "cuducos/yaml.nvim",
 
   -- Better yaml folding
-  "pedrohdz/vim-yaml-folds",
+  -- "pedrohdz/vim-yaml-folds",
 
   -- Portable package manager for Neovim that runs everywhere Neovim runs.
   -- easily install and manage LSP servers, DAP servers, linters, and
@@ -275,12 +275,12 @@ require("lazy").setup({
   -- "rebelot/heirline.nvim",
 
   -- Highligh color codes
-  "lilydjwg/colorizer", -- Old plugin, works OK
+  -- "lilydjwg/colorizer", -- Old plugin, works OK
+  'brenoprata10/nvim-highlight-colors',
   -- "NvChad/nvim-colorizer.lua",
   -- A high-performance color highlighter for Neovim which has no
   -- external dependencies! Written in performant Luajit.
   -- "norcalli/nvim-colorizer.lua",
-  -- 'brenoprata10/nvim-highlight-colors',
 
   -- AppArmor syntax highlight
   -- 'ClockworkNet/vim-apparmor')

@@ -220,8 +220,8 @@ vim.g.custom_color_character = "#98c379"
 -- Access colors present in 256 colorspace
 vim.o.termguicolors = true
 
-vim.o.t_8f = [[<Esc>[38;2;%lu;%lu;%lum]]
-vim.o.t_8b = [[<Esc>[48;2;%lu;%lu;%lum]]
+--vim.o.t_8f = [[<Esc>[38;2;%lu;%lu;%lum]]
+--vim.o.t_8b = [[<Esc>[48;2;%lu;%lu;%lum]]
 
 -- Always show statusline
 vim.o.laststatus = 2
