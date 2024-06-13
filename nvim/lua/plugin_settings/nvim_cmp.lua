@@ -180,25 +180,25 @@ cmp.setup({
   sorting = {
     comparators = {
 			compare.exact,
+			compare.score,
       -- Locality bonus comparator (distance-based sorting)
       function(...) return cmp_buffer:compare_locality(...) end,
       compare.offset,
-			compare.score,
 			compare.recently_used,
+			compare.length,
+			compare.order,
 			compare.kind,
 			compare.sort_text,
-			compare.length,
-			compare.order
     }
   },
   sources = cmp.config.sources({
     {
       name = 'nvim_lsp',
-      max_item_count = 7,
+      max_item_count = 8,
     },
     {
       name = 'buffer',
-      max_item_count = 7,
+      max_item_count = 8,
       option = {
         -- get_bufnrs = getVisibleBuffers,
         get_bufnrs = getAllBuffers

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+asdf plugin add golang https://github.com/asdf-community/asdf-golang.git
+
+asdf install golang latest
+
 # TODO set go destination dir
 # timestamp=$(date +%s)
 # go_tmp_binaries_dir=/tmp/go-binaries-$timestamp

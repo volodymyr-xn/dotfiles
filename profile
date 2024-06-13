@@ -101,11 +101,11 @@ export GOPATH="$HOME/.programing_languages/go"
   # Add homebrew to PATH
   #
 
-  if [[ $(uname -m) == 'arm64' ]]; then
-    export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin:$PATH"
-  else
-  export PATH="$PATH:$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin"
-  fi
+# if [[ $(uname -m) == 'arm64' ]]; then
+  # export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin:$PATH"
+# else
+# export PATH="$PATH:$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin"
+# fi
 
   # Old format(homebrew binaries has lowest priority
   # With this i have openssl bug(broken certificates), that prevents me from install
@@ -132,6 +132,8 @@ export GOPATH="$HOME/.programing_languages/go"
 
   # Add local binaries to path
   export PATH="$HOME/.local/bin:$PATH"
+
+  export PATH="${PATH}:/usr/x86_64-w64-mingw32/bin"
 # fi
 
 # Ruby verbose mode
@@ -202,7 +204,6 @@ export GROFF_NO_SGR=1                  # for konsole and gnome-terminal
 
 # Use less as man page viewer
 # export MANPAGER="less"
-
 # Use neovim as man page viewer
 export MANPAGER='nvim +Man!'
 

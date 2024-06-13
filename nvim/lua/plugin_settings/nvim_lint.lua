@@ -1,7 +1,9 @@
 require('lint').linters_by_ft = {
   ruby = {'rubocop'},
   eruby = {'erb_lint'},
-  javascript = {'eslint'}
+  javascript = {'eslint'},
+  bash = {'shellcheck'},
+  sh = {'shellcheck'}
 }
 
 -- vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost", "InsertLeave"}, {

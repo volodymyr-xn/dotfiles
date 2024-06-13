@@ -113,6 +113,7 @@ vim.api.nvim_set_keymap("n", "<C-\\>", "<NOP>", {noremap = true, silent = true})
 -- Toggle NvimTree
 vim.api.nvim_set_keymap("n", "<C-\\>", ":Neotree toggle<CR>", {noremap = true, silent = true})
 vim.api.nvim_set_keymap("n", "<Leader>0", ":Neotree filesystem reveal<CR>", {noremap = true, silent = false})
+vim.api.nvim_set_keymap("n", "=", ":Neotree filesystem reveal<CR>", {noremap = true, silent = false})
 
 
 --

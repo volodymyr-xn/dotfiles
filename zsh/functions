@@ -41,3 +41,4 @@ fvim() {
      rougify {} ||
      cat {}) 2> /dev/null | head -500'
 }
+

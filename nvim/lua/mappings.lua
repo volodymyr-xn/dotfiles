@@ -16,6 +16,8 @@ vim.api.nvim_set_keymap('n', 'H', '^', { noremap = true })
 -- Go to the end of line
 vim.api.nvim_set_keymap('n', 'L', '$', { noremap = true })
 
+vim.api.nvim_set_keymap('n', '*', 'viwy', { silent = true, noremap = true })
+
 -- Run 'git blame' on a selection of code
 vim.api.nvim_set_keymap('n', '<Leader>gb', ':Git blame<CR>', { noremap = true })
 
@@ -69,22 +71,15 @@ vim.api.nvim_set_keymap('n', 'e', 'E', { noremap = true })
 -- Easily navigate between tabs
 -- vim.api.nvim_set_keymap('n', 'E', ':tabprev<CR>', { noremap = true })
 -- Tab nad <C-I> in terminal returns the same code
--- Switch between tabs
-vim.api.nvim_set_keymap('n', '<C-q>', ':tabprev<CR>', {noremap = true})
--- vim.api.nvim_set_keymap('n', '<C-e>', ':tabnext<CR>', {noremap = true})
 -- Tabs
 vim.api.nvim_set_keymap('n', '<C-Left>', ':tabprev<CR>', {noremap = true})
 vim.api.nvim_set_keymap('n', '<C-Right>', ':tabnext<CR>', {noremap = true})
-vim.api.nvim_set_keymap('n', 's', ':tabnext<CR>', {noremap = true})
 
 -- Copy selected text to system clipboard
 vim.api.nvim_set_keymap('v', 'm', '"+y', { noremap = true })
 
 -- Copy current line to system clipboard
-vim.api.nvim_set_keymap('n', '`', '"+yy', { noremap = true })
-
--- Copy relative path of the current file to the clipboard
-vim.api.nvim_set_keymap('n', '`', ':let @+ = expand("%")<CR>', { noremap = true, silent = true })
+-- vim.api.nvim_set_keymap('n', '`', '"+yy', { noremap = true })
 
 -- Easily resize windows
 vim.api.nvim_set_keymap('n', '<', '<C-w>5<', { noremap = true })
@@ -93,25 +88,22 @@ vim.api.nvim_set_keymap('n', '+', '<C-w>5+', { noremap = true })
 vim.api.nvim_set_keymap('n', '_', '<C-w>5-', { noremap = true })
 
 -- Move current line up
-vim.api.nvim_set_keymap('n', '<S-Up>', ':m .-2<CR>==', { noremap = true })
-vim.api.nvim_set_keymap('i', '<S-Up>', '<ESC>:m .-2<CR>==gi', { noremap = true })
+-- vim.api.nvim_set_keymap('v', 'J', ':m .-2<CR>==', { noremap = true })
+-- vim.api.nvim_set_keymap('i', '<S-Up>', '<ESC>:m .-2<CR>==gi', { noremap = true })
 
 -- Move current line down
-vim.api.nvim_set_keymap('n', '<S-Down>', ':m .+1<CR>==', { noremap = true })
-vim.api.nvim_set_keymap('i', '<S-Down>', '<ESC>:m .+1<CR>==gi', { noremap = true })
+-- vim.api.nvim_set_keymap('v', 'K', '<ESC>:m .+1<CR>==gi', { noremap = true })
+-- vim.api.nvim_set_keymap('n', '<S-Down>', ':m .+1<CR>==', { noremap = true })
 
 -- Move multiple lines up in visual mode
-vim.api.nvim_set_keymap('x', 'K', ':m \'<-2<CR>gv=gv', { noremap = true })
+-- vim.api.nvim_set_keymap('x', 'K', ':m \'<-2<CR>gv=gv', { noremap = true })
 
 -- Toggle folding
 -- vim.api.nvim_set_keymap('n', 'N', 'za', {noremap = true})
 vim.api.nvim_set_keymap('n', 'K', 'za', {noremap = true})
-vim.api.nvim_set_keymap('x', '<2-LeftMouse>', 'za', {noremap = true})
-
--- vim.api.nvim_set_keymap('n', '<A-k>', ':tabprev<CR>', {noremap = true})
--- vim.api.nvim_set_keymap('n', '<A-j>', ':tabnext<CR>', {noremap = true})
--- vim.api.nvim_set_keymap('n', '<A-e>', ':tabprev<CR>', {noremap = true})
--- vim.api.nvim_set_keymap('n', '<A-w>', ':tabnext<CR>', {noremap = true})
+-- vim.api.nvim_set_keymap('x', '<2-LeftMouse>', 'za', {noremap = true})
+vim.api.nvim_set_keymap('v', 'K', ":m '<-2<CR>gv=gv", { noremap = true })
+vim.api.nvim_set_keymap('v', 'J', ":m '<-2<CR>gv=gv", { noremap = true })
 
 -- Map text align to tab button in visual mode
 vim.api.nvim_set_keymap('v', '<Tab>', '=', {noremap = true})
@@ -178,11 +170,6 @@ vim.api.nvim_set_keymap('x', 'p', '"_dP', { noremap = true })
 -- Comment line in normal mode
 -- vim.api.nvim_set_keymap('n', '\\', ':TComment<CR>', { noremap = true })
 
-
--- vim.api.nvim_set_keymap('n', '<leader>-', ':vsplit<CR>', { noremap = true })
--- vim.api.nvim_set_keymap('n', 'M', ':vsplit<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', 'M', ':tabnext<CR>', { noremap = true })
-
 -- SUPER EXPERIMENTAL
 function switch_to_next_file()
   -- Get the current buffer's file name
@@ -214,3 +201,11 @@ end
 -- Change surround double quotes to plain quotes
 -- vim.api.nvim_set_keymap('n', '<Leader>b', 'cs\'"', { noremap = true })
 vim.api.nvim_set_keymap('n', '-', 'cs\'\"', {})
+
+-- Copy relative path of the current file to the clipboard
+-- vim.api.nvim_set_keymap('n', '`', ':let @+ = expand("%")<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '`', ':let @+ = @%<CR>', { noremap = true, silent = true })
+
+-- Show LSP/linter/nvim-lint diagnostic for line in popup
+-- vim.keymap.set('n', '<Leader>k', vim.diagnostic.open_float, opts)
+vim.keymap.set('n', '*', vim.diagnostic.open_float, bufopts)

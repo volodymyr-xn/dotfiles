@@ -2,6 +2,9 @@
 
 DOTFILES_DIR="$HOME/dotfiles"
 
+mkdir -p /$HOME/.programing_languages/go/bin
+mkdir -p /$HOME/.programing_languages/rust/cargo/bin
+
 symlink_files_from_dir() {
   target=$1
 
@@ -16,7 +19,7 @@ symlink_files_from_dir() {
 installation_log() {
   local fmt="$1"; shift
   # shellcheck disable=SC2059
-  printf "\n✨ \e[32m(Dotfiles) $fmt\n" "$@"
+  printf "\n✨ \e[32m(Dotfiles) $fmt" "$@"
 }
 
 symlink_to() {
@@ -57,8 +60,10 @@ files_to_symlink="\
 dirs_to_symlink_to_xdg_config="\
   fish bundle docker nvim vim tmux rubocop pry htop"
 
+# dirs_to_symlink_to_xdg_config_linux_only="\
+#   pipewire wireplumber kitty rofi"
 dirs_to_symlink_to_xdg_config_linux_only="\
-  pipewire wireplumber kitty rofi"
+  pipewire"
 
 # fallback_files_to_symlink="rubocop/rubocop.yml tmux/tmux.conf"
 fallback_files_to_symlink="tmux/tmux.conf"
@@ -83,6 +88,11 @@ done
 
 # Symlink configuration directories to config directory
 for dir in $dirs_to_symlink_to_xdg_config; do
+  symlink_directory_to_config_dir $dir
+done
+
+# Symlink configuration directories to config directory
+for dir in $dirs_to_symlink_to_xdg_config_linux_only; do
   symlink_directory_to_config_dir $dir
 done
 

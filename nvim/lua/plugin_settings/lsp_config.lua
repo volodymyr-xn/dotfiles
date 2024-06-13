@@ -2,7 +2,7 @@ require("mason").setup()
 require("mason-lspconfig").setup({
   -- A list of servers to automatically install if they're not already installed. Example: { "rust_analyzer@nightly", "lua_ls" }
   -- This setting has no relation with the `automatic_installation` setting.
-  ensure_installed = { "lua_ls", "tsserver", "ruby_ls", "cssls", "tailwindcss"},
+  ensure_installed = { "lua_ls", "tsserver", "cssls", "tailwindcss"},
   -- Whether servers that are set up (via lspconfig) should be automatically installed if they're not already installed.
   -- This setting has no relation with the `ensure_installed` setting.
   -- Can either be:
@@ -23,9 +23,6 @@ local on_attach = function(client, bufnr)
   local bufopts = { noremap=true, silent=true, buffer=bufnr }
 
   ------------- Good mappings i use ------------------------------------------
-  -- Show LSP/linter diagnostic for line in popup
-  -- vim.keymap.set('n', '<Leader>k', vim.diagnostic.open_float, opts)
-  vim.keymap.set('n', '`', vim.diagnostic.open_float, bufopts)
 
   -- Some help hints about method and classes in popup window
   -- Works well for Ruby and Rails standard library, also for gems
@@ -139,6 +136,8 @@ lspconfig.emmet_language_server.setup({
 
 
 function configureSolargraph()
+  print("Using Solargraph LSP")
+
   lspconfig['solargraph'].setup{
     on_attach = on_attach,
     flags = lsp_flags,
@@ -159,6 +158,8 @@ local enabled_features = {
 }
 
 function configureRubyLS()
+  print("Using ruby_ls LSP")
+
   lspconfig['ruby_ls'].setup({
     on_attach = on_attach,
     flags = lsp_flags,
@@ -196,11 +197,8 @@ if (ruby_major_version and ruby_major_version >= 3) then
   -- Enable Ruby-lsp on Ruby 3.0+ projekts
   -- configureRubyLS()
   configureSolargraph()
-  print("Ruby version: " .. ruby_major_version .. ". Using ruby_ls LSP")
 elseif ruby_major_version then
   configureSolargraph()
-  -- Enable solargraph on "ruby"
-  print("Ruby version: " .. ruby_major_version .. ". Using Solargraph LSP")
 else
   configureSolargraph()
 end

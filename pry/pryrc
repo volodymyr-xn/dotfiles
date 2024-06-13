@@ -5,11 +5,13 @@ require 'readline'
 # Search in pry history with fzf
 # (https://github.com/junegunn/fzf)
 
-def fzf_installed?
-  !`which fzf`&.size&.zero?
+module FZFChecker
+  def self.fzf_installed?
+    !`which fzf`&.size&.zero?
+  end
 end
 
-if fzf_installed? && defined?(RbReadline)
+if FZFChecker.fzf_installed? && defined?(RbReadline)
   def RbReadline.rl_reverse_search_history(_sign, _key)
     command = `cat #{Pry.config.history_file} | fzf --tac |  tr '\n' ' '`
 

@@ -6,16 +6,16 @@
 alacritty_source_tmp_path=/tmp/alacritty-$(timestamp-ms)
 
 # clone alacritty from github
-git clone https://github.com/jwilm/alacritty $alacritty_source_tmp_path
+git clone https://github.com/jwilm/alacritty "$alacritty_source_tmp_path"
 
 # build alacritty from source
-cd $alacritty_source_tmp_path
+cd "$alacritty_source_tmp_path"
 
 cargo build --release
 
-yes | sudo cp -rf $alacritty_source_tmp_path/target/release/alacritty /usr/local/bin/alacritty
+yes | sudo cp -rf "$alacritty_source_tmp_path/target/release/alacritty" /usr/local/bin/alacritty
 
-sudo cp $alacritty_source_tmp_path/extra/logo/alacritty-term.svg /usr/share/pixmaps/Alacritty.svg
-sudo desktop-file-install $alacritty_source_tmp_path/extra/linux/Alacritty.desktop
+sudo cp "$alacritty_source_tmp_path/extra/logo/alacritty-term.svg /usr/share/pixmaps/Alacritty.svg"
+sudo desktop-file-install "$alacritty_source_tmp_path/extra/linux/Alacritty.desktop"
 
 sudo update-desktop-database

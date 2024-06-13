@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
 # Search engine for FZF
-if [[ c-is-mac ]]; then
-  brew install the_silver_searcher
-fi
+# if [[ "$(c-is-mac)" = 'true' ]]; then
+#   brew install the_silver_searcher
+# fi
+c-execute-on-mac 'brew install the_silver_searcher'
 
 # Alternative search engine
 # brew install ack

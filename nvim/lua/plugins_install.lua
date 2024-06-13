@@ -100,7 +100,6 @@ require("lazy").setup({
     dependencies = { 'nvim-lua/plenary.nvim' }
   },
   "nvim-telescope/telescope-ui-select.nvim",
-
   -- Enabled live grep in dir
   "nvim-telescope/telescope-live-grep-args.nvim",
 
@@ -109,7 +108,6 @@ require("lazy").setup({
     -- build = 'make'
     build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build'
   },
-
   -- An extension for telescope.nvim that allows you to import modules faster
   -- based on what you've already imported in your project.
   -- "piersolenski/telescope-import.nvim",
@@ -220,10 +218,12 @@ require("lazy").setup({
 
   -- Shows yaml path under cursor,
   -- allows to search by YAML key
-  -- "Einenlum/yaml-revealer",
+  "Einenlum/yaml-revealer",
 
-  -- "nvim-treesitter/nvim-treesitter",
-  -- "cuducos/yaml.nvim",
+  "nvim-treesitter/nvim-treesitter",
+
+  -- Better yaml
+  "cuducos/yaml.nvim",
 
   -- Better yaml folding
   -- "pedrohdz/vim-yaml-folds",
@@ -331,7 +331,6 @@ require("lazy").setup({
 
   -- Emmet
   "mattn/emmet-vim",
-
   "olrtg/nvim-emmet",
 
   -- Indent line guides
@@ -403,8 +402,25 @@ require("lazy").setup({
         },
       })
     end,
-  }
+  },
 
+  -- A collection of improvements for the quickfix buffer
+  -- "stevearc/qf_helper.nvim",
+
+  {
+    "ray-x/go.nvim",
+    dependencies = {  -- optional packages
+      "ray-x/guihua.lua",
+      "neovim/nvim-lspconfig",
+      "nvim-treesitter/nvim-treesitter",
+    },
+    config = function()
+      require("go").setup()
+    end,
+    event = {"CmdlineEnter"},
+    ft = {"go", 'gomod'},
+    build = ':lua require("go.install").update_all_sync()' -- if you need to install/update all binaries
+  }
 
   -- "rcarriga/nvim-notify",
   -- "stevearc/dressing.nvim",

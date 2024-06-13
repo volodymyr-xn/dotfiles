@@ -1,3 +1,12 @@
+#
+# ##########
+import = [
+# uncomment the flavour you want below:
+# "~/.config/alacritty/catppuccin-latte.toml"
+# "~/.config/alacritty/catppuccin-frappe.toml"
+  "~/.config/alacritty/catppuccin-macchiato.toml"
+# "~/.config/alacritty/catppuccin-mocha.toml"
+]
 [env]
 term = "xterm-256color"
 
@@ -7,13 +16,15 @@ term = "xterm-256color"
 [font]
 #
 # # Normal font style
-normal = { family = "Monego", style = "Bold" }  # Default for Linux/BSD: "monospace", Regular
-#
+# normal = { family = "Monego", style = "Bold" }  # Default for Linux/BSD: "monospace", Regular
+normal = { family = "MesloLGM Nerd Font", style = "Bold" }  # Default for Linux/BSD: "monospace", Regular
+
 # # Bold font style
-# bold = { style = "Bold" }  # Inherits family from normal, Default style: Bold
+bold = {family = "MesloLGM Nerd Font", style = "Bold" }  # Inherits family from normal, Default style: Bold
 #
 # # Italic font style
 # italic = { style = "Italic" }  # Inherits family from normal, Default style: Italic
+italic = {family = "MesloLGM Nerd Font", style = "Bold Italic" }  # Inherits family from normal, Default style: Bold
 #
 # # Bold Italic font style
 # bold_italic = { style = "Bold Italic" }  # Inherits family from normal, Default style: Bold Italic
@@ -22,6 +33,8 @@ normal = { family = "Monego", style = "Bold" }  # Default for Linux/BSD: "monosp
 size = 15  # Default: 11.25
 #
 # # Offset is extra space around each character
+# offset = { x = 0, y = 0 }  # Default: x = 0, y = 0
+# For MesloLGM
 offset = { x = 0, y = 0 }  # Default: x = 0, y = 0
 #
 # # Glyph offset determines the locations of the glyphs within their cells
@@ -29,6 +42,3 @@ glyph_offset = { x = 0, y = 0 }  # Default: x = 0, y = 0
 #
 # # Use built-in font for box drawing characters
 builtin_box_drawing = true  # Default: true
-#
-# ##########
-#

@@ -4,7 +4,7 @@
 # yes | sudo apt-get install ninja-build gettext libtool \
 #      libtool-bin autoconf automake cmake g++ pkg-config unzip
 
-yes | sudo pacman -S libuv libluv libtermkey libvterm luajit lua-lpeg lua-mpack msgpack-c tree-sitter unibilium
+# yes | sudo pacman -S libuv libluv libtermkey libvterm luajit lua-lpeg lua-mpack msgpack-c tree-sitter unibilium
 
 timestamp=$(date +%s)
 neovim_source_dir=/tmp/neovim-$timestamp
@@ -15,10 +15,7 @@ echo "Stating compile process"
 cd $neovim_source_dir
 
 # latest_tag=`git describe --tags $(git rev-list --tags --max-count=1)`
-#
-
 #latest_stable_tag_name="stable"
-
 # git checkout "$latest_stable_tag_name"
 
 # rm -r build
@@ -29,7 +26,7 @@ make \
   -j $(nproc)
 
 make install
-# echo "Remove neovim source directory $neovim"
-# rm -rf $neovim
+echo "Remove neovim source directory $neovim"
+rm -rf $neovim
 
 # brew install neovim

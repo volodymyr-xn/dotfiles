@@ -15,9 +15,9 @@ function ta() {
 }
 
 # Makes deleting a tmux session easier
-function tk() {
-  tmux kill-session -t $1
-}
+# function tk() {
+#   tmux kill-session -t $1
+# }
 
 # Kill stop tmux server and kill all sessions
 alias tka="tmux kill-server"

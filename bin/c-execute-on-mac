@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+if [[ "$(c-is-mac)" = 'true' ]]; then
+  local code="$1"
+  eval "$code"
+fi
+

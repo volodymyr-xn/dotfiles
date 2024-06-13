@@ -3,22 +3,22 @@ local telescope_global = require("telescope")
 require('telescope').setup{
   defaults = {
     vimgrep_arguments = {
-      -- "rg",
-      -- "-L",
-      -- "--color=never",
-      -- "--no-heading",
-      -- "--with-filename",
-      -- "--line-number",
-      -- "--column",
-      -- "--smart-case",
-      "ag",
-      "--nocolor",
-      "--noheading",
-      "--numbers",
+      "rg",
+      "-L",
+      "--color=never",
+      "--no-heading",
+      "--with-filename",
+      "--line-number",
       "--column",
       "--smart-case",
-      "--silent",
-      "--vimgrep"
+      -- "ag",
+      -- "--nocolor",
+      -- "--noheading",
+      -- "--numbers",
+      -- "--column",
+      -- "--smart-case",
+      -- "--silent",
+      -- "--vimgrep"
     },
     -- prompt_prefix = "   ",
     prompt_prefix = " 🔍  ",
@@ -242,8 +242,7 @@ vim.keymap.set('n', '<Leader>f', find_view_components, {})
 vim.keymap.set('n', '<Leader>d', find_views, {})
 vim.keymap.set('n', '<Leader>b', find_i18n, {})
 -- vim.keymap.set('n', '@', find_word, {})
-
-local builtin = require('telescope.builtin')
+-- local builtin = require('telescope.builtin')
 -- vim.keymap.set('n', 'gt', builtin.tags, { desc = '[G]o to C[T]ags (telescope)', noremap = true })
 
 -- It enables passing arguments to the grep command, rg examples:

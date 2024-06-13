@@ -1,6 +1,7 @@
 local yaml_nvim = require("yaml_nvim")
 -- require("yaml_nvim").setup({ ft = { "yaml"} })
 
+
 yaml_nvim.setup({ ft = { "yaml"} })
 
 vim.api.nvim_create_autocmd({ "BufEnter", "CursorMoved" }, {
