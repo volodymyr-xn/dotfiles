@@ -220,7 +220,7 @@ local find_i18n = find_reource_in_dir("config/locales/custom_updates")
 vim.keymap.set('n', '<C-p>', find_files_wihout_preview, { noremap = true })
 -- " Search sibling files in same directory as current file(with preview window)
 vim.keymap.set('n', '<Leader>i', find_sibling_files, { noremap = true })
-vim.keymap.set('n', 'R', telescope.grep_string, { noremap = true })
+-- vim.keymap.set('n', 'R', telescope.grep_string, { noremap = true })
 -- vim.keymap.set('n', 's', find_sibling_files, { noremap = true })
 
 -- Buffer select

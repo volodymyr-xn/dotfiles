@@ -22,15 +22,25 @@ vim.cmd("command! Q q")
 --   echo "Servers reloaded"
 -- endfunction
 
---  function ReloadActiveChromeTab()
---   local currentTerminalEmulator = vim.fn.system("xdotool getactivewindow")
---
---   vim.fn.execute("!" ..
---     "xdotool search --onlyvisible --class Chrome windowfocus key F5" ..
---     " && xdotool windowfocus " .. currentTerminalEmulator)
---
---   print("Chrome tab reloaded")
--- end
+ function ReloadActiveChromeTab()
+  -- local currentTerminalEmulator = vim.fn.system("xdotool getactivewindow")
+  -- vim.fn.execute("!" ..
+  --   "xdotool search --onlyvisible --class Chromium windowfocus key F5" ..
+  --   " && xdotool windowfocus " .. currentTerminalEmulator)
+
+  vim.fn.execute("!" .. "xdotool search --onlyvisible --class Chromium windowfocus key F5")
+
+  local window_id = vim.fn.system("wmctrl -l | grep -i 'Chromium' | head -n 1 | awk '{print $1}'")
+  vim.fn.system("xdotool windowactivate " .. window_id)
+  -- vim.fn.system("xdotool key --window " .. window_id .. " F5")
+
+  print("Chrome tab reloaded")
+end
+
+vim.cmd [[
+  nnoremap R :lua ReloadActiveChromeTab() <CR>
+]]
+
 
 -- Toggle zoom of current window
 function ToggleCurrentWindowZoom()
