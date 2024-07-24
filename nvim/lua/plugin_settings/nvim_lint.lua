@@ -3,7 +3,7 @@ require('lint').linters_by_ft = {
   eruby = {'erb_lint'},
   javascript = {'eslint'},
   bash = {'shellcheck'},
-  sh = {'shellcheck'}
+  -- sh = {'shellcheck'}
 }
 
 -- vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost", "InsertLeave"}, {

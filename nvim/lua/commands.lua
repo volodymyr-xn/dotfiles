@@ -28,11 +28,11 @@ vim.cmd("command! Q q")
   --   "xdotool search --onlyvisible --class Chromium windowfocus key F5" ..
   --   " && xdotool windowfocus " .. currentTerminalEmulator)
 
-  vim.fn.execute("!" .. "xdotool search --onlyvisible --class Chromium windowfocus key F5")
+  vim.fn.execute("!" .. "xdotool search --onlyvisible --class Chromium  windowactivate windowfocus key F5")
 
-  local window_id = vim.fn.system("wmctrl -l | grep -i 'Chromium' | head -n 1 | awk '{print $1}'")
-  vim.fn.system("xdotool windowactivate " .. window_id)
+  -- local window_id = vim.fn.system("wmctrl -l | grep -i 'Chromium' | head -n 1 | awk '{print $1}'")
   -- vim.fn.system("xdotool key --window " .. window_id .. " F5")
+  -- vim.fn.system("xdotool windowactivate " .. window_id)
 
   print("Chrome tab reloaded")
 end
