@@ -67,6 +67,8 @@ require("lazy").setup({
   -- Requires nerdfont: (https://www.nerdfonts.com/)
   "nvim-tree/nvim-web-devicons",
 
+  "ibhagwan/fzf-lua",
+
   -- Comment helper
   -- "tomtom/tcomment_vim",
   -- Alternative plugin:
@@ -338,6 +340,8 @@ require("lazy").setup({
 
   -- Easily navigate between vim and tmux panes
   "christoomey/vim-tmux-navigator",
+
+  "ray-x/navigator.lua",
 
   -- Old broken
   -- 'dcampos/nvim-snippy',

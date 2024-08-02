@@ -21,6 +21,13 @@ local on_attach = function(client, bufnr)
   -- Mappings.
   -- See `:help vim.lsp.*` for documentation on any of the below functions
   local bufopts = { noremap=true, silent=true, buffer=bufnr }
+  -- refresh codelens on TextChanged and InsertLeave as well
+  -- vim.api.nvim_create_autocmd({ 'TextChanged', 'InsertLeave' }, {
+  --   buffer = bufnr,
+  --   callback = vim.lsp.codelens.refresh,
+  -- })
+  -- -- trigger codelens refresh
+  -- vim.api.nvim_exec_autocmds('User', { pattern = 'LspAttached' })
 
   ------------- Good mappings i use ------------------------------------------
 
@@ -42,6 +49,8 @@ local on_attach = function(client, bufnr)
   -- Rename method/variable/constant accross files
   -- REALLY COOL!!!
   vim.keymap.set('n', 'gv', vim.lsp.buf.rename, bufopts)
+
+  vim.keymap.set("n", "ga", "<cmd>lua require('fzf-lua').lsp_code_actions()<cr>")
 
   -- Experimental use Telescope for LSP ---------------------------------------------
   -- keymap.set("n", "gr", "<cmd>Telescope lsp_references<CR>", opts) -- show definition, references
@@ -66,11 +75,16 @@ local on_attach = function(client, bufnr)
   -- vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
   vim.keymap.set('n', '<Leader>gv', vim.lsp.buf.code_action, bufopts)
 
-  -- This mapping conflict with vim-tmux-navigator
-    -- on_attach = function(client, buffer)
-  -- setup_diagnostics(client, buffer)
-    -- end,
+  -- vim.lsp.codelens.refresh()
 end
+
+  -- Initial refresh codelens
+vim.api.nvim_create_autocmd('User', {
+    pattern = 'LspAttached',
+    once = true,
+    callback = vim.lsp.codelens.refresh,
+})
+
 
 local lsp_flags = {
   -- This is the default in Nvim 0.7+
@@ -157,22 +171,23 @@ end
 local enabled_features = {
 }
 
-function configureRubyLS()
-  print("Using ruby_ls LSP")
+function configureRubyLSP()
+  print("Using ruby_lsp LSP")
 
-  lspconfig['ruby_ls'].setup({
+  lspconfig['ruby_lsp'].setup({
     on_attach = on_attach,
     flags = lsp_flags,
     capabilities = capabilities,
     filetypes = { 'ruby', 'eruby'},
     init_options = {
 				enabledFeatures = {
+          -- Disable LSP highlight of code
+          -- "semanticHighlighting",
           "documentSymbol",
           "documentLink",
           "hover",
           "foldingRange",
           "selectionRange",
-          -- "semanticHighlighting",
           "formatting",
           "onTypeFormatting",
           "diagnostic",
@@ -193,11 +208,10 @@ end
 
 local ruby_major_version = readRubyVersion()
 
+-- Enable Ruby-lsp on Ruby 3.0+ projekts
 if (ruby_major_version and ruby_major_version >= 3) then
-  -- Enable Ruby-lsp on Ruby 3.0+ projekts
-  -- configureRubyLS()
-  configureSolargraph()
-elseif ruby_major_version then
+  -- configureRubyLSP()
+-- elseif ruby_major_version then
   configureSolargraph()
 else
   configureSolargraph()
@@ -220,7 +234,7 @@ vim.diagnostic.config({
   -- float = { source = "always", border = border },
   float = { source = "always"},
   -- virtual_text = true,
-  -- signs = true,
+  signs = true,
   virtual_text = {
     source = "always",  -- Or "if_many"
     -- prefix = '⚠️',
@@ -231,13 +245,13 @@ vim.diagnostic.config({
 })
 --
 
--- local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
-local signs = { Error = "⛔", Warn = "⚠️ ", Hint = "💡", Info = "⚠️ " }
--- local signs = { Error = "⛔", Warn = "⚠️ ", Hint = "💡", Info = "ℹ️ " }
-for type, icon in pairs(signs) do
-  local hl = "DiagnosticSign" .. type
-  vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-end
+-- -- local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
+-- local signs = { Error = "⛔", Warn = "⚠️ ", Hint = "💡", Info = "⚠️ " }
+-- -- local signs = { Error = "⛔", Warn = "⚠️ ", Hint = "💡", Info = "ℹ️ " }
+-- for type, icon in pairs(signs) do
+--   local hl = "DiagnosticSign" .. type
+--   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+-- end
 
 ---------------------------------
 -- Auto commands

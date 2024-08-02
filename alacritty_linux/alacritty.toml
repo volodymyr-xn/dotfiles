@@ -4,7 +4,7 @@ import = [
 # uncomment the flavour you want below:
 # "~/.config/alacritty/catppuccin-latte.toml"
 # "~/.config/alacritty/catppuccin-frappe.toml"
-  "~/.config/alacritty/catppuccin-macchiato.toml"
+  "~/.config/alacritty/colorschemes/catppuccin-macchiato.toml"
 # "~/.config/alacritty/catppuccin-mocha.toml"
 ]
 [env]
@@ -42,3 +42,9 @@ glyph_offset = { x = 0, y = 0 }  # Default: x = 0, y = 0
 #
 # # Use built-in font for box drawing characters
 builtin_box_drawing = true  # Default: true
+
+[window]
+startup_mode = "Maximized"
+
+[debug]
+log_level = "Error"

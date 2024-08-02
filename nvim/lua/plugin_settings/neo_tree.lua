@@ -42,7 +42,7 @@ require("neo-tree").setup({
     },
   },
   window = {
-    width = 45,
+    width = 35,
     mappings = {
       ["x"] = "close_node",
       -- ['C'] = 'close_all_subnodes',
@@ -116,7 +116,6 @@ vim.api.nvim_set_keymap("n", "<Leader>0", ":Neotree filesystem reveal<CR>", {nor
 vim.api.nvim_set_keymap("n", "=", ":Neotree filesystem reveal<CR>", {noremap = true, silent = false})
 
 
---
 -- vim.cmd('highlight! NeoTreeGitAdded guifg=#ffffff gui=bold')
 vim.cmd('hi! link NeoTreeGitAdded Type ')
 vim.cmd('hi! link NeoTreeGitUntracked Type')
