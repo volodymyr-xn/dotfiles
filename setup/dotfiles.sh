@@ -74,11 +74,14 @@ fallback_files_to_symlink="tmux/tmux.conf"
 
 installation_log "Installing dotfiles..."
 
+# Install font config
+mkdir -p $HOME/.config/fontconfig/conf.d/
+ln -nsf $HOME/dotfiles/config/fontconfig/conf.d/local.conf $HOME/.config/fontconfig/conf.d/local.conf
+
 # Symlink configuration files located directly in home directory
 for file in $files_to_symlink; do
   symlink_file_to_home_dir $file
 done
-
 
 
 # Symlink fallback files

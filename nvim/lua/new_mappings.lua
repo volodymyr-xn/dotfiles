@@ -8,8 +8,10 @@ vim.api.nvim_set_keymap('n', '<C-e>', ':tabnext<CR>', {noremap = true, silent = 
 vim.api.nvim_set_keymap('n', '<M-k>', ':tabprev<CR>', {noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<M-j>', ':tabnext<CR>', {noremap = true, silent = true })
 
-
 vim.api.nvim_set_keymap('n', 'M', ':vsplit<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', 'H', '^', {noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', 'L', '$', {noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<C-3>', '#', {noremap = true, silent = true })
 -- vim.api.nvim_set_keymap('n', 'M', ':tabnext<CR>', { noremap = true })
 
 -- Re-balance panes

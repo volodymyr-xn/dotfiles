@@ -332,7 +332,10 @@ require("lazy").setup({
   -- "mileszs/ack.vim",
 
   -- Emmet
-  "mattn/emmet-vim",
+  {
+    "mattn/emmet-vim",
+    commit = "3fb2f63799e1922f7647ed9ff3b32154031a76ee"
+  },
   "olrtg/nvim-emmet",
 
   -- Indent line guides

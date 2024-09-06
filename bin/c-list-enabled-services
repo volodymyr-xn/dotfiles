@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# Lists all active systemd services
+
+set -euo pipefail
+
+systemctl list-units --type=service

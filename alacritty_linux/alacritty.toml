@@ -48,3 +48,5 @@ startup_mode = "Maximized"
 
 [debug]
 log_level = "Error"
+# Turn off log completely
+# log_level = "Off"

@@ -781,7 +781,7 @@ nnoremap <Leader>d :FuzzySearchFileInDir app/views<CR>
 nnoremap <Leader>f :FuzzySearchFileInDir app/components<CR>
 
 " Search app/locales by FZF
-nnoremap <Leader>b :FuzzySearchFileInDir config/locales/custom_updates<CR>
+nnoremap <Leader>b :FuzzySearchFileInDir config/locales<CR>
 
 " Search app/controllers by FZF
 noremap <Leader>c :FuzzySearchFileInDir app/controllers<CR>
