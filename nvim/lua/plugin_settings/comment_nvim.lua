@@ -1,12 +1,22 @@
-require('Comment').setup()
+
+-- Comment line in visual mode
+ vim.api.nvim_set_keymap('v', '<Leader><Tab>', 'gc', {})
+--Comment line in normal mode
+ vim.api.nvim_set_keymap('n', '<Leader><Tab>', 'gcc', {})
+
+--  require('nvim-treesitter.configs').setup {
+--   context_commentstring = {
+--     enable = true,
+--     commentary_integration = {
+--       -- change default mapping
+--       Commentary = 'g/',
+--       -- disable default mapping
+--       CommentaryLine = false,
+--     },
+--   },
+-- }
 
 -- vim.api.nvim_set_keymap('v', '\\', 'gc', {})
--- -- Comment line in normal mode
--- vim.api.nvim_set_keymap('n', '\\', 'gcc', {})
---
-vim.api.nvim_set_keymap('v', '<Leader><Tab>', 'gc', {})
--- Comment line in normal mode
-vim.api.nvim_set_keymap('n', '<Leader><Tab>', 'gcc', {})
 
 -- Tcomment
 -- Comment line in visual mode

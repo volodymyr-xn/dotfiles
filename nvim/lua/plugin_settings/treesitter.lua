@@ -1,14 +1,16 @@
 require("nvim-treesitter.configs").setup({
   -- auto_install = true,
+
   ensure_installed = {
     "bash",
     "html",
-    -- "javascript",
+    "javascript",
     "json",
     "lua",
     "regex",
     "go",
-    -- "ruby",
+    "diff",
+    "ruby",
     "elixir",
     "sql",
     "vim",
@@ -23,16 +25,10 @@ require("nvim-treesitter.configs").setup({
   highlight = {
     enable = true,
     -- disable = { "c", "ruby", "javascript" },
-    disable = { "c", "ruby" },
+    disable = { "c", "ruby", 'html'},
     additional_vim_regex_highlighting = true,
   },
 })
 
-
--- -- Treesitter dosen't highlight Ruby symbols correctly
--- -- Highlight ruby symbols the same as classes
--- vim.api.nvim_set_hl(0, "@symbol.ruby", { link = "Type" })
--- -- Highlight regular ruby variables
--- vim.api.nvim_set_hl(0, "@variable.ruby", { link = "@character.special" })
--- -- Highlight ruby instance variables as properties
--- vim.api.nvim_set_hl(0, "@label.ruby", { link = "@property" })
+-- Make eruby filetype to use html treesitter rules
+vim.treesitter.language.register("html", "eruby")

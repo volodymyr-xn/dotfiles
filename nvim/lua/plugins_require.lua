@@ -1,4 +1,4 @@
-require("plugin_settings/nvim_devicons")
+require("plugin_settings/icons")
 -- require("plugin_settings/nvim_tree")
 require("plugin_settings/neo_tree")
 require("plugin_settings/lualine")

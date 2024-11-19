@@ -7,6 +7,7 @@ vim.api.nvim_set_keymap("n", "<Space>", "<NOP>", { noremap = true, silent = true
 
 -- Make space Leader
 vim.g.mapleader = " "
+vim.g.maplocalleader = ","
 
 -- Vim built-in tree-exploer options
 -- vim.g.netrw_banner = 0					-- gets rid of the annoying banner for netrw
@@ -179,6 +180,8 @@ vim.o.clipboard='unnamed'
 
 vim.o.foldenable=false
 vim.o.foldlevelstart=3
+
+vim.o.pumheight=15
 
 vim.opt.inccommand = "split"
 

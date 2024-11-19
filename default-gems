@@ -2,8 +2,8 @@ rails
 pry
 solargraph
 solargraph-rails
-pry-doc
 gem-ctags
+ripper-tags
 tmuxinator
 rb-readline
 ruby-lsp

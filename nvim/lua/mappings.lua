@@ -87,12 +87,17 @@ vim.api.nvim_set_keymap('n', '>', '<C-w>5>', { noremap = true })
 vim.api.nvim_set_keymap('n', '+', '<C-w>5+', { noremap = true })
 vim.api.nvim_set_keymap('n', '_', '<C-w>5-', { noremap = true })
 
+-- Move multiple lines in visual mode
+vim.api.nvim_set_keymap('v', 'K', ":m '<-2<CR>gv=gv", { noremap = true })
+vim.api.nvim_set_keymap('v', 'J', ":m '>+1<CR>gv=gv", { noremap = true })
+-- vim.api.nvim_set_keymap('v', 'J', ':m .+1<CR>==', { noremap = true })
+-- vim.api.nvim_set_keymap('v', 'J', '<ESC>:m .+1<CR>==gi', { noremap = true })
+
 -- Move current line up
 -- vim.api.nvim_set_keymap('v', 'J', ':m .-2<CR>==', { noremap = true })
 -- vim.api.nvim_set_keymap('i', '<S-Up>', '<ESC>:m .-2<CR>==gi', { noremap = true })
 
 -- Move current line down
--- vim.api.nvim_set_keymap('v', 'K', '<ESC>:m .+1<CR>==gi', { noremap = true })
 -- vim.api.nvim_set_keymap('n', '<S-Down>', ':m .+1<CR>==', { noremap = true })
 
 -- Move multiple lines up in visual mode
@@ -102,8 +107,6 @@ vim.api.nvim_set_keymap('n', '_', '<C-w>5-', { noremap = true })
 -- vim.api.nvim_set_keymap('n', 'N', 'za', {noremap = true})
 vim.api.nvim_set_keymap('n', 'K', 'za', {noremap = true})
 -- vim.api.nvim_set_keymap('x', '<2-LeftMouse>', 'za', {noremap = true})
-vim.api.nvim_set_keymap('v', 'K', ":m '<-2<CR>gv=gv", { noremap = true })
-vim.api.nvim_set_keymap('v', 'J', ":m '<-2<CR>gv=gv", { noremap = true })
 
 -- Map text align to tab button in visual mode
 vim.api.nvim_set_keymap('v', '<Tab>', '=', {noremap = true})
@@ -163,12 +166,6 @@ vim.api.nvim_set_keymap('x', 'p', '"_dP', { noremap = true })
 -- Switch to last file
 -- vim.api.nvim_set_keymap('n', 'R', '<c-^>', { noremap = true })
 
--- Tcomment
--- Comment line in visual mode
--- vim.api.nvim_set_keymap('v', '\\', ':TComment<CR>', { noremap = true })
-
--- Comment line in normal mode
--- vim.api.nvim_set_keymap('n', '\\', ':TComment<CR>', { noremap = true })
 
 -- SUPER EXPERIMENTAL
 function switch_to_next_file()
@@ -206,6 +203,3 @@ vim.api.nvim_set_keymap('n', '-', 'cs\'\"', {})
 -- vim.api.nvim_set_keymap('n', '`', ':let @+ = expand("%")<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '`', ':let @+ = @%<CR>', { noremap = true, silent = true })
 
--- Show LSP/linter/nvim-lint diagnostic for line in popup
--- vim.keymap.set('n', '<Leader>k', vim.diagnostic.open_float, opts)
-vim.keymap.set('n', '*', vim.diagnostic.open_float, bufopts)

@@ -19,7 +19,9 @@ require('illuminate').configure({
         -- 'dirvish',
         -- 'fugitive',
         'NvimTree',
-        'Neotree'
+        'Neotree',
+        "html",
+        "eruby"
     },
     -- filetypes_allowlist: filetypes to illuminate, this is overriden by filetypes_denylist
     filetypes_allowlist = {},
@@ -48,6 +50,7 @@ require('illuminate').configure({
 -- augroup END
 -- ]])
 
+-- TODO: improve highlight
 vim.cmd [[
     hi IlluminatedWordText gui=none guibg=#404040
     hi IlluminatedWordRead guibg=#3b415b

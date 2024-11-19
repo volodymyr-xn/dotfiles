@@ -49,7 +49,7 @@ require("lazy").setup({
   },
   -- Filetree
   -- "scrooloose/nerdtree",
-  -- TODO: Replace nerdtree with fern
+  -- TODO Replace nerdtree with fern
   -- "lambdalisue/fern.vim",
 
   -- Nerdtree like file exploer
@@ -67,13 +67,16 @@ require("lazy").setup({
   -- Requires nerdfont: (https://www.nerdfonts.com/)
   "nvim-tree/nvim-web-devicons",
 
+  -- "echasnovski/mini.icons",
+
   "ibhagwan/fzf-lua",
 
-  -- Comment helper
-  -- "tomtom/tcomment_vim",
   -- Alternative plugin:
   -- "preservim/nerdcommenter",
-  "numToStr/Comment.nvim",
+  -- At the time of installing (2024) only tpope/vim-commentary
+  -- works correcly for commenting erb files
+  "tpope/vim-commentary",
+  "JoosepAlviste/nvim-ts-context-commentstring",
 
   "tpope/vim-haml",
 
@@ -86,7 +89,7 @@ require("lazy").setup({
   -- Enable repeating supported plugin maps with '.'
   "tpope/vim-repeat",
 
-  'alvan/vim-closetag',
+  -- 'alvan/vim-closetag',
 
   -- FZF integration
   {
@@ -99,7 +102,8 @@ require("lazy").setup({
 
   {
     'nvim-telescope/telescope.nvim',
-    dependencies = { 'nvim-lua/plenary.nvim' }
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    commit = "cb3f98d935842836cc115e8c9e4b38c1380fbb6b"
   },
   "nvim-telescope/telescope-ui-select.nvim",
   -- Enabled live grep in dir
@@ -155,7 +159,7 @@ require("lazy").setup({
   "tpope/vim-endwise",
 
   -- quoting/parenthesizing made simple
-  "tpope/vim-surround",
+  -- "tpope/vim-surround",
 
   -- Provides additional text objects
   -- Example:
@@ -200,11 +204,7 @@ require("lazy").setup({
   "bfontaine/brewfile.vim",
 
   -- Auto close (X)HTML tags
-  "alvan/vim-closetag",
-
-  -- Use treesitter to autoclose and autorename html tag
-  -- https://github.com/windwp/nvim-ts-autotag
-  -- "windwp/nvim-ts-autotag",
+  -- "alvan/vim-closetag",
 
   -- Base16 color schemes
   -- "Mofiqul/dracula.nvim",
@@ -222,7 +222,9 @@ require("lazy").setup({
   -- allows to search by YAML key
   "Einenlum/yaml-revealer",
 
-  "nvim-treesitter/nvim-treesitter",
+  {
+    "nvim-treesitter/nvim-treesitter"
+  },
 
   -- Better yaml
   "cuducos/yaml.nvim",
@@ -238,12 +240,12 @@ require("lazy").setup({
   -- easier to use both plugins together.
   "williamboman/mason-lspconfig.nvim",
 
+  -- Configs for the Nvim LSP client (:help lsp).(Quickstart configs for Nvim LSP )
+  "neovim/nvim-lspconfig",
+
   -- A neovim plugin that preview code with LSP code actions applied.
   -- The following backends are available:
   "aznhe21/actions-preview.nvim",
-
-  -- Configs for the Nvim LSP client (:help lsp).(Quickstart configs for Nvim LSP )
-  "neovim/nvim-lspconfig",
   "hrsh7th/cmp-nvim-lsp",
   "hrsh7th/cmp-buffer",
   "hrsh7th/cmp-path",
@@ -298,6 +300,8 @@ require("lazy").setup({
 
   -- Auto close quotes, parenthesiz, etc
   "windwp/nvim-autopairs",
+  -- Use treesitter to autoclose and autorename html tag
+  "windwp/nvim-ts-autotag",
   -- Alternative plugin
   -- "echasnovski/mini.pairs",
 
@@ -322,11 +326,9 @@ require("lazy").setup({
   -- Switch between different things
   -- 'AndrewRadev/switch.vim',
 
-  -- Line indentation
-  -- "Yggdroot/indentLine", { 'for': ['html', 'eruby'] }
-
   -- Highlight matching HTML tag
-  -- "leafOfTree/vim-matchtag",
+  -- TODO: check how good is performance
+  'leafOfTree/vim-matchtag',
 
   -- Global search by ack cli util
   -- "mileszs/ack.vim",
@@ -334,9 +336,11 @@ require("lazy").setup({
   -- Emmet
   {
     "mattn/emmet-vim",
-    commit = "3fb2f63799e1922f7647ed9ff3b32154031a76ee"
+    -- TODO: write issue on github regarding bug on main
+    -- commit = "3fb2f63799e1922f7647ed9ff3b32154031a76ee"
   },
-  "olrtg/nvim-emmet",
+  -- LSP for emmet
+  -- "olrtg/nvim-emmet",
 
   -- Indent line guides
   -- "lukas-reineke/indent-blankline.nvim",
@@ -346,10 +350,7 @@ require("lazy").setup({
 
   "ray-x/navigator.lua",
 
-  -- Old broken
-  -- 'dcampos/nvim-snippy',
-  -- addition for nvim-cmp
-  -- 'dcampos/cmp-snippy',
+  -- Old and broken
   -- Snippets
   -- "MarcWeber/vim-addon-mw-utils",
   "L3MON4D3/LuaSnip",
@@ -411,29 +412,42 @@ require("lazy").setup({
     end,
   },
 
+  {
+    "kylechui/nvim-surround",
+    version = "*", -- Use for stability; omit to use `main` branch for the latest features
+    event = "VeryLazy",
+    config = function()
+      require("nvim-surround").setup({
+        -- Configuration here, or leave empty to use defaults
+      })
+    end
+  },
+
+  -- "weizheheng/ror.nvim",
+  -- "jonsmithers/vim-html-template-literals",
+
+  -- Very cool search & replace plugin similar to Atom
+  -- "MagicDuck/grug-far.nvim",
+
   -- A collection of improvements for the quickfix buffer
   -- "stevearc/qf_helper.nvim",
-
-  {
-    "ray-x/go.nvim",
-    dependencies = {  -- optional packages
-      "ray-x/guihua.lua",
-      "neovim/nvim-lspconfig",
-      "nvim-treesitter/nvim-treesitter",
-    },
-    config = function()
-      require("go").setup()
-    end,
-    event = {"CmdlineEnter"},
-    ft = {"go", 'gomod'},
-    build = ':lua require("go.install").update_all_sync()' -- if you need to install/update all binaries
-  }
-
+  -- {
+  --   "ray-x/go.nvim",
+  --   dependencies = {  -- optional packages
+  --     "ray-x/guihua.lua",
+  --     "neovim/nvim-lspconfig",
+  --     "nvim-treesitter/nvim-treesitter",
+  --   },
+  --   config = function()
+  --     require("go").setup()
+  --   end,
+  --   event = {"CmdlineEnter"},
+  --   ft = {"go", 'gomod'},
+  --   build = ':lua require("go.install").update_all_sync()' -- if you need to install/update all binaries
+  -- },
+  -- ======== Tesing area ====================
   -- "rcarriga/nvim-notify",
   -- "stevearc/dressing.nvim",
-  -- "weizheheng/ror.nvim",
-
-  -- "jonsmithers/vim-html-template-literals",
 
   -- ============= CURRENT EXPERIMENTAL PLUGINS ======================
 
@@ -447,13 +461,12 @@ require("lazy").setup({
   -- A plugin to visualise and resolve merge conflicts in neovim
   -- 'akinsho/git-conflict.nvim',
   -- 'rhysd/conflict-marker.vim',
-
   -- 'folke/neodev.nvim',
 
   -- A pretty list for showing diagnostics, references, telescope results,
   -- quickfix and location lists to help you solve all the trouble your code is
   -- causing.
-
+  --
   -- 'MunifTanjim/prettier.nvim',
 
   ----------------- NEXT IN LINE ========================
@@ -477,8 +490,6 @@ require("lazy").setup({
   -- results, quickfix and location list to help you solve all the trouble your
   -- code is causing.
   -- folke/trouble.nvim
-  -- Use treesitter to auto close and auto rename html tag
-  -- windwp/nvim-ts-autotag
   -- kevinhwang91/nvim-hlslens
   -- kevinhwang91/nvim-ufo
   --

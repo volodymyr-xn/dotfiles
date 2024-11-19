@@ -68,8 +68,9 @@ require('telescope').setup{
     buffers = {
       show_all_buffers = true,
       sort_lastused = true,
+      ignore_current_buffer = true,
       -- theme = "dropdown",
-      previewer = false,
+      -- previewer = false,
       mappings = {
         i = {
           ["<c-d>"] = "delete_buffer",
@@ -221,16 +222,18 @@ vim.keymap.set('n', '<C-p>', find_files_wihout_preview, { noremap = true })
 -- " Search sibling files in same directory as current file(with preview window)
 vim.keymap.set('n', '<Leader>i', find_sibling_files, { noremap = true })
 -- vim.keymap.set('n', 'R', telescope.grep_string, { noremap = true })
--- vim.keymap.set('n', 's', find_sibling_files, { noremap = true })
 
 -- Buffer select
--- vim.api.nvim_set_keymap('n', '<Leader>q', ':Buffers!<CR>', {noremap = true})
+vim.api.nvim_set_keymap('n', '<Leader>q', ':Buffers!<CR>', {noremap = true})
 
 -- Full text search
 -- vim.keymap.set('n', '<Leader>o', telescope.live_grep, {})
 -- vim.keymap.set('n', '<Leader>p', full_text_search_wihout_preview, {})
-vim.keymap.set('n', '<Leader>q', full_text_search_only_in_opened_buffers, {})
+-- vim.keymap.set('n', '<Leader>q', full_text_search_only_in_opened_buffers, {})
+
+-- Find changed file
 vim.keymap.set('n', 'q', find_changed_files, {})
+
 -- vim.keymap.set('n', '<Leader>q', full_text_search_only_in_opened_buffers_fzf_version, {})
 
 -- Find in varios Rails projekt dirs

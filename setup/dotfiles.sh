@@ -76,7 +76,9 @@ installation_log "Installing dotfiles..."
 
 # Install font config
 mkdir -p $HOME/.config/fontconfig/conf.d/
+
 ln -nsf $HOME/dotfiles/config/fontconfig/conf.d/local.conf $HOME/.config/fontconfig/conf.d/local.conf
+ln -nsf $HOME/dotfiles/config/fontconfig/fonts.conf $HOME/.config/fontconfig/fonts.conf
 
 # Symlink configuration files located directly in home directory
 for file in $files_to_symlink; do
@@ -110,6 +112,11 @@ fi
 installation_log "-> Linking $HOME/gitignore_global to $HOME/.gitignore"
 ln -nsf "$HOME/gitignore_global" "$HOME/.gitignore"
 
+ln -nsf \
+  "$HOME/dotfiles/oh-my-zsh-themes/avit_custom.zsh-theme" \
+  "$HOME/.oh-my-zsh/custom/themes/"
+
+
 # Create local_profile file
 local_shell_profile_path="$HOME/.local_profile"
 installation_log "Create local shell profile file $local_shell_profile_path"
@@ -126,3 +133,8 @@ ln -nsf "$DOTFILES_DIR/file-templates/*" "$file_templates_destination"
 
 echo ''
 echo "✨✨✨Dotfiles installation complete!🍰✨✨✨"
+
+# zsh
+# source "$HOME/.zshrc"
+exec zsh
+

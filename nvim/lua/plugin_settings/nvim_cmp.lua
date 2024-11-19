@@ -2,10 +2,22 @@ local cmp = require("cmp")
 local cmp_buffer = require('cmp_buffer')
 local compare = require('cmp.config.compare')
 
+-- local function getVisibleBuffers()
+--   local bufs = {}
+--   for _, win in ipairs(vim.api.nvim_list_wins()) do
+--     bufs[vim.api.nvim_win_get_buf(win)] = true
+--   end
+--   return vim.tbl_keys(bufs)
+-- end
+
 local function getVisibleBuffers()
   local bufs = {}
   for _, win in ipairs(vim.api.nvim_list_wins()) do
-    bufs[vim.api.nvim_win_get_buf(win)] = true
+    local buf = vim.api.nvim_win_get_buf(win)
+    local filetype = vim.api.nvim_buf_get_option(buf, 'filetype')
+    if filetype ~= "Neotree" then
+      bufs[buf] = true
+    end
   end
   return vim.tbl_keys(bufs)
 end
@@ -71,23 +83,6 @@ end
 -- local snippy = require('snippy')
 local luasnip = require('luasnip')
 
--- require("copilot").setup({
---   suggestion = {
---     enabled = true,
---     auto_trigger = true,
---     debounce = 75,
---     keymap = {
---       accept = "<c-j>",
---       accept_word = false,
---       accept_line = false,
---       next = "<A-n>",
---       prev = "<A-p>",
---       dismiss = "<C-]>",
---     },
---   },
--- })
-
-
 -- local fuzzy_buffer_source_config =
 --     {
 --       name = 'fuzzy_buffer',
@@ -118,11 +113,9 @@ local border = {
     { "╰", "CmpBorder" },
     { "│", "CmpBorder" },
 }
-
 vim.cmd [[
   hi! link CmpBorder Comment
 ]]
-
 
 cmp.setup({
   snippet = {
@@ -141,12 +134,15 @@ cmp.setup({
   },
 
   completion = {
-    keyword_length = 1
+    keyword_length = 1,
+    completeopt = 'menu,menuone,noinser'
   },
 
   mapping = cmp.mapping.preset.insert({
     ['<C-b>'] = cmp.mapping.scroll_docs(-4),
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    -- ['<C-u>'] = cmp.mapping.scroll_docs(-4),
+    -- ['<C-d>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete(),
     ['<C-e>'] = cmp.mapping.abort(),
     ["<C-b>"] = cmp.mapping.scroll_docs(-4),
@@ -159,11 +155,16 @@ cmp.setup({
       cmp.abort()
       fallback()
     end,
-    ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+    ['<CR>'] = cmp.mapping.confirm({
+      select = true,
+    }),
+    -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
     -- ['<Tab>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
     ["<Tab>"] = function(fallback)
       if cmp.visible() then
         cmp.select_next_item()
+        -- For jumping to 2nd item
+        -- cmp.select_next_item()
       else
         fallback()
       end
@@ -175,71 +176,63 @@ cmp.setup({
         fallback()
       end
     end,
-
   }),
   sorting = {
     comparators = {
 			compare.exact,
-			compare.score,
+      compare.score,
       -- Locality bonus comparator (distance-based sorting)
-      function(...) return cmp_buffer:compare_locality(...) end,
+      -- function(...) return cmp_buffer:compare_locality(...) end,
+      compare.locality,
       compare.offset,
-			compare.recently_used,
-			compare.length,
-			compare.order,
-			compare.kind,
-			compare.sort_text,
+
+			-- compare.sort_text,
+			-- compare.recently_used,
+			-- compare.order,
+      -- locals mean local scope of variables
+			-- compare.locals,
+			-- compare.kind,
+			-- compare.length,
     }
   },
   sources = cmp.config.sources({
     {
-      name = 'nvim_lsp',
-      max_item_count = 8,
-    },
-    {
       name = 'buffer',
-      max_item_count = 8,
+      -- max_item_count = 8,
       option = {
-        -- get_bufnrs = getVisibleBuffers,
-        get_bufnrs = getAllBuffers
+        get_bufnrs = getVisibleBuffers,
+        -- get_bufnrs = getAllBuffers
       }
     },
-    -- {
-    --   name = "rg",
-    --   -- Try it when you feel cmp performance is poor
-    --   keyword_length = 12
-    -- },
+    {
+      name = 'nvim_lsp',
+      -- max_item_count = 3,
+    }
   }),
-  -- formatting = {
-  --   format = function(entry, vim_item)
-  --     local lspkind_ok, lspkind = pcall(require, "lspkind")
-  --     if not lspkind_ok then
-  --       -- From kind_icons array
-  --       vim_item.kind = string.format('%s %s', kind_icons[vim_item.kind], vim_item.kind) -- This concatonates the icons with the name of the item kind
-  --       -- Source
-  --       vim_item.menu = ({
-  --         buffer = "[Buffer]",
-  --         nvim_lsp = "[LSP]",
-  --         luasnip = "[LuaSnip]",
-  --         nvim_lua = "[Lua]",
-  --       })[entry.source.name]
-  --       return vim_item
-  --     else
-  --       -- Frog lspkind
-  --       return lspkind.cmp_format()
-  --     end
-  --   end
+
+  performance = {
+    debounce = 10,
+    throttle = 5,
+    -- debounce = 60,
+    -- throttle = 30,
+    -- fetching_timeout = 500,
+    -- filtering_context_budget = 3,
+    -- confirm_resolve_timeout = 80,
+    -- async_budget = 1,
+    -- max_view_entries = 200,
+  },
+
   formatting = {
     format = lspkind.cmp_format({
       mode = "symbol_text",
-      -- menu = ({
-      --   buffer = "[Buffer]",
-      --   nvim_lsp = "[LSP]",
-      --   luasnip = "[LuaSnip]",
-      --   nvim_lua = "[Lua]",
-      --   latex_symbols = "[Latex]",
-      -- })
-    }),
+      menu = ({
+        buffer = "[Buffer]",
+        nvim_lsp = "[LSP]",
+        luasnip = "[LuaSnip]",
+        nvim_lua = "[Lua]",
+        latex_symbols = "[Latex]",
+      })
+    })
   }
 })
 
@@ -274,6 +267,11 @@ cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done({ map_char = { tex = 
 -- })
 
 cmp.setup.filetype('scss', {
+  -- completion = {
+  --   keyword_length = 1,
+  --   completeopt = 'menu,menuone'
+  -- },
+
   sources = cmp.config.sources({
     {
       name = 'nvim_lsp',
@@ -339,7 +337,14 @@ cmp.setup.filetype('scss', {
 
 -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
 cmp.setup.cmdline(':', {
-  mapping = cmp.mapping.preset.cmdline(),
+  mapping = cmp.mapping.preset.cmdline({
+    ['<CR>'] = {
+      c = cmp.mapping.confirm({ select = false }),
+    }
+  }),
+  completion = {
+    completeopt = 'menu,menuone,noselect,noinsert',
+  },
   sources = cmp.config.sources({
     { name = 'path' }
   }, {
@@ -348,7 +353,7 @@ cmp.setup.cmdline(':', {
 })
 
 -- gray
-vim.api.nvim_set_hl(0, 'CmpItemAbbrDeprecated', { bg='NONE', strikethrough=true, fg='#808080' })
+vim.api.nvim_set_hl(0, 'CmpItemAbbrDeprecated', { bg='NONE', strikethrough=true, fg='white' })
 -- blue
 vim.api.nvim_set_hl(0, 'CmpItemAbbrMatch', { bg='NONE', fg='#569CD6' })
 vim.api.nvim_set_hl(0, 'CmpItemAbbrMatchFuzzy', { link='CmpIntemAbbrMatch' })
@@ -363,3 +368,19 @@ vim.api.nvim_set_hl(0, 'CmpItemKindMethod', { link='CmpItemKindFunction' })
 vim.api.nvim_set_hl(0, 'CmpItemKindKeyword', { bg='NONE', fg='#D4D4D4' })
 vim.api.nvim_set_hl(0, 'CmpItemKindProperty', { link='CmpItemKindKeyword' })
 vim.api.nvim_set_hl(0, 'CmpItemKindUnit', { link='CmpItemKindKeyword' })
+
+-- require("copilot").setup({
+--   suggestion = {
+--     enabled = true,
+--     auto_trigger = true,
+--     debounce = 75,
+--     keymap = {
+--       accept = "<c-j>",
+--       accept_word = false,
+--       accept_line = false,
+--       next = "<A-n>",
+--       prev = "<A-p>",
+--       dismiss = "<C-]>",
+--     },
+--   },
+-- })

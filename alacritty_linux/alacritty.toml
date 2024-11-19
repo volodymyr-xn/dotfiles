@@ -1,5 +1,6 @@
 #
 # ##########
+[general]
 import = [
 # uncomment the flavour you want below:
 # "~/.config/alacritty/catppuccin-latte.toml"
@@ -16,15 +17,26 @@ term = "xterm-256color"
 [font]
 #
 # # Normal font style
+# normal = {family = "MesloLGM Nerd Font", style = "Bold" }  # Inherits family from normal, Default style: Bold
+# normal = { family = "Jet Brains Mono", style = "SemiBold" }  # Default for Linux/BSD: "monospace", Regular
+# normal = { family = "MonacoB Semi", style = "Regular" }  # Default for Linux/BSD: "monospace", Regular
 # normal = { family = "Monego", style = "Bold" }  # Default for Linux/BSD: "monospace", Regular
-normal = { family = "MesloLGM Nerd Font", style = "Bold" }  # Default for Linux/BSD: "monospace", Regular
+# normal = { family = "MesloLGLDZ Nerd Font", style = "Bold" }
+# normal = { family = "CaskaydiaMono Nerd Font", style = "Regular" }
+normal = { family = "CaskaydiaMono Nerd Font", style = "SemiBold" }
+
+# # Offset is extra space around each character
+# offset = { x = 0, y = 0 }  # Default: x = 0, y = 0
+offset = { x = 0, y = 3 }  # Default: x = 0, y = 0
 
 # # Bold font style
-bold = {family = "MesloLGM Nerd Font", style = "Bold" }  # Inherits family from normal, Default style: Bold
+# bold = {family = "MesloLGM Nerd Font", style = "Bold" }  # Inherits family from normal, Default style: Bold
+bold = { family = "CaskaydiaMono Nerd Font", style = "Bold" }
 #
 # # Italic font style
 # italic = { style = "Italic" }  # Inherits family from normal, Default style: Italic
-italic = {family = "MesloLGM Nerd Font", style = "Bold Italic" }  # Inherits family from normal, Default style: Bold
+# italic = {family = "MesloLGM Nerd Font", style = "Bold Italic" }  # Inherits family from normal, Default style: Bold
+italic = { family = "CaskaydiaMono Nerd Font", style = "Italic" }
 #
 # # Bold Italic font style
 # bold_italic = { style = "Bold Italic" }  # Inherits family from normal, Default style: Bold Italic
@@ -32,10 +44,6 @@ italic = {family = "MesloLGM Nerd Font", style = "Bold Italic" }  # Inherits fam
 # # Font size in points
 size = 15  # Default: 11.25
 #
-# # Offset is extra space around each character
-# offset = { x = 0, y = 0 }  # Default: x = 0, y = 0
-# For MesloLGM
-offset = { x = 0, y = 0 }  # Default: x = 0, y = 0
 #
 # # Glyph offset determines the locations of the glyphs within their cells
 glyph_offset = { x = 0, y = 0 }  # Default: x = 0, y = 0

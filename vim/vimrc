@@ -15,7 +15,7 @@ Plug('scrooloose/nerdtree')
 " Plug('lambdalisue/fern.vim')
 
 " Comments
-Plug('tomtom/tcomment_vim')
+Plug('tpope/vim-commentary')
 
 " Perform all your vim insert mode completions with Tab
 " Plug('ervandew/supertab')
@@ -177,7 +177,7 @@ Plug('garbas/vim-snipmate')
 " https://github.com/neoclide/coc-snippets
 
 " Automatically highlighting other uses of the current word under the cursor
-Plug('RRethy/vim-illuminate')
+" Plug('RRethy/vim-illuminate')
 
 " Better yaml folding
 Plug 'pedrohdz/vim-yaml-folds'
@@ -715,10 +715,10 @@ xnoremap p "_dP
 
 " Tcomment
 " Comment line in visual mode
-vnoremap \ :TComment<CR>
+vnoremap <Leader><Tab> gcc<CR>
 
 " Comment line in normal mode
-nnoremap \ :TComment<CR>
+nnoremap <Leader><Tab> gcc<CR>
 
 
 "=========================================================================

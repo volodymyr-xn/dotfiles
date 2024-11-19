@@ -140,12 +140,12 @@ snippet in
 		${0}
 	endf
 
-snippet cla
-  class ` luaeval("GenerateRubyClassNameFromCurrentFilename()")`
-     ${0}
+snippet c
+  class ` luaeval("GenerateRubyClassNameFromCurrentFilename()")` < ${1}
+    ${0}
   end
 
-snippet s
+snippet sr
   class ` luaeval("GenerateRubyClassNameFromCurrentFilename()")` < BaseService
     def initialize(${2})
       ${1}
@@ -163,31 +163,26 @@ snippet sh
     end
   end
 
-snippet con
+snippet cn
   class `luaeval("GenerateRubyClassNameFromCurrentFilename()")` < ApplicationController
-     ${0}
+    ${0}
   end
 
-snippet ct
-  class `luaeval("GenerateRubyClassNameFromCurrentFilename()")` < ApplicationController
-     ${0}
-  end
-
-snippet c
+snippet cm
   class `luaeval("GenerateRubyClassNameFromCurrentFilename()")` < `luaeval("RailsViewComponenbaseClassName()")`
     def initialize(${1})
       ${0}
     end
   end
 
-snippet ch
-	class ${1} < ApplicationViewComponent
-		def initialize(${2})
-			${0}
-		end
-	end
+# snippet ch
+# 	class ${1} < ApplicationViewComponent
+# 		def initialize(${2})
+# 			${0}
+# 		end
+# 	end
 
-snippet mod
+snippet md
   class `luaeval("GenerateRubyClassNameFromCurrentFilename()")` < ApplicationRecord
-     ${0}
+    ${0}
   end

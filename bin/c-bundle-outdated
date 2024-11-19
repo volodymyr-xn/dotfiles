@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+bundle outdated --only-explicit --groups

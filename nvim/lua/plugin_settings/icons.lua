@@ -1,5 +1,4 @@
-
--- ====================== Nvim devicons settings ==========================
+-- -- ====================== Nvim devicons settings ==========================
 require('nvim-web-devicons').setup {
 --  -- your personnal icons can go here (to override)
 --  -- you can specify color or cterm_color instead of specifying both of them
@@ -22,16 +21,15 @@ require('nvim-web-devicons').setup {
 --  -- different tables, first by filename, and if not found by extension; this
 --  -- prevents cases when file doesn't have any extension but still gets some icon
 --  -- because its name happened to match some extension (default to false)
---  strict = true,
+ strict = true,
  -- same as `override` but specifically for overrides by filename
  -- takes effect when `strict` is true
  override_by_filename = {
-   -- ["^Gemfile$"] = {
-   --   icon = "",
-   --   color = "#701516",
-   --   cterm_color = "52",
-   --   name = "gemfile",
-   -- },
+   ["Gemfile"] = {
+     icon = "",
+     color = "#e95678",
+     name = "Gemfile",
+   },
   [".gitignore"] = {
     icon = "",
     color = "#f1502f",
@@ -42,8 +40,8 @@ require('nvim-web-devicons').setup {
  -- takes effect when `strict` is true
  override_by_extension = {
   ["rb"] = {
-    -- icon = "",
-    icon = "",
+    icon = "",
+    -- icon = "",
     color = "#e95678",
     name = "Ruby"
   },
@@ -55,9 +53,39 @@ require('nvim-web-devicons').setup {
   },
 
   ["rake"] = {
-    icon = "",
+    icon = "",
     color = "#ce54e9",
     name = "Rake"
   }
  }
 }
+
+-- -- ====================== mini.icons settings ==========================
+-- require('mini.icons').setup({
+--   -- default   = {},
+--   -- directory = {},
+--   extension = {
+--     ['my.ext'] = { glyph = '󰻲', hl = 'MiniIconsRed' },
+--   },
+--   file = {
+--     ["Gemfile.lock"] = { glyph = "", hl = "MiniIconsRed" },
+--   },
+--   filetype = {
+--     -- eruby = { glyph = "", hl = "MiniIconsBlue"}
+--     eruby = { glyph = "", hl = "MiniIconsAzure"}
+--   },
+--   -- lsp       = {},
+--   -- os        = {},
+-- })
+--
+-- -- Change highlight for MiniIconsRed group which used for Ruby(but not only)
+-- vim.cmd [[
+--  hi MiniIconsRed guifg=#e95678
+-- ]]
+--
+-- MiniIcons.mock_nvim_web_devicons()
+
+
+
+-- MiniDeps.later(MiniIcons.tweak_lsp_kind)
+

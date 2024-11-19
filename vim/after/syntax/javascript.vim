@@ -136,8 +136,8 @@ hi! link jsExtendsKeyword Statement
 " call Highlight('jsArrowFunctionDeclaration', g:custom_color_special)
 hi! link jsArrowFunctionDeclaration Special
 
-" hi jsThis gui=italic cterm=italic guifg=#e5c07b
-call ItalicHighlight('jsThis', g:custom_color_character)
+hi jsThis gui=italic cterm=italic guifg=#e5c07b
+" call ItalicHighlight('jsThis', g:custom_color_character)
 
 augroup html_in_js
   autocmd!
