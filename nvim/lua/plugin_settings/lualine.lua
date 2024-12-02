@@ -147,7 +147,7 @@ require('lualine').setup {
         end
     },
     'diagnostics',
-      { get_attached_clients, color = { gui = "bold" } },
+      -- { get_attached_clients, color = { gui = "bold" } },
       -- 'fileformat',
       'filetype'
     },

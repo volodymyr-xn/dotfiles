@@ -31,4 +31,4 @@ require("nvim-treesitter.configs").setup({
 })
 
 -- Make eruby filetype to use html treesitter rules
-vim.treesitter.language.register("html", "eruby")
+-- vim.treesitter.language.register("html", "eruby")

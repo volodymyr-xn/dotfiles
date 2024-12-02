@@ -179,11 +179,11 @@ cmp.setup({
   }),
   sorting = {
     comparators = {
-			compare.exact,
       compare.score,
+      compare.locality,
+			compare.exact,
       -- Locality bonus comparator (distance-based sorting)
       -- function(...) return cmp_buffer:compare_locality(...) end,
-      compare.locality,
       compare.offset,
 
 			-- compare.sort_text,
@@ -206,7 +206,6 @@ cmp.setup({
     },
     {
       name = 'nvim_lsp',
-      -- max_item_count = 3,
     }
   }),
 

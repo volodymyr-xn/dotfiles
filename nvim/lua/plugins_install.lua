@@ -65,9 +65,9 @@ require("lazy").setup({
 
   -- Provides devicons
   -- Requires nerdfont: (https://www.nerdfonts.com/)
-  "nvim-tree/nvim-web-devicons",
+  -- "nvim-tree/nvim-web-devicons",
 
-  -- "echasnovski/mini.icons",
+  "echasnovski/mini.icons",
 
   "ibhagwan/fzf-lua",
 
@@ -120,9 +120,9 @@ require("lazy").setup({
   'piersolenski/telescope-import.nvim',
 
   -- Show changed lines from git
-  "airblade/vim-gitgutter",
+  -- "airblade/vim-gitgutter",
   -- TODO: Consider switch to
-  -- 'lewis6991/gitsigns.nvim',
+  'lewis6991/gitsigns.nvim',
 
   -- Lightweight support for Ruby's Bundler
   -- "tpope/vim-bundler",
@@ -337,7 +337,7 @@ require("lazy").setup({
   {
     "mattn/emmet-vim",
     -- TODO: write issue on github regarding bug on main
-    -- commit = "3fb2f63799e1922f7647ed9ff3b32154031a76ee"
+    commit = "3fb2f63799e1922f7647ed9ff3b32154031a76ee"
   },
   -- LSP for emmet
   -- "olrtg/nvim-emmet",

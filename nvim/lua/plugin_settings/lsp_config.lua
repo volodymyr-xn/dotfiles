@@ -20,14 +20,6 @@ local lspconfig = require('lspconfig')
 -- lspconfig.ruby_lsp.setup({
 --   capabilities = capabilities
 -- })
--- vim.keymap.set("n", "K", vim.lsp.buf.hover, {})
--- vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition, {})
--- vim.keymap.set("n", "<leader>gr", vim.lsp.buf.references, {})
--- vim.keymap.set("n", "<leader>gf", vim.lsp.buf.format, {})
--- vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, {})
--- vim.keymap.set("n", "ca", vim.lsp.buf.code_action, {})
--- vim.keymap.set("n", "ga", vim.lsp.buf.code_action, {})
--- vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, {})
 -- ====================================
 
 -- See `:help vim.lsp.*` for documentation on any of the below functions
@@ -58,18 +50,6 @@ vim.keymap.set('n', 'ga', vim.lsp.buf.code_action, {})
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
 local on_attach = function(client, bufnr)
-  -- Experimental use Telescope for LSP ---------------------------------------------
-  -- keymap.set("n", "gr", "<cmd>Telescope lsp_references<CR>", opts) -- show definition, references
-  -- keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<CR>", opts) -- see definition and make edits in window
-  -- keymap.set("n", "<leader>D", "<cmd>Telescope diagnostics bufnr=0<CR>", opts) -- show  diagnostics for file
-  -- keymap.set("n", "<leader>rn", ":IncRename ", opts) -- smart rename
-  -- keymap.set("n", "[d", vim.diagnostic.goto_prev, opts) -- jump to previous diagnostic in buffer
-  -- keymap.set("n", "]d", vim.diagnostic.goto_next, opts) -- jump to next diagnostic in buffer
-
-  --- Doesnt work for Ruby with Solargraph -----
-  -- vim.keymap.set('n', 'gD', vim.lsp.buf.type_definition, bufopts)
-  -- vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
-  -- vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
   -- vim.lsp.codelens.refresh()
 end
 
@@ -79,7 +59,6 @@ end
 --     once = true,
 --     callback = vim.lsp.codelens.refresh,
 -- })
-
 
 local lsp_flags = {
   -- This is the default in Nvim 0.7+
