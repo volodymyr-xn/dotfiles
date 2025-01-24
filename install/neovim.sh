@@ -4,7 +4,7 @@
 # yes | sudo apt-get install ninja-build gettext libtool \
 #      libtool-bin autoconf automake cmake g++ pkg-config unzip
 
-# yes | sudo pacman -S libuv libluv libtermkey libvterm luajit lua-lpeg lua-mpack msgpack-c tree-sitter unibilium
+yes | sudo pacman -S libuv libluv libtermkey libvterm luajit lua-lpeg lua-mpack msgpack-c tree-sitter unibilium
 
 timestamp=$(date +%s)
 neovim_source_dir=/tmp/neovim-$timestamp

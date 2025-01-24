@@ -98,8 +98,10 @@ vim.o.smartindent = true
 
 -- Performance
 vim.cmd [[
-  syntax sync maxlines=500
-  set synmaxcol=150
+  " syntax sync maxlines=500
+  syntax sync maxlines=800
+  " set synmaxcol=150
+  set synmaxcol=200
 ]]
 
 -- Allow backspace to delete end of line, indent and start of line characters

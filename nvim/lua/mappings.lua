@@ -119,7 +119,7 @@ vim.api.nvim_set_keymap('n', '"', '<C-W>|<C-W>_', {noremap = true})
 vim.api.nvim_set_keymap('n', '=', '<C-W>=', {noremap = true})
 
 -- Toggle current window zoom
-vim.api.nvim_set_keymap('n', 'm', ':ToggleCurrentWindowZoom<CR>', {noremap = true})
+vim.api.nvim_set_keymap('n', 'm', ':ToggleCurrentWindowZoom<CR>', { noremap = true, silent = true })
 
 -- Select tab by number
 -- 'ctrl-m 1' - selects first tab, etc
@@ -201,5 +201,4 @@ vim.api.nvim_set_keymap('n', '-', 'cs\'\"', {})
 
 -- Copy relative path of the current file to the clipboard
 -- vim.api.nvim_set_keymap('n', '`', ':let @+ = expand("%")<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '`', ':let @+ = @%<CR>', { noremap = true, silent = true })
-
+vim.api.nvim_set_keymap('n', '`', ':CopyCurrentFileRelativePathToClipboard<CR>', { noremap = true })

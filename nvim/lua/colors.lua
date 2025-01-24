@@ -76,10 +76,11 @@ require("catppuccin").setup {
         all = {
             text = "#ffffff",
             -- base = "#1f2233",
-            -- base = "#212433",
+            -- Darker and bluer
+            base = "#212433",
             -- base = "#262833",
             -- base = "#242533"
-            base = "#252633"
+            -- base = "#252633"
 -- # background = "#24273a"
         },
         frappe = {},

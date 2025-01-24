@@ -35,13 +35,13 @@ vim.keymap.set('n', '<Leader>=', vim.lsp.buf.format, bufopts)
 -- REALLY COOL!!!
 vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
 
--- Find references of variable/constant/class/method accross files
--- REALLY COOL!!!
+-- -- Find references of variable/constant/class/method accross files
+-- -- REALLY COOL!!!
 vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
 
--- Rename method/variable/constant accross files
--- REALLY COOL!!!
-vim.keymap.set('n', 'gv', vim.lsp.buf.rename, bufopts)
+-- -- Rename method/variable/constant accross files
+-- -- REALLY COOL!!!
+vim.keymap.set('n', 'gb', vim.lsp.buf.rename, bufopts)
 
 vim.keymap.set('n', 'ga', vim.lsp.buf.code_action, {})
 

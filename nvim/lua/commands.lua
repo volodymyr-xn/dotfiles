@@ -4,6 +4,9 @@
 -- Toggles current window zoom
 vim.cmd("command! ToggleCurrentWindowZoom lua ToggleCurrentWindowZoom()")
 
+-- CopyCurrentFileRelativePathToClipboard
+vim.cmd("command! CopyCurrentFileRelativePathToClipboard lua CopyCurrentFileRelativePathToClipboard()")
+
 -- Fix save file typos
 vim.cmd("command! W w")
 vim.cmd("command! WQ wq")
@@ -60,3 +63,8 @@ function ToggleCurrentWindowZoom()
   end
 end
 
+function CopyCurrentFileRelativePathToClipboard()
+  vim.cmd("let @+ = @%")
+  local clipboard_content = vim.fn.getreg('+')
+  vim.api.nvim_command('echohl Type | echo "Path ' .. clipboard_content .. ' copied!" | echohl None')
+end

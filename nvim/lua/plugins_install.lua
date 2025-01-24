@@ -154,6 +154,17 @@ require("lazy").setup({
   -- Make text objects with various ruby block structures.
   -- TODO: replace with NEOVIM equvivalent
   -- "rhysd/vim-textobj-ruby",
+  {
+    "chrisgrieser/nvim-various-textobjs",
+    event = "VeryLazy",
+    opts = {
+      keymaps = {
+        useDefaults = true
+      }
+    }
+  },
+
+  "michaeljsmith/vim-indent-object",
 
   -- Automaticaly add end in ruby scrips
   "tpope/vim-endwise",
@@ -371,6 +382,18 @@ require("lazy").setup({
 
   -- Use local Ollama AI in VIM
   "David-Kunz/gen.nvim",
+
+  -- For some reason right now(24.01.2025) this plugin works very slowly
+  -- with ollama if you compare it to other similar plugins like gen.nvim
+  -- Try it again at the end of 2025 or in 2026 year
+  -- {
+  --   "olimorris/codecompanion.nvim",
+  --   dependencies = {
+  --     "nvim-lua/plenary.nvim",
+  --     "nvim-treesitter/nvim-treesitter",
+  --   },
+  --   config = true
+  -- },
 
   -- {
   --   "huynle/ogpt.nvim",

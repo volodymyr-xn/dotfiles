@@ -91,6 +91,8 @@ Plug('kana/vim-textobj-user')
 " Make text objects with various ruby block structures.
 Plug('rhysd/vim-textobj-ruby')
 
+Plug('michaeljsmith/vim-indent-object')
+
 " Automaticaly add end in ruby scrips
 Plug('tpope/vim-endwise')
 

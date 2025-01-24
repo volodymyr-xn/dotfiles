@@ -1,7 +1,9 @@
 require('gen').setup({
   -- model = "mistral:instruct", -- The default model to use. (very good)
-  -- model = "deepseek-coder:33b-instruct",
-  model = "mixtral",
+  -- model = "llama3.2",
+  -- model = "llama3.2:3b-instruct-q8_0",
+  model = "deepseek-coder-v2",
+  host = os.getenv("OLLAMA_API_HOST"),
   -- TO do models
   -- model = "deepseek-coder:6.7b-instruct", --(7b model)
   -- model = "magicoder:7b-s-cl", -- (todo)
@@ -13,7 +15,7 @@ require('gen').setup({
   no_auto_close = false, -- Never closes the window automatically.
   -- init = function(options) pcall(io.popen, "ollama serve > /dev/null 2>&1 &") end,
   -- Function to initialize Ollama
-  command = "curl --silent --no-buffer -X POST http://localhost:11434/api/generate -d $body",
+  --command = "curl --silent --no-buffer -X POST http://localhost:11434/api/generate -d $body",
   -- The command for the Ollama service. You can use placeholders $prompt, $model and $body (shellescaped).
   -- This can also be a lua function returning a command string, with options as the input parameter.
   -- The executed command must return a JSON object with { response, context }

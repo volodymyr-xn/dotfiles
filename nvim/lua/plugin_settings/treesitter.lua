@@ -27,8 +27,5 @@ require("nvim-treesitter.configs").setup({
     -- disable = { "c", "ruby", "javascript" },
     disable = { "c", "ruby", 'html'},
     additional_vim_regex_highlighting = true,
-  },
-})
-
--- Make eruby filetype to use html treesitter rules
--- vim.treesitter.language.register("html", "eruby")
+  }
+ })

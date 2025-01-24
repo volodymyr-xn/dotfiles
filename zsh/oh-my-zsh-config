@@ -1,0 +1,23 @@
+# vim: syntax=bash
+# nvim: syntax=bash
+
+export ZSH=$HOME/.oh-my-zsh
+#
+DISABLE_UPDATE_PROMPT=true
+DISABLE_AUTO_UPDATE=true
+COMPLETION_WAITING_DOTS="true"
+
+ZSH_THEME="avit_custom"
+# ZSH_THEME="jispwoso"
+
+plugins=(git vi-mode asdf gitfast)
+#
+source $ZSH/oh-my-zsh.sh
+
+# MODE_INDICATOR="%F{yellow}NORMAL%f"
+MODE_INDICATOR="%K{yellow}%F{black}%B NORMAL %b%f%k"
+# INSERT_MODE_INDICATOR="%F{green}INSERT%f"
+# INSERT_MODE_INDICATOR="%K{green}%f%F{black}INSERT%f%F"
+INSERT_MODE_INDICATOR="%K{green}%F{black}%B INSERT %b%f%k"
+# PROMPT="$PROMPT\$(vi_mode_prompt_info)"
+# RPROMPT="\$(vi_mode_prompt_info)$RPROMPT"
