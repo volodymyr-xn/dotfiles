@@ -15,7 +15,7 @@ plugins=(git vi-mode asdf gitfast)
 source $ZSH/oh-my-zsh.sh
 
 # MODE_INDICATOR="%F{yellow}NORMAL%f"
-MODE_INDICATOR="%K{yellow}%F{black}%B NORMAL %b%f%k"
+MODE_INDICATOR="%K{yellow}%F{black}%B VIM-MODE %b%f%k"
 # INSERT_MODE_INDICATOR="%F{green}INSERT%f"
 # INSERT_MODE_INDICATOR="%K{green}%f%F{black}INSERT%f%F"
 INSERT_MODE_INDICATOR="%K{green}%F{black}%B INSERT %b%f%k"
