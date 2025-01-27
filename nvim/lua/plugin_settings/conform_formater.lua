@@ -1,7 +1,8 @@
 
 require("conform").setup({
   formatters_by_ft = {
-    eruby = {"erb_format"},
+    -- eruby = {"erb_format"},
+    eruby = {"htmlbeautifier"},
     yaml = {"yamlfix"},
     -- yaml = {"yamlfmt "},
     -- ruby = {"rubocop"}
