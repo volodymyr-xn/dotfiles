@@ -16,6 +16,8 @@ ch() {
   git checkout $(echo "$branch" | sed "s/.* //" | sed "s#remotes/[^/]*/##")
 }
 
+
+# Not used anymore
 conflicted() {
   vim +Conflicted
 }

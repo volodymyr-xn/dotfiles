@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+find / -type f -size +500M 2>/dev/null \
+  | xargs du -h \
+  | sort -rh \
+  | head -n 10

@@ -181,15 +181,15 @@ end
 
 local ruby_major_version = readRubyVersion()
 
-configureRubyLSP()
+-- configureRubyLSP()
 -- configureSolargraph()
 
 -- -- Enable Ruby-lsp on Ruby 3.0+ projekts
--- if (ruby_major_version and ruby_major_version >= 3) then
---   configureRubyLSP()
--- else
---   configureSolargraph()
--- end
+if (ruby_major_version and ruby_major_version >= 3) then
+  configureRubyLSP()
+else
+  configureSolargraph()
+end
 
 lspconfig['tailwindcss'].setup{}
 

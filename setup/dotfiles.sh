@@ -58,7 +58,7 @@ files_to_symlink="\
   config.reek stylelint"
 
 dirs_to_symlink_to_xdg_config="\
-  fish bundle docker nvim vim tmux rubocop pry htop"
+  fish bundle docker nvim vim tmux rubocop pry htop ghostty"
 
 # dirs_to_symlink_to_xdg_config_linux_only="\
 #   pipewire wireplumber kitty rofi"

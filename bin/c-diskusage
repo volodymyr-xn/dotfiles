@@ -5,4 +5,5 @@
 set -euo pipefail
 
 # Ignore squeashfs, tmpfs and udev
-df -h -xsquashfs -xtmpfs -xudev
+df -h -x squashfs -x tmpfs -x udev | grep -v '^dev'
+

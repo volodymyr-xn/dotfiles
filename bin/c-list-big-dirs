@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+du -h --max-depth=3 / 2>/dev/null \
+  | sort -rh \
+  | head -n 10
+

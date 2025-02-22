@@ -4,4 +4,12 @@
  #ss -nlt
 
 # Shows app names
-netstat -tulpn | grep LISTEN
+# netstat -tulpn | grep LISTEN
+# OR
+ss -tulnp
+
+# -t – Shows TCP connections.
+# -u – Shows UDP connections.
+# -l – Lists only listening ports.
+# -n – Displays numerical addresses instead of resolving hostnames.
+# -p – Shows the process (PID) using the port.

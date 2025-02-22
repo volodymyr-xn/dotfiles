@@ -66,5 +66,5 @@ end
 function CopyCurrentFileRelativePathToClipboard()
   vim.cmd("let @+ = @%")
   local clipboard_content = vim.fn.getreg('+')
-  vim.api.nvim_command('echohl Type | echo "Path ' .. clipboard_content .. ' copied!" | echohl None')
+  vim.api.nvim_command('echohl Type | echo "Path ' .. clipboard_content .. ' copied to clipboard!" | echohl None')
 end

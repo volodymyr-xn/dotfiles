@@ -2,12 +2,11 @@ require('gen').setup({
   -- model = "mistral:instruct", -- The default model to use. (very good)
   -- model = "llama3.2",
   -- model = "llama3.2:3b-instruct-q8_0",
-  model = "deepseek-coder-v2",
+  -- model = "deepseek-coder-v2",
   host = os.getenv("OLLAMA_API_HOST"),
   -- TO do models
   -- model = "deepseek-coder:6.7b-instruct", --(7b model)
   -- model = "magicoder:7b-s-cl", -- (todo)
-  --
 
   display_mode = "float", -- The display mode. Can be "float" or "split".
   show_prompt = true, -- Shows the Prompt submitted to Ollama.

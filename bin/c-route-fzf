@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+# Function to highlight text in green
+highlight() {
+  echo -e "\e[32m$1\e[0m"
+}
+
+path_name="$(bin/rails routes | fzf | awk '{print $1}')_path"
+echo -n "Copied path: "
+highlight "$path_name"
+echo "$path_name" | xclip -selection clipboard
+

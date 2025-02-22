@@ -2,12 +2,12 @@ local cmp = require("cmp")
 local cmp_buffer = require('cmp_buffer')
 local compare = require('cmp.config.compare')
 
--- local function getVisibleBuffers()
---   local bufs = {}
---   for _, win in ipairs(vim.api.nvim_list_wins()) do
---     bufs[vim.api.nvim_win_get_buf(win)] = true
---   end
---   return vim.tbl_keys(bufs)
+ -- require("copilot_cmp").setup()
+-- Used for copilot
+-- local has_words_before = function()
+--   if vim.api.nvim_buf_get_option(0, "buftype") == "prompt" then return false end
+--   local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+--   return col ~= 0 and vim.api.nvim_buf_get_text(0, line-1, 0, line-1, col, {})[1]:match("^%s*$") == nil
 -- end
 
 local function getVisibleBuffers()
@@ -103,6 +103,13 @@ local luasnip = require('luasnip')
 
 local lspkind = require('lspkind')
 
+lspkind.init({
+  symbol_map = {
+    Copilot = "",
+  },
+})
+
+
 local border = {
     { "╭", "CmpBorder" },
     { "─", "CmpBorder" },
@@ -118,6 +125,9 @@ vim.cmd [[
 ]]
 
 cmp.setup({
+  -- experimental = {
+  --   ghost_text = true, -- Enable ghost text
+  -- },
   snippet = {
     expand = function(args)
       luasnip.lsp_expand(args.body)
@@ -160,15 +170,24 @@ cmp.setup({
     }),
     -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
     -- ['<Tab>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-    ["<Tab>"] = function(fallback)
+    ["<Tab>"] = vim.schedule_wrap(function(fallback)
+      -- Used for copilot
+      -- if cmp.visible() and has_words_before() then
       if cmp.visible() then
-        cmp.select_next_item()
-        -- For jumping to 2nd item
-        -- cmp.select_next_item()
+        cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
       else
         fallback()
       end
-    end,
+    end),
+    -- ["<Tab>"] = function(fallback)
+    --   if cmp.visible() then
+    --     cmp.select_next_item()
+    --     -- For jumping to 2nd item
+    --     -- cmp.select_next_item()
+    --   else
+    --     fallback()
+    --   end
+    -- end,
     ["<S-Tab>"] = function(fallback)
       if cmp.visible() then
         cmp.select_prev_item()
@@ -179,6 +198,8 @@ cmp.setup({
   }),
   sorting = {
     comparators = {
+      -- require("copilot_cmp.comparators").prioritize,
+
       compare.score,
       compare.locality,
 			compare.exact,
@@ -196,6 +217,7 @@ cmp.setup({
     }
   },
   sources = cmp.config.sources({
+    -- { name = "copilot"},
     {
       name = 'buffer',
       -- max_item_count = 8,
@@ -210,11 +232,13 @@ cmp.setup({
   }),
 
   performance = {
-    debounce = 10,
-    throttle = 5,
+    -- debounce = 10,
+    -- throttle = 5,
+    debounce = 5,
+    throttle = 1,
+    fetching_timeout = 1,
     -- debounce = 60,
     -- throttle = 30,
-    -- fetching_timeout = 500,
     -- filtering_context_budget = 3,
     -- confirm_resolve_timeout = 80,
     -- async_budget = 1,
@@ -368,18 +392,4 @@ vim.api.nvim_set_hl(0, 'CmpItemKindKeyword', { bg='NONE', fg='#D4D4D4' })
 vim.api.nvim_set_hl(0, 'CmpItemKindProperty', { link='CmpItemKindKeyword' })
 vim.api.nvim_set_hl(0, 'CmpItemKindUnit', { link='CmpItemKindKeyword' })
 
--- require("copilot").setup({
---   suggestion = {
---     enabled = true,
---     auto_trigger = true,
---     debounce = 75,
---     keymap = {
---       accept = "<c-j>",
---       accept_word = false,
---       accept_line = false,
---       next = "<A-n>",
---       prev = "<A-p>",
---       dismiss = "<C-]>",
---     },
---   },
--- })
+vim.api.nvim_set_hl(0, "CmpItemKindCopilot", {fg ="#6CC644"})

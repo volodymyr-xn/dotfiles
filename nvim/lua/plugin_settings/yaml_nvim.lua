@@ -1,15 +1,15 @@
 local yaml_nvim = require("yaml_nvim")
 -- require("yaml_nvim").setup({ ft = { "yaml"} })
 
-
 yaml_nvim.setup({ ft = { "yaml"} })
 
-vim.api.nvim_create_autocmd({ "BufEnter", "CursorMoved" }, {
-	pattern = { "*.yaml" },
-	callback = function()
-		vim.opt_local.winbar = yaml_nvim.get_yaml_key()
-	end,
-})
+-- vim.api.nvim_create_autocmd({ "BufEnter", "CursorMoved" }, {
+-- 	pattern = { "*.yaml" },
+-- 	callback = function()
+-- 		-- vim.opt_local.winbar = yaml_nvim.get_yaml_key()
+--     vim.cmd(":YAMLView")
+-- 	end,
+-- })
 
 
 local function CopyYamlKeyToClipboard()

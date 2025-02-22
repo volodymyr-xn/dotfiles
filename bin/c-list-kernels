@@ -2,4 +2,62 @@
 
 set -euo pipefail
 
-dpkg --list | grep linux-image
+#!/bin/bash
+
+echo "========================================="
+echo " Linux Kernel Checker Script"
+echo "========================================="
+
+# Function to detect the OS type
+detect_os() {
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        OS_ID="${ID:-unknown}"
+        OS_LIKE="${ID_LIKE:-unknown}"
+        echo "Detected OS: $NAME ($OS_ID)"
+    else
+        echo "Could not detect OS."
+        exit 1
+    fi
+}
+
+# Function to check the current running kernel
+check_running_kernel() {
+    echo "Currently running kernel: $(uname -r)"
+}
+
+# Function to list installed kernels
+check_installed_kernels() {
+    echo "Installed kernels:"
+    if [[ "$OS_ID" == "ubuntu" || "$OS_LIKE" == "debian" ]]; then
+        dpkg --list | grep linux-image | awk '{print $2}'
+    elif [[ "$OS_ID" == "arch" || "$OS_LIKE" == "arch" ]]; then
+        # Show only actual kernel packages (filtering out firmware and other non-kernel packages)
+        pacman -Q | grep -E '^linux' | grep -v 'linux-firmware' | awk '{print $1, $2}'
+    else
+        echo "Unsupported OS for installed kernel check."
+    fi
+}
+
+# Function to list available kernels in GRUB safely
+check_grub_kernels() {
+    echo "Available kernels in GRUB:"
+    GRUB_FILE="/boot/grub/grub.cfg"
+
+    if [ -r "$GRUB_FILE" ]; then
+        awk -F\' '/menuentry / {print $2}' "$GRUB_FILE"
+    else
+        echo "Cannot access GRUB config directly. Trying sudo..."
+        sudo awk -F\' '/menuentry / {print $2}' "$GRUB_FILE"
+    fi
+}
+
+# Run functions
+detect_os
+echo "-----------------------------------------"
+check_running_kernel
+echo "-----------------------------------------"
+check_installed_kernels
+echo "-----------------------------------------"
+check_grub_kernels
+echo "========================================="

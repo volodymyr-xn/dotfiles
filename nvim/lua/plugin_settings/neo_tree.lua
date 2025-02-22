@@ -12,6 +12,9 @@ require("neo-tree").setup({
   open_files_do_not_replace_types = { "terminal", "Trouble", "trouble", "qf", "Outline" },
 
   default_component_configs = {
+    name = {
+      use_popups_for_input = false,  -- Disable floating dialogs for renaming
+    },
     container = {
       enable_character_fade = true
     },
@@ -40,6 +43,16 @@ require("neo-tree").setup({
       default = "*",
       highlight = "NeoTreeFileIcon"
     },
+  },
+  commands = {
+    rename = function(state)
+      local node = state.tree:get_node()
+      local new_name = vim.fn.input("Rename to: ", node.name)
+      if not new_name or new_name == "" then
+        return
+      end
+      require("neo-tree.sources.filesystem.commands").rename(state, new_name)
+    end,
   },
   window = {
     width = 35,
@@ -104,6 +117,7 @@ require("neo-tree").setup({
     ".DS_Store",
     "thumbs.db"
   },
+  use_popups_for_input = false,
 })
 
 -- ======================== neo-tree mappings ===================================

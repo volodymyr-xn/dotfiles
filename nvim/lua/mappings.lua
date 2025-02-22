@@ -142,7 +142,7 @@ vim.api.nvim_set_keymap('n', '<C-c>', '<C-w>q', {noremap = true})
 -- Test runner mappings
 vim.api.nvim_set_keymap('n', '<Leader>t', ':TestNearest<CR>', {silent = true})
 vim.api.nvim_set_keymap('n', '<Leader>T', ':TestFile<CR>', {silent = true})
-vim.api.nvim_set_keymap('n', '<Leader>a', ':TestSuite<CR>', {silent = true})
+-- vim.api.nvim_set_keymap('n', '<Leader>a', ':TestSuite<CR>', {silent = true})
 vim.api.nvim_set_keymap('n', '<Leader>l', ':TestLast<CR>', {silent = true})
 
 -- Go to related file
@@ -198,7 +198,3 @@ end
 -- Change surround double quotes to plain quotes
 -- vim.api.nvim_set_keymap('n', '<Leader>b', 'cs\'"', { noremap = true })
 vim.api.nvim_set_keymap('n', '-', 'cs\'\"', {})
-
--- Copy relative path of the current file to the clipboard
--- vim.api.nvim_set_keymap('n', '`', ':let @+ = expand("%")<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '`', ':CopyCurrentFileRelativePathToClipboard<CR>', { noremap = true })

@@ -207,6 +207,8 @@ export GROFF_NO_SGR=1                  # for konsole and gnome-terminal
 # Use neovim as man page viewer
 export MANPAGER='nvim +Man!'
 
+export BAT_THEME="Catppuccin Mocha"
+
 # Always use number of processing cores with make
 # shopt -s checkwinsize
 
@@ -227,3 +229,4 @@ local_profile_path="$HOME/.local_profile"
 if [ -f "$local_profile_path" ] ; then
   . "$local_profile_path"
 fi
+. "$HOME/.cargo/env"
