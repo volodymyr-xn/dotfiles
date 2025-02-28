@@ -44,16 +44,6 @@ require("neo-tree").setup({
       highlight = "NeoTreeFileIcon"
     },
   },
-  commands = {
-    rename = function(state)
-      local node = state.tree:get_node()
-      local new_name = vim.fn.input("Rename to: ", node.name)
-      if not new_name or new_name == "" then
-        return
-      end
-      require("neo-tree.sources.filesystem.commands").rename(state, new_name)
-    end,
-  },
   window = {
     width = 35,
     mappings = {
