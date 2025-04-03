@@ -29,7 +29,7 @@ if ! [[ "$port" =~ ^[0-9]+$ ]]; then
   exit 1
 fi
 
-postgres -D $(asdf where postgres)/data -p $port
+postgres -D $(mise where postgres)/data -p $port
 
 # Check if PostgreSQL started successfully
 if [ $? -eq 0 ]; then

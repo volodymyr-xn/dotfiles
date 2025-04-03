@@ -6,7 +6,7 @@ alias nv='nvim'
 alias vn='nvim'
 
 # Quickly open current directory
-alias na='xdg-open .'
+alias na='open .'
 # alias na='nautilus .'
 
 # General UNIX

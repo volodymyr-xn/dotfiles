@@ -2,4 +2,13 @@
 
 set -euo pipefail
 
-xdg-open "$@"
+# Detect OS and use the appropriate command
+if command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "$@"
+elif [ -x /usr/bin/open ]; then
+    /usr/bin/open "$@"
+else
+    echo "Error: Could not find a suitable command to open files." >&2
+    exit 1
+fi
+

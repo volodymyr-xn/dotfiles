@@ -16,16 +16,20 @@ require("nvim-treesitter.configs").setup({
     "vim",
     "yaml",
   },
-  illuminate = {
-    -- disable = { "c", "ruby", "javascript" },
-    enable = true,
-    loaded = false,
-    module_path = "illuminate.providers.treesitter"
-  },
+  ignore_install = { "lua" },
+  -- TODO: not sure what this used for
+  -- illuminate = {
+  --   -- disable = { "c", "ruby", "javascript" },
+  --   -- enable = true,
+  --   enable = false,
+  --   loaded = false,
+  --   module_path = "illuminate.providers.treesitter"
+  -- },
   highlight = {
     enable = true,
+    -- enable = false,
     -- disable = { "c", "ruby", "javascript" },
-    disable = { "c", "ruby", 'html'},
+    disable = { "c", "ruby", 'html', "lua"},
     additional_vim_regex_highlighting = true,
   }
  })

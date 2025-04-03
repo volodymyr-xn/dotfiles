@@ -5,5 +5,12 @@
 # 0.4 seconds.
 KEYTIMEOUT=1
 
-# Added by `rbenv init` on четвер, 13 лютого 2025 09:28:51 +0200
-eval "$(~/.rbenv/bin/rbenv init - --no-rehash zsh)"
+
+##
+# Your previous /Users/tech/.zprofile file was backed up as /Users/tech/.zprofile.macports-saved_2025-03-30_at_00:14:16
+##
+
+# MacPorts Installer addition on 2025-03-30_at_00:14:16: adding an appropriate PATH variable for use with MacPorts.
+export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
+# Finished adapting your PATH environment variable for use with MacPorts.
+

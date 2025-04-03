@@ -23,6 +23,8 @@ vim.api.nvim_set_keymap('n', '`', ':CopyCurrentFileRelativePathToClipboard<CR>',
 
 vim.api.nvim_set_keymap('n', '<Leader>!', ':Ack "binding.pry"<CR>', {noremap = true, silent = false })
 
+vim.api.nvim_set_keymap('n', 's', ':tabnext<CR>', {noremap = true, silent = false })
+
 -- vim.api.nvim_set_keymap('n', 'M', ':tabnext<CR>', { noremap = true })
 
 -- Re-balance panes

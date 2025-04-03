@@ -11,21 +11,23 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
+echo "Executing .profile"
+
 # If running bash
-if [ -n "$BASH_VERSION" ]; then
-    # include .bashrc if it exists
-    if [ -f "$HOME/.bashrc" ]; then
-      . "$HOME/.bashrc"
-    fi
-fi
+# if [ -n "$BASH_VERSION" ]; then
+#     # include .bashrc if it exists
+#     if [ -f "$HOME/.bashrc" ]; then
+#       . "$HOME/.bashrc"
+#     fi
+# fi
 
 # If running zsh
-if [ -n "$ZSH_VERSION" ]; then
-    # include .zshrc if it exists
-    if [ -f "$HOME/.zshrc" ]; then
-      . "$HOME/.zshrc"
-    fi
-fi
+# if [ -n "$ZSH_VERSION" ]; then
+#     # include .zshrc if it exists
+#     if [ -f "$HOME/.zshrc" ]; then
+#       . "$HOME/.zshrc"
+#     fi
+# fi
 
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/bin" ] ; then
@@ -139,9 +141,19 @@ export GOPATH="$HOME/.programing_languages/go"
 # Ruby verbose mode
 # export RUBYOPT="-W1"
 
-# export RUBY_CONFIGURE_OPTS="--with-jemalloc"
-# Always use jemmaloc and yjit to install ruby
-export RUBY_CONFIGURE_OPTS="--with-jemalloc --enable-yjit"
+if [[ -f "/opt/homebrew/bin/brew" ]] ; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+  export LDFLAGS="$LDFLAGS -L$(brew --prefix jemalloc)/lib"
+  export CPPFLAGS="$CPPFLAGS -I$(brew --prefix jemalloc)/include"
+  export PKG_CONFIG_PATH="$(brew --prefix jemalloc)/lib/pkgconfig:$PKG_CONFIG_PATH"
+  export PKG_CONFIG_PATH="/opt/homebrew/bin/pkg-config:$(brew --prefix icu4c)/lib/pkgconfig:$(brew --prefix curl)/lib/pkgconfig:$(brew --prefix zlib)/lib/pkgconfig"
+  export RUBY_CONFIGURE_OPTS="--with-jemalloc --enable-yjit --with-jemalloc-dir=$(brew --prefix jemalloc) --with-readline-dir=$(brew --prefix readline)  --with-openssl=$(brew --prefix openssl)"
+else
+  # export RUBY_CONFIGURE_OPTS=""
+  export RUBY_CONFIGURE_OPTS="--with-jemalloc --enable-yjit"
+  export MALLOC_ARENA_MAX=2
+fi
+
 
 # Set Onedark fzf theme
 # export FZF_DEFAULT_OPTS='
@@ -214,13 +226,18 @@ export BAT_THEME="Catppuccin Mocha"
 
 export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
 
-export ASDF_FORCE_PREPEND=yes
+# export ASDF_FORCE_PREPEND=yes
+
 
 # Enable asdf
-if [ -f $HOME/.asdf/asdf.sh ]; then
-  echo 'Source asdf from profile'
-  source $HOME/.asdf/asdf.sh
-fi
+# if [ -f "$HOME/.asdf/asdf.sh" ]; then
+#   echo 'Source asdf from profile'
+#   source $HOME/.asdf/asdf.sh
+# fi
+
+# asdf 0.16+
+# export ASDF_DATA_DIR="$HOME/.asdf"
+# export PATH="$ASDF_DATA_DIR/shims:$PATH"
 
 
 local_profile_path="$HOME/.local_profile"
@@ -229,4 +246,12 @@ local_profile_path="$HOME/.local_profile"
 if [ -f "$local_profile_path" ] ; then
   . "$local_profile_path"
 fi
-. "$HOME/.cargo/env"
+
+# if [ -f "$HOME/.cargo/env" ] ; then
+#   . "$HOME/.cargo/env"
+# fi
+
+if [[ -f "/Users/tech/.local/bin/mise" ]] ; then
+  echo "Activating mise from profile"
+  eval "$(activate zsh)"
+fi

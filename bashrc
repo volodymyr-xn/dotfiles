@@ -15,11 +15,6 @@ source ~/dotfiles/shared_shell_rc_file
 # [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
 # Enable fzf shortcuts
-[ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash ] && source "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash
-. "$HOME/.cargo/env"
+#[ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash ] && source "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash
+#. "$HOME/.cargo/env"
 
-
-# Utils
-export utilHighlightGreen() {
-  echo -e "\e[32m$1\e[0m"
-}

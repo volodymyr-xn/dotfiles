@@ -2,7 +2,7 @@ font-family = "CaskaydiaMono Nerd Font"
 font-style = "Regular"
 font-size = 14
 
-maximize=true
+maximize = true
 
 # Disable full screen on ctrl+enter
 keybind=ctrl+enter=ignore

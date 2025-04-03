@@ -110,7 +110,7 @@ else
 fi
 
 installation_log "-> Linking $HOME/gitignore_global to $HOME/.gitignore"
-ln -nsf "$HOME/gitignore_global" "$HOME/.gitignore"
+ln -nsf "$HOME/.gitignore_global" "$HOME/.gitignore"
 
 ln -nsf \
   "$HOME/dotfiles/oh-my-zsh-themes/avit_custom.zsh-theme" \

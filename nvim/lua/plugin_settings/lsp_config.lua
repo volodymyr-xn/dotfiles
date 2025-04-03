@@ -118,7 +118,8 @@ function configureSolargraph()
   print("Using Solargraph LSP")
 
   lspconfig['solargraph'].setup{
-    cmd = {'env', 'RUBY_YJIT_ENABLE=1', 'solargraph', 'stdio' },
+    -- Using YJIT with lsp can make 100% CPU usage
+    -- cmd = {'env', 'RUBY_YJIT_ENABLE=1', 'solargraph', 'stdio' },
     on_attach = on_attach,
     flags = lsp_flags,
     capabilities = capabilities,
@@ -135,7 +136,8 @@ function configureSolargraph()
 end
 
 lspconfig['rubocop'].setup({
-  cmd = { 'env', 'RUBY_YJIT_ENABLE=1', 'bundle', 'exec', 'rubocop', '--lsp' },
+  -- Using YJIT with lsp can make 100% CPU usage
+  -- cmd = { 'env', 'RUBY_YJIT_ENABLE=1', 'bundle', 'exec', 'rubocop', '--lsp' },
   flags = lsp_flags,
   capabilities = capabilities,
 })
@@ -145,7 +147,8 @@ function configureRubyLSP()
   print("Using ruby_lsp LSP")
 
   lspconfig['ruby_lsp'].setup({
-    cmd = {'env', 'RUBY_YJIT_ENABLE=1', 'ruby-lsp' },
+  -- Using YJIT with lsp can make 100% CPU usage
+    -- cmd = {'env', 'RUBY_YJIT_ENABLE=1', 'ruby-lsp' },
     flags = lsp_flags,
     capabilities = capabilities,
     -- filetypes = { 'ruby'},
@@ -184,11 +187,13 @@ local ruby_major_version = readRubyVersion()
 -- configureRubyLSP()
 -- configureSolargraph()
 
--- -- Enable Ruby-lsp on Ruby 3.0+ projekts
+-- Enable Ruby-lsp on Ruby 3.0+ projekts
 if (ruby_major_version and ruby_major_version >= 3) then
-  configureRubyLSP()
+  -- Dont use lsp until devs fix problem what it uses 100% CPU on macos
+  -- configureRubyLSP()
+  -- configureSolargraph()
 else
-  configureSolargraph()
+  -- configureSolargraph()
 end
 
 lspconfig['tailwindcss'].setup{}

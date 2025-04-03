@@ -54,6 +54,7 @@ vim.o.writebackup = false
 
 -- No swap file
 vim.o.swapfile = false
+vim.o.backupcopy = "no"
 
 -- Encrypted files encryption method
 -- set cm=blowfish2 " doesnt work in neovim
@@ -175,13 +176,13 @@ vim.o.scrolloff=3
 vim.o.title=true
 
 -- Yank to vim clipboard
-vim.o.clipboard='unnamed'
+-- vim.o.clipboard='unnamed'
 
 -- Always Yank to system clipboard
 -- vim.o.clipboard='unnamedplus'
 
 vim.o.foldenable=false
-vim.o.foldlevelstart=3
+-- vim.o.foldlevelstart=3
 
 vim.o.pumheight=15
 
