@@ -45,3 +45,5 @@ st = status
 
 # Rebase the current branch from an up-to-date origin/master. (`g up`)
 up = !git fetch origin && git rebase origin/master
+[init]
+	defaultBranch = main

@@ -1,13 +1,10 @@
-require('gen').setup({
-  -- model = "mistral:instruct", -- The default model to use. (very good)
-  -- model = "llama3.2",
-  -- model = "llama3.2:3b-instruct-q8_0",
-  -- model = "deepseek-coder-v2",
-  host = os.getenv("OLLAMA_API_HOST"),
-  -- TO do models
-  -- model = "deepseek-coder:6.7b-instruct", --(7b model)
-  -- model = "magicoder:7b-s-cl", -- (todo)
+local gen_plugin = require('gen')
 
+gen_plugin.setup({
+  -- model = "gemma3:1b", -- The default model to use. (very good)
+  -- model = "gemma3", -- The default model to use. (very good)
+  model = "codellama", -- The default model to use. (very good)
+  -- host = os.getenv("OLLAMA_API_HOST"),
   display_mode = "float", -- The display mode. Can be "float" or "split".
   show_prompt = true, -- Shows the Prompt submitted to Ollama.
   show_model = true, -- Displays which model you are using at the beginning of your chat session.
@@ -25,8 +22,20 @@ require('gen').setup({
 
 
 -- Custom prompts
-require('gen').prompts['WriteRspecs'] = {
-  prompt = "Generate Rspec tests(output just code without explanation and comments) for following code:\n$text",
+gen_plugin.prompts['WriteRspecs'] = {
+  prompt = "Generate Rspec tests(output just code without any explanation and additional comments) for following code:\n$text",
+  replace = false
+}
+gen_plugin.prompts['WriteRspecs2'] = {
+  prompt = "You are an expert programmer in Ruby. You are tasked with writing a single RSpec file with all the test cases for the following code:\n```$text```. Output just code, no comments.",
+  replace = false
+}
+gen_plugin.prompts['WriteCombinedRspecs'] = {
+  prompt = "Generate combined Rspec specs(output just code without explanation and comments, put as many check into one spec as possible) for following code:\n$text",
+  replace = false
+}
+gen_plugin.prompts['WriteMinitest'] = {
+  prompt = "Generate Ruby test using Minitest ruby gem/library(output just code without explanation and comments) for following code:\n$text",
   replace = false
 }
 

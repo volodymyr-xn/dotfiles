@@ -1,7 +1,7 @@
 require('lint').linters_by_ft = {
   -- ruby = {'rubocop'},
-  eruby = {'erb_lint'},
-  -- javascript = {'eslint'},
+  -- eruby = {'erb_lint'},
+  javascript = {'eslint'},
   bash = {'shellcheck'},
   -- sh = {'shellcheck'}
 }

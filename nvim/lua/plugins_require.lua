@@ -1,13 +1,15 @@
 require("plugin_settings/icons")
 require("plugin_settings/neo_tree")
 require("plugin_settings/lualine")
+
 require("plugin_settings/fzf")
 require("plugin_settings/telescope")
+
 require('plugin_settings/treesitter')
 require('plugin_settings/yaml_nvim')
 require('plugin_settings/lsp_config')
 -- require('plugin_settings/copilot')
-require('plugin_settings/nvim_cmp')
+-- require('plugin_settings/nvim_cmp')
 require('plugin_settings/blink_cmp')
 require("plugin_settings/vim_rails")
 require("plugin_settings/emmet")

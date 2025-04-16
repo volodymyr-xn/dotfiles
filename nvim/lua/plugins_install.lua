@@ -274,7 +274,10 @@ require("lazy").setup({
   -- "lukas-reineke/cmp-rg",
 
   -- Alternative fast copilot plugin
-  'saghen/blink.cmp',
+  {
+    'saghen/blink.cmp',
+    commit = "52cd2aa"
+  },
 
   -- "github/copilot.vim",
   -- 'zbirenbaum/copilot.lua',

@@ -24,10 +24,23 @@ esac
 
 # Enable fzf
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-#
 # # Include local settings
 # [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 #
+# # Shell-GPT integration ZSH v0.2
+_sgpt_zsh() {
+if [[ -n "$BUFFER" ]]; then
+    _sgpt_prev_cmd=$BUFFER
+    BUFFER+="⌛"
+    zle -I && zle redisplay
+    BUFFER=$(sgpt --shell <<< "$_sgpt_prev_cmd" --no-interaction)
+    zle end-of-line
+fi
+}
+zle -N _sgpt_zsh
+bindkey "^t" _sgpt_zsh
+# # Shell-GPT integration ZSH v0.2
+
 source "$HOME/dotfiles/shared_shell_rc_file"
 
 # echo "Activating mise from zshrc"

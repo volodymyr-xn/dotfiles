@@ -23,7 +23,29 @@ vim.api.nvim_set_keymap('n', '`', ':CopyCurrentFileRelativePathToClipboard<CR>',
 
 vim.api.nvim_set_keymap('n', '<Leader>!', ':Ack "binding.pry"<CR>', {noremap = true, silent = false })
 
-vim.api.nvim_set_keymap('n', 's', ':tabnext<CR>', {noremap = true, silent = false })
+vim.api.nvim_set_keymap('n', '<C-s>', '<C-w>v', {noremap = true, silent = false })
+
+-- Free mappings for "s" button that works as prefix
+vim.api.nvim_set_keymap('n', 's', '', {noremap = true, silent = false })
+vim.api.nvim_set_keymap('n', 'st', '<C-w>s', {noremap = true, silent = false })
+
+vim.api.nvim_set_keymap('n', '<Leader>h', ':Telescope jumplist<CR>', {noremap = true, silent = false })
+
+-- vim.api.nvim_set_keymap('n', 'dn', 'bdiw', {})
+
+-- Quick binding.pry
+-- vim.cmd [[
+--  nnoremap <leader>q o<Esc>==i binding.pry<Esc>==o<Esc>kko<Esc>j
+-- ]]
+
+-- Quick binding.pry
+vim.api.nvim_set_keymap(
+ 'n',
+ '<leader>q',
+ 'o<Esc>==i binding.pry<Esc>==',
+ { noremap = true, silent = true }
+)
+
 
 -- vim.api.nvim_set_keymap('n', 'M', ':tabnext<CR>', { noremap = true })
 

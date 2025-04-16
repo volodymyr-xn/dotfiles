@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# Runs shell_gpt
+
+sgpt --model "gpt-4o" "$@"

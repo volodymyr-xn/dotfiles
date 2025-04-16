@@ -182,7 +182,7 @@ vim.o.title=true
 -- vim.o.clipboard='unnamedplus'
 
 vim.o.foldenable=false
--- vim.o.foldlevelstart=3
+vim.o.foldlevelstart=7
 
 vim.o.pumheight=15
 

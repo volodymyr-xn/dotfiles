@@ -698,7 +698,7 @@ nnoremap <silent> <Leader>l :TestLast<CR>
 nnoremap <Leader>e :R<CR>
 
 " Go to alternate file
-nnoremap q :A<CR>
+nnoremap q :GFiles?<CR>
 
 " Auto indent pasted text
 nnoremap p p=`]<C-o>

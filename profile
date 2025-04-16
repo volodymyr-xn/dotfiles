@@ -255,3 +255,6 @@ if [[ -f "/Users/tech/.local/bin/mise" ]] ; then
   echo "Activating mise from profile"
   eval "$(activate zsh)"
 fi
+
+. "$HOME/.cargo/env"
+

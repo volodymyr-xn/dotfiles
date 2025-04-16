@@ -143,6 +143,12 @@ cmp.setup({
     },
   },
 
+  view = {
+    docs = {
+      auto_open = false
+    }
+  },
+
   completion = {
     keyword_length = 1,
     completeopt = 'menu,menuone,noinser'
@@ -155,8 +161,6 @@ cmp.setup({
     -- ['<C-d>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete(),
     ['<C-e>'] = cmp.mapping.abort(),
-    ["<C-b>"] = cmp.mapping.scroll_docs(-4),
-    ["<C-f>"] = cmp.mapping.scroll_docs(4),
     ["<S-CR>"] = cmp.mapping.confirm({
       behavior = cmp.ConfirmBehavior.Replace,
       select = true,

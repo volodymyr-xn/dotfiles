@@ -1,3 +1,13 @@
+function CustomFindFirstAvailableDir(dirs)
+  for _, dir in ipairs(dirs) do
+    if vim.fn.isdirectory(dir) == 1 then
+      return dir
+    end
+  end
+
+  return nil -- Return nil if no directory is found
+end
+
 local function CamelizeFilename(filename)
   local name = filename:gsub("(%a)(%w*)", function(first, rest)
     return first:upper() .. rest
@@ -57,7 +67,6 @@ function RailsViewComponenbaseClassName()
 end
 
 function readRubyVersion()
-  -- local ruby_version_path = vim.fn.getcwd() .. "/.ruby-version"
   local ruby_version_path = ".ruby-version"
   local ruby_version_file = io.open(ruby_version_path, "r")
 
@@ -66,7 +75,11 @@ function readRubyVersion()
     local content = ruby_version_file:read("*all")
     ruby_version_file:close()
 
-    -- Match the major version using pattern matching
-    return tonumber(string.match(content, "%d+"))
+    -- Match the major and minor versions using pattern matching
+    local major, minor = content:match("^(%d+)%.(%d+)")
+    if major and minor then
+      return tonumber(major), tonumber(minor)
+    end
   end
+  return nil, nil
 end

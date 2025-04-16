@@ -9,7 +9,7 @@ syntax match rubyDeleteAllMethod /.delete_all(/
 syntax match rubyUpdateMethod /.update(/
 syntax match rubyUpdateAllMethod /.update_all(/
 
-hi def link rubyBindingPry Function
+hi def link rubyBindingPry DiagnosticSignHint
 hi def link rubyNewConstructorMethod Function
 hi def link rubySaveConstructorMethod Function
 hi def link rubyCreateConstructorMethod Function

@@ -15,6 +15,7 @@ require("nvim-treesitter.configs").setup({
     "sql",
     "vim",
     "yaml",
+    "embedded_template"
   },
   ignore_install = { "lua" },
   -- TODO: not sure what this used for
@@ -29,7 +30,18 @@ require("nvim-treesitter.configs").setup({
     enable = true,
     -- enable = false,
     -- disable = { "c", "ruby", "javascript" },
-    disable = { "c", "ruby", 'html', "lua"},
+    disable = { "c", "ruby", 'html', "lua", "embedded_template"},
     additional_vim_regex_highlighting = true,
   }
  })
+
+ -- Disable highlight for treesitter groups
+ vim.api.nvim_set_hl(0, "@string.special.symbol.ruby", {  })
+ vim.api.nvim_set_hl(0, "@variable.member.ruby", {})
+ vim.api.nvim_set_hl(0, "@function.builtin.ruby", { })
+ -- vim.api.nvim_set_hl(0, "@variable.ruby", { })
+ -- vim.api.nvim_set_hl(0, "@function.call.ruby", { })
+ vim.api.nvim_set_hl(0, "@function.builtin.ruby", { link = "Statement" })
+ vim.api.nvim_set_hl(0, "BlinkCmpLabel", { link = "Statement" })
+ -- vim.api.nvim_set_hl(0, "BlinkCmpLabel", { fg = "#ffffff" })
+ vim.api.nvim_set_hl(0, "BlinkCmpLabelMatch", { fg = "#ffffff" })

@@ -88,6 +88,7 @@ require("catppuccin").setup {
         mocha = {},
     },
     integrations = {
+      blink_cmp = true,
       cmp = true,
       gitsigns = true,
       nvimtree = true,
@@ -114,3 +115,4 @@ require("catppuccin").setup {
 
 vim.g.custom_color_character = "#98c379"
 vim.cmd("colorscheme catppuccin")
+-- vim.cmd("colorscheme dracula")

@@ -142,7 +142,7 @@ local function find_changed_files()
   telescope.git_status()
 end
 
-function find_reource_in_dir(dir)
+function find_resource_in_dir(dir)
   return function() telescope.find_files({ cwd = dir, previewer = false }) end
 end
 
@@ -191,30 +191,19 @@ end
 --   })
 -- end
 
-local find_models = find_reource_in_dir("app/models")
-local find_controllers = find_reource_in_dir("app/controllers")
-local find_css = find_reource_in_dir("app/assets/stylesheets")
-local find_js = find_reource_in_dir("app/assets/javascripts")
+local find_models = find_resource_in_dir("app/models")
+local find_controllers = find_resource_in_dir("app/controllers")
+local find_css = find_resource_in_dir("app/assets/stylesheets")
+local find_js = find_resource_in_dir("app/assets/javascripts")
 
-local resulting_components_dir = nil
+local find_views = find_resource_in_dir("app/views")
+local find_i18n = find_resource_in_dir("config/locales")
 
-local current_app_dir = vim.fn.getcwd() .. "/"
-local components_dir_path = "app/components"
-local view_components_dir_path = "app/view_components"
--- local components_dir = io.open(current_app_dir .. components_dir_path, "r")
--- local view_components_dir = io.open(current_app_dir .. view_components_dir_path, "r")
-local components_dir = io.open(components_dir_path, "r")
-local view_components_dir = io.open(view_components_dir_path, "r")
-
-if (view_components_dir) then
-  resulting_components_dir = view_components_dir_path
-elseif (components_dir) then
-  resulting_components_dir = components_dir_path
-end
-
-local find_view_components = find_reource_in_dir(resulting_components_dir)
-local find_views = find_reource_in_dir("app/views")
-local find_i18n = find_reource_in_dir("config/locales/custom_updates")
+local components_dir = CustomFindFirstAvailableDir({'app/components', "app/view_components"})
+local find_view_components = find_resource_in_dir(components_dir)
+-- if (components_dir) then
+vim.keymap.set('n', '<Leader>f', find_view_components, {})
+-- end
 
 -- Search files
 -- vim.keymap.set('n', '<C-p>', telescope.find_files, { noremap = true })
@@ -241,7 +230,6 @@ vim.keymap.set('n', '<Leader>m', find_models, {})
 vim.keymap.set('n', '<Leader>c', find_controllers, {})
 vim.keymap.set('n', '<Leader>j', find_js, {})
 vim.keymap.set('n', '<Leader>s', find_css, {})
-vim.keymap.set('n', '<Leader>f', find_view_components, {})
 vim.keymap.set('n', '<Leader>d', find_views, {})
 vim.keymap.set('n', '<Leader>b', find_i18n, {})
 -- vim.keymap.set('n', '@', find_word, {})
