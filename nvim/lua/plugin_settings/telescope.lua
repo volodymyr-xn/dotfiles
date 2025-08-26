@@ -104,10 +104,10 @@ require('telescope').setup{
       --   codeactions = false,
       -- }
     },
-    import = {
-      -- Add imports to the top of the file keeping the cursor in place
-      insert_at_top = true,
-    },
+    -- import = {
+    --   -- Add imports to the top of the file keeping the cursor in place
+    --   insert_at_top = true,
+    -- },
     -- https://github.com/nvim-telescope/telescope-fzf-native.nvim
     -- fzf-native is a c port of fzf. It only covers the algorithm and
     -- implements few functions to support calculating the score.
@@ -121,7 +121,7 @@ require('telescope').setup{
   }
 }
 -- require('telescope').load_extension("ag")
-telescope_global.load_extension('import')
+-- telescope_global.load_extension('import')
 telescope_global.load_extension('fzf')
 telescope_global.load_extension("ui-select")
 

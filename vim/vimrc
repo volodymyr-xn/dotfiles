@@ -26,7 +26,7 @@ Plug('tpope/vim-commentary')
 " Autocomplete & intellisense
 " Coc is an intellisense engine for Vim/Neovim.
 " Also adds linting and snipets
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " Enable in 2023
 " if has('nvim')
@@ -55,6 +55,7 @@ Plug('daviesjamie/vim-base16-lightline')
 Plug('tpope/vim-repeat')
 
 " FZF integration
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 
 " Show changed lines from git
@@ -1229,7 +1230,7 @@ endfunction
 nmap <leader>t <Plug>(coc-rename)
 
 " Highlight the symbol and its references when holding the cursor.
-autocmd CursorHold * silent call CocActionAsync('highlight')
+" autocmd CursorHold * silent call CocActionAsync('highlight')
 
 " Symbol renaming.
 nmap <leader>rn <Plug>(coc-rename)

@@ -111,13 +111,13 @@ require("lazy").setup({
 
   {
     'nvim-telescope/telescope-fzf-native.nvim',
-    -- build = 'make'
-    build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build'
+    build = 'make'
+    --build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build'
   },
   -- An extension for telescope.nvim that allows you to import modules faster
   -- based on what you've already imported in your project.
   -- "piersolenski/telescope-import.nvim",
-  'piersolenski/telescope-import.nvim',
+  -- 'piersolenski/telescope-import.nvim',
 
   -- Show changed lines from git
   -- "airblade/vim-gitgutter",
@@ -273,11 +273,11 @@ require("lazy").setup({
   "hrsh7th/nvim-cmp",
   -- "lukas-reineke/cmp-rg",
 
-  -- Alternative fast copilot plugin
-  {
-    'saghen/blink.cmp',
-    commit = "52cd2aa"
-  },
+  -- Alternative fast completion plugin
+  -- {
+  --   'saghen/blink.cmp',
+  --   commit = "52cd2aa"
+  -- },
 
   -- "github/copilot.vim",
   -- 'zbirenbaum/copilot.lua',

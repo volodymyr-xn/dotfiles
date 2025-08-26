@@ -23,7 +23,10 @@ esac
 # pnpm end
 
 # Enable fzf
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+if command -v fzf >/dev/null 2>&1; then
+  source <(fzf --zsh)
+fi
+
 # # Include local settings
 # [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 #
@@ -44,7 +47,9 @@ bindkey "^t" _sgpt_zsh
 source "$HOME/dotfiles/shared_shell_rc_file"
 
 # echo "Activating mise from zshrc"
-eval "$(mise activate zsh)"
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate zsh)"
+fi
 
 # source ~/.zsh/catppuccin_mocha-zsh-syntax-highlighting.zsh
 # [ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.zsh ] && source "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.zsh
