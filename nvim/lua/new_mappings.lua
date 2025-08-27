@@ -23,7 +23,7 @@ vim.api.nvim_set_keymap('n', '`', ':CopyCurrentFileRelativePathToClipboard<CR>',
 
 vim.api.nvim_set_keymap('n', '<Leader>!', ':Ack "binding.pry"<CR>', {noremap = true, silent = false })
 
-vim.api.nvim_set_keymap('n', '<C-s>', '<C-w>v', {noremap = true, silent = false })
+-- vim.api.nvim_set_keymap('n', '<C-s>', '<C-w>v', {noremap = true, silent = false })
 
 -- Free mappings for "s" button that works as prefix
 vim.api.nvim_set_keymap('n', 's', '', {noremap = true, silent = false })

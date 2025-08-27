@@ -111,8 +111,8 @@ require("lazy").setup({
 
   {
     'nvim-telescope/telescope-fzf-native.nvim',
-    build = 'make'
-    --build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build'
+    --build = 'make'
+    build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && cmake --build build --config Release && cmake --install build --prefix build'
   },
   -- An extension for telescope.nvim that allows you to import modules faster
   -- based on what you've already imported in your project.
