@@ -7,6 +7,9 @@ maximize = true
 # Disable full screen on ctrl+enter
 keybind=ctrl+enter=ignore
 
+# Make fonts bolder (works only on MacOS)
+font-thicken=true
+font-thicken-strength=10
 
 palette = 0=#494d64
 palette = 1=#ed8796
