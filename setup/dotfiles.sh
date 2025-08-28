@@ -40,8 +40,8 @@ symlink_fallback_file_to_home_dir() {
   symlink_to "$DOTFILES_DIR/$1" "$HOME/.$file_basename"
 }
 
-symlink_directory_to_config_dir() {
-  symlink_to "$DOTFILES_DIR/$1" "$HOME/.config/$1"
+symlink_config_directory_to_config_dir() {
+  symlink_to "$DOTFILES_DIR/config/$1" "$HOME/.config/$1"
 }
 
 #===============================================================
@@ -52,13 +52,16 @@ set -e # Terminate script if anything exits with a non-zero value
 set -u # Prevent unset variables
 
 files_to_symlink="\
-  profile zprofile bash_profile vim tmux zsh ackrc asdfrc ctags gemrc \
+  profile zprofile bash_profile ackrc asdfrc ctags gemrc \
   gitconfig gitignore_global gitmessage npmrc zshrc \
   inputrc default-gems asdfrc bashrc editorconfig \
   config.reek stylelint"
 
 dirs_to_symlink_to_xdg_config="\
-  fish bundle docker nvim vim tmux rubocop pry htop ghostty"
+  "
+
+config_dirs_to_symlink_to_xdg_config="\
+ fish bundle nvim vim tmux rubocop pry htop ghostty mise kitty"
 
 # dirs_to_symlink_to_xdg_config_linux_only="\
 #   pipewire wireplumber kitty rofi"
@@ -66,7 +69,7 @@ dirs_to_symlink_to_xdg_config_linux_only="\
   pipewire"
 
 # fallback_files_to_symlink="rubocop/rubocop.yml tmux/tmux.conf"
-fallback_files_to_symlink="tmux/tmux.conf"
+# fallback_files_to_symlink="tmux/tmux.conf"
 
 #===============================================================
 #================= Instalation =================================
@@ -91,14 +94,13 @@ for fallback_file in $fallback_files_to_symlink; do
   symlink_fallback_file_to_home_dir $fallback_file
 done
 
-# Symlink configuration directories to config directory
-for dir in $dirs_to_symlink_to_xdg_config; do
-  symlink_directory_to_config_dir $dir
+for dir in $config_dirs_to_symlink_to_xdg_config; do
+  symlink_config_directory_to_config_dir "$dir"
 done
 
 # Symlink configuration directories to config directory
 for dir in $dirs_to_symlink_to_xdg_config_linux_only; do
-  symlink_directory_to_config_dir $dir
+  symlink_config_directory_to_config_dir $dir
 done
 
 if [[  c-is-mac == 'true' ]]; then

@@ -1,5 +1,0 @@
-let g:netrw_dirhistmax  =10
-let g:netrw_dirhistcnt =3
-let g:netrw_dirhist_3='/home/tech/Meta/code/work/aipower/app/controllers'
-let g:netrw_dirhist_2='/home/tech/Meta/code/work/aipower/app'
-let g:netrw_dirhist_1='/home/tech/Meta/code/work/aipower'

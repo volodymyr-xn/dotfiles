@@ -2,9 +2,9 @@ system-setup
 
 ## vim-plug
 # ignore everything
-vim/plugged/
-nvim/plugged/
-tmux/plugins/
-!tmux/plugins/tpm
+config/vim/plugged/
+config/nvim/plugged/
+config/tmux/plugins/
+!config/tmux/plugins/tpm
 .vagrant
 *.log
