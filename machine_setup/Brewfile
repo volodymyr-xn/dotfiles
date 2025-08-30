@@ -18,6 +18,10 @@ brew "vips"
 brew "wget"
 brew "wireguard-tools"
 
+# Better encryption for encrypted zip archives
+brew "p7zip"
+
+
 cask "betterdisplay"
 cask "ghostty"
 cask "libreoffice"
