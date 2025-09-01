@@ -1,7 +1,5 @@
 rails
 pry
-solargraph
-solargraph-rails
 gem-ctags
 ripper-tags
 tmuxinator
