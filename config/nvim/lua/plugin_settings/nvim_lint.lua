@@ -12,11 +12,11 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost"}, {
   -- pattern = {"*.rb", "*.js", "*.html.erb", "*.haml", "*.spec"},
   -- pattern = {"*.html.erb"},
   callback = function()
-    require("lint").try_lint()
-    -- local lint_status, lint = pcall(require, "lint")
-    -- if lint_status then
-    --   lint.try_lint()
-    -- end
+    -- require("lint").try_lint()
+    local lint_status, lint = pcall(require, "lint")
+    if lint_status then
+       lint.try_lint()
+     end
   end,
 })
 --

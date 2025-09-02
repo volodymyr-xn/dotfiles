@@ -1,5 +1,6 @@
 [tools]
 node = "24.6.0"
+postgres = "17.6"
 ruby = "latest"
 
 [settings]

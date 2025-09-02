@@ -8,9 +8,11 @@ require("plugin_settings/telescope")
 require('plugin_settings/treesitter')
 require('plugin_settings/yaml_nvim')
 require('plugin_settings/lsp_config')
+
 -- require('plugin_settings/copilot')
--- require('plugin_settings/nvim_cmp')
+require('plugin_settings/nvim_cmp')
 --require('plugin_settings/blink_cmp')
+--
 require("plugin_settings/vim_rails")
 require("plugin_settings/emmet")
 require('plugin_settings/ack')

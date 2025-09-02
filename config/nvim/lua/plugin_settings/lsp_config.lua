@@ -182,7 +182,7 @@ function configureRubyLSP()
   })
 end
 
--- local ruby_major_version, ruby_minor_version = readRubyVersion()
+local ruby_major_version, ruby_minor_version = readRubyVersion()
 
 -- echo ruby_major_version .. ruby_minor_version
 
@@ -191,12 +191,14 @@ end
 
 -- Enable Ruby-lsp on Ruby 3.0+ projekts
 -- if (ruby_major_version > 3 and ruby_minor_version > 4) then
---   -- Dont use lsp until devs fix problem what it uses 100% CPU on macos
---   -- configureSolargraph()
---   configureRubyLSP()
+  -- Dont use lsp until devs fix problem what it uses 100% CPU on macos
+  -- configureRubyLSP()
 -- else
---   -- configureSolargraph()
 -- end
+
+  require("lspconfig").ruby_lsp.setup({
+    autostart = false,
+  })
 
 lspconfig['tailwindcss'].setup{}
 
