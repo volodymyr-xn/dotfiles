@@ -81,5 +81,5 @@ function readRubyVersion()
       return tonumber(major), tonumber(minor)
     end
   end
-  return nil, nil
+  return 0, 0
 end

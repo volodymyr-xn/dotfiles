@@ -3,7 +3,8 @@ require("mason-lspconfig").setup({
   -- A list of servers to automatically install if they're not already installed. Example: { "rust_analyzer@nightly", "lua_ls" }
   -- This setting has no relation with the `automatic_installation` setting.
   -- ensure_installed = { "lua_ls", "ts_ls", "cssls", "tailwindcss"},
-  ensure_installed = { "lua_ls", "ts_ls", "cssls", "tailwindcss", "ruby_lsp"},
+  -- ensure_installed = { "lua_ls", "ts_ls", "cssls", "tailwindcss", "ruby_lsp"},
+  ensure_installed = { "ts_ls", "cssls", "tailwindcss"},
   -- Whether servers that are set up (via lspconfig) should be automatically installed if they're not already installed.
   automatic_installation = false
 })
@@ -184,21 +185,16 @@ end
 
 local ruby_major_version, ruby_minor_version = readRubyVersion()
 
--- echo ruby_major_version .. ruby_minor_version
-
--- configureRubyLSP()
--- configureSolargraph()
-
 -- Enable Ruby-lsp on Ruby 3.0+ projekts
--- if (ruby_major_version > 3 and ruby_minor_version > 4) then
-  -- Dont use lsp until devs fix problem what it uses 100% CPU on macos
-  -- configureRubyLSP()
--- else
--- end
+if (ruby_major_version > 3 and ruby_minor_version > 4) then
+  configureRubyLSP()
+else
+  configureSolargraph()
+-- require("lspconfig").ruby_lsp.setup({
+--   autostart = false,
+-- })
+end
 
-  require("lspconfig").ruby_lsp.setup({
-    autostart = false,
-  })
 
 lspconfig['tailwindcss'].setup{}
 

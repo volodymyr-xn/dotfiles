@@ -348,7 +348,7 @@ require("lazy").setup({
 
   -- Highlight matching HTML tag
   -- TODO: check how good is performance
-  'leafOfTree/vim-matchtag',
+  -- 'leafOfTree/vim-matchtag',
 
   -- Global search by ack cli util
   -- "mileszs/ack.vim",
