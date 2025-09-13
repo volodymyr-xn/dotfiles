@@ -16,11 +16,13 @@ brew "imagemagick"
 brew "vips"
 brew "wget"
 
+brew "rclone"
+
 brew "gallery-dl"
 brew "wireguard-tools"
 
 # Better encryption for encrypted zip archives
-brew "p7zip"
+# brew "p7zip"
 
 cask "betterdisplay"
 cask "ghostty"
@@ -29,3 +31,4 @@ cask "microsoft-teams"
 cask "google-chrome"
 cask "sublime-text"
 cask "affinity-photo"
+cask "affinity-designer"
