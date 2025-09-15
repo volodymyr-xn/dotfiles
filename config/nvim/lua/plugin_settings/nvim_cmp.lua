@@ -174,15 +174,13 @@ cmp.setup({
     }),
     -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
     -- ['<Tab>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-    ["<Tab>"] = vim.schedule_wrap(function(fallback)
-      -- Used for copilot
-      -- if cmp.visible() and has_words_before() then
+    ["<Tab>"] = function(fallback)
       if cmp.visible() then
-        cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
+        cmp.select_next_item()
       else
         fallback()
       end
-    end),
+    end,
     -- ["<Tab>"] = function(fallback)
     --   if cmp.visible() then
     --     cmp.select_next_item()
@@ -370,7 +368,8 @@ cmp.setup.cmdline(':', {
     }
   }),
   completion = {
-    completeopt = 'menu,menuone,noselect,noinsert',
+    completeopt = 'menu,menuone,noselect',
+    -- completeopt = 'menu,menuone,noselect,noinsert',
   },
   sources = cmp.config.sources({
     { name = 'path' }

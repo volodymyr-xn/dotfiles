@@ -321,7 +321,9 @@ require("lazy").setup({
   -- Auto close quotes, parenthesiz, etc
   "windwp/nvim-autopairs",
   -- Use treesitter to autoclose and autorename html tag
-  "windwp/nvim-ts-autotag",
+  -- "windwp/nvim-ts-autotag",
+
+  "andymass/vim-matchup",
   -- Alternative plugin
   -- "echasnovski/mini.pairs",
 

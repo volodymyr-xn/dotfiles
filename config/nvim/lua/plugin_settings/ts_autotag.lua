@@ -1,5 +1,5 @@
-require('nvim-ts-autotag').setup({
-  filetypes = { "html" , "eruby" },
-})
+-- require('nvim-ts-autotag').setup({
+--   filetypes = { "html" , "eruby" },
+-- })
 
 

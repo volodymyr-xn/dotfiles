@@ -1,3 +1,8 @@
+
+-- require('nvim-ts-autotag').setup({
+--   filetypes = { "html" , "eruby" },
+-- })
+
 require("nvim-treesitter.configs").setup({
   -- auto_install = true,
 
@@ -18,6 +23,7 @@ require("nvim-treesitter.configs").setup({
     "embedded_template"
   },
   ignore_install = { "lua" },
+
   -- TODO: not sure what this used for
   -- illuminate = {
   --   -- disable = { "c", "ruby", "javascript" },
@@ -33,6 +39,12 @@ require("nvim-treesitter.configs").setup({
     disable = { "c", "ruby", 'html', "lua", "embedded_template"},
     additional_vim_regex_highlighting = true,
   }
+ })
+
+ require('match-up').setup({
+   treesitter = {
+     stopline = 500
+   }
  })
 
  -- Disable highlight for treesitter groups
