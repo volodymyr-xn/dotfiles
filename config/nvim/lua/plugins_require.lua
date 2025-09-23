@@ -6,6 +6,7 @@ require("plugin_settings/fzf")
 require("plugin_settings/telescope")
 
 require('plugin_settings/treesitter')
+require('plugin_settings/vim_matchup')
 require('plugin_settings/yaml_nvim')
 require('plugin_settings/lsp_config')
 

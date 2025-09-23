@@ -5,7 +5,6 @@
 vim.cmd("command! ToggleCurrentWindowZoom lua ToggleCurrentWindowZoom()")
 
 -- CopyCurrentFileRelativePathToClipboard
-vim.cmd("command! CopyCurrentFileRelativePathToClipboard lua CopyCurrentFileRelativePathToClipboard()")
 
 -- Fix save file typos
 vim.cmd("command! W w")
@@ -64,7 +63,21 @@ function ToggleCurrentWindowZoom()
 end
 
 function CopyCurrentFileRelativePathToClipboard()
-  vim.cmd("let @+ = @%")
-  local clipboard_content = vim.fn.getreg('+')
-  vim.api.nvim_command('echohl Type | echo "Path ' .. clipboard_content .. ' copied to clipboard!" | echohl None')
+  local relpath = vim.fn.expand("%")
+  vim.fn.setreg("+", relpath)
+  vim.api.nvim_command('echo "Relative path " | echohl String | echon "' .. relpath .. '" | echohl None | echon " copied to clipboard!"')
 end
+
+
+vim.cmd("command! CopyCurrentFileRelativePathToClipboard lua CopyCurrentFileRelativePathToClipboard()")
+
+function CopyCurrentFileNameToClipboard()
+  local filename = vim.fn.expand("%:t")
+  local basename = filename:match("^[^%.]+") or filename
+  vim.fn.setreg('"', basename)
+  vim.api.nvim_command(
+    'echo "Filename " | echohl Type | echon "' .. basename .. '" | echohl None | echon " copied to vim default copy register!"'
+  )
+end
+
+vim.cmd("command! CopyCurrentFileNameToClipboard lua CopyCurrentFileNameToClipboard()")

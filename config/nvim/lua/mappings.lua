@@ -153,7 +153,7 @@ vim.api.nvim_set_keymap('n', '<Leader>e', ':R<CR>', { noremap = true })
 
 -- Auto indent pasted text
 vim.api.nvim_set_keymap('n', 'p', 'p=`]<C-o>', { noremap = true })
-vim.api.nvim_set_keymap('n', 'P', 'P=`]<C-o>', { noremap = true })
+-- vim.api.nvim_set_keymap('n', 'P', 'P=`]<C-o>', { noremap = true })
 
 -- Move to the end of yanked text after yank and paste
 vim.api.nvim_set_keymap('n', 'p', 'p`]', { noremap = true })

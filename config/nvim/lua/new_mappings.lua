@@ -20,6 +20,7 @@ vim.api.nvim_set_keymap('v', 'L', '$', {noremap = true, silent = true })
 
 -- vim.api.nvim_set_keymap('n', '`', ':let @+ = expand("%")<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '`', ':CopyCurrentFileRelativePathToClipboard<CR>', { noremap = true })
+-- vim.api.nvim_set_keymap('n', '~', ':CopyCurrentFileNameToClipboard<CR>', { noremap = true })
 
 vim.api.nvim_set_keymap('n', '<Leader>!', ':Ack "binding.pry"<CR>', {noremap = true, silent = false })
 
