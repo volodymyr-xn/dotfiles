@@ -10,7 +10,7 @@ require("mason-lspconfig").setup({
 })
 
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
-local lspconfig = require('lspconfig')
+-- local lspconfig = require('lspconfig')
 -- Maybe depreacated:
 -- require 'lspconfig/configs'
 
@@ -78,17 +78,17 @@ local lsp_flags = {
 --   }
 -- }
 
-lspconfig['cssls'].setup{
+vim.lsp.config('cssls', {
   on_attach = on_attach,
   flags = lsp_flags,
   capabilities = capabilities
-}
+})
 
-lspconfig['ts_ls'].setup{
+vim.lsp.config('ts_ls', {
   -- on_attach = on_attach,
   flags = lsp_flags,
   capabilities = capabilities
-}
+})
 
 -- lspconfig.emmet_language_server.setup({
 --   filetypes = { "eruby", "html" },
@@ -118,7 +118,7 @@ lspconfig['ts_ls'].setup{
 function configureSolargraph()
   print("Using Solargraph LSP")
 
-  lspconfig['solargraph'].setup{
+  vim.lsp.config('solargraph', {
     -- Using YJIT with lsp can make 100% CPU usage
     -- cmd = {'env', 'RUBY_YJIT_ENABLE=1', 'solargraph', 'stdio' },
     on_attach = on_attach,
@@ -133,7 +133,7 @@ function configureSolargraph()
       }
     },
     useBundler = true
-  }
+  })
 end
 
 -- lspconfig['rubocop'].setup({
@@ -147,7 +147,7 @@ end
 function configureRubyLSP()
   print("Using ruby_lsp LSP")
 
-  lspconfig['ruby_lsp'].setup({
+  vim.lsp.config('ruby_lsp', {
   -- Using YJIT with lsp can make 100% CPU usage
     -- cmd = {'env', 'RUBY_YJIT_ENABLE=1', 'ruby-lsp' },
     flags = lsp_flags,
@@ -196,7 +196,7 @@ else
 end
 
 
-lspconfig['tailwindcss'].setup{}
+vim.lsp.config('tailwindcss', {})
 
 -- lspconfig['html'].setup{
 --   on_attach = on_attach,

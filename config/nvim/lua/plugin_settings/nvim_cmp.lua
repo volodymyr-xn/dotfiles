@@ -292,23 +292,23 @@ cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done({ map_char = { tex = 
 -- })
 
 cmp.setup.filetype('scss', {
-  -- completion = {
-  --   keyword_length = 1,
-  --   completeopt = 'menu,menuone'
-  -- },
+  completion = {
+    keyword_length = 1,
+    completeopt = 'menu,menuone'
+  },
 
   sources = cmp.config.sources({
     {
       name = 'nvim_lsp',
       max_item_count = 5,
     },
-    {
-      name = 'buffer',
-      max_item_count = 5,
-      option = {
-        get_bufnrs = getVisibleBuffers
-      }
-    },
+    -- {
+    --   name = 'buffer',
+    --   max_item_count = 5,
+    --   option = {
+    --     get_bufnrs = getVisibleBuffers
+    --   }
+    -- },
   }),
 
   sorting = {
