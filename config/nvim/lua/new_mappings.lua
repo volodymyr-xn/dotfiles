@@ -31,6 +31,7 @@ vim.api.nvim_set_keymap('n', 's', '', {noremap = true, silent = false })
 vim.api.nvim_set_keymap('n', 'st', '<C-w>s', {noremap = true, silent = false })
 
 vim.api.nvim_set_keymap('n', '<Leader>h', ':Telescope jumplist<CR>', {noremap = true, silent = false })
+vim.api.nvim_set_keymap('n', '<Leader>a', ':Telescope buffers<CR>', {noremap = true, silent = false })
 
 -- vim.api.nvim_set_keymap('n', 'dn', 'bdiw', {})
 
@@ -39,14 +40,35 @@ vim.api.nvim_set_keymap('n', '<Leader>h', ':Telescope jumplist<CR>', {noremap = 
 --  nnoremap <leader>q o<Esc>==i binding.pry<Esc>==o<Esc>kko<Esc>j
 -- ]]
 
--- Quick binding.pry
-vim.api.nvim_set_keymap(
- 'n',
- '<leader>q',
- 'o<Esc>==i binding.pry<Esc>==',
- { noremap = true, silent = true }
-)
+-- Define a function to insert the appropriate debug snippet
+local function custom_insert_debug()
+  local ft = vim.bo.filetype
+  local snippet = ""
 
+  if ft == "ruby" then
+    snippet = "binding.pry"
+  elseif ft == "eruby" then -- html.erb is usually detected as 'eruby'
+    snippet = "<%= binding.pry %>"
+  elseif ft == "javascript" then
+    snippet = "console.log()"
+  elseif ft == "typescript" then -- optional, for TS
+    snippet = "console.log()"
+  else
+    print("No debug snippet defined for filetype: " .. ft)
+    return
+  end
+
+  -- Insert snippet in new line below current cursor
+  vim.api.nvim_feedkeys("o" .. snippet .. vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
+
+  -- Move cursor inside parentheses if console.log()
+  if snippet == "console.log()" then
+    vim.api.nvim_feedkeys("F(a", "n", false)
+  end
+end
+
+-- Inser debug
+vim.keymap.set("n", "<leader>q", custom_insert_debug, { noremap = true, silent = true })
 
 -- vim.api.nvim_set_keymap('n', 'M', ':tabnext<CR>', { noremap = true })
 
