@@ -24,24 +24,49 @@ vim.cmd("command! Q q")
 --   echo "Servers reloaded"
 -- endfunction
 
- function ReloadActiveChromeTab()
-  -- local currentTerminalEmulator = vim.fn.system("xdotool getactivewindow")
-  -- vim.fn.execute("!" ..
-  --   "xdotool search --onlyvisible --class Chromium windowfocus key F5" ..
-  --   " && xdotool windowfocus " .. currentTerminalEmulator)
+function ReloadActiveChromeTab()
+    -- Detect OS
+  local sysname = vim.loop.os_uname().sysname
 
-  vim.fn.execute("!" .. "xdotool search --onlyvisible --class Chromium  windowactivate windowfocus key F5")
+  -- ANSI escape codes for purple text
+  local purple = "\27[35m"
+  local reset = "\27[0m"
 
-  -- local window_id = vim.fn.system("wmctrl -l | grep -i 'Chromium' | head -n 1 | awk '{print $1}'")
-  -- vim.fn.system("xdotool key --window " .. window_id .. " F5")
-  -- vim.fn.system("xdotool windowactivate " .. window_id)
+  local success = false
 
-  print("Chrome tab reloaded")
+  if sysname == "Linux" then
+    -- Linux: use xdotool
+    vim.fn.system("xdotool search --onlyvisible --class Chromium windowactivate windowfocus key F5")
+    if vim.v.shell_error == 0 then
+      success = true
+    end
+
+  elseif sysname == "Darwin" then
+    -- macOS: use AppleScript via osascript
+    local applescript = [[
+      osascript -e '
+        tell application "Google Chrome"
+          if (count of windows) > 0 then
+            tell active tab of front window to reload
+          end if
+          activate
+        end tell
+      '
+    ]]
+    vim.fn.system(applescript)
+    if vim.v.shell_error == 0 then
+      success = true
+    end
+  end
+
+  if success then
+    vim.api.nvim_echo({{"Chrome tab reloaded ✅", "Keyword"}}, false, {})
+  else
+    print("Error reloading chrome tab ✅")
+  end
 end
 
-vim.cmd [[
-  nnoremap R :lua ReloadActiveChromeTab() <CR>
-]]
+vim.keymap.set("n", "R", ReloadActiveChromeTab, { silent = true, desc = "Reload active Chrome tab" })
 
 
 -- Toggle zoom of current window
@@ -63,8 +88,24 @@ function ToggleCurrentWindowZoom()
 end
 
 function CopyCurrentFileRelativePathToClipboard()
-  local relpath = vim.fn.expand("%")
+  -- local relpath = vim.fn.getcwd()
+  -- vim.fn.setreg("+", relpath)
+
+  -- vim.cmd("let @+ = @%")
+  -- local relpath = vim.fn.getreg('+')
+  -- vim.api.nvim_command('echohl Type | echo "Path ' .. clipboard_content .. ' copied to clipboard!" | echohl None')
+    -- Try git root, fallback to cwd
+  local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
+  if vim.v.shell_error ~= 0 then
+    git_root = vim.fn.getcwd()
+  end
+
+  local filepath = vim.fn.expand("%:p")
+  local relpath = vim.fn.fnamemodify(filepath, ":.:" .. git_root)
+
+  -- Copy to clipboard
   vim.fn.setreg("+", relpath)
+
   vim.api.nvim_command('echo "Relative path " | echohl String | echon "' .. relpath .. '" | echohl None | echon " copied to clipboard!"')
 end
 

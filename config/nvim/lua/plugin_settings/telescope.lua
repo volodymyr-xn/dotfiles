@@ -218,9 +218,10 @@ vim.api.nvim_set_keymap('n', '<Leader>q', ':Buffers!<CR>', {noremap = true})
 -- Full text search
 -- vim.keymap.set('n', '<Leader>o', telescope.live_grep, {})
 -- vim.keymap.set('n', '<Leader>p', full_text_search_wihout_preview, {})
--- vim.keymap.set('n', '<Leader>q', full_text_search_only_in_opened_buffers, {})
+vim.keymap.set('n', '<Leader>Q', full_text_search_only_in_opened_buffers, {})
+vim.keymap.set('n', '<Leader>h', telescope.current_buffer_fuzzy_find, {})
 
--- Find changed file
+-- Find changed files
 vim.keymap.set('n', 'q', find_changed_files, {})
 
 -- vim.keymap.set('n', '<Leader>q', full_text_search_only_in_opened_buffers_fzf_version, {})

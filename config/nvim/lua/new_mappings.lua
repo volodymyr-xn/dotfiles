@@ -30,8 +30,8 @@ vim.api.nvim_set_keymap('n', '<Leader>!', ':Ack "binding.pry"<CR>', {noremap = t
 vim.api.nvim_set_keymap('n', 's', '', {noremap = true, silent = false })
 vim.api.nvim_set_keymap('n', 'st', '<C-w>s', {noremap = true, silent = false })
 
-vim.api.nvim_set_keymap('n', '<Leader>h', ':Telescope jumplist<CR>', {noremap = true, silent = false })
-vim.api.nvim_set_keymap('n', '<Leader>a', ':Telescope buffers<CR>', {noremap = true, silent = false })
+-- vim.api.nvim_set_keymap('n', '<Leader>h', ':Telescope jumplist<CR>', {noremap = true, silent = false })
+vim.api.nvim_set_keymap('n', '<Leader>q', ':Telescope buffers<CR>', {noremap = true, silent = false })
 
 -- vim.api.nvim_set_keymap('n', 'dn', 'bdiw', {})
 
@@ -68,7 +68,9 @@ local function custom_insert_debug()
 end
 
 -- Inser debug
-vim.keymap.set("n", "<leader>q", custom_insert_debug, { noremap = true, silent = true })
+vim.keymap.set("n", "<Leader>a", custom_insert_debug, { noremap = true, silent = true })
+
+vim.keymap.set("n", "a", ":A", { noremap = true, silent = true })
 
 -- vim.api.nvim_set_keymap('n', 'M', ':tabnext<CR>', { noremap = true })
 
