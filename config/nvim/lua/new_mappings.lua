@@ -67,12 +67,21 @@ local function custom_insert_debug()
   end
 end
 
+local function highlight_word_under_cursor()
+  local word = vim.fn.expand("<cword>")
+  local pattern = "\\<" .. word .. "\\>"
+  vim.fn.setreg("/", pattern)
+end
+
 -- Inser debug
 vim.keymap.set("n", "<Leader>a", custom_insert_debug, { noremap = true, silent = true })
 
-vim.keymap.set("n", "a", ":A", { noremap = true, silent = true })
+vim.keymap.set("n", "a", ":A<CR>", { noremap = true, silent = true })
 
--- vim.api.nvim_set_keymap('n', 'M', ':tabnext<CR>', { noremap = true })
+vim.keymap.set('n', 's', ':tabnext<CR>', { noremap = true })
+
+-- vim.keymap.set('n', '@', highlight_word_under_cursor, { noremap = true, silent = true })
+vim.keymap.set('n', '#', "*N", { noremap = true, silent = true })
 
 -- Re-balance panes
 -- vim.api.nvim_set_keymap('n', '=', '<C-W>=', {noremap = true})

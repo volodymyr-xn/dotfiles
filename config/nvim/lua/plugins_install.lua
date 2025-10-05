@@ -220,14 +220,14 @@ require("lazy").setup({
   -- Base16 color schemes
   -- "Mofiqul/dracula.nvim",
   -- "folke/tokyonight.nvim",
-  "rose-pine/neovim",
+  -- "rose-pine/neovim",
   -- "EdenEast/nightfox.nvim",
   "catppuccin/nvim",
-  "tinted-theming/base16-vim",
+  -- "tinted-theming/base16-vim",
   "ellisonleao/gruvbox.nvim",
-  "rebelot/kanagawa.nvim",
-  "dracula/vim",
-  "sainnhe/sonokai",
+  -- "rebelot/kanagawa.nvim",
+  -- "dracula/vim",
+  -- "sainnhe/sonokai",
 
   -- Shows yaml path under cursor,
   -- allows to search by YAML key
@@ -286,7 +286,7 @@ require("lazy").setup({
 
 
   -- Automatically highlighting other uses of the current word under the cursor
-  "RRethy/vim-illuminate",
+  -- "RRethy/vim-illuminate",
   -- Alternative to vim-illuminate
   -- "tzachar/local-highlight.nvim",
 
