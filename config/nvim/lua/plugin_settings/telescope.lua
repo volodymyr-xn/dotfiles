@@ -222,8 +222,8 @@ vim.api.nvim_set_keymap('n', '<Leader>q', ':Buffers!<CR>', {noremap = true})
 -- Find changed files
 vim.keymap.set('n', 'q', find_changed_files, {})
 
-vim.keymap.set('n', '<Leader>x', full_text_search_only_in_opened_buffers, {})
-vim.keymap.set('n', '<Leader>h', telescope.current_buffer_fuzzy_find, {})
+-- vim.keymap.set('n', '<Leader>h', full_text_search_only_in_opened_buffers, {})
+vim.keymap.set('n', '<Leader>x', telescope.current_buffer_fuzzy_find, {})
 
 -- vim.keymap.set('n', '<Leader>q', full_text_search_only_in_opened_buffers_fzf_version, {})
 

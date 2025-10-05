@@ -7,7 +7,7 @@ vim.cmd [[
   hi SpecialKey guifg=#bebebe ctermfg=238 guibg=NONE ctermbg=NONE gui=NONE cterm=NONE
 
   " hi CursorColumn guifg=#bebebe ctermfg=238 guibg=NONE ctermbg=NONE gui=NONE cterm=NONE
-  hi! link CursorColumn SpecialKey
+  hi! link Search TermCursor
 
 
   function! Highlight(group, color)
