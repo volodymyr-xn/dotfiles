@@ -131,7 +131,8 @@ require('lualine').setup {
         end
       }
     },
-    lualine_x = {
+    lualine_x = {'diff'},
+    lualine_y = {
       -- { get_yaml_key, cond = is_yaml },
       {
         is_curent_window_zoomed,
@@ -145,14 +146,35 @@ require('lualine').setup {
 
           return { bg = color, fg = '#1a1c23' }
         end
-    },
-    'diagnostics',
+      },
+      'diagnostics',
       -- { get_attached_clients, color = { gui = "bold" } },
       -- 'fileformat',
-      'filetype'
+      {'filetype', color = { fg = "none", bg = "none"}}
     },
-    lualine_y = {'diff'},
-    lualine_z = {'location'}
+    -- lualine_z = {'location'}
+    lualine_z = {
+      {
+        function()
+          local current_line = vim.fn.line('.')
+          local total_lines = vim.fn.line('$')
+          -- fixed width for consistent display
+          return string.format('%4d/%-4d', current_line, total_lines)
+        end,
+        color = { fg = '#ffffff', bg = 'none' }, -- transparent background
+        padding = { left = 0, right = 0 },
+      },
+    },
+    -- lualine_z = {
+    --   {
+    --     function()
+    --       local current_line = vim.fn.line('.')
+    --       local total_lines = vim.fn.line('$')
+    --       return string.format(' %d/%d ', current_line, total_lines)
+    --     end,
+    --     color = { fg = '#ffffff', bg = "none" }, -- optional: match your theme
+    --   },
+    -- },
   },
   inactive_sections = {
     lualine_a = {},

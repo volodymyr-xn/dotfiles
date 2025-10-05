@@ -116,7 +116,7 @@ vim.lsp.config('ts_ls', {
 
 
 function configureSolargraph()
-  print("Using Solargraph LSP")
+  -- print("Using Solargraph LSP")
 
   vim.lsp.config('solargraph', {
     -- Using YJIT with lsp can make 100% CPU usage
@@ -126,7 +126,7 @@ function configureSolargraph()
     capabilities = capabilities,
     filetypes = { 'ruby', 'eruby'},
     -- Disable built in Solargraph Rubocop diagnostics
-    -- Use linter
+    -- Use linter instead
     settings = {
       solargraph = {
         diagnostics = false

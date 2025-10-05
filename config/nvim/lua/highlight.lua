@@ -6,6 +6,9 @@ vim.cmd [[
   hi NonText guifg=#bebebe ctermfg=238 guibg=NONE ctermbg=NONE gui=NONE cterm=NONE
   hi SpecialKey guifg=#bebebe ctermfg=238 guibg=NONE ctermbg=NONE gui=NONE cterm=NONE
 
+  " hi CursorColumn guifg=#bebebe ctermfg=238 guibg=NONE ctermbg=NONE gui=NONE cterm=NONE
+  hi! link CursorColumn SpecialKey
+
 
   function! Highlight(group, color)
     exec "hi " a:group . " guifg=" . a:color

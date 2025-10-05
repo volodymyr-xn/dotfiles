@@ -230,7 +230,10 @@ require("lazy").setup({
   -- "sainnhe/sonokai",
 
   -- Delete entries from quickfix
-  "stefandtw/quickfix-reflector.vim",
+  -- "stefandtw/quickfix-reflector.vim",
+
+  -- Delete entries from quickfix (alt)
+  "itchyny/vim-qfedit",
 
   -- Shows yaml path under cursor,
   -- allows to search by YAML key
@@ -388,6 +391,8 @@ require("lazy").setup({
   -- Show scrollbar for VIM buffer(SUPER COOL!)
   -- 'dstein64/nvim-scrollview',
    'petertriho/nvim-scrollbar',
+   "kevinhwang91/nvim-hlslens",
+   "lewis6991/gitsigns.nvim",
 
   -- Run linters and formaters as fake LSP
   -- 'jose-elias-alvarez/null-ls.nvim',
