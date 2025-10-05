@@ -218,11 +218,12 @@ vim.api.nvim_set_keymap('n', '<Leader>q', ':Buffers!<CR>', {noremap = true})
 -- Full text search
 -- vim.keymap.set('n', '<Leader>o', telescope.live_grep, {})
 -- vim.keymap.set('n', '<Leader>p', full_text_search_wihout_preview, {})
-vim.keymap.set('n', '<Leader>Q', full_text_search_only_in_opened_buffers, {})
-vim.keymap.set('n', '<Leader>h', telescope.current_buffer_fuzzy_find, {})
 
 -- Find changed files
 vim.keymap.set('n', 'q', find_changed_files, {})
+
+vim.keymap.set('n', '<Leader>x', full_text_search_only_in_opened_buffers, {})
+vim.keymap.set('n', '<Leader>h', telescope.current_buffer_fuzzy_find, {})
 
 -- vim.keymap.set('n', '<Leader>q', full_text_search_only_in_opened_buffers_fzf_version, {})
 
@@ -233,6 +234,9 @@ vim.keymap.set('n', '<Leader>j', find_js, {})
 vim.keymap.set('n', '<Leader>s', find_css, {})
 vim.keymap.set('n', '<Leader>d', find_views, {})
 vim.keymap.set('n', '<Leader>b', find_i18n, {})
+
+
+
 -- vim.keymap.set('n', '@', find_word, {})
 -- local builtin = require('telescope.builtin')
 -- vim.keymap.set('n', 'gt', builtin.tags, { desc = '[G]o to C[T]ags (telescope)', noremap = true })

@@ -229,6 +229,9 @@ require("lazy").setup({
   -- "dracula/vim",
   -- "sainnhe/sonokai",
 
+  -- Delete entries from quickfix
+  "stefandtw/quickfix-reflector.vim",
+
   -- Shows yaml path under cursor,
   -- allows to search by YAML key
   "Einenlum/yaml-revealer",
