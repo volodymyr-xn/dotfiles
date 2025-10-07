@@ -155,3 +155,5 @@ require("scrollbar").setup({
         search = false, -- Requires hlslens
     },
 })
+
+-- require("neoscroll").setup({})

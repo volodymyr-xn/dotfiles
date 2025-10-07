@@ -20,6 +20,12 @@ require('telescope').setup{
       -- "--silent",
       -- "--vimgrep"
     },
+    preview = {
+      treesitter = {
+        enable = {"javascript"},
+        -- disable = { 'scss' }
+      },
+    },
     -- prompt_prefix = "   ",
     prompt_prefix = " 🔍  ",
     selection_caret = "  ",
@@ -212,8 +218,6 @@ vim.keymap.set('n', '<C-p>', find_files_wihout_preview, { noremap = true })
 vim.keymap.set('n', '<Leader>i', find_sibling_files, { noremap = true })
 -- vim.keymap.set('n', 'R', telescope.grep_string, { noremap = true })
 
--- Buffer select
-vim.api.nvim_set_keymap('n', '<Leader>q', ':Buffers!<CR>', {noremap = true})
 
 -- Full text search
 -- vim.keymap.set('n', '<Leader>o', telescope.live_grep, {})
@@ -221,11 +225,15 @@ vim.api.nvim_set_keymap('n', '<Leader>q', ':Buffers!<CR>', {noremap = true})
 
 -- Find changed files
 vim.keymap.set('n', 'q', find_changed_files, {})
+-- Buffer select
+vim.api.nvim_set_keymap('n', '<Leader>q', ':Buffers!<CR>', {noremap = true})
 
 -- vim.keymap.set('n', '<Leader>h', full_text_search_only_in_opened_buffers, {})
 vim.keymap.set('n', '<Leader>x', telescope.current_buffer_fuzzy_find, {})
 
--- vim.keymap.set('n', '<Leader>q', full_text_search_only_in_opened_buffers_fzf_version, {})
+vim.keymap.set('n', '<Leader>h', full_text_search_only_in_opened_buffers_fzf_version, {})
+
+vim.keymap.set('n', ',q', ":Tel<CR>", {})
 
 -- Find in varios Rails projekt dirs
 vim.keymap.set('n', '<Leader>m', find_models, {})

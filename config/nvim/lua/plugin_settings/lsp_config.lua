@@ -4,24 +4,12 @@ require("mason-lspconfig").setup({
   -- This setting has no relation with the `automatic_installation` setting.
   -- ensure_installed = { "lua_ls", "ts_ls", "cssls", "tailwindcss"},
   -- ensure_installed = { "lua_ls", "ts_ls", "cssls", "tailwindcss", "ruby_lsp"},
-  ensure_installed = { "ts_ls", "cssls", "tailwindcss"},
+  ensure_installed = { "ts_ls", "cssls"},
   -- Whether servers that are set up (via lspconfig) should be automatically installed if they're not already installed.
   automatic_installation = false
 })
 
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
--- local lspconfig = require('lspconfig')
--- Maybe depreacated:
--- require 'lspconfig/configs'
-
--- Diable LSP logfile ($HOME/.local/state/nvim/lsp.log)
--- vim.lsp.set_log_level("off")
-
--- ================================== Typecraft config
--- lspconfig.ruby_lsp.setup({
---   capabilities = capabilities
--- })
--- ====================================
 
 -- See `:help vim.lsp.*` for documentation on any of the below functions
 local bufopts = { noremap=true, silent=true, buffer=bufnr }
@@ -116,7 +104,7 @@ vim.lsp.config('ts_ls', {
 
 
 function configureSolargraph()
-  -- print("Using Solargraph LSP")
+  print("Using Solargraph LSP")
 
   vim.lsp.config('solargraph', {
     -- Using YJIT with lsp can make 100% CPU usage
@@ -132,7 +120,7 @@ function configureSolargraph()
         diagnostics = false
       }
     },
-    useBundler = true
+    -- useBundler = true
   })
 end
 
@@ -187,16 +175,17 @@ local ruby_major_version, ruby_minor_version = readRubyVersion()
 
 -- Enable Ruby-lsp on Ruby 3.0+ projekts
 if (ruby_major_version > 3 and ruby_minor_version > 4) then
-  configureRubyLSP()
+  -- configureRubyLSP()
 else
-  configureSolargraph()
+  -- configureSolargraph()
 -- require("lspconfig").ruby_lsp.setup({
 --   autostart = false,
 -- })
 end
 
+-- configureSolargraph()
 
-vim.lsp.config('tailwindcss', {})
+-- vim.lsp.config('tailwindcss', {})
 
 -- lspconfig['html'].setup{
 --   on_attach = on_attach,

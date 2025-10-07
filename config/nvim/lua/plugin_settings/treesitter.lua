@@ -18,6 +18,7 @@ require("nvim-treesitter.configs").setup({
     "ruby",
     "elixir",
     "sql",
+    "scss",
     "vim",
     "yaml",
     "embedded_template"
@@ -36,7 +37,7 @@ require("nvim-treesitter.configs").setup({
     enable = true,
     -- enable = false,
     -- disable = { "c", "ruby", "javascript" },
-    disable = { "c", "ruby", 'html', "lua", "embedded_template"},
+    disable = { "c", "ruby", 'html', "lua", "scss", "embedded_template"},
     additional_vim_regex_highlighting = true,
   }
  })
