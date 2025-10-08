@@ -63,8 +63,9 @@ vim.o.backupcopy = "no"
 vim.o.history = 500
 
 -- Remove escape delay http://www.johnhawthorn.com/2012/09/vi-escape-delays/
-vim.o.timeoutlen = 1000
-vim.o.ttimeoutlen = 0
+-- vim.o.timeoutlen = 1000
+-- vim.o.timeoutlen = 300
+-- vim.o.ttimeoutlen = 0
 
 -- Always show cursor
 vim.o.ruler = true
@@ -198,6 +199,21 @@ vim.o.shiftround=true
 vim.o.signcolumn = "yes"
 -- vim.o.signcolumn = "number"
 
--- vim.cmd [[
--- -- let test#ruby#rspec#executable = 'spring rspec'
--- ]]
+--############ NVIM Performance tweaks ########################
+-- Assume fast terminal connection
+vim.opt.ttyfast=true
+-- Don't redraw while executing macros or scrolling
+vim.opt.lazyredraw=true
+-- Reduce redraw frequency
+vim.opt.updatetime=200
+-- INPUT RESPONSIVENESS ---
+-- timeoutlen affects how responsive Neovim feels, especially when typing
+-- commands or using keymaps.
+-- If you often use which-key.nvim or a similar key-hint plugin:
+-- Use a slightly higher value (e.g. 400–500), since those plugins rely on the timeout window to show hints.
+vim.opt.timeoutlen=300
+-- vim.opt.ttimeoutlen=10
+vim.opt.ttimeoutlen=0
+
+vim.opt.smoothscroll=true
+vim.opt.showmode=false

@@ -39,6 +39,8 @@ Plug('tpope/vim-commentary')
 " Linting
 Plug('w0rp/ale')
 
+Plug 'catppuccin/vim', { 'as': 'catppuccin' }
+
 " Statusline
 Plug('itchyny/lightline.vim')
 
@@ -300,7 +302,7 @@ set noswapfile
 set history=500
 
 " Remove escape delay http://www.johnhawthorn.com/2012/09/vi-escape-delays/
-set timeoutlen=1000 ttimeoutlen=0
+" set timeoutlen=1000 ttimeoutlen=0
 
 " Always show cursor
 set ruler
@@ -354,6 +356,7 @@ set background=dark
 " Use pywal colorscheme
 " colorscheme wal
 colorscheme dracula
+" colorscheme catppuccin_frappe
 
 " colorscheme one
 

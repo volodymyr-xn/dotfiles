@@ -85,7 +85,7 @@ vim.keymap.set('n', '#', "*N", { noremap = true, silent = true })
 
 
 vim.keymap.set('n', 'K', ':OutlineFocus<CR>', { noremap = true, silent = true })
-vim.keymap.set('n', '<leader>k', ':Outline<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>k', ':Outline!<CR>', { noremap = true, silent = true })
 
 -- Re-balance panes
 -- vim.api.nvim_set_keymap('n', '=', '<C-W>=', {noremap = true})
