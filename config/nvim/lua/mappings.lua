@@ -2,7 +2,7 @@
 --====================== Mapings =============================================
 --============================================================================
 -- Remap VIM 0 to first non-blank character
-vim.api.nvim_set_keymap('n', '0', '^', { noremap = true })
+-- vim.api.nvim_set_keymap('n', '0', '^', { noremap = true })
 
 -- Pressing will toggle and untoggle spell checking
 -- vim.api.nvim_set_keymap('n', '<Leader>custom', ':setlocal spell!<cr>', { noremap = true })
@@ -65,7 +65,7 @@ vim.api.nvim_set_keymap('n', '<Leader>vr', ':luafile %<CR>', { noremap = true })
 -- Move up and down by visible lines if current line is wrapped
 vim.api.nvim_set_keymap('n', 'j', 'gj', { noremap = true })
 vim.api.nvim_set_keymap('n', 'k', 'gk', { noremap = true })
-vim.api.nvim_set_keymap('n', 'K', 'k', { noremap = true })
+-- vim.api.nvim_set_keymap('n', 'K', 'k', { noremap = true })
 
 vim.api.nvim_set_keymap('n', 'e', 'E', { noremap = true })
 
@@ -106,7 +106,7 @@ vim.api.nvim_set_keymap('v', 'J', ":m '>+1<CR>gv=gv", { noremap = true })
 
 -- Toggle folding
 -- vim.api.nvim_set_keymap('n', 'N', 'za', {noremap = true})
-vim.api.nvim_set_keymap('n', 'K', 'za', {noremap = true})
+vim.api.nvim_set_keymap('n', '0', 'za', {noremap = true})
 -- vim.api.nvim_set_keymap('x', '<2-LeftMouse>', 'za', {noremap = true})
 
 -- Map text align to tab button in visual mode
@@ -153,7 +153,7 @@ vim.api.nvim_set_keymap('n', '<Leader>e', ':R<CR>', { noremap = true })
 -- vim.api.nvim_set_keymap('n', 'q', ':A<CR>', { noremap = true })
 
 -- Auto indent pasted text
-vim.api.nvim_set_keymap('n', 'p', 'p=`]<C-o>', { noremap = true })
+-- vim.api.nvim_set_keymap('n', 'p', 'p=`]<C-o>', { noremap = true })
 -- vim.api.nvim_set_keymap('n', 'P', 'P=`]<C-o>', { noremap = true })
 
 -- Move to the end of yanked text after yank and paste
@@ -199,3 +199,5 @@ end
 -- Change surround double quotes to plain quotes
 -- vim.api.nvim_set_keymap('n', '<Leader>b', 'cs\'"', { noremap = true })
 vim.api.nvim_set_keymap('n', '-', 'cs\'\"', {})
+
+

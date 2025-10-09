@@ -205,15 +205,16 @@ vim.opt.ttyfast=true
 -- Don't redraw while executing macros or scrolling
 vim.opt.lazyredraw=true
 -- Reduce redraw frequency
-vim.opt.updatetime=200
+-- vim.opt.updatetime=200
+vim.opt.updatetime=100
 -- INPUT RESPONSIVENESS ---
 -- timeoutlen affects how responsive Neovim feels, especially when typing
 -- commands or using keymaps.
 -- If you often use which-key.nvim or a similar key-hint plugin:
 -- Use a slightly higher value (e.g. 400–500), since those plugins rely on the timeout window to show hints.
-vim.opt.timeoutlen=300
--- vim.opt.ttimeoutlen=10
-vim.opt.ttimeoutlen=0
+vim.opt.timeoutlen=400
+vim.opt.ttimeoutlen=10
+-- vim.opt.ttimeoutlen=0
 
 vim.opt.smoothscroll=true
 vim.opt.showmode=false

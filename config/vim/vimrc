@@ -705,8 +705,8 @@ nnoremap <Leader>e :R<CR>
 nnoremap q :GFiles?<CR>
 
 " Auto indent pasted text
-nnoremap p p=`]<C-o>
-nnoremap P P=`]<C-o>
+" nnoremap p p=`]<C-o>
+" nnoremap P P=`]<C-o>
 
 " Move to the end of yanked text after yank and paste
 nnoremap p p`]

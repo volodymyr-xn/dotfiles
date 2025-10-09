@@ -137,6 +137,7 @@ cmp.setup({
   window = {
     documentation = {
       border = border,
+      max_height = 15
     },
     completion = {
       border = border,
@@ -146,6 +147,7 @@ cmp.setup({
   view = {
     docs = {
       auto_open = false
+      -- auto_open = true
     }
   },
 
@@ -236,9 +238,10 @@ cmp.setup({
   performance = {
     -- debounce = 10,
     -- throttle = 5,
-    debounce = 5,
-    throttle = 1,
-    fetching_timeout = 1,
+    -- debounce = 5,
+    debounce = 20,
+    throttle = 30,
+    fetching_timeout = 20,
     -- debounce = 60,
     -- throttle = 30,
     -- filtering_context_budget = 3,
