@@ -169,7 +169,8 @@ require("flash").setup({
       -- hide after jump when not using jump labels
       autohide = false,
       -- show jump labels
-      jump_labels = true,
+      -- jump_labels = true,
+      jump_labels = false,
       -- set to `false` to use the current line only
       multi_line = false,
       -- When using jump labels, don't use these keys
