@@ -1,4 +1,28 @@
 require("aerial").setup({
+  -- Determines how the aerial window decides which buffer to display symbols for
+  --   window - aerial window will display symbols for the buffer in the window from which it was opened
+  --   global - aerial window will display symbols for the current window
+  attach_mode = "global",
+  -- backends = { "treesitter", "lsp", "markdown", "asciidoc", "man" },
+  backends = { "lsp", "treesitter", "markdown", "asciidoc", "man" },
+
+  filter_kind = {
+    "Class",
+    "Method",
+    "Field",
+    "Property",
+    -- "Variable"
+  },
+
+  icons = {
+    Class = "𝓒",
+    Method = "ƒ",
+    Function = "ƒ",
+    -- Variable = "",
+    -- Field = "",
+    Property = "",
+  },
+
   -- optionally use on_attach to set keymaps when aerial has attached to a buffer
   on_attach = function(bufnr)
     -- Jump forwards/backwards with '{' and '}'
@@ -10,12 +34,31 @@ require("aerial").setup({
     ["o"] = "actions.scroll",
     ["l"] = "actions.scroll",
   },
-
 })
 
+require('outline').setup({
+  providers = {
+    priority = { 'lsp', 'coc', 'markdown', 'norg', 'treesitter' },
+  },
+  symbol_folding = {
+    -- Depth past which nodes will be folded by default. Set to false to unfold all on open.
+    autofold_depth = 1,
+    -- When to auto unfold nodes
+    auto_unfold = {
+      -- Auto unfold currently hovered symbol
+      hovered = false,
+      -- Auto fold when the root level only has this many nodes.
+      -- Set true for 1 node, false for 0.
+      only = true,
+    },
+    markers = { '', '' },
+  },
+})
 
--- vim.keymap.set("n", "<leader>a", "<cmd>AerialToggle!<CR>")
+vim.keymap.set("n", "<leader>z", "<cmd>AerialToggle!<CR>")
+
+
+vim.api.nvim_set_hl(0, "AerialLine", { fg = "#a6da95", bg = "#2e3245" })
 
 require("leap")
-
 vim.keymap.set({'n', 'x', 'o'}, '<leader>a', '<Plug>(leap)')
