@@ -123,6 +123,13 @@ vim.o.showtabline = 2
 -- Hide the default mode text (e.g. -- INSERT -- below the statusline)
 vim.o.showmode = false
 
+-- When a file has been detected to have been changed outside of Vim and
+-- it has not been changed inside of Vim, automatically read it again.
+-- When the file has been deleted this is not done, so you have the text
+-- from before it was deleted.  When it appears again then it is read.
+-- timestamp
+vim.o.autoread = true
+
 -- Enable mouse
 vim.o.mouse = 'a'
 

@@ -76,8 +76,7 @@ end
 -- Inser debug
 vim.keymap.set("n", "<Leader>q", custom_insert_debug, { noremap = true, silent = true })
 
-vim.keymap.set("n", "a", ":A<CR>", { noremap = true, silent = true })
-
+-- vim.keymap.set("n", "sa", ":A<CR>", { noremap = true, silent = true })
 -- vim.keymap.set('n', 's', ':tabnext<CR>', { noremap = true })
 
 -- vim.keymap.set('n', '@', highlight_word_under_cursor, { noremap = true, silent = true })

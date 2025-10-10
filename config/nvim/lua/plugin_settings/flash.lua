@@ -185,7 +185,8 @@ require("flash").setup({
       -- The direction for `prev` and `next` is determined by the motion.
       -- `left` and `right` are always left and right.
       search = { wrap = false },
-      highlight = { backdrop = true },
+      -- highlight = { backdrop = true },
+      highlight = { backdrop = false },
       jump = {
         register = false,
         -- when using jump labels, set to 'true' to automatically jump

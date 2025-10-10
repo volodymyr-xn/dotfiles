@@ -10,6 +10,10 @@
 
 -- Force Ruby syntax for Pry config file
 -- vim.api.nvim_command("autocmd BufRead,BufNewFile .pryrc setlocal syntax=ruby")
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter" }, {
+  command = "if mode() != 'c' | checktime | endif",
+  pattern = "*",
+})
 
 if vim.fn.has("nvim") == 1 then
   -- Highligh text on yank

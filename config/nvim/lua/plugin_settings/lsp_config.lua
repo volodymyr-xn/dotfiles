@@ -177,13 +177,11 @@ local ruby_major_version, ruby_minor_version = readRubyVersion()
 if (ruby_major_version > 3 and ruby_minor_version > 4) then
   -- configureRubyLSP()
 else
-  -- configureSolargraph()
+  configureSolargraph()
 -- require("lspconfig").ruby_lsp.setup({
 --   autostart = false,
 -- })
 end
-
--- configureSolargraph()
 
 -- vim.lsp.config('tailwindcss', {})
 
@@ -194,6 +192,11 @@ end
 --   diagnostics = true,
 --   filetypes = { 'html', 'eruby'},
 -- }
+
+vim.lsp.enable("solargraph")
+vim.lsp.enable("ts_ls")
+vim.lsp.enable("cssls")
+
 
 ---------------------------------
 -- Floating diagnostics message
