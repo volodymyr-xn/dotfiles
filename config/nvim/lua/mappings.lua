@@ -50,8 +50,8 @@ vim.api.nvim_set_keymap('n', '<Leader>n', ':nohl<CR>', { silent = true, noremap 
 -- Global search and replace in quickfix menu
 vim.api.nvim_set_keymap('n', '@', ':%s///g<Left><Left><Left>', { noremap = true })
 -- vim.api.nvim_set_keymap('n', 's', ':w<CR>', { noremap = true })
--- vim.api.nvim_set_keymap('n', '<Leader>r', ":cfdo %s///g | update <c-b><right><right><right><right><right><right><right><right>", { noremap = true })
-vim.api.nvim_set_keymap('n', '<Leader>r', ":cdo %s///g | update <c-b><right><right><right><right><right><right><right><right>", { noremap = true })
+vim.api.nvim_set_keymap('n', '<Leader>r', ":cfdo %s///g | update <c-b><right><right><right><right><right><right><right><right>", { noremap = true })
+-- vim.api.nvim_set_keymap('n', '<Leader>r', ":cdfo %s///g | update <c-b><right><right><right><right><right><right><right><right>", { noremap = true })
 
 -- Edit vim config
 vim.api.nvim_set_keymap('n', '<Leader>ve', ':e ~/.config/nvim/init.lua<cr>', { noremap = true })

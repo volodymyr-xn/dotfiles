@@ -1,12 +1,3 @@
--- require('scrollview').setup({
---   current_only = true,
---   winblend = 60,
---   base = 'buffer',
---   column = 1,
---   marks_create_mappings = false
---   -- signs_on_startup = {'all'},
---   -- diagnostics_severities = {vim.diagnostic.severity.ERROR}
--- })
 require("scrollbar").setup({
     show = true,
     show_in_active_only = false,
@@ -88,7 +79,7 @@ require("scrollbar").setup({
             highlight = "Normal",
         },
         GitAdd = {
-            text = "┆",
+            text = "|",
             priority = 7,
             gui = nil,
             color = nil,
@@ -97,7 +88,7 @@ require("scrollbar").setup({
             highlight = "GitSignsAdd",
         },
         GitChange = {
-            text = "┆",
+            text = "|",
             priority = 7,
             gui = nil,
             color = nil,
@@ -152,7 +143,7 @@ require("scrollbar").setup({
         diagnostic = true,
         gitsigns = true, -- Requires gitsigns
         handle = true,
-        search = false, -- Requires hlslens
+        search = true, -- Requires hlslens
     },
 })
 

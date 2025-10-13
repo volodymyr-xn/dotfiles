@@ -5,7 +5,7 @@ require('lint').linters_by_ft = {
   javascript = {'eslint'},
   bash = {'shellcheck'},
   zsh = {'shellcheck'},
-  sh = {'shellcheck'}
+  -- sh = {'shellcheck'}
 }
 
 -- vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost", "InsertLeave"}, {

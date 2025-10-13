@@ -685,8 +685,8 @@ for i in range(1, 9)
 endfor
 
 " Yank(copy), comment and paste (usefull for refactoring)
-vnoremap M yV'] :TComment<CR>']pjj
-nnoremap M yy']:TComment<CR>']pjj
+vnoremap M yV'] gcc']pjj
+" nnoremap M yy']:TComment<CR>']pjj
 
 " Faster close windows and quit
 " nnoremap <C-c> <C-w>q

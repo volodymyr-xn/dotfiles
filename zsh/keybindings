@@ -21,11 +21,14 @@ bindkey -s "^o" 'bin/rails c\n'
 
 bindkey "^w" forward-word
 bindkey "^b" backward-word
-bindkey "^s" backward-delete-word
+bindkey "^d" backward-delete-word
 bindkey "^v" delete-word
+
+bindkey -s "^x" 'eza -alh\n'
 # bindkey "^e" beginning-of-line
 # bindkey "^]" end-of-line
-bindkey "^u" backward-kill-line
+# bindkey "^u" backward-kill-line
+# bindkey "^d" backward-kill-line
 
 # # bindkey -s "^i" 'git diff --staged\n'
 # bindkey -s "^o" 'git diff --staged\n'
