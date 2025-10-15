@@ -14,6 +14,7 @@ require("catppuccin").setup {
           return {
             CmpItemMenu = { fg = "#eceaff" },
             CmpItemAbbr = { fg = "#eceaff" },
+            -- WinSeparator = { fg = "#eceaff" },
             -- CmpItemAbbrDefault = { fg = "#eceaff" },
             -- CmpItemAbbrDeprecated = { fg = "#eceaff" },
             -- CmpItemAbbrDeprecatedDefault = { fg = "#eceaff" },

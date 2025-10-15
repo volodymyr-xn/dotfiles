@@ -22,6 +22,21 @@ vim.cmd [[
 -- vim.cmd("hi! link TabLineSel Function")
 -- vim.cmd("hi NonText guifg=#bebebe ctermfg=238 guibg=NONE ctermbg=NONE gui=NONE cterm=NONE")
 -- vim.cmd("hi SpecialKey guifg=#bebebe ctermfg=238 guibg=NONE ctermbg=NONE gui=NONE cterm=NONE")
+--
+--
+vim.opt.fillchars = {
+  horiz = "─",
+  horizup = "┴",
+  horizdown = "┬",
+  vert = "│",
+  vertleft = "┤",
+  vertright = "├",
+  verthoriz = "┼",
+}
+vim.cmd("hi! WinSeparator guifg=#89b4fa")
+vim.cmd("hi! VertSplit guifg=#89b4fa")
+-- WinSeparator   xxx guifg=#181926
+-- VertSplit      xxx guifg=#181926
 
 -- Custom highlight function
 -- Requires vim 'set termguicolors'
