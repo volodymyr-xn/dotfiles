@@ -16,5 +16,7 @@ Session.vim
 node_modules/
 *.local
 tags
+.claude/
+.cursor/
 dump.rdb
 .solargraph.yml

@@ -26,7 +26,7 @@ Plug('tpope/vim-commentary')
 " Autocomplete & intellisense
 " Coc is an intellisense engine for Vim/Neovim.
 " Also adds linting and snipets
-" Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " Enable in 2023
 " if has('nvim')
@@ -303,6 +303,8 @@ set history=500
 
 " Remove escape delay http://www.johnhawthorn.com/2012/09/vi-escape-delays/
 " set timeoutlen=1000 ttimeoutlen=0
+set timeoutlen=350
+set ttimeoutlen=10
 
 " Always show cursor
 set ruler
@@ -468,6 +470,22 @@ if has("nvim-0.5.0") || has("patch-8.1.1564")
 else
   set signcolumn=yes
 endif
+
+" Reference chart of values:
+"   Ps = 0  -> blinking block.
+"   Ps = 1  -> blinking block (default).
+"   Ps = 2  -> steady block.
+"   Ps = 3  -> blinking underline.
+"   Ps = 4  -> steady underline.
+"   Ps = 5  -> blinking bar (xterm).
+"   Ps = 6  -> steady bar (xterm).
+" Set cursor shapes (Insert: thin bar, Normal: block)
+let &t_SI = "\<Esc>[6 q"
+let &t_EI = "\<Esc>[2 q"
+" For this to work import to have the following ESC delay timeout settings:
+" Remove escape delay http://www.johnhawthorn.com/2012/09/vi-escape-delays/
+" set timeoutlen=350
+" set ttimeoutlen=10
 
 "============================================================================
 "====================== Highlight ============================================

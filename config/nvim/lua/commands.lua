@@ -106,7 +106,7 @@ function CopyCurrentFileRelativePathToClipboard()
   -- Copy to clipboard
   vim.fn.setreg("+", relpath)
 
-  vim.api.nvim_command('echo "Relative path " | echohl String | echon "' .. relpath .. '" | echohl None | echon " copied to clipboard!"')
+  vim.api.nvim_command('echohl String | echon "' .. relpath .. '" | echohl None | echon " copied to clipboard!"')
 end
 
 

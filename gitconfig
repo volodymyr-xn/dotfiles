@@ -3,7 +3,7 @@
 	email = volodymyr.shevchuk.dev@gmail.com
 [core]
 	editor = vim
-	excludesfile = /home/tech/.gitignore_global
+	excludesfile = ~/.gitignore_global
 [color]
 	ui = true
 [push]
