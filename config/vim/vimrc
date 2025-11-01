@@ -14,9 +14,6 @@ Plug('scrooloose/nerdtree')
 " TODO: Replace nerdtree with fern
 " Plug('lambdalisue/fern.vim')
 
-" Comments
-Plug('tpope/vim-commentary')
-
 " Perform all your vim insert mode completions with Tab
 " Plug('ervandew/supertab')
 
@@ -250,6 +247,10 @@ Plug('leafOfTree/vim-matchtag')
 " Measure startuptime
 Plug('dstein64/vim-startuptime')
 
+
+" Comments
+Plug('tpope/vim-commentary')
+
 call plug#end()
 "============================================================================
 " ===================== General settings ====================================
@@ -480,8 +481,10 @@ endif
 "   Ps = 5  -> blinking bar (xterm).
 "   Ps = 6  -> steady bar (xterm).
 " Set cursor shapes (Insert: thin bar, Normal: block)
-let &t_SI = "\<Esc>[6 q"
-let &t_EI = "\<Esc>[2 q"
+" let &t_SI = "\<Esc>[6 q"
+" let &t_EI = "\<Esc>[2 q"
+let &t_SI = "\e[6 q"
+let &t_EI = "\e[2 q"
 " For this to work import to have the following ESC delay timeout settings:
 " Remove escape delay http://www.johnhawthorn.com/2012/09/vi-escape-delays/
 " set timeoutlen=350
@@ -740,10 +743,13 @@ xnoremap p "_dP
 " Tcomment
 " Comment line in visual mode
 vnoremap <Leader><Tab> gcc<CR>
+vnoremap <Leader>. gcc<CR>
+
+nnoremap <leader><TAB> <Plug>CommentaryLine
 
 " Comment line in normal mode
 nnoremap <Leader><Tab> gcc<CR>
-
+nnoremap <Leader>. gcc<CR>
 
 "=========================================================================
 "====================== FZF settings =====================================
