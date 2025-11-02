@@ -720,8 +720,11 @@ nnoremap <silent> <Leader>T :TestFile<CR>
 nnoremap <silent> <Leader>a :TestSuite<CR>
 nnoremap <silent> <Leader>l :TestLast<CR>
 
+" Reload file
+nnoremap <silent> <Leader>e :e!<CR>
+
+nnoremap <silent> <Leader>e :e!<CR>
 " Go to related file
-nnoremap <Leader>e :R<CR>
 
 " Go to alternate file
 nnoremap q :GFiles?<CR>
