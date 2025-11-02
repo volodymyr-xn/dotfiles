@@ -250,6 +250,7 @@ Plug('dstein64/vim-startuptime')
 
 " Comments
 Plug('tpope/vim-commentary')
+" Plug('tomtom/tcomment_vim')
 
 call plug#end()
 "============================================================================
@@ -742,14 +743,13 @@ xnoremap p "_dP
 
 " Tcomment
 " Comment line in visual mode
-vnoremap <Leader><Tab> gcc<CR>
-vnoremap <Leader>. gcc<CR>
-
-nnoremap <leader><TAB> <Plug>CommentaryLine
+" vnoremap <Leader><Tab> gcc<CR>
+" vnoremap <Leader><Tab> :TComment<CR>
+vnoremap <Leader><Tab> :Commentary<CR>
 
 " Comment line in normal mode
-nnoremap <Leader><Tab> gcc<CR>
-nnoremap <Leader>. gcc<CR>
+" nnoremap <Leader><Tab> :TComment<CR>
+noremap <Leader><Tab> :Commentary<CR>
 
 "=========================================================================
 "====================== FZF settings =====================================
