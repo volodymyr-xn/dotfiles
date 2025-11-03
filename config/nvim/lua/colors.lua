@@ -80,13 +80,15 @@ require("catppuccin").setup {
             -- Darker and bluer
             -- Bluer
             base = "#212433",
+            -- base = "#1E202C"
             -- Darker
             -- base = "#171920"
+            -- base = "#181A21"
+            -- base = "#1A1C22"
 
             -- base = "#262833",
             -- base = "#242533"
             -- base = "#252633"
--- # background = "#24273a"
         },
         frappe = {},
         macchiato = {},
