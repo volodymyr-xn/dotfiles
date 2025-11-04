@@ -149,7 +149,7 @@ vim.api.nvim_set_keymap('n', '<Leader>l', ':TestLast<CR>', {silent = true})
 -- Go to related file
 vim.api.nvim_set_keymap('n', '<Leader>a', ':R<CR>', { noremap = true })
 
-vim.api.nvim_set_keymap('n', '<Leader>e', ':e!<CR>', { noremap = true })
+vim.api.nvim_set_keymap('n', '<Leader>e', ':e!<CR>', { noremap = true, silent = true })
 
 -- Go to alternate file
 -- vim.api.nvim_set_keymap('n', 'q', ':A<CR>', { noremap = true })
