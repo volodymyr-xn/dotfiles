@@ -33,6 +33,8 @@ vim.api.nvim_set_keymap('n', 'st', '<C-w>s', {noremap = true, silent = false })
 -- vim.api.nvim_set_keymap('n', '<Leader>h', ':Telescope jumplist<CR>', {noremap = true, silent = false })
 vim.api.nvim_set_keymap('n', '<Leader>q', ':Telescope buffers<CR>', {noremap = true, silent = false })
 
+vim.api.nvim_set_keymap('n', 'ss', ':R<CR>', {noremap = true, silent = false })
+
 -- vim.api.nvim_set_keymap('n', 'dn', 'bdiw', {})
 
 -- Quick binding.pry

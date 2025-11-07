@@ -231,7 +231,7 @@ vim.api.nvim_set_keymap('n', '<Leader>q', ':Buffers!<CR>', {noremap = true})
 -- vim.keymap.set('n', '<Leader>h', full_text_search_only_in_opened_buffers, {})
 vim.keymap.set('n', '<Leader>x', telescope.current_buffer_fuzzy_find, {})
 
-vim.keymap.set('n', '<Leader>h', full_text_search_only_in_opened_buffers_fzf_version, {})
+-- vim.keymap.set('n', '<Leader>h', full_text_search_only_in_opened_buffers_fzf_version, {})
 
 vim.keymap.set('n', ',q', ":Tel<CR>", {})
 

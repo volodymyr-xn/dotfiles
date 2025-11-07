@@ -2,9 +2,9 @@ require("mason").setup()
 require("mason-lspconfig").setup({
   -- A list of servers to automatically install if they're not already installed. Example: { "rust_analyzer@nightly", "lua_ls" }
   -- This setting has no relation with the `automatic_installation` setting.
-  -- ensure_installed = { "lua_ls", "ts_ls", "cssls", "tailwindcss"},
-  -- ensure_installed = { "lua_ls", "ts_ls", "cssls", "tailwindcss", "ruby_lsp"},
-  ensure_installed = { "ts_ls", "cssls"},
+  -- ensure_installed = { "lua_ls", "ts_ls", "cssls", "herb_ls", "tailwindcss"},
+  -- ensure_installed = { "lua_ls", "ts_ls", "cssls", "herb_ls", "tailwindcss", "ruby_lsp"},
+  ensure_installed = { "ts_ls", "cssls", "herb_ls"},
   -- Whether servers that are set up (via lspconfig) should be automatically installed if they're not already installed.
   automatic_installation = false
 })
@@ -193,9 +193,13 @@ end
 --   filetypes = { 'html', 'eruby'},
 -- }
 
+-- require('lspconfig').herb_ls.setup()
+-- vim.lsp.config('herb_ls', {})
+
 vim.lsp.enable("solargraph")
 vim.lsp.enable("ts_ls")
 vim.lsp.enable("cssls")
+vim.lsp.enable("herb_ls")
 
 
 ---------------------------------

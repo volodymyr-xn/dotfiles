@@ -257,5 +257,6 @@ if [[ -f "/Users/tech/.local/bin/mise" ]] ; then
   eval "$(activate zsh)"
 fi
 
+export PATH="$PATH:$HOME/.local/bin"
 . "$HOME/.cargo/env"
 

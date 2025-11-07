@@ -48,9 +48,9 @@ vim.api.nvim_set_keymap('n', '<Leader>n', ':nohl<CR>', { silent = true, noremap 
 
 -- Enter replace command
 -- Global search and replace in quickfix menu
-vim.api.nvim_set_keymap('n', '@', ':%s///g<Left><Left><Left>', { noremap = true })
+vim.api.nvim_set_keymap('n', 'sr', ':%s///g<Left><Left><Left>', { noremap = true })
 -- vim.api.nvim_set_keymap('n', 's', ':w<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<Leader>r', ":cfdo %s///g | update <c-b><right><right><right><right><right><right><right><right>", { noremap = true })
+vim.api.nvim_set_keymap('n', '@', ":cfdo %s///g | update <c-b><right><right><right><right><right><right><right><right>", { noremap = true })
 -- vim.api.nvim_set_keymap('n', '<Leader>r', ":cdfo %s///g | update <c-b><right><right><right><right><right><right><right><right>", { noremap = true })
 
 -- Edit vim config
