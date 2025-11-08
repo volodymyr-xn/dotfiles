@@ -17,6 +17,9 @@ node_modules/
 *.local
 tags
 .claude/
+.claude
+.cursor
 .cursor/
 dump.rdb
 .solargraph.yml
+CLAUDE.md
