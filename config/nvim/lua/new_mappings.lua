@@ -31,7 +31,8 @@ vim.api.nvim_set_keymap('n', 's', '', {noremap = true, silent = false })
 vim.api.nvim_set_keymap('n', 'st', '<C-w>s', {noremap = true, silent = false })
 
 -- vim.api.nvim_set_keymap('n', '<Leader>h', ':Telescope jumplist<CR>', {noremap = true, silent = false })
-vim.api.nvim_set_keymap('n', '<Leader>q', ':Telescope buffers<CR>', {noremap = true, silent = false })
+-- vim.api.nvim_set_keymap('n', '<Leader>q', ':Telescope buffers<CR>', {noremap = true, silent = false })
+vim.api.nvim_set_keymap('n', '<Leader>h', ':Telescope buffers<CR>', {noremap = true, silent = false })
 
 vim.api.nvim_set_keymap('n', 'ss', ':R<CR>', {noremap = true, silent = false })
 
@@ -92,7 +93,4 @@ vim.keymap.set('n', '<leader>k', ':TestFile<CR>', { noremap = true, silent = tru
 -- Re-balance panes
 -- vim.api.nvim_set_keymap('n', '=', '<C-W>=', {noremap = true})
 --
-
-vim.keymap.set('n', '<C-i>', '<ESC>', { noremap = true, silent = true })
-vim.keymap.set('i', '<C-i>', '<ESC>', { noremap = true, silent = true })
 

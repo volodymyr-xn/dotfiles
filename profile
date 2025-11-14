@@ -148,7 +148,8 @@ if [[ -f "/opt/homebrew/bin/brew" ]] ; then
   export PKG_CONFIG_PATH="$(brew --prefix jemalloc)/lib/pkgconfig:$PKG_CONFIG_PATH"
   export PKG_CONFIG_PATH="/opt/homebrew/bin/pkg-config:$(brew --prefix icu4c)/lib/pkgconfig:$(brew --prefix curl)/lib/pkgconfig:$(brew --prefix zlib)/lib/pkgconfig"
   # export RUBY_CONFIGURE_OPTS="--with-readline-dir=$(brew --prefix readline)"
-  export RUBY_CONFIGURE_OPTS="--with-jemalloc --enable-yjit --with-jemalloc-dir=$(brew --prefix jemalloc) --with-readline-dir=$(brew --prefix readline)  --with-openssl=$(brew --prefix openssl) --with-openssl-dir=$(brew --prefix openssl@3)"
+  # export RUBY_CONFIGURE_OPTS="--with-jemalloc --enable-yjit --with-jemalloc-dir=$(brew --prefix jemalloc) --with-readline-dir=$(brew --prefix readline)  --with-openssl=$(brew --prefix openssl) --with-openssl-dir=$(brew --prefix openssl@3)"
+  export RUBY_CONFIGURE_OPTS="--with-readline-dir=$(brew --prefix readline)  --with-openssl=$(brew --prefix openssl) --with-openssl-dir=$(brew --prefix openssl@3)"
 else
   # export RUBY_CONFIGURE_OPTS=""
   export RUBY_CONFIGURE_OPTS="--with-jemalloc --enable-yjit"
