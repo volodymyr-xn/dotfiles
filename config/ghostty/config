@@ -1,6 +1,10 @@
-font-family = "CaskaydiaMono Nerd Font"
-font-style = "Regular"
+#font-family = "CaskaydiaMono Nerd Font"
+# font-family = "JetBrains Mono Semi Bold"
+# font-style = "Regular"
 font-size = 12
+
+# adjust-cell-height = -5
+adjust-cell-height = -5
 
 maximize = true
 
@@ -9,7 +13,7 @@ keybind=ctrl+enter=ignore
 
 # Make fonts bolder (works only on MacOS)
 font-thicken=false
-font-thicken-strength=2
+font-thicken-strength=1
 
 palette = 0=#494d64
 palette = 1=#ed8796

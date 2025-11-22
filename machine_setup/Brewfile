@@ -21,14 +21,17 @@ brew "rclone"
 brew "gallery-dl"
 brew "wireguard-tools"
 
+
 # Better encryption for encrypted zip archives
 # brew "p7zip"
 
-cask "betterdisplay"
 cask "ghostty"
-cask "libreoffice"
-cask "microsoft-teams"
+cask "kitty"
 cask "google-chrome"
+cask "betterdisplay"
+cask "microsoft-teams"
+cask "libreoffice"
 cask "sublime-text"
 cask "affinity-photo"
 cask "affinity-designer"
+cask "stats"
