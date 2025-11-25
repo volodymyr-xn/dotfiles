@@ -18,6 +18,8 @@ brew "wget"
 
 brew "rclone"
 
+brew "ollama"
+brew "yt-dlp"
 brew "gallery-dl"
 brew "wireguard-tools"
 
