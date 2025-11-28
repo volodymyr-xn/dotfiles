@@ -76,8 +76,9 @@ local function highlight_word_under_cursor()
   vim.fn.setreg("/", pattern)
 end
 
--- Inser debug
-vim.keymap.set("n", "<Leader>q", custom_insert_debug, { noremap = true, silent = true })
+-- Insert debug
+-- vim.keymap.set("n", "<Leader>q", custom_insert_debug, { noremap = true, silent = true })
+vim.keymap.set("n", "<Leader>`", custom_insert_debug, { noremap = true, silent = true })
 
 -- vim.keymap.set("n", "sa", ":A<CR>", { noremap = true, silent = true })
 -- vim.keymap.set('n', 's', ':tabnext<CR>', { noremap = true })
