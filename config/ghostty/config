@@ -1,3 +1,13 @@
+#Confirms that a surface should be closed before closing it.
+
+# This defaults to true. If set to false, surfaces will close without any confirmation. This can # also be set to always, which will always confirm closing a surface, even if shell integration # says a process isn't running.
+confirm-close-surface=false
+
+# Whether or not to quit after the last surface is closed.
+# This defaults to false on macOS since that is standard behavior for a macOS application. On Linux, this defaults to true since that is generally expected behavior.
+# On Linux, if this is true, Ghostty can delay quitting fully until a configurable amount of time has passed after the last window is closed. See the documentation of quit-after-last-window-closed-delay.
+# quit-after-last-window-closed=true
+
 #font-family = "CaskaydiaMono Nerd Font"
 # font-family = "JetBrains Mono Semi Bold"
 # font-style = "Regular"
@@ -36,4 +46,7 @@ foreground = ffffff
 cursor-color = f4dbd6
 selection-background = 3a3e53
 selection-foreground = cad3f5
+
+
 keybind = shift+enter=text:\x1b\r
+keybind = ctrl+enter=unbind
