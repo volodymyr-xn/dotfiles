@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+current=$(osascript -e "output volume of (get volume settings)")
+new=$((current + 10))
+if [ $new -gt 100 ]; then new=100; fi
+
+osascript -e "set volume output volume $new"
