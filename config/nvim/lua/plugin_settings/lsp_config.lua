@@ -15,24 +15,25 @@ local capabilities = require("cmp_nvim_lsp").default_capabilities()
 local bufopts = { noremap=true, silent=true, buffer=bufnr }
 -- Some help hints about method and classes in popup window
 -- Works well for Ruby and Rails standard library, also for gems
-vim.keymap.set('n', 'go', vim.lsp.buf.hover, bufopts)
+vim.keymap.set('n', 'go', vim.lsp.buf.hover, vim.tbl_extend('force', bufopts, { desc = "LSP hover" }))
 
 -- Format by null_ls
-vim.keymap.set('n', '<Leader>=', vim.lsp.buf.format, bufopts)
+vim.keymap.set('n', '<Leader>=', vim.lsp.buf.format, vim.tbl_extend('force', bufopts, { desc = "Format buffer" }))
 
 -- Go to definition. Works, but not works initialy when LSP client is not attached
 -- REALLY COOL!!!
-vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
+vim.keymap.set('n', 'gd', vim.lsp.buf.definition, vim.tbl_extend('force', bufopts, { desc = "Go to definition" }))
 
 -- -- Find references of variable/constant/class/method accross files
 -- -- REALLY COOL!!!
-vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
+vim.keymap.set('n', 'gr', vim.lsp.buf.references, vim.tbl_extend('force', bufopts, { desc = "Find references" }))
 
 -- -- Rename method/variable/constant accross files
 -- -- REALLY COOL!!!
-vim.keymap.set('n', 'gb', vim.lsp.buf.rename, bufopts)
+vim.keymap.set('n', 'gb', vim.lsp.buf.rename, vim.tbl_extend('force', bufopts, { desc = "Rename symbol" }))
 
-vim.keymap.set('n', 'ga', vim.lsp.buf.code_action, {})
+-- LSP code actions
+vim.keymap.set('n', 'ga', vim.lsp.buf.code_action, { desc = "Code actions" })
 
 -- Mappings.
 -- See `:help vim.diagnostic.*` for documentation on any of the below functions

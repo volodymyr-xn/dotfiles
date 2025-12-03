@@ -251,5 +251,6 @@ local function flash_jump()
   flash.jump()
 end
 
-vim.keymap.set("n", "K", flash_jump, {})
+-- Flash jump
+vim.keymap.set("n", "K", flash_jump, { desc = "Flash jump" })
 

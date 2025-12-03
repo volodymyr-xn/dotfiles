@@ -1,7 +1,7 @@
 # Vim specific
 alias vi='vim'
 alias vi:='vim ~/.vim/vimrc'
-alias v='vim'
+alias v='nvim'
 alias nv='nvim'
 alias vn='nvim'
 

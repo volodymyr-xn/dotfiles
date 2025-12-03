@@ -66,6 +66,7 @@ function ReloadActiveChromeTab()
   end
 end
 
+-- Reload active Chrome tab
 vim.keymap.set("n", "R", ReloadActiveChromeTab, { silent = true, desc = "Reload active Chrome tab" })
 
 

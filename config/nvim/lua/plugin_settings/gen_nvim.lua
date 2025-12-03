@@ -40,4 +40,5 @@ gen_plugin.prompts['WriteMinitest'] = {
 }
 
 -- vim.keymap.set({ 'v' }, '<leader>q', ':Gen WriteRspecs<CR>')
-vim.keymap.set({ 'v' }, '<leader>q', ':Gen<CR>')
+-- Open Gen AI prompts
+vim.keymap.set({ 'v' }, '<leader>q', ':Gen<CR>', { desc = "Gen AI prompts" })

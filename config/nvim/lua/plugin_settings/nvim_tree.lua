@@ -87,8 +87,9 @@ vim.cmd [[ highlight NvimTreeClosedFolderIcon guifg=#8094b4 gui=bold ]]
 vim.api.nvim_set_keymap("n", "<C-\\>", "<NOP>", {noremap = true, silent = true})
 
 -- Toggle NvimTree
-vim.api.nvim_set_keymap("n", "<C-\\>", ":NvimTreeToggle<CR>", {noremap = true, silent = true})
-vim.api.nvim_set_keymap("n", "<Leader>0", ":NvimTreeFindFile<CR>", {noremap = true, silent = true})
+vim.api.nvim_set_keymap("n", "<C-\\>", ":NvimTreeToggle<CR>", {noremap = true, silent = true, desc = "Toggle NvimTree"})
+-- Find current file in NvimTree
+vim.api.nvim_set_keymap("n", "<Leader>0", ":NvimTreeFindFile<CR>", {noremap = true, silent = true, desc = "Find file in NvimTree"})
 
 -- Disable json plugin conceal
 vim.g.vim_json_syntax_conceal = 0

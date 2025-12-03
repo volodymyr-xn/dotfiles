@@ -208,14 +208,15 @@ local find_i18n = find_resource_in_dir("config/locales")
 local components_dir = CustomFindFirstAvailableDir({'app/components', "app/view_components"})
 local find_view_components = find_resource_in_dir(components_dir)
 -- if (components_dir) then
-vim.keymap.set('n', '<Leader>f', find_view_components, {})
+-- Find view components
+vim.keymap.set('n', '<Leader>f', find_view_components, { desc = "Find view components" })
 -- end
 
 -- Search files
 -- vim.keymap.set('n', '<C-p>', telescope.find_files, { noremap = true })
-vim.keymap.set('n', '<C-p>', find_files_wihout_preview, { noremap = true })
+vim.keymap.set('n', '<C-p>', find_files_wihout_preview, { noremap = true, desc = "Find files" })
 -- " Search sibling files in same directory as current file(with preview window)
-vim.keymap.set('n', '<Leader>i', find_sibling_files, { noremap = true })
+vim.keymap.set('n', '<Leader>i', find_sibling_files, { noremap = true, desc = "Find sibling files" })
 -- vim.keymap.set('n', 'R', telescope.grep_string, { noremap = true })
 
 
@@ -224,24 +225,26 @@ vim.keymap.set('n', '<Leader>i', find_sibling_files, { noremap = true })
 -- vim.keymap.set('n', '<Leader>p', full_text_search_wihout_preview, {})
 
 -- Find changed files
-vim.keymap.set('n', 'q', find_changed_files, {})
+vim.keymap.set('n', 'q', find_changed_files, { desc = "Find changed files" })
 -- Buffer select
-vim.api.nvim_set_keymap('n', '<Leader>q', ':Buffers!<CR>', {noremap = true})
+vim.api.nvim_set_keymap('n', '<Leader>q', ':Buffers!<CR>', {noremap = true, desc = "FZF buffers"})
 
 -- vim.keymap.set('n', '<Leader>h', full_text_search_only_in_opened_buffers, {})
-vim.keymap.set('n', '<Leader>x', telescope.current_buffer_fuzzy_find, {})
+-- Fuzzy find in current buffer
+vim.keymap.set('n', '<Leader>x', telescope.current_buffer_fuzzy_find, { desc = "Fuzzy find in buffer" })
 
 -- vim.keymap.set('n', '<Leader>h', full_text_search_only_in_opened_buffers_fzf_version, {})
 
-vim.keymap.set('n', ',q', ":Tel<CR>", {})
+-- Telescope command
+vim.keymap.set('n', ',q', ":Tel<CR>", { desc = "Telescope command" })
 
 -- Find in varios Rails projekt dirs
-vim.keymap.set('n', '<Leader>m', find_models, {})
-vim.keymap.set('n', '<Leader>c', find_controllers, {})
-vim.keymap.set('n', '<Leader>j', find_js, {})
-vim.keymap.set('n', '<Leader>s', find_css, {})
-vim.keymap.set('n', '<Leader>d', find_views, {})
-vim.keymap.set('n', '<Leader>b', find_i18n, {})
+vim.keymap.set('n', '<Leader>m', find_models, { desc = "Find models" })
+vim.keymap.set('n', '<Leader>c', find_controllers, { desc = "Find controllers" })
+vim.keymap.set('n', '<Leader>j', find_js, { desc = "Find JS files" })
+vim.keymap.set('n', '<Leader>s', find_css, { desc = "Find CSS files" })
+vim.keymap.set('n', '<Leader>d', find_views, { desc = "Find views" })
+vim.keymap.set('n', '<Leader>b', find_i18n, { desc = "Find i18n files" })
 
 
 
