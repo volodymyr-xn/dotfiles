@@ -11,7 +11,7 @@ confirm-close-surface=false
 #font-family = "CaskaydiaMono Nerd Font"
 # font-family = "JetBrains Mono Semi Bold"
 # font-style = "Regular"
-font-size = 12
+font-size = 15
 
 # adjust-cell-height = -5
 adjust-cell-height = -2
