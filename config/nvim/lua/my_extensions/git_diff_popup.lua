@@ -48,29 +48,41 @@ function GitDiffCurrentFilePopup()
   -- FOCUS LOCKING
   --------------------------------------------------------------------
 
-  -- Keys that should NOT work while popup is open
   local blocked_keys = {
     -- window navigation
-    "<C-w>", "<C-w>h", "<C-w>j", "<C-w>k", "<C-w>l>",
+    "<C-w>", "<C-w>h", "<C-w>j", "<C-w>k", "<C-w>l", "<C-w>w", "<C-w>W",
+    "<C-w>p", "<C-w>t", "<C-w>b", "<C-w>c", "<C-w>o", "<C-w>q",
+    "<C-w>s", "<C-w>v", "<C-w>n", "<C-w><C-w>",
     "<C-h>", "<C-j>", "<C-k>", "<C-l>",
     "<C-Up>", "<C-Down>", "<C-Left>", "<C-Right>",
 
     -- tab switching
     "<Tab>", "<S-Tab>",
+    "gt", "gT", "<C-PageUp>", "<C-PageDown>",
 
     -- buffer switching
-    ":b", ":bnext", ":bprev",
+    "<C-^>", "<C-6>",
 
-    -- file opening
-    ":e ",
+    -- jump list navigation
+    "<C-o>", "<C-i>", "<C-t>",
+
+    -- file navigation
+    "gf", "gF", "<C-]>", "gd", "gD",
+
+    -- marks
+    "'", "`",
+
+    -- other navigation
+    "ZZ", "ZQ",
   }
 
   for _, key in ipairs(blocked_keys) do
     vim.keymap.set({ "n", "v", "i" }, key, "<Nop>", { buffer = buf, silent = true })
   end
 
-  -- Prevent ":" (command mode)
-  vim.keymap.set("n", ":", "<Nop>", { buffer = buf, silent = true })
+  -- Block command mode completely
+  vim.keymap.set({ "n", "v" }, ":", "<Nop>", { buffer = buf, silent = true })
+  vim.keymap.set({ "n", "v" }, "Q", "<Nop>", { buffer = buf, silent = true })
 
   --------------------------------------------------------------------
   -- ESC CLOSES POPUP

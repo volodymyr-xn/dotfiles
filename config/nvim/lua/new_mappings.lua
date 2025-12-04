@@ -98,6 +98,9 @@ vim.keymap.set('n', '#', "*N", { noremap = true, silent = true, desc = "Search w
 -- Test current file
 vim.keymap.set('n', '<leader>k', ':TestFile<CR>', { noremap = true, silent = true, desc = "Test file" })
 
+-- Start FzfLua menu
+vim.keymap.set('n', 'sj', ':FzfLua<cr>', { noremap = true, silent = true, desc = "FzfLua select" })
+
 -- Re-balance panes
 -- vim.api.nvim_set_keymap('n', '=', '<C-W>=', {noremap = true})
 --
