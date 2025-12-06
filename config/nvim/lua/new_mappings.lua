@@ -101,8 +101,7 @@ vim.keymap.set('n', '<leader>k', ':TestFile<CR>', { noremap = true, silent = tru
 -- Start FzfLua menu
 vim.keymap.set('n', 'sj', ':FzfLua<cr>', { noremap = true, silent = true, desc = "FzfLua select" })
 
-vim.keymap.set('n', 'sl', ':Outline<CR>', { noremap = true, silent = true, desc = "Outline" })
-vim.keymap.set('n', 'sj', ':Outline<CR>', { noremap = true, silent = true, desc = "Outline" })
+vim.keymap.set('n', 'go', ':Outline<CR>', { noremap = true, silent = true, desc = "Outline" })
 
 -- Re-balance panes
 -- vim.api.nvim_set_keymap('n', '=', '<C-W>=', {noremap = true})
