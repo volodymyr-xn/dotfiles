@@ -124,9 +124,6 @@ require("lazy").setup({
   -- TODO: Consider switch to
   'lewis6991/gitsigns.nvim',
 
-  -- Lightweight support for Ruby's Bundler
-  -- "tpope/vim-bundler",
-
   -- Ruby on Rails power tool
   -- This is a massive (in a good way) Vim plugin for editing Ruby on Rails applications.
   -- Partial and concern extraction. In a view, :Extract {file} replaces the
@@ -144,6 +141,9 @@ require("lazy").setup({
 
   -- Ruby syntax highlighting
   "vim-ruby/vim-ruby",
+
+  -- Lightweight support for Ruby's Bundler
+  "tpope/vim-bundler",
 
   -- Vim highlighting & completion for MiniTest
   "sunaku/vim-ruby-minitest",

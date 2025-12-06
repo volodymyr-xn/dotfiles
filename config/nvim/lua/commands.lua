@@ -70,20 +70,18 @@ end
 vim.keymap.set("n", "R", ReloadActiveChromeTab, { silent = true, desc = "Reload active Chrome tab" })
 
 
--- Toggle zoom of current window
 function ToggleCurrentWindowZoom()
-  if not vim.g.currentWindowZoomed then
+  if vim.g.currentWindowZoomed == nil then
     vim.g.currentWindowZoomed = false
-    -- TODO check nerdtree state
   end
 
   if vim.g.currentWindowZoomed then
-    vim.cmd('execute "normal \\<C-W>="')
+    vim.cmd("wincmd =")
     vim.g.currentWindowZoomed = false
   else
-    -- vim.cmd("NvimTreeClose")
     vim.cmd("Neotree close")
-    vim.cmd('execute "normal \\<C-W>\\| \\<C-W>_"')
+    vim.cmd("wincmd |")
+    vim.cmd("wincmd _")
     vim.g.currentWindowZoomed = true
   end
 end
