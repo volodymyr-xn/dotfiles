@@ -148,6 +148,47 @@ local function find_changed_files()
   telescope.git_status()
 end
 
+local function find_changed_files_by_extension(extension)
+  return function()
+    local pickers = require('telescope.pickers')
+    local finders = require('telescope.finders')
+    local conf = require('telescope.config').values
+    local make_entry = require('telescope.make_entry')
+
+    local git_cmd = vim.fn.systemlist('git status --porcelain')
+    local files = {}
+
+    for _, line in ipairs(git_cmd) do
+      local file = line:sub(4)
+      if file:match(extension .. "$") then
+        table.insert(files, {
+          value = file,
+          display = line:sub(1, 2) .. " " .. file,
+          ordinal = file,
+          path = file,
+        })
+      end
+    end
+
+    pickers.new({}, {
+      prompt_title = 'Git Status (' .. extension .. ')',
+      finder = finders.new_table {
+        results = files,
+        entry_maker = function(entry)
+          return entry
+        end,
+      },
+      sorter = conf.generic_sorter({}),
+      previewer = conf.file_previewer({}),
+    }):find()
+  end
+end
+
+local find_changed_js_files = find_changed_files_by_extension("%.js")
+local find_changed_rb_files = find_changed_files_by_extension("%.rb")
+local find_changed_erb_files = find_changed_files_by_extension("%.html%.erb")
+local find_changed_css_files = find_changed_files_by_extension("%.s?css")
+
 function find_resource_in_dir(dir)
   return function() telescope.find_files({ cwd = dir, previewer = false }) end
 end
@@ -226,8 +267,17 @@ vim.keymap.set('n', '<Leader>i', find_sibling_files, { noremap = true, desc = "F
 
 -- Find changed files
 vim.keymap.set('n', 'q', find_changed_files, { desc = "Find changed files" })
+vim.keymap.set('n', 'gj', find_changed_js_files, { desc = "Find changed JS files" })
+vim.keymap.set('n', 'gk', find_changed_rb_files, { desc = "Find changed RB files" })
+vim.keymap.set('n', 'gf', find_changed_erb_files, { desc = "Find changed ERB files" })
+vim.keymap.set('n', 'gs', find_changed_css_files, { desc = "Find changed CSS files" })
+vim.keymap.set('n', '<leader>qj', find_changed_js_files, { desc = "Find changed JS files" })
+vim.keymap.set('n', '<leader>qk', find_changed_rb_files, { desc = "Find changed RB files" })
+vim.keymap.set('n', '<leader>qf', find_changed_erb_files, { desc = "Find changed ERB files" })
+vim.keymap.set('n', '<leader>qs', find_changed_css_files, { desc = "Find changed CSS files" })
+
 -- Buffer select
-vim.api.nvim_set_keymap('n', '<Leader>q', ':Buffers!<CR>', {noremap = true, desc = "FZF buffers"})
+-- vim.api.nvim_set_keymap('n', '<Leader>q', ':Buffers!<CR>', {noremap = true, desc = "FZF buffers"})
 
 -- vim.keymap.set('n', '<Leader>h', full_text_search_only_in_opened_buffers, {})
 -- Fuzzy find in current buffer
