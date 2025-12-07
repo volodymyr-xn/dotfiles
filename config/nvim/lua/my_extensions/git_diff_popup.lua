@@ -1,9 +1,41 @@
+local function find_diff_line_for_source_line(diff, target_line)
+  local diff_line_num = 1
+  local current_new_line = 0
+
+  for _, line in ipairs(diff) do
+    if line:match("^@@") then
+      local new_start = line:match("%+(%d+)")
+      if new_start then
+        current_new_line = tonumber(new_start)
+      end
+    elseif line:match("^%-") then
+      -- Deletion, don't increment current_new_line
+    elseif line:match("^%+") then
+      if current_new_line == target_line then
+        return diff_line_num
+      end
+      current_new_line = current_new_line + 1
+    else
+      -- Context line
+      if current_new_line == target_line then
+        return diff_line_num
+      end
+      current_new_line = current_new_line + 1
+    end
+    diff_line_num = diff_line_num + 1
+  end
+
+  return nil
+end
+
 function GitDiffCurrentFilePopup()
   local file = vim.api.nvim_buf_get_name(0)
   if file == "" then
     vim.notify("No file associated with this buffer", vim.log.levels.WARN)
     return
   end
+
+  local current_line = vim.api.nvim_win_get_cursor(0)[1]
 
   -- Diff for current file
   local diff = vim.fn.systemlist("git diff -- " .. vim.fn.fnameescape(file))
@@ -43,6 +75,12 @@ function GitDiffCurrentFilePopup()
     title = ' Git Diff ',
     title_pos = 'center'
   })
+
+  -- Position cursor at current line if it has changes
+  local target_diff_line = find_diff_line_for_source_line(diff, current_line)
+  if target_diff_line then
+    vim.api.nvim_win_set_cursor(win, {target_diff_line, 0})
+  end
 
   --------------------------------------------------------------------
   -- FOCUS LOCKING
