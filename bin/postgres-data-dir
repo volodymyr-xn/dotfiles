@@ -2,4 +2,11 @@
 
 set -euo pipefail
 
-echo "$(asdf where postgres)/data"
+if command -v mise &> /dev/null && mise where postgres &> /dev/null; then
+  echo "$(mise where postgres)/data"
+elif command -v asdf &> /dev/null && asdf where postgres &> /dev/null; then
+  echo "$(asdf where postgres)/data"
+else
+  echo "Error: postgres not found in mise or asdf" >&2
+  exit 1
+fi

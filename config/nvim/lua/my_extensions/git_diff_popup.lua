@@ -84,14 +84,15 @@ function GitDiffCurrentFilePopup()
   vim.keymap.set({ "n", "v" }, ":", "<Nop>", { buffer = buf, silent = true })
   vim.keymap.set({ "n", "v" }, "Q", "<Nop>", { buffer = buf, silent = true })
 
-  --------------------------------------------------------------------
-  -- ESC CLOSES POPUP
-  --------------------------------------------------------------------
-  vim.keymap.set("n", "<Esc>", function()
+  local close_popup = function()
     if vim.api.nvim_win_is_valid(win) then
       vim.api.nvim_win_close(win, true)
     end
-  end, { buffer = buf, silent = true })
+  end
+
+  -- Close popup bindings in git diff popup mode
+  vim.keymap.set("n", "<Esc>", close_popup, { buffer = buf, silent = true })
+  vim.keymap.set("n", "q", close_popup, { buffer = buf, silent = true })
 end
 
 vim.api.nvim_create_user_command("GitDiffPopup", GitDiffCurrentFilePopup, {})

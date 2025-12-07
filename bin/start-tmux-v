@@ -18,7 +18,7 @@ done
 
 vim_executable="nvim"
 
-echo "$tmux_session_name"
+# echo "$tmux_session_name"
 
 is_tmux_server_running() {
   [[ -n $(pgrep tmux) ]] && return 0 || return 1
