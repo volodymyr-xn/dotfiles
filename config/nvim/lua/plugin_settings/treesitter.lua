@@ -16,6 +16,7 @@ require("nvim-treesitter.configs").setup({
     "go",
     "diff",
     "ruby",
+    "python",
     "elixir",
     "sql",
     "scss",

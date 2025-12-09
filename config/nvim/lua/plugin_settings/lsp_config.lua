@@ -4,7 +4,7 @@ require("mason-lspconfig").setup({
   -- This setting has no relation with the `automatic_installation` setting.
   -- ensure_installed = { "lua_ls", "ts_ls", "cssls", "herb_ls", "tailwindcss"},
   -- ensure_installed = { "lua_ls", "ts_ls", "cssls", "herb_ls", "tailwindcss", "ruby_lsp"},
-  ensure_installed = { "ts_ls", "cssls", "herb_ls"},
+  ensure_installed = { "ts_ls", "cssls", "herb_ls", "black"},
   -- Whether servers that are set up (via lspconfig) should be automatically installed if they're not already installed.
   automatic_installation = false
 })

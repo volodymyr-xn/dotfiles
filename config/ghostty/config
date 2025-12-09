@@ -13,6 +13,8 @@ confirm-close-surface=false
 # font-style = "Regular"
 font-size = 15
 
+# cursor-style = bar
+
 # adjust-cell-height = -5
 adjust-cell-height = -2
 
