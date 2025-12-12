@@ -267,14 +267,11 @@ vim.keymap.set('n', '<Leader>i', find_sibling_files, { noremap = true, desc = "F
 
 -- Find changed files
 vim.keymap.set('n', 'q', find_changed_files, { desc = "Find changed files" })
-vim.keymap.set('n', 'gj', find_changed_js_files, { desc = "Find changed JS files" })
-vim.keymap.set('n', 'gk', find_changed_rb_files, { desc = "Find changed RB files" })
-vim.keymap.set('n', 'gf', find_changed_erb_files, { desc = "Find changed ERB files" })
-vim.keymap.set('n', 'gs', find_changed_css_files, { desc = "Find changed CSS files" })
+vim.keymap.set('n', '<leader>q1', find_changed_js_files, { desc = "Find changed JS files" })
 vim.keymap.set('n', '<leader>qj', find_changed_js_files, { desc = "Find changed JS files" })
-vim.keymap.set('n', '<leader>qk', find_changed_rb_files, { desc = "Find changed RB files" })
-vim.keymap.set('n', '<leader>qf', find_changed_erb_files, { desc = "Find changed ERB files" })
-vim.keymap.set('n', '<leader>qs', find_changed_css_files, { desc = "Find changed CSS files" })
+vim.keymap.set('n', '<leader>q2', find_changed_rb_files, { desc = "Find changed RB files" })
+vim.keymap.set('n', '<leader>q3', find_changed_erb_files, { desc = "Find changed ERB files" })
+vim.keymap.set('n', '<leader>q4', find_changed_css_files, { desc = "Find changed CSS files" })
 
 -- Buffer select
 -- vim.api.nvim_set_keymap('n', '<Leader>q', ':Buffers!<CR>', {noremap = true, desc = "FZF buffers"})

@@ -20,9 +20,6 @@ adjust-cell-height = -2
 
 maximize = true
 
-# Disable full screen on ctrl+enter
-keybind=ctrl+enter=ignore
-
 
 # Open quake like terminal
 keybind = global:cmd+backquote=toggle_quick_terminal
