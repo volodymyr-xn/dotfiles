@@ -151,9 +151,9 @@ vim.api.nvim_set_keymap('n', '<Leader>T', ':TestFile<CR>', {silent = true, desc 
 vim.api.nvim_set_keymap('n', '<Leader>l', ':TestLast<CR>', {silent = true, desc = "Test last"})
 
 -- Go to related file
-vim.api.nvim_set_keymap('n', '<Leader>a', ':R<CR>', { noremap = true, desc = "Go to related file" })
+vim.api.nvim_set_keymap('n', '<Leader>r', ':%s/', { noremap = true, desc = "Go to related file" })
 vim.api.nvim_set_keymap('n', 'gs', ':R<CR>', { noremap = true, desc = "Go to related file" })
-vim.api.nvim_set_keymap('n', 'ga', ':A<CR>', { noremap = true, desc = "Go to related file" })
+vim.api.nvim_set_keymap('n', '<leader>a', ':A<CR>', { noremap = true, desc = "Go to related file" })
 
 -- Reload file
 vim.api.nvim_set_keymap('n', '<Leader>e', ':e!<CR>', { noremap = true, silent = true, desc = "Reload file" })

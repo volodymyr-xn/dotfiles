@@ -21,6 +21,8 @@ adjust-cell-height = -2
 maximize = true
 
 
+macos-option-as-alt = left
+
 # Open quake like terminal
 keybind = global:cmd+backquote=toggle_quick_terminal
 
