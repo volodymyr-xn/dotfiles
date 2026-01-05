@@ -15,6 +15,7 @@ brew "nginx"
 brew "imagemagick"
 brew "vips"
 brew "wget"
+brew "gum"
 
 brew "rclone"
 

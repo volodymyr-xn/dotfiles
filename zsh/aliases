@@ -58,3 +58,5 @@ alias ctags-ruby='ripper-tags -R --exclude=vendor'
 # alias ctags-ruby='ctags -R --languages=ruby,javascript --langmap=javascript:.js.es6.es.jsx--javascript-kinds=-c-f-m-p-v  --sort=yes  --quiet=yes --tag-relative=yes --exclude=.git --exclude=log --exclude=app/assets/builds --exclude=node_modules . $(bundle list --paths)'
 alias ct='ctags-ruby'
 alias ctags-javascript="ctags -R app config lib --langmap=javascript:.js.es6.es.jsx--javascript-kinds=-c-f-m-p-v ."
+
+alias gd='git diff'

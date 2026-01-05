@@ -10,7 +10,8 @@ COMPLETION_WAITING_DOTS="true"
 ZSH_THEME="avit_custom"
 # ZSH_THEME="jispwoso"
 
-plugins=(git vi-mode)
+# plugins=(git vi-mode)
+plugins=(vi-mode)
 # plugins=(git vi-mode asdf gitfast)
 
 source $ZSH/oh-my-zsh.sh
