@@ -45,6 +45,7 @@ fvim() {
 }
 
 
+# Create a new worktree and branch from within current git directory.
 ga() {
   if [[ -z "$1" ]]; then
     echo "Usage: ga [branch name]"
@@ -55,7 +56,7 @@ ga() {
   local base="$(basename "$PWD")"
   local path="../${base}--${branch}"
 
-  git worktree add -b "$branch" "$path"
+  /usr/bin/git worktree add -b "$branch" "$path"
   mise trust "$path"
   cd "$path"
 }
