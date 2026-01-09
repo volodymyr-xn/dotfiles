@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+sound_file="$1"
+
+if [[ -z "$sound_file" ]]; then
+  echo "Usage: c-play-sound <sound-file>" >&2
+  exit 1
+fi
+
+if [[ "$(c-is-mac)" == "true" ]]; then
+  afplay "$sound_file"
+elif [[ "$(c-is-linux)" == "true" ]]; then
+  if command -v paplay &> /dev/null; then
+    paplay "$sound_file"
+  elif command -v aplay &> /dev/null; then
+    aplay "$sound_file"
+  elif command -v ffplay &> /dev/null; then
+    ffplay -nodisp -autoexit "$sound_file" 2>/dev/null
+  else
+    echo "No sound player found (paplay, aplay, or ffplay)" >&2
+    exit 1
+  fi
+else
+  echo "Unsupported OS" >&2
+  exit 1
+fi
