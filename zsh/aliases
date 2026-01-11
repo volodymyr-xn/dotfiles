@@ -60,3 +60,8 @@ alias ct='ctags-ruby'
 alias ctags-javascript="ctags -R app config lib --langmap=javascript:.js.es6.es.jsx--javascript-kinds=-c-f-m-p-v ."
 
 alias gd='git diff'
+
+# Claude
+alias hc='claude --model haiku'
+alias sc='claude --model sonnet'
+alias oc='claude --model opus'
