@@ -52,3 +52,14 @@ vim.api.nvim_command("autocmd FileType eruby setlocal ts=2 sts=2 sw=2 expandtab"
 -- vim.cmd [[
 --  autocmd CursorHold,CursorHoldI * lua code_action_listener()
 --]]
+
+
+-- Correcly Focus cursor and go to insert mode in nvim-terminal widnow.
+-- This is very import to have different types of terminal tui tools work correcly in nvim terminal window.
+vim.api.nvim_create_autocmd("FocusGained", {
+  callback = function()
+    if vim.bo.buftype == "terminal" then
+      vim.cmd("startinsert")
+    end
+  end,
+})

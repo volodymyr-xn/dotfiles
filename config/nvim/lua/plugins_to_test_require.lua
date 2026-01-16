@@ -71,28 +71,6 @@ require("claudecode").setup({
 })
 
 
-local opts = { silent = true, noremap = true }
-
--- vim.keymap.set("n", "<C-h>", "<Cmd>TmuxNavigateLeft<CR>", opts)
--- vim.keymap.set("n", "<C-j>", "<Cmd>TmuxNavigateDown<CR>", opts)
--- vim.keymap.set("n", "<C-k>", "<Cmd>TmuxNavigateUp<CR>", opts)
--- vim.keymap.set("n", "<C-l>", "<Cmd>TmuxNavigateRight<CR>", opts)
-
-vim.keymap.set("t", "<C-h>", [[<C-\><C-n><Cmd>TmuxNavigateLeft<CR>]], opts)
-vim.keymap.set("t", "<C-j>", [[<C-\><C-n><Cmd>TmuxNavigateDown<CR>]], opts)
-vim.keymap.set("t", "<C-k>", [[<C-\><C-n><Cmd>TmuxNavigateUp<CR>]], opts)
-vim.keymap.set("t", "<C-l>", [[<C-\><C-n><Cmd>TmuxNavigateRight<CR>]], opts)
-
--- Correcly Focus cursor and go to insert mode in nvim-terminal widnow.
--- This is very import to have different types of terminal tui tools work correcly in nvim terminal window.
-vim.api.nvim_create_autocmd("FocusGained", {
-  callback = function()
-    if vim.bo.buftype == "terminal" then
-      vim.cmd("startinsert")
-    end
-  end,
-})
-
 
 -- vim.keymap.set("t", "<C-h>", "<Cmd>wincmd h<CR>", { silent = true })
 -- vim.keymap.set("t", "<C-j>", "<Cmd>wincmd j<CR>", { silent = true })

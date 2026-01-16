@@ -212,3 +212,9 @@ end
 vim.api.nvim_set_keymap('n', '-', 'cs\'\"', { desc = "Change single to double quotes" })
 
 
+local opts = { silent = true, noremap = true }
+-- Navigation in terminal mode mappings for working with TmuxNavigate
+vim.keymap.set("t", "<C-h>", [[<C-\><C-n><Cmd>TmuxNavigateLeft<CR>]], opts)
+vim.keymap.set("t", "<C-j>", [[<C-\><C-n><Cmd>TmuxNavigateDown<CR>]], opts)
+vim.keymap.set("t", "<C-k>", [[<C-\><C-n><Cmd>TmuxNavigateUp<CR>]], opts)
+vim.keymap.set("t", "<C-l>", [[<C-\><C-n><Cmd>TmuxNavigateRight<CR>]], opts)
