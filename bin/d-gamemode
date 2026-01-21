@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Manages gamemode service
+# Manages gamemode service on Linux
 
 set -euo pipefail
 
