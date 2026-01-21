@@ -273,6 +273,7 @@ vim.keymap.set('n', '<leader>q2', find_changed_rb_files, { desc = "Find changed 
 vim.keymap.set('n', '<leader>q3', find_changed_erb_files, { desc = "Find changed ERB files" })
 vim.keymap.set('n', '<leader>q4', find_changed_css_files, { desc = "Find changed CSS files" })
 
+vim.keymap.set('n', '<leader>qd', ":FzfLua<CR>", { desc = "FzfLua" })
 -- Buffer select
 -- vim.api.nvim_set_keymap('n', '<Leader>q', ':Buffers!<CR>', {noremap = true, desc = "FZF buffers"})
 

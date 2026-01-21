@@ -1,40 +1,72 @@
+# UNIX shell (command interpreter)
 brew "zsh"
+# Terminal multiplexer
 brew "tmux"
+# Vi 'workalike' with many additional features
 brew "vim"
+# Ambitious Vim-fork focused on extensibility and agility
 brew "neovim"
+# Command-line fuzzy finder written in Go
 brew "fzf"
+# Simple, fast and user-friendly alternative to find
 brew "fd"
+# Search tool like grep and The Silver Searcher
 brew "ripgrep"
+# Code-search similar to ack
 brew "the_silver_searcher"
 
+# Polyglot runtime manager (asdf rust clone)
 brew "mise"
+# Implementation of malloc emphasizing fragmentation avoidance
 brew "jemalloc"
+# Cross-platform make
 brew "cmake"
+# Improved top (interactive process viewer)
 brew "htop"
+# HTTP(S) server and reverse proxy, and IMAP/POP3 proxy server
 brew "nginx"
+# Tools and libraries to manipulate images in select formats
 brew "imagemagick"
+# Image processing library
 brew "vips"
+# Internet file retriever
 brew "wget"
+# Tool for glamorous shell scripts
 brew "gum"
 
+# Rsync for cloud storage
 brew "rclone"
 
+# Create, run, and share large language models (LLMs)
 brew "ollama"
+# Feature-rich command-line audio/video downloader
 brew "yt-dlp"
+# Command-line downloader for image-hosting site galleries and collections
 brew "gallery-dl"
+# Tools for the WireGuard secure network tunnel
 brew "wireguard-tools"
 
 
-# Better encryption for encrypted zip archives
+# 7-Zip (high compression file archiver) implementation
 # brew "p7zip"
 
+# Terminal emulator that uses platform-native UI and GPU acceleration
 cask "ghostty"
+# GPU-based terminal emulator
 cask "kitty"
+# Web browser
 cask "google-chrome"
+# Display management tool
 cask "betterdisplay"
+# Meet, chat, call, and collaborate in just one place
 cask "microsoft-teams"
+# Free cross-platform office suite, fresh version
 cask "libreoffice"
+# Text editor for code, markup and prose
 cask "sublime-text"
+# Professional image editing software
 cask "affinity-photo"
+# Professional graphic design software
 cask "affinity-designer"
+# System monitor for the menu bar
 cask "stats"
