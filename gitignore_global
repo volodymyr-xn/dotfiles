@@ -22,5 +22,5 @@ tags
 .cursor/
 dump.rdb
 .solargraph.yml
-CLAUDE.md
+CLAUDE.local.md
 AGENTS.md

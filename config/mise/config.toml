@@ -2,7 +2,7 @@
 node = "24.6.0"
 postgres = "18.0"
 python = "3.12"
-ruby = "3.4.7"
+ruby = "4.0.1"
 
 [settings]
 idiomatic_version_file_enable_tools = ["ruby"]

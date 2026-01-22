@@ -1,3 +1,7 @@
+# Taps
+tap "iina/mpv-iina"
+tap "sst/tap"
+
 # UNIX shell (command interpreter)
 brew "zsh"
 # Terminal multiplexer
@@ -23,6 +27,8 @@ brew "jemalloc"
 brew "cmake"
 # Improved top (interactive process viewer)
 brew "htop"
+# Modern and colorful resource monitor showing CPU, memory, disks, network and processes
+brew "btop"
 # HTTP(S) server and reverse proxy, and IMAP/POP3 proxy server
 brew "nginx"
 # Tools and libraries to manipulate images in select formats
@@ -43,23 +49,112 @@ brew "ollama"
 brew "yt-dlp"
 # Command-line downloader for image-hosting site galleries and collections
 brew "gallery-dl"
-# Tools for the WireGuard secure network tunnel
-brew "wireguard-tools"
+
+# Development & Build Tools
+# Version control system
+brew "git"
+# Cross-platform portable archive format
+brew "p7zip"
+# Universal document converter
+brew "pandoc"
+# Extract and convert PDF documents
+brew "poppler"
+# Protocol buffers compiler
+brew "protobuf"
+# Ctags implementation for indexing source code
+brew "ctags"
+# Extracts EXIF metadata from images
+brew "exiftool"
+# Modern maintained replacement for ls, written in Rust
+brew "eza"
+# Feature-rich media framework and tools
+brew "ffmpeg"
+# Command-line media player
+brew "mpv"
+# Network security scanner for reconnaissance
+brew "nmap"
+# Powerful AI coding agent for the terminal
+brew "opencode"
+# Open-source SSH implementation
+brew "openssh"
+# Lightweight HTTP/HTTPS proxy
+brew "tinyproxy"
+# HTTP benchmarking tool inspired by Apache Bench
+brew "wrk"
+
+# Programming Languages & Runtimes
+# Systems programming language with Ruby-like syntax compiled to native code
+brew "crystal"
+# Rust programming language compiler
+brew "rust"
+# Python implementation focused on performance
+brew "pypy3.10"
+# Python programming language (version 3.10)
+brew "python@3.10"
+# Systems programming language
+brew "zig"
+
+# Databases & Services
+# PostgreSQL relational database (version 14)
+brew "postgresql@14"
+# In-memory data structure store
+brew "redis"
+
+# Root CA certificates bundle
+brew "ca-certificates"
+# OpenSSL cryptography library
+brew "openssl@3"
+
+# Shell utilities
+# Shell script static analyzer and linter
+brew "shellcheck"
+# HTTP/S load tester for benchmarking
+brew "siege"
+
+# AI & Utilities
+# Open-source AI agent for terminal access to Google Gemini
+brew "gemini-cli"
 
 
-# 7-Zip (high compression file archiver) implementation
-# brew "p7zip"
-
+# Terminal Emulators
 # Terminal emulator that uses platform-native UI and GPU acceleration
 cask "ghostty"
 # GPU-based terminal emulator
 cask "kitty"
+# Cross-platform GPU-accelerated terminal emulator written in Rust
+cask "alacritty"
+# GPU-based terminal emulator 2
+cask "iterm2"
+
+# Web & Communication
 # Web browser
 cask "google-chrome"
-# Display management tool
-cask "betterdisplay"
 # Meet, chat, call, and collaborate in just one place
 cask "microsoft-teams"
+# Microsoft auto-update tool
+cask "microsoft-auto-update"
+
+# Development & Tools
+# API development environment and API client
+cask "postman"
+# AI-powered code editor and development tool
+cask "codex"
+# PostgreSQL database administration GUI
+cask "pgadmin4"
+
+# Media & Display
+# Modern media player for macOS based on mpv
+cask "iina"
+# VLC media player
+cask "vlc"
+# Display management tool
+cask "betterdisplay"
+# External monitor brightness and volume control for Mac
+cask "monitorcontrol"
+# GStreamer multimedia framework runtime
+cask "gstreamer-runtime"
+
+# Office & Design
 # Free cross-platform office suite, fresh version
 cask "libreoffice"
 # Text editor for code, markup and prose
@@ -68,5 +163,9 @@ cask "sublime-text"
 cask "affinity-photo"
 # Professional graphic design software
 cask "affinity-designer"
+# Image editing and design software
+cask "affinity"
+
+# System Utilities
 # System monitor for the menu bar
 cask "stats"
