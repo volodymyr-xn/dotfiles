@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Sync and refresh pacman package databases
+
 set -euo pipefail
 
 sudo pacman -Syy

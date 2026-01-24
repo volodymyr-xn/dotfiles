@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Creates tempdir for sources code or installation fies in "/tmp" directory
+# Clone git repo to temporary directory
 
 destination_dir=$(dotfiles-tempdir-for "$1")
 

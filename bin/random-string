@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Generate 32-character random alphanumeric string
+
 set -euo pipefail
 
 cat /dev/urandom \

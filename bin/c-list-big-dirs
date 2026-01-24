@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# List 10 largest directories in system
+
 du -h --max-depth=3 / 2>/dev/null \
   | sort -rh \
   | head -n 10

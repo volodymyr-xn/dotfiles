@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Updates asdf itself and update all plugins
+# List slowest startup services
 
 set -euo pipefail
 

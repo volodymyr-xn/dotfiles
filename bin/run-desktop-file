@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Launch desktop file application
+
 set -euo pipefail
 
 desktop_file_name="$1"

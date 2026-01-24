@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
+# Check if Ruby compiled with jemalloc memory allocator
+
 ruby -e "p RbConfig::CONFIG['MAINLIBS']" | grep jemalloc

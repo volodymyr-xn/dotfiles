@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-# Log files still could be hold on disk after deletion because some running process could hold them
-# instead of deleting log files directly better to can truncate them like this:
+# Truncate log file by redirecting output to it
 
-> your-log-file.log
+: > "$1"

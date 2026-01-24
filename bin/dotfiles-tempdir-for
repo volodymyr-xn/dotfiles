@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# Creates tempdir for sources code or installation fies in "/tmp" directory
+# Generate temporary directory path for project sources
+
 set -euo pipefail
 
 name="$1-source"

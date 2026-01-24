@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Display current time in multiple world cities
+
 set -euo pipefail
 
 datetime="date +%H:%M"

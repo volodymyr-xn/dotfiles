@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
-# Displays disk usage statistics
+# Display disk usage for mounted filesystems
 
 set -euo pipefail
 
-# Ignore squeashfs, tmpfs and udev
 df -h -x squashfs -x tmpfs -x udev | grep -v '^dev'
 

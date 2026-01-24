@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
+# Copy file contents to clipboard
+
 set -euo pipefail
 
-# Copies file to clipboard
 filename="$1"
 
 cat "$1" | xcopy

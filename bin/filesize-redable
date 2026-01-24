@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Display human-readable file size
+
 filename="$1"
 
 size=$(du -h "$filename" | awk '{print $1}')

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Shows current CPU frequency
+# Display current CPU frequency
 
 set -euo pipefail
 

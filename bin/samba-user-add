@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Add Samba user with password
+
 samba_user="$1"
 
 sudo smbpasswd -a "$samba_user"

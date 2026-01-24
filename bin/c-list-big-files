@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# List 10 largest files in system
+
 find / -type f -size +500M 2>/dev/null \
   | xargs du -h \
   | sort -rh \

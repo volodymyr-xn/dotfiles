@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Display weather for specified city
+
 set -euo pipefail
 
 city="$1"

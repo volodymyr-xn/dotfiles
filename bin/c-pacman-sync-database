@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
+# Sync pacman package database
+
 sudo pacman -Sy

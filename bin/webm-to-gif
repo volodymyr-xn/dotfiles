@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Convert WebM video file to animated GIF
+
 set -euo pipefail
 
 webm_file="$1"

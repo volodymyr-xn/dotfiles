@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Mount ISO file to /mnt/iso_image
+
 mount_point="/mnt/iso_image"
 mkdir $mount_point -p
 

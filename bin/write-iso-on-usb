@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Write ISO file to USB drive with confirmation prompt
+
 set -euo pipefail
 
 iso="$1"

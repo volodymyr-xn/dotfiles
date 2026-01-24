@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Generate 20 random digits
+
 set -euo pipefail
 
 cat /dev/urandom \

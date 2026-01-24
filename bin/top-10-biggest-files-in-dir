@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
+# List top 10 biggest files in directory
+
 set -euo pipefail
 
-# Show top 10 biggest dirs under path
-# By default take current dir
 path=${1:-"."}
 
 du -haxs "$path"/* | sort -hr | head -n 2

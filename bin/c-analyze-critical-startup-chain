@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Updates asdf itself and update all plugins
+# Display critical startup chain
 
 set -euo pipefail
 

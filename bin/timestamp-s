@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Output current Unix timestamp in seconds
+
 set -euo pipefail
 
 date +"%s"

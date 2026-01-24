@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
+# Execute code only on macOS
+
 if [[ "$(c-is-mac)" = 'true' ]]; then
   local code="$1"
   eval "$code"
 fi
-

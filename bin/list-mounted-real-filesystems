@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# List real mounted filesystems (excluding virtual)
+
 set -euo pipefail
 
 findmnt --real -t nosquashfs

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Convert MP4 file to MP3 audio
+
 mp4_file_path="$1"
 
 mp4_file_basename=$(basename "$mp4_file_path" .mp4)

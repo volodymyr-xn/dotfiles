@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Show file status between current branch and master
+
 set -euo pipefail
 
 git diff master --name-status

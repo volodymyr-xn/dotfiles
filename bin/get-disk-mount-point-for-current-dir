@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Show disk mount point for current directory
+
 set -euo pipefail
 
 findmnt -T .

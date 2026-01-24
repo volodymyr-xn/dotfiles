@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# Symlinks one dir as other dir expanding relative paths as full real paths
+# Create symlink to directory in destination, resolving relative paths
+
 set -euo pipefail
 
 dir_to_symlink="$1"

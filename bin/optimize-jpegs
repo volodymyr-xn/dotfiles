@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Compress JPEG images to 80% quality
+
 set -euo pipefail
 
 mogrify -quality 80 *.jpg

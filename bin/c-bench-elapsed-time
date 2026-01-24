@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-# CLI commands benchmark util
-# Check how many time specified command takes to execute
+# Benchmark execution time of a command
 
 set -euo pipefail
 

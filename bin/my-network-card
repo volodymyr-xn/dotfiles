@@ -1,54 +1,22 @@
 #!/usr/bin/env ruby
-# /usr/bin/env bash
-# frozen_string_literal: true
 
-# lspci (8) - list all PCI devices
-# lspci is a utility for displaying information about PCI buses in the
-# system and devices connected to them.
-# {print $1} - print first world in line
-# lspci | awk '/[Nn]et/ {print $1}' | xargs -i% lspci -ks %
+# Display network card hardware information
 
-# NETWORK_DEVICE_NAME_REGEX_PART = /[Nn]et/
-#
-# all_devices = `lspci`
-#
-# network_cards_detailed_info  =
-#   all_devices
-#     .split("\n")
-#     # Select those that match network device name
-#     .select { _1.match(NETWORK_DEVICE_NAME_REGEX_PART) }
-#     # Map ids of devices
-#     .map { _1.split(/\s/).first }
-#     # Obtain device detailed info
-#     .map { `lspci -ks #{_1}` + "\n" }
-#
-# puts network_cards_detailed_info
-#
-#
 module PCIDevicesInfo
   NETWORK_DEVICE_NAME_REGEX = /[Nn]et/
 
-  # Get list of all PCI devices splited into new lines
   def self.all
     `lspci`.split("\n")
   end
 
   def self.network_devices
-    # Select those that match network device name
     all.select { _1.match(NETWORK_DEVICE_NAME_REGEX) }
   end
 
-  # Get only network devices
   def self.network_devices_details
     network_devices
-      # Map ids of devices
-      .map {
-        _1.split(/\s/).first
-      }
-      # Use this ids to obtain device info
-      .map {
-        `lspci -ks #{_1}` + "\n"
-      }
+      .map { _1.split(/\s/).first }
+      .map { `lspci -ks #{_1}` + "\n" }
   end
 
   def self.network_devices_details_full

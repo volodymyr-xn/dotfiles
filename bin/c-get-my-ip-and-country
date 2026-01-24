@@ -1,16 +1,11 @@
 #!/usr/bin/env bash
 
+# Get public IP address and country
+
 set -euo pipefail
 
-# Get local IP
-# local_ip=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null)
-
-# Get public IP
 public_ip=$(curl -s https://ipinfo.io/ip)
-
-# Get country from ipinfo.io
 country=$(curl -s https://ipinfo.io/$public_ip/country)
 
-# echo "Local IP:   $local_ip"
 echo "Public IP:  $public_ip"
 echo "Country:    $country"

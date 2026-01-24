@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 
-# ip route get 1.2.3.4 | awk '{print $7}'
+# List local IP addresses
+
 ifconfig | grep "inet " | grep -v 127.0.0.1 | awk '{print $2}'

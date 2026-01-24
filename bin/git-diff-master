@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
+# Show diff between current branch and master
+
 set -euo pipefail
 
-# show diff between current branch and master
 git diff master...

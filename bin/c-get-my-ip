@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Get public IP address
+
 set -euo pipefail
 
 dig TXT +short o-o.myaddr.l.google.com @ns1.google.com -4

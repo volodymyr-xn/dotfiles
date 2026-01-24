@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Updates asdf itself and update all plugins
+# Update asdf runtime manager and all plugins
 
 set -euo pipefail
 

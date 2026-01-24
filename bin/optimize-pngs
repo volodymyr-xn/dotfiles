@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
+# Convert PNG images to optimized JPEG format
+
 set -euo pipefail
 
 quality=90
 
 mogrify -format jpg -quality $quality *.png
 
-# rm *png
 gvfs-trash *.png

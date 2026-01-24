@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
+# Show macOS sleep and wake history
+
 pmset -g log | grep -e " Sleep  " -e " Wake  "

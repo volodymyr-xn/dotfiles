@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
+# Select and execute command from directory using rofi
+
 set -euo pipefail
 
-# Main directory
 MAIN_DIR="$1"
 COMMAND_RUNNER_TITLE=${2:-"Command"}
 

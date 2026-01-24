@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
+
+# Check if operating system is macOS
+
 [[ "$OSTYPE" == "darwin"* ]] && echo true
 [[ "$OSTYPE" != "darwin"* ]] && echo false

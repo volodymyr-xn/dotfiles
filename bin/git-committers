@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# List git contributors by number of commits
+
 set -euo pipefail
 
 git ls-tree --name-only -r HEAD \

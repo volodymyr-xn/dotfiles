@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Monitor WiFi traffic statistics
+
 set -euo pipefail
 
 sudo tcptrack -i wlp3s0

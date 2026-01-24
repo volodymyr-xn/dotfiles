@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
+# Create symlink to directory in home directory
+
 symlink-to-dir "$1" "$HOME"

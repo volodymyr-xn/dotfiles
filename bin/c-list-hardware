@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 
-# sudo lshw "$@"
+# List hardware information
+
 sudo lshw

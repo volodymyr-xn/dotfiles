@@ -1,20 +1,17 @@
 #!/usr/bin/env sh
 
+# Select file from directory with rofi and open with default app
+
 set -euo pipefail
 
-# Main directory
 MAIN_DIR="$1"
 PATTERN=${2:-".*"}
 
-# Save find result to F_ARRAY
 readarray -t FILES_PATH_LIST <<< "$(fdfind "$PATTERN" "$MAIN_DIR")"
 
 declare -A FILES
 
-# Add elements to BOOKS array
 get_files() {
-
-  # if [ ${#F_ARRAY[@]} != 0 ]; then
   if [[ ! -z ${FILES_PATH_LIST[@]} ]]; then
     for i in "${!FILES_PATH_LIST[@]}"
     do
@@ -29,11 +26,8 @@ get_files() {
       echo "$MAIN_DIR is empty!"
       exit
   fi
-
-
 }
 
-# List for rofi
 gen_list(){
   for i in "${!FILES[@]}"
   do

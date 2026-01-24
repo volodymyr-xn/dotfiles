@@ -1,3 +1,5 @@
 #!/bin/sh
 
+# Display current Linux kernel version
+
 uname -r

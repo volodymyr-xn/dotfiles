@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
+# Generate random number between start and end (inclusive)
+
 set -euo pipefail
 
 START_NUMBER=$1
 END_NUMBER=$2
-
-# echo $(( ( RANDOM % $END_NUMBER)  + $START_NUMBER ))
 
 echo $(shuf -i $START_NUMBER-$END_NUMBER -n 1)

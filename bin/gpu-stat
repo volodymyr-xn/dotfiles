@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Display NVIDIA GPU status
+
 set -euo pipefail
 
 nvidia-smi

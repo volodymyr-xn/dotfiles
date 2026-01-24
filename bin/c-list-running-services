@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Lists all running systemd services
+# List all running systemd services
 
 set -euo pipefail
 

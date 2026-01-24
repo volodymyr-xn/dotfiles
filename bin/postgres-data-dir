@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Get PostgreSQL data directory from mise or asdf
+
 set -euo pipefail
 
 if command -v mise &> /dev/null && mise where postgres &> /dev/null; then

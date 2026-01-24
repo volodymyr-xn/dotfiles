@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Run GTK application in interactive debug mode
+
 set -euo pipefail
 
 export GTK_DEBUG=interative

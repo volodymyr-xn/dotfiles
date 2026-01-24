@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Output current Unix timestamp in milliseconds
+
 set -euo pipefail
 
 echo '('`date +"%s.%N"` ' * 1000000)/1' | bc

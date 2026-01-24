@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
+# Copy stdin to clipboard using xclip
+
 set -euo pipefail
 
-# Copies stdin into clipboard
 xclip -selection clipboard

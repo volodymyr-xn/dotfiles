@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Display man pages with limited width (max 80 chars)
+
 set -euo pipefail
 
 columns=$(tput cols)

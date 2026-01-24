@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
+# Open file with default application (macOS/Linux compatible)
+
 set -euo pipefail
 
-# Detect OS and use the appropriate command
 if command -v xdg-open >/dev/null 2>&1; then
     xdg-open "$@"
 elif [ -x /usr/bin/open ]; then

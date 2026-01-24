@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Get X window WM class for window management
+
 set -euo pipefail
 
 xprop | grep 'CLASS'

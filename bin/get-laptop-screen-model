@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Retrieves the name of screen on Laptop
+# Get laptop screen model name from EDID
 
 set -euo pipefail
 

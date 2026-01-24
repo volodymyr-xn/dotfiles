@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Display kernel version
+
 set -euo pipefail
 
 uname -r

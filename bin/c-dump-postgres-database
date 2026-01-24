@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# Dump PostgreSQL database to SQL file
+
+pg_dump "$1" > "$2"

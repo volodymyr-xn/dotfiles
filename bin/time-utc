@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Displays current date in UTC timezone
+# Display current date and time in UTC timezone
 
 set -euo pipefail
 

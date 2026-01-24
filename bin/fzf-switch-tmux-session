@@ -1,14 +1,8 @@
 #!/usr/bin/env bash
 
+# Select and switch to tmux session with fzf
+
 set -euo pipefail
 
 tmux_session_name=$(tmux ls -F "#{session_name}" | fzf)
-
-# fs() {
-#   local session
-#   session=$(tmux list-sessions -F "#{session_name}" | \
-#     fzf --query="$1" --select-1 --exit-0) &&
-#   tmux switch-client -t "$session"
-# }
-#
 tmux switch -t "$tmux_session_name"

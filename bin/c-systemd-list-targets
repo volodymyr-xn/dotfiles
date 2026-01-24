@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# List systemd targets
+
 set -euo pipefail
 
 systemctl list-units --type=target --no-pager

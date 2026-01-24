@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Generate temporary string with timestamp and random component
+
 set -euo pipefail
 
 echo "$(timestamp-ms)-$(random-string)"

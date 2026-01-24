@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
+# Start PostgreSQL from asdf installation
+
 set -euo pipefail
 
 postgres \
-  -D $(asdf where postgres)/data \
-  # -k "$(pwd)/tmp/sockets"
-  # -p 5532
-  # -c listen_addresses='' \
+  -D $(asdf where postgres)/data

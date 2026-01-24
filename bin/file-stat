@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Display detailed file information (name, owner, permissions)
+
 set -euo pipefail
 
 filename=${1:-"."}

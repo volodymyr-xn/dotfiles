@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-
-# Clears journalctl logs
+# Clean systemd journal logs by time and size limits
 
 set -euo pipefail
 

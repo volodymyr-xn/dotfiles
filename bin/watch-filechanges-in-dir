@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Monitor directory for file changes using inotify
+
 set -euo pipefail
 
 inotifywait -m -r "$1"

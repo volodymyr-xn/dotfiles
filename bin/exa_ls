@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# List files using exa with extended attributes and git status
+
 set -euo pipefail
 
 exa -@ --long --header --git --colour-scale --all $@

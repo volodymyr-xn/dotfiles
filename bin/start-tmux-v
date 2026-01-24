@@ -1,11 +1,7 @@
 #!/usr/bin/env bash
 
-# set -euo pipefail
+# Create or attach tmux session with Neovim editor
 
-# tmux_session_name="$1"
-# directory_name="$2"
-
-# Parse command line arguments
 while getopts "d:n:" opt; do
   case ${opt} in
     d ) directory_name=$OPTARG ;;
@@ -15,10 +11,7 @@ while getopts "d:n:" opt; do
   esac
 done
 
-
 vim_executable="nvim"
-
-# echo "$tmux_session_name"
 
 is_tmux_server_running() {
   [[ -n $(pgrep tmux) ]] && return 0 || return 1
@@ -49,15 +42,12 @@ connect_to_session() {
 }
 
 create_session() {
-  # Create a new tmux session_name, starting vim from a saved
-  # session_name in the new window
   tmux new-session \
         -d \
         -s "$tmux_session_name" \
         -c "$directory_name" \
         -n vim
 
-  # Run vim
   tmux send-keys \
         -t "$tmux_session_name":1 \
         "$vim_executable" C-m

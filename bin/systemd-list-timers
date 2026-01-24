@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# List systemd timer units
+
 set -euo pipefail
 
 systemctl --no-pager list-timers

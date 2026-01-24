@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
+# Print current directory path (resolving symlinks)
+
 set -euo pipefail
 
-# Prints current physical location
-
-# -P - avoid symlincs
 pwd -P

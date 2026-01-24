@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
+# Display RAM memory module information
+
 sudo dmidecode --type 17

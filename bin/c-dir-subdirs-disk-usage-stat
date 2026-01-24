@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-# Prints the list of sizes of subdirs for specified dir
-# Defaults to check the subdirs of current dir
-# Uses current dir if dir is not specified
+# List subdirectory sizes sorted by largest first
 
 set -euo pipefail
 

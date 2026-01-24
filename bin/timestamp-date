@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Output date as YYYY-MM-DD HH-MM-SS format
+
 set -euo pipefail
 
 date '+%Y-%m-%d %H-%M-%S'

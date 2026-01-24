@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
+# Restore file from master branch
+
 git checkout origin/master -- "$1"

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Display PATH variable entries one per line
+
 set -euo pipefail
 
 echo -e ${PATH//:/\\n}

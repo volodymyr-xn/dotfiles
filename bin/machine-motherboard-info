@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
+# Display motherboard information
+
 cat /sys/devices/virtual/dmi/id/board_{vendor,name,version}

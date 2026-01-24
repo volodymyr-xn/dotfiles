@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Convert PSD file to PNG
+
 set -euo pipefail
 
 convert "$1" -flatten "$2"

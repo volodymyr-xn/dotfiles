@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Symlinks files in $target dir to $destination dir
+# Symlink files from source directory to destination directory
 
 set -euo pipefail
 

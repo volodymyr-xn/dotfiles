@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# List all mounted filesystems
+
 set -euo pipefail
 
 findmnt -t nosquashfs

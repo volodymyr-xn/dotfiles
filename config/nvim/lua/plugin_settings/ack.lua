@@ -8,5 +8,6 @@ ack.setup({
 })
 
 vim.api.nvim_set_keymap('n', '!', ':Ack<SPACE>', {})
+vim.api.nvim_set_keymap('n', '@', '*N:Ack <C-R><C-W><CR>', {})
 vim.api.nvim_set_keymap('n', '<leader>]', ':cn<CR>', {})
 vim.api.nvim_set_keymap('n', '<leader>[', ':cp<CR>', {})

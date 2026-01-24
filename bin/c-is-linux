@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-# [[ "$(uname -m)" == "arm64" ]] && echo 0
-# [[ "$(uname -m)" != "arm64" ]] && echo 1
-#
+# Check if operating system is Linux
 
 [[ "$OSTYPE" == "linux-gnu"* ]] && echo true
 [[ "$OSTYPE" != "linux-gnu"* ]] && echo false

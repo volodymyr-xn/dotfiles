@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Play audio file on macOS or Linux
+
 sound_file="$1"
 
 if [[ -z "$sound_file" ]]; then

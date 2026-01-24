@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Select file with fzf and open it
+
 set -euo pipefail
 
 open $(fzf)

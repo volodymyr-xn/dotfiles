@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# Check if a port number is provided
+# Find process using a specific port number
+
 if [ -z "$1" ]; then
   echo "Usage: $0 <port>"
   exit 1
@@ -8,7 +9,6 @@ fi
 
 PORT=$1
 
-# Find process using lsof
 PROCESS=$(sudo lsof -i :$PORT -t)
 
 if [ -n "$PROCESS" ]; then

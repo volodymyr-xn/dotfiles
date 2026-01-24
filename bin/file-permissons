@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# %a - access rights in octal form
-# %A - access rights in human readable form
+# Display file permissions in octal and human-readable format
+
 file=${1:-"."}
 stat -c "%a %A" "$file"

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# List systemd socket units
+
 set -euo pipefail
 
 systemctl --no-pager list-sockets

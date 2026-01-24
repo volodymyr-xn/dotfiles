@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Display OS release information
+
 set -euo pipefail
 
 cat /etc/os-release

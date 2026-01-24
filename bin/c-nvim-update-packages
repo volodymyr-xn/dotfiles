@@ -1,5 +1,5 @@
-# #!/usr/bin/env bash
-#
-# set -euo pipefail
-#
-# nvim +PlugUpdate! +PlugClean +qall
+#!/usr/bin/env bash
+
+# Update Neovim plugins via lazy.nvim package manager
+
+nvim --headless "+Lazy! sync" +qa

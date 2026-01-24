@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Select file with fzf and open its parent directory
+
 set -euo pipefail
 
 open $(dirname $(fzf))

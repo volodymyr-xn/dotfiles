@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Convert WebP image to PNG format
+
 set -euo pipefail
 
 image_file="$1"

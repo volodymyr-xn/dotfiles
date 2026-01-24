@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
+# Extract filename from full path
+
 basename "$1"

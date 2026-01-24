@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+# Start PostgreSQL using pg_ctl with data directory
 
-# pg_ctl -D $(asdf where postgres)/data start
+pg_ctl start -D "$(postgres-data-dir)"

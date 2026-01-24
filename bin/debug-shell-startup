@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 
-# echo exit | strace bash -li |& grep '^open'
+# Debug zsh shell startup time and file access
+
 echo exit | strace zsh -li |& grep '^open'
