@@ -1,9 +1,6 @@
 snippet f
 	# frozen_string_literal: true
 
-snippet be
-  before_action ${0}
-
 snippet b
 	binding.pry
 
@@ -23,10 +20,10 @@ snippet pry
 	binding.pry
 
 snippet t
-	<%= t("${0}") %>
+	I18n.t("${0}")
 
 snippet l
-	<%= t("${0}") %>
+	I18n.l("${0}")
 
 snippet d
 	def ${1:method_name}
@@ -48,7 +45,7 @@ snippet def
 		${0}
 	end
 
-snippet dov
+snippet dv
 	do |${1:v}|
 		${2}
 	end
@@ -140,12 +137,12 @@ snippet in
 		${0}
 	endf
 
-snippet c
+snippet g
   class ` luaeval("GenerateRubyClassNameFromCurrentFilename()")` < ${1}
     ${0}
   end
 
-snippet sr
+snippet gs
   class ` luaeval("GenerateRubyClassNameFromCurrentFilename()")` < BaseService
     def initialize(${2})
       ${1}
@@ -156,19 +153,12 @@ snippet sr
     end
   end
 
-snippet sh
-  class `luaeval("GenerateRubyClassNameFromCurrentFilename()")` < BaseService
-    def call
-      ${0}
-    end
-  end
-
-snippet cn
+snippet gc
   class `luaeval("GenerateRubyClassNameFromCurrentFilename()")` < ApplicationController
     ${0}
   end
 
-snippet cm
+snippet gv
   class `luaeval("GenerateRubyClassNameFromCurrentFilename()")` < `luaeval("RailsViewComponenbaseClassName()")`
     def initialize(${1})
       ${0}
@@ -182,7 +172,17 @@ snippet cm
 # 		end
 # 	end
 
-snippet md
+snippet gm
   class `luaeval("GenerateRubyClassNameFromCurrentFilename()")` < ApplicationRecord
     ${0}
   end
+
+snippet he
+	<<~${1:HEREDOC}
+		${0}
+	$1
+
+snippet her
+	<<~${1:HEREDOC}
+		${0}
+	$1
