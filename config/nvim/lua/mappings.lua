@@ -53,8 +53,8 @@ vim.api.nvim_set_keymap('n', '<Leader>n', ':nohl<CR>', { silent = true, noremap 
 vim.api.nvim_set_keymap('n', 'sr', ':%s///g<Left><Left><Left>', { noremap = true, desc = "Search and replace in file" })
 -- vim.api.nvim_set_keymap('n', 's', ':w<CR>', { noremap = true })
 -- Global search and replace in quickfix menu
--- vim.api.nvim_set_keymap('n', '@', ":cfdo %s///g | update <c-b><right><right><right><right><right><right><right><right>", { noremap = true, desc = "Search and replace in quickfix" })
-vim.api.nvim_set_keymap('n', '<Leader>r', ":cdfo %s///g | update <c-b><right><right><right><right><right><right><right><right>", { noremap = true })
+vim.api.nvim_set_keymap('n', '@', ":cfdo %s///g | update <c-b><right><right><right><right><right><right><right><right>", { noremap = true, desc = "Search and replace in quickfix" })
+-- vim.api.nvim_set_keymap('n', '<Leader>r', ":cfdo %s///g | update <c-b><right><right><right><right><right><right><right><right>", { noremap = true })
 
 -- Edit vim config
 vim.api.nvim_set_keymap('n', '<Leader>ve', ':e ~/.config/nvim/init.lua<cr>', { noremap = true, desc = "Edit vim config" })
@@ -151,7 +151,7 @@ vim.api.nvim_set_keymap('n', '<Leader>T', ':TestFile<CR>', {silent = true, desc 
 vim.api.nvim_set_keymap('n', '<Leader>l', ':TestLast<CR>', {silent = true, desc = "Test last"})
 
 -- Go to related file
-vim.api.nvim_set_keymap('n', '<Leader>r', ':%s/', { noremap = true, desc = "Go to related file" })
+-- vim.api.nvim_set_keymap('n', '<Leader>r', ':%s/', { noremap = true, desc = "Go to related file" })
 vim.api.nvim_set_keymap('n', 'gs', ':R<CR>', { noremap = true, desc = "Go to related file" })
 vim.api.nvim_set_keymap('n', '<leader>a', ':A<CR>', { noremap = true, desc = "Go to related file" })
 
