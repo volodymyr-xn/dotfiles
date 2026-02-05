@@ -102,7 +102,7 @@ function M.render_deleted_file(file, base_ref, target_win)
   for i = 0, #lines - 1 do
     vim.api.nvim_buf_set_extmark(buf, ns, i, 0, {
       line_hl_group = hl.line_delete,
-      priority = 100,
+      priority = 50,
     })
   end
 
@@ -141,7 +141,7 @@ function M.apply_inline_diff(buf, hunks, file, base_ref)
         if new_line_idx >= 0 and new_line_idx < #buf_lines then
           vim.api.nvim_buf_set_extmark(buf, ns, new_line_idx, 0, {
             line_hl_group = hl.line_add,
-            priority = 100,
+            priority = 50,
           })
 
           if #pending_deletes > 0 then
@@ -155,6 +155,7 @@ function M.apply_inline_diff(buf, hunks, file, base_ref)
                 vim.api.nvim_buf_set_extmark(buf, ns, new_line_idx, start_col, {
                   end_col = end_col,
                   hl_group = hl.char_add,
+                  hl_mode = "combine",
                   priority = 200,
                 })
               end

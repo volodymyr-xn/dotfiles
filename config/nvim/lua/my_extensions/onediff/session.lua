@@ -142,6 +142,21 @@ function M.get_diff_buf()
   return state.diff_buf
 end
 
+function M.focus_diff_window()
+  if not state.diff_buf or not vim.api.nvim_buf_is_valid(state.diff_buf) then
+    return false
+  end
+  
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    if vim.api.nvim_win_get_buf(win) == state.diff_buf then
+      vim.api.nvim_set_current_win(win)
+      return true
+    end
+  end
+  
+  return false
+end
+
 function M.get_hunk_start_lines()
   local lines = {}
   for _, hunk in ipairs(state.current_hunks) do

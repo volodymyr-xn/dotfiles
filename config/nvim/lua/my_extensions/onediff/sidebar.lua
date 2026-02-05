@@ -16,61 +16,81 @@ local function get_file_icon(filename)
   return "", nil
 end
 
-local function get_git_status_hl(status)
-  if status == "added" then
-    return "OneDiffStatusAdded"
-  elseif status == "deleted" then
-    return "OneDiffStatusDeleted"
-  elseif status == "modified" then
-    return "OneDiffStatusModified"
-  elseif status == "renamed" then
-    return "OneDiffStatusModified"
-  elseif status == "untracked" then
-    return "OneDiffStatusUntracked"
-  end
-  return "OneDiffStatusUntracked"
-end
+local ICON_PLUS = "󰐕"
+local ICON_MINUS = "󰍴"
+local ICON_NEW = "󰫻"
 
-local function get_status_letter(status)
-  if status == "added" then
-    return "A"
+local function get_file_status_icon(file)
+  local status = file.status
+  local insertions = file.insertions or 0
+  local deletions = file.deletions or 0
+
+  if status == "added" or status == "untracked" then
+    return ICON_NEW, "OneDiffStatusAdded"
   elseif status == "deleted" then
-    return "D"
-  elseif status == "modified" then
-    return "M"
-  elseif status == "renamed" then
-    return "R"
+    return "D", "OneDiffStatusDeleted"
+  elseif status == "modified" or status == "renamed" then
+    if insertions > 0 and deletions > 0 then
+      return ICON_PLUS .. " " .. ICON_MINUS, "mixed"
+    elseif deletions > 0 then
+      return ICON_MINUS, "OneDiffStatusDeleted"
+    elseif insertions > 0 then
+      return ICON_PLUS, "OneDiffStatusAdded"
+    end
+    return "M", "OneDiffStatusModified"
   end
-  return "?"
+  return "?", "OneDiffStatusUntracked"
 end
 
 local function get_folder_icon(is_collapsed)
   if is_collapsed then
-    return "", "OneDiffFolderIcon"
+    return "", "OneDiffFolderIcon"
   else
-    return "", "OneDiffFolderIconOpen"
+    return "", "OneDiffFolderIconOpen"
   end
 end
 
 local function get_folder_status(folder_path, files, is_collapsed, collapsed_folders)
   if not is_collapsed then
-    return " ", "Normal"
+    return "   ", "Normal"
   end
 
-  local statuses = {}
+  local has_deletions = false
+  local has_additions = false
+  local has_new = false
+  local has_deleted = false
+
   for _, file in ipairs(files) do
     if file.path:find("^" .. vim.pesc(folder_path) .. "/") then
-      statuses[file.status] = true
+      if file.status == "added" or file.status == "untracked" then
+        has_new = true
+      elseif file.status == "deleted" then
+        has_deleted = true
+      elseif file.status == "modified" or file.status == "renamed" then
+        local deletions = file.deletions or 0
+        local insertions = file.insertions or 0
+        if deletions > 0 then
+          has_deletions = true
+        end
+        if insertions > 0 then
+          has_additions = true
+        end
+      end
     end
   end
-  if statuses["modified"] then
-    return "M", "OneDiffStatusModified"
-  elseif statuses["added"] then
-    return "A", "OneDiffStatusAdded"
-  elseif statuses["deleted"] then
+
+  if has_deleted then
     return "D", "OneDiffStatusDeleted"
+  elseif has_additions and has_deletions then
+    return ICON_PLUS .. " " .. ICON_MINUS, "mixed"
+  elseif has_deletions then
+    return ICON_MINUS, "OneDiffStatusDeleted"
+  elseif has_new then
+    return ICON_NEW, "OneDiffStatusAdded"
+  elseif has_additions then
+    return ICON_PLUS, "OneDiffStatusAdded"
   end
-  return " ", "Normal"
+  return "   ", "Normal"
 end
 
 function M.init()
@@ -295,18 +315,25 @@ function M.render_tree(node, lines, hl_marks, start_line, depth, current_idx, al
     local is_collapsed = M.collapsed_folders[dir.node.path] == true
     local arrow = is_collapsed and ">" or "˅"
     local folder_icon, folder_icon_hl = get_folder_icon(is_collapsed)
-    local status_letter, status_hl = get_folder_status(dir.node.path, all_files, is_collapsed, M.collapsed_folders)
+    local status_icon, status_hl = get_folder_status(dir.node.path, all_files, is_collapsed, M.collapsed_folders)
 
     local tree_indent = string.rep("  ", depth)
-    local folder_line = "  " .. status_letter .. " " .. tree_indent .. arrow .. " " .. folder_icon .. " " .. dir.name
+    local status_display_width = vim.fn.strdisplaywidth(status_icon)
+    local status_padding = string.rep(" ", math.max(0, 3 - status_display_width))
+    local folder_line = " " .. status_icon .. status_padding .. " " .. tree_indent .. arrow .. " " .. folder_icon .. " " .. dir.name
 
     table.insert(lines, folder_line)
     M.folder_line_map[line_idx + 1] = dir.node.path
 
-    local col = 2
-    table.insert(hl_marks, { line = line_idx, col = col, end_col = col + 1, hl = status_hl, priority = 200 })
+    local col = 1
+    if status_hl == "mixed" then
+      table.insert(hl_marks, { line = line_idx, col = col, end_col = col + #ICON_PLUS, hl = "OneDiffStatusAdded", priority = 200 })
+      table.insert(hl_marks, { line = line_idx, col = col + #ICON_PLUS + 1, end_col = col + #ICON_PLUS + 1 + #ICON_MINUS, hl = "OneDiffStatusDeleted", priority = 200 })
+    else
+      table.insert(hl_marks, { line = line_idx, col = col, end_col = col + #status_icon, hl = status_hl, priority = 200 })
+    end
 
-    col = 4 + #tree_indent
+    col = 1 + #status_icon + #status_padding + 1 + #tree_indent
     table.insert(hl_marks, { line = line_idx, col = col, end_col = col + #arrow, hl = "OneDiffFolderArrow", priority = 200 })
 
     col = col + #arrow + 1
@@ -323,8 +350,7 @@ function M.render_tree(node, lines, hl_marks, start_line, depth, current_idx, al
   end
 
   for _, item in ipairs(node.files) do
-    local status_letter = get_status_letter(item.file.status)
-    local status_hl = get_git_status_hl(item.file.status)
+    local status_icon, status_hl = get_file_status_icon(item.file)
     local icon, icon_hl = get_file_icon(item.name)
 
     local is_selected = item.index == current_idx
@@ -339,15 +365,22 @@ function M.render_tree(node, lines, hl_marks, start_line, depth, current_idx, al
       stats_str = " " .. insertions .. ", " .. deletions
     end
 
-    local line = "  " .. status_letter .. " " .. tree_indent .. icon .. " " .. item.name .. stats_str
+    local status_display_width = vim.fn.strdisplaywidth(status_icon)
+    local status_padding = string.rep(" ", math.max(0, 3 - status_display_width))
+    local line = " " .. status_icon .. status_padding .. " " .. tree_indent .. icon .. " " .. item.name .. stats_str
 
     table.insert(lines, line)
     M.file_line_map[line_idx + 1] = item.index
 
-    local col = 2
-    table.insert(hl_marks, { line = line_idx, col = col, end_col = col + 1, hl = status_hl, priority = 200 })
+    local col = 1
+    if status_hl == "mixed" then
+      table.insert(hl_marks, { line = line_idx, col = col, end_col = col + #ICON_PLUS, hl = "OneDiffStatusAdded", priority = 200 })
+      table.insert(hl_marks, { line = line_idx, col = col + #ICON_PLUS + 1, end_col = col + #ICON_PLUS + 1 + #ICON_MINUS, hl = "OneDiffStatusDeleted", priority = 200 })
+    else
+      table.insert(hl_marks, { line = line_idx, col = col, end_col = col + #status_icon, hl = status_hl, priority = 200 })
+    end
 
-    col = 4 + #tree_indent
+    col = 1 + #status_icon + #status_padding + 1 + #tree_indent
     if icon_hl then
       table.insert(hl_marks, { line = line_idx, col = col, end_col = col + #icon, hl = icon_hl })
     end
@@ -433,6 +466,32 @@ function M.select_item()
   end
 end
 
+function M.open_file_keep_focus()
+  local session = require("my_extensions.onediff.session")
+  local display = require("my_extensions.onediff.display")
+
+  local cursor = api.nvim_win_get_cursor(0)
+  local line_num = cursor[1]
+
+  local folder_path = M.get_folder_at_line(line_num)
+  if folder_path then
+    M.toggle_folder(folder_path)
+    return
+  end
+
+  local file_idx = M.get_file_at_line(line_num)
+  if file_idx then
+    local sidebar_win = session.get_sidebar_win()
+    session.set_current_index(file_idx)
+    M.render()
+    display.render_current()
+    
+    if sidebar_win and api.nvim_win_is_valid(sidebar_win) then
+      api.nvim_set_current_win(sidebar_win)
+    end
+  end
+end
+
 function M.select_file()
   M.select_item()
 end
@@ -471,7 +530,7 @@ function M.setup_keymaps(buf)
   vim.keymap.set("n", keymaps.close, onediff.close, opts)
   vim.keymap.set("n", keymaps.refresh, onediff.refresh, opts)
 
-  vim.keymap.set("n", "o", M.select_item, opts)
+  vim.keymap.set("n", "o", M.open_file_keep_focus, opts)
   vim.keymap.set("n", "za", function()
     local cursor = api.nvim_win_get_cursor(0)
     local folder_path = M.get_folder_at_line(cursor[1])
@@ -498,31 +557,18 @@ function M.setup_keymaps(buf)
     end
   end, opts)
 
+  vim.keymap.set("n", "h", "<Nop>", opts)
+  vim.keymap.set("n", "l", "<Nop>", opts)
+
   vim.keymap.set("n", "<Tab>", function()
     local session = require("my_extensions.onediff.session")
-    local diff_buf = session.get_diff_buf()
-    if diff_buf and vim.api.nvim_buf_is_valid(diff_buf) then
-      for _, win in ipairs(vim.api.nvim_list_wins()) do
-        if vim.api.nvim_win_get_buf(win) == diff_buf then
-          vim.api.nvim_set_current_win(win)
-          break
-        end
-      end
-    end
+    session.focus_diff_window()
     onediff.goto_next_change()
   end, opts)
 
   vim.keymap.set("n", "<S-Tab>", function()
     local session = require("my_extensions.onediff.session")
-    local diff_buf = session.get_diff_buf()
-    if diff_buf and vim.api.nvim_buf_is_valid(diff_buf) then
-      for _, win in ipairs(vim.api.nvim_list_wins()) do
-        if vim.api.nvim_win_get_buf(win) == diff_buf then
-          vim.api.nvim_set_current_win(win)
-          break
-        end
-      end
-    end
+    session.focus_diff_window()
     onediff.goto_prev_change()
   end, opts)
 end
