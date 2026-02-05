@@ -61,5 +61,5 @@ vim.keymap.set("n", "<leader>z", "<cmd>AerialToggle!<CR>", { desc = "Toggle aeri
 
 vim.api.nvim_set_hl(0, "AerialLine", { fg = "#a6da95", bg = "#2e3245" })
 
-require("leap")
+-- require("leap")
 -- vim.keymap.set({'n', 'x', 'o'}, '<leader>a', '<Plug>(leap)')

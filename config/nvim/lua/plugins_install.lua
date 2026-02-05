@@ -558,7 +558,7 @@ require("lazy").setup({
   },
 
 
-  "ggandor/leap.nvim",
+  -- "ggandor/leap.nvim",
 
   {
     "folke/flash.nvim",
