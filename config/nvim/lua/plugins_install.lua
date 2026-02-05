@@ -191,6 +191,7 @@ require("lazy").setup({
 
   -- Git integration
   "tpope/vim-fugitive",
+  "sindrets/diffview.nvim",
 
   -- Make terminal vim and tmux work better together.
   "tmux-plugins/vim-tmux-focus-events",
