@@ -42,6 +42,7 @@ require('plugin_settings/flash')
 -- require('plugin_settings/vim_markdown')
 -- require("plugin_settings/git_conflict")
 require('plugin_settings/1_ror')
+require('plugin_settings/onediff')
 
 -- require('plugin_settings/indent_blankline')
 -- require('plugin_settings/local_highlight')
