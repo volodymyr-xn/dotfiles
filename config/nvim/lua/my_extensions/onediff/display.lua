@@ -53,9 +53,12 @@ function M.open_file_with_diff(file, hunks, base_ref)
   local buf = vim.api.nvim_get_current_buf()
   session.set_diff_buf(buf)
 
-  M.clear_buffer_highlights(buf)
-  M.apply_inline_diff(buf, hunks, file, base_ref)
   M.setup_buffer_keymaps(buf)
+  
+  vim.schedule(function()
+    M.clear_buffer_highlights(buf)
+    M.apply_inline_diff(buf, hunks, file, base_ref)
+  end)
 end
 
 function M.setup_buffer_keymaps(buf)
@@ -102,7 +105,6 @@ function M.render_deleted_file(file, base_ref, target_win)
   for i = 0, #lines - 1 do
     vim.api.nvim_buf_set_extmark(buf, ns, i, 0, {
       line_hl_group = hl.line_delete,
-      priority = 50,
     })
   end
 
@@ -110,10 +112,7 @@ function M.render_deleted_file(file, base_ref, target_win)
 end
 
 function M.apply_inline_diff(buf, hunks, file, base_ref)
-  local git_ops = require("my_extensions.onediff.git_ops")
-  local diff_parse = require("my_extensions.onediff.diff_parse")
   local settings = require("my_extensions.onediff.settings")
-  local session = require("my_extensions.onediff.session")
 
   if not hunks or #hunks == 0 then
     return
@@ -122,102 +121,58 @@ function M.apply_inline_diff(buf, hunks, file, base_ref)
   local ns = settings.get_ns()
   local hl = settings.get("highlights")
   local buf_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-  local base_content = git_ops.get_base_content(file.path, base_ref) or ""
-  local base_lines = vim.split(base_content, "\n")
+  local buf_line_count = #buf_lines
 
   for _, hunk in ipairs(hunks) do
     local new_line_idx = hunk.new_start - 1
-    local old_line_idx = hunk.old_start - 1
-    local pending_deletes = {}
+    local deleted_lines = {}
+    local deleted_attach_line = nil
+
+    local function flush_deleted_lines()
+      if #deleted_lines == 0 then
+        return
+      end
+      if buf_line_count == 0 then
+        deleted_lines = {}
+        deleted_attach_line = nil
+        return
+      end
+
+      local attach_line = math.min(deleted_attach_line, buf_line_count - 1)
+      local virt_lines = {}
+      for _, text in ipairs(deleted_lines) do
+        table.insert(virt_lines, { { text, hl.line_delete } })
+      end
+      vim.api.nvim_buf_set_extmark(buf, ns, attach_line, 0, {
+        virt_lines = virt_lines,
+        virt_lines_above = deleted_attach_line > 0,
+      })
+
+      deleted_lines = {}
+      deleted_attach_line = nil
+    end
 
     for _, change in ipairs(hunk.changes) do
-      if change.type == "delete" then
-        table.insert(pending_deletes, {
-          text = change.text,
-          old_idx = old_line_idx,
-        })
-        old_line_idx = old_line_idx + 1
+      if change.type == "context" then
+        flush_deleted_lines()
+        new_line_idx = new_line_idx + 1
       elseif change.type == "add" then
-        if new_line_idx >= 0 and new_line_idx < #buf_lines then
+        flush_deleted_lines()
+        if new_line_idx >= 0 and new_line_idx < buf_line_count then
           vim.api.nvim_buf_set_extmark(buf, ns, new_line_idx, 0, {
             line_hl_group = hl.line_add,
-            priority = 50,
           })
-
-          if #pending_deletes > 0 then
-            local del = table.remove(pending_deletes, 1)
-            local _, new_ranges = diff_parse.compute_char_diff(del.text, change.text)
-
-            for _, range in ipairs(new_ranges) do
-              local start_col = math.min(range[1], #buf_lines[new_line_idx + 1])
-              local end_col = math.min(range[2], #buf_lines[new_line_idx + 1])
-              if start_col < end_col then
-                vim.api.nvim_buf_set_extmark(buf, ns, new_line_idx, start_col, {
-                  end_col = end_col,
-                  hl_group = hl.char_add,
-                  hl_mode = "combine",
-                  priority = 200,
-                })
-              end
-            end
-
-            local attach_line = math.max(0, new_line_idx)
-            local old_ranges, _ = diff_parse.compute_char_diff(del.text, change.text)
-            local virt_text = {}
-
-            if #old_ranges > 0 then
-              local last_end = 0
-              for _, range in ipairs(old_ranges) do
-                if range[1] > last_end then
-                  table.insert(virt_text, { del.text:sub(last_end + 1, range[1]), hl.line_delete })
-                end
-                table.insert(virt_text, { del.text:sub(range[1] + 1, range[2]), hl.char_delete })
-                last_end = range[2]
-              end
-              if last_end < #del.text then
-                table.insert(virt_text, { del.text:sub(last_end + 1), hl.line_delete })
-              end
-            else
-              virt_text = { { del.text, hl.line_delete } }
-            end
-
-            vim.api.nvim_buf_set_extmark(buf, ns, attach_line, 0, {
-              virt_lines = { virt_text },
-              virt_lines_above = true,
-              priority = 100,
-            })
-          end
         end
         new_line_idx = new_line_idx + 1
-      elseif change.type == "context" then
-        if #pending_deletes > 0 then
-          for _, del in ipairs(pending_deletes) do
-            local attach_line = math.max(0, math.min(new_line_idx, #buf_lines - 1))
-            vim.api.nvim_buf_set_extmark(buf, ns, attach_line, 0, {
-              virt_lines = { { { del.text, hl.line_delete } } },
-              virt_lines_above = true,
-              priority = 100,
-            })
-          end
-          pending_deletes = {}
+      elseif change.type == "delete" then
+        if deleted_attach_line == nil then
+          deleted_attach_line = math.max(new_line_idx, 0)
         end
-        new_line_idx = new_line_idx + 1
-        old_line_idx = old_line_idx + 1
+        table.insert(deleted_lines, change.text)
       end
     end
 
-    if #pending_deletes > 0 then
-      for _, del in ipairs(pending_deletes) do
-        local attach_line = math.max(0, math.min(new_line_idx - 1, #buf_lines - 1))
-        if attach_line >= 0 then
-          vim.api.nvim_buf_set_extmark(buf, ns, attach_line, 0, {
-            virt_lines = { { { del.text, hl.line_delete } } },
-            virt_lines_above = false,
-            priority = 100,
-          })
-        end
-      end
-    end
+    flush_deleted_lines()
   end
 end
 
