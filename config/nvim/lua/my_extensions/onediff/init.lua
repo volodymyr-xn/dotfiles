@@ -5,6 +5,18 @@ function M.setup(opts)
   local sidebar = require("my_extensions.onediff.sidebar")
   settings.apply(opts)
   sidebar.init()
+  
+  vim.api.nvim_create_user_command("OneDiff", M.toggle, { desc = "Toggle OneDiff" })
+  vim.api.nvim_create_user_command("OneDiffOpen", M.open, { desc = "Open OneDiff" })
+  vim.api.nvim_create_user_command("OneDiffOpenCurrent", M.open_current, { desc = "Open OneDiff with current file" })
+  vim.api.nvim_create_user_command("OneDiffClose", M.close, { desc = "Close OneDiff" })
+  vim.api.nvim_create_user_command("OneDiffRefresh", M.refresh, { desc = "Refresh OneDiff" })
+  vim.api.nvim_create_user_command("OneDiffNextFile", M.goto_next_file, { desc = "Go to next changed file" })
+  vim.api.nvim_create_user_command("OneDiffPrevFile", M.goto_prev_file, { desc = "Go to previous changed file" })
+  vim.api.nvim_create_user_command("OneDiffNextChange", M.goto_next_change, { desc = "Go to next change" })
+  vim.api.nvim_create_user_command("OneDiffPrevChange", M.goto_prev_change, { desc = "Go to previous change" })
+  vim.api.nvim_create_user_command("OneDiffFocusSidebar", M.focus_sidebar, { desc = "Focus sidebar" })
+  vim.api.nvim_create_user_command("OneDiffToggleSidebar", M.toggle_sidebar, { desc = "Toggle sidebar" })
 end
 
 function M.open()
@@ -86,6 +98,22 @@ end
 function M.toggle_sidebar()
   local sidebar = require("my_extensions.onediff.sidebar")
   sidebar.toggle()
+end
+
+function M.open_current()
+  local session = require("my_extensions.onediff.session")
+  local sidebar = require("my_extensions.onediff.sidebar")
+  local display = require("my_extensions.onediff.display")
+
+  if session.is_open() then
+    return
+  end
+
+  local current_file = vim.api.nvim_buf_get_name(0)
+  
+  session.start(current_file)
+  sidebar.show()
+  display.render_current()
 end
 
 return M

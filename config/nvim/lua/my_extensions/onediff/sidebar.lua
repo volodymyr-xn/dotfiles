@@ -18,15 +18,17 @@ end
 
 local function get_git_status_hl(status)
   if status == "added" then
-    return "DiffAdd"
+    return "OneDiffStatusAdded"
   elseif status == "deleted" then
-    return "DiffDelete"
+    return "OneDiffStatusDeleted"
   elseif status == "modified" then
-    return "DiffChange"
+    return "OneDiffStatusModified"
   elseif status == "renamed" then
-    return "DiffChange"
+    return "OneDiffStatusModified"
+  elseif status == "untracked" then
+    return "OneDiffStatusUntracked"
   end
-  return "Normal"
+  return "OneDiffStatusUntracked"
 end
 
 local function get_status_letter(status)
@@ -42,18 +44,54 @@ local function get_status_letter(status)
   return "?"
 end
 
+local function get_folder_icon(is_collapsed)
+  if is_collapsed then
+    return "", "OneDiffFolderIcon"
+  else
+    return "", "OneDiffFolderIconOpen"
+  end
+end
+
+local function get_folder_status(folder_path, files, is_collapsed, collapsed_folders)
+  if not is_collapsed then
+    return " ", "Normal"
+  end
+
+  local statuses = {}
+  for _, file in ipairs(files) do
+    if file.path:find("^" .. vim.pesc(folder_path) .. "/") then
+      statuses[file.status] = true
+    end
+  end
+  if statuses["modified"] then
+    return "M", "OneDiffStatusModified"
+  elseif statuses["added"] then
+    return "A", "OneDiffStatusAdded"
+  elseif statuses["deleted"] then
+    return "D", "OneDiffStatusDeleted"
+  end
+  return " ", "Normal"
+end
+
 function M.init()
   vim.api.nvim_set_hl(0, "OneDiffPanelTitle", { fg = "#cdd6f4", bold = true, default = true })
   vim.api.nvim_set_hl(0, "OneDiffPanelCount", { fg = "#6c7086", default = true })
   vim.api.nvim_set_hl(0, "OneDiffPanelPath", { fg = "#6c7086", italic = true, default = true })
-  vim.api.nvim_set_hl(0, "OneDiffPanelFileName", { fg = "#cdd6f4", default = true })
-  vim.api.nvim_set_hl(0, "OneDiffPanelSelected", { fg = "#cdd6f4", bold = true, default = true })
+  vim.api.nvim_set_hl(0, "OneDiffPanelFileName", { link = "Normal", default = true })
+  vim.api.nvim_set_hl(0, "OneDiffPanelSelected", { link = "Type", default = true })
   vim.api.nvim_set_hl(0, "OneDiffPanelInsertions", { fg = "#a6e3a1", default = true })
   vim.api.nvim_set_hl(0, "OneDiffPanelDeletions", { fg = "#f38ba8", default = true })
-  vim.api.nvim_set_hl(0, "OneDiffFolderName", { fg = "#89b4fa", default = true })
-  vim.api.nvim_set_hl(0, "OneDiffFolderSign", { fg = "#f9e2af", default = true })
+  vim.api.nvim_set_hl(0, "OneDiffFolderName", { link = "Directory", default = true })
+  vim.api.nvim_set_hl(0, "OneDiffFolderIcon", { link = "Directory", default = true })
+  vim.api.nvim_set_hl(0, "OneDiffFolderIconOpen", { link = "Directory", default = true })
+  vim.api.nvim_set_hl(0, "OneDiffFolderArrow", { link = "Normal", default = true })
   vim.api.nvim_set_hl(0, "OneDiffNonText", { fg = "#6c7086", default = true })
   vim.api.nvim_set_hl(0, "OneDiffCursorLine", { bg = "#313244", default = true })
+  vim.api.nvim_set_hl(0, "OneDiffStatusModified", { fg = "#f5a97f", default = true })
+  vim.api.nvim_set_hl(0, "OneDiffStatusAdded", { fg = "#a6da95", default = true })
+  vim.api.nvim_set_hl(0, "OneDiffStatusDeleted", { fg = "#ed8796", default = true })
+  vim.api.nvim_set_hl(0, "OneDiffStatusUntracked", { fg = "#8aadf4", default = true })
+  vim.api.nvim_set_hl(0, "OneDiffTreeIndent", { fg = "#6c7086", default = true })
 end
 
 function M.show()
@@ -189,7 +227,7 @@ function M.render()
 
     local tree = M.build_file_tree(files)
     local line_idx = #lines
-    M.render_tree(tree, lines, hl_marks, line_idx, 0, current_idx)
+    M.render_tree(tree, lines, hl_marks, line_idx, 0, current_idx, files)
   end
 
   vim.bo[buf].modifiable = true
@@ -244,7 +282,7 @@ function M.build_file_tree(files)
   return tree
 end
 
-function M.render_tree(node, lines, hl_marks, start_line, depth, current_idx)
+function M.render_tree(node, lines, hl_marks, start_line, depth, current_idx, all_files)
   local line_idx = start_line
 
   local sorted_dirs = {}
@@ -254,32 +292,37 @@ function M.render_tree(node, lines, hl_marks, start_line, depth, current_idx)
   table.sort(sorted_dirs, function(a, b) return a.name < b.name end)
 
   for _, dir in ipairs(sorted_dirs) do
-    local indent = string.rep("  ", depth)
     local is_collapsed = M.collapsed_folders[dir.node.path] == true
-    local folder_icon = is_collapsed and "" or ""
-    local folder_line = indent .. folder_icon .. " " .. dir.name
+    local arrow = is_collapsed and ">" or "˅"
+    local folder_icon, folder_icon_hl = get_folder_icon(is_collapsed)
+    local status_letter, status_hl = get_folder_status(dir.node.path, all_files, is_collapsed, M.collapsed_folders)
+
+    local tree_indent = string.rep("  ", depth)
+    local folder_line = "  " .. status_letter .. " " .. tree_indent .. arrow .. " " .. folder_icon .. " " .. dir.name
 
     table.insert(lines, folder_line)
-
     M.folder_line_map[line_idx + 1] = dir.node.path
 
-    local icon_start = #indent
-    local icon_end = icon_start + #folder_icon
-    table.insert(hl_marks, { line = line_idx, col = icon_start, end_col = icon_end, hl = "OneDiffFolderArrow", priority = 200 })
+    local col = 2
+    table.insert(hl_marks, { line = line_idx, col = col, end_col = col + 1, hl = status_hl, priority = 200 })
 
-    local name_start = icon_end + 1
-    local name_end = name_start + #dir.name
-    table.insert(hl_marks, { line = line_idx, col = name_start, end_col = name_end, hl = "OneDiffFolderName" })
+    col = 4 + #tree_indent
+    table.insert(hl_marks, { line = line_idx, col = col, end_col = col + #arrow, hl = "OneDiffFolderArrow", priority = 200 })
+
+    col = col + #arrow + 1
+    table.insert(hl_marks, { line = line_idx, col = col, end_col = col + #folder_icon, hl = folder_icon_hl, priority = 200 })
+
+    col = col + #folder_icon + 1
+    table.insert(hl_marks, { line = line_idx, col = col, end_col = col + #dir.name, hl = "OneDiffFolderName" })
 
     line_idx = line_idx + 1
 
     if not is_collapsed then
-      line_idx = M.render_tree(dir.node, lines, hl_marks, line_idx, depth + 1, current_idx)
+      line_idx = M.render_tree(dir.node, lines, hl_marks, line_idx, depth + 1, current_idx, all_files)
     end
   end
 
   for _, item in ipairs(node.files) do
-    local indent = string.rep("  ", depth)
     local status_letter = get_status_letter(item.file.status)
     local status_hl = get_git_status_hl(item.file.status)
     local icon, icon_hl = get_file_icon(item.name)
@@ -287,22 +330,39 @@ function M.render_tree(node, lines, hl_marks, start_line, depth, current_idx)
     local is_selected = item.index == current_idx
     local file_hl = is_selected and "OneDiffPanelSelected" or "OneDiffPanelFileName"
 
-    local line = indent .. status_letter .. " " .. icon .. " " .. item.name
+    local tree_indent = string.rep("  ", depth)
+    local insertions = item.file.insertions or 0
+    local deletions = item.file.deletions or 0
+
+    local stats_str = ""
+    if insertions > 0 or deletions > 0 then
+      stats_str = " " .. insertions .. ", " .. deletions
+    end
+
+    local line = "  " .. status_letter .. " " .. tree_indent .. icon .. " " .. item.name .. stats_str
 
     table.insert(lines, line)
-
     M.file_line_map[line_idx + 1] = item.index
 
-    local col = #indent
-    table.insert(hl_marks, { line = line_idx, col = col, end_col = col + 1, hl = status_hl })
+    local col = 2
+    table.insert(hl_marks, { line = line_idx, col = col, end_col = col + 1, hl = status_hl, priority = 200 })
 
-    col = col + 2
+    col = 4 + #tree_indent
     if icon_hl then
       table.insert(hl_marks, { line = line_idx, col = col, end_col = col + #icon, hl = icon_hl })
     end
 
     col = col + #icon + 1
     table.insert(hl_marks, { line = line_idx, col = col, end_col = col + #item.name, hl = file_hl, priority = 150 })
+
+    if #stats_str > 0 then
+      local stats_start = col + #item.name
+      local comma_pos = stats_str:find(",")
+      if comma_pos then
+        table.insert(hl_marks, { line = line_idx, col = stats_start, end_col = stats_start + comma_pos, hl = "OneDiffPanelInsertions", priority = 150 })
+        table.insert(hl_marks, { line = line_idx, col = stats_start + comma_pos, end_col = stats_start + #stats_str, hl = "OneDiffPanelDeletions", priority = 150 })
+      end
+    end
 
     if is_selected then
       table.insert(hl_marks, { line = line_idx, col = 0, end_col = #line, hl = "OneDiffCursorLine", priority = 50 })
@@ -439,11 +499,31 @@ function M.setup_keymaps(buf)
   end, opts)
 
   vim.keymap.set("n", "<Tab>", function()
-    onediff.goto_next_file()
+    local session = require("my_extensions.onediff.session")
+    local diff_buf = session.get_diff_buf()
+    if diff_buf and vim.api.nvim_buf_is_valid(diff_buf) then
+      for _, win in ipairs(vim.api.nvim_list_wins()) do
+        if vim.api.nvim_win_get_buf(win) == diff_buf then
+          vim.api.nvim_set_current_win(win)
+          break
+        end
+      end
+    end
+    onediff.goto_next_change()
   end, opts)
 
   vim.keymap.set("n", "<S-Tab>", function()
-    onediff.goto_prev_file()
+    local session = require("my_extensions.onediff.session")
+    local diff_buf = session.get_diff_buf()
+    if diff_buf and vim.api.nvim_buf_is_valid(diff_buf) then
+      for _, win in ipairs(vim.api.nvim_list_wins()) do
+        if vim.api.nvim_win_get_buf(win) == diff_buf then
+          vim.api.nvim_set_current_win(win)
+          break
+        end
+      end
+    end
+    onediff.goto_prev_change()
   end, opts)
 end
 

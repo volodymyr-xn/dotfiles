@@ -62,8 +62,8 @@ function M.setup_buffer_keymaps(buf)
   local onediff = require("my_extensions.onediff")
   local opts = { buffer = buf, silent = true, nowait = true }
 
-  vim.keymap.set("n", "<Tab>", onediff.goto_next_file, opts)
-  vim.keymap.set("n", "<S-Tab>", onediff.goto_prev_file, opts)
+  vim.keymap.set("n", "<Tab>", onediff.goto_next_change, opts)
+  vim.keymap.set("n", "<S-Tab>", onediff.goto_prev_change, opts)
 end
 
 function M.render_deleted_file(file, base_ref, target_win)

@@ -12,7 +12,7 @@ local state = {
   sidebar_win = nil,
 }
 
-function M.start()
+function M.start(target_file_path)
   local git_ops = require("my_extensions.onediff.git_ops")
   local settings = require("my_extensions.onediff.settings")
 
@@ -20,6 +20,24 @@ function M.start()
   state.base_ref = settings.get("base_ref")
   state.changed_files = git_ops.list_changed_files(state.base_ref)
   state.current_index = 1
+  
+  if target_file_path then
+    local git_root = git_ops.get_root()
+    if git_root then
+      local relative_path = target_file_path
+      if target_file_path:find("^" .. vim.pesc(git_root)) then
+        relative_path = target_file_path:sub(#git_root + 2)
+      end
+      
+      for i, file in ipairs(state.changed_files) do
+        if file.path == relative_path then
+          state.current_index = i
+          break
+        end
+      end
+    end
+  end
+  
   state.active = true
 end
 

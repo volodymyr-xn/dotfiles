@@ -29,6 +29,32 @@ function M.list_changed_files(base_ref)
   local staged = run_cmd(string.format("git diff --cached --name-status %s", base_ref))
   local unstaged = run_cmd(string.format("git diff --name-status %s", base_ref))
 
+  local numstat_staged = run_cmd(string.format("git diff --cached --numstat %s", base_ref))
+  local numstat_unstaged = run_cmd(string.format("git diff --numstat %s", base_ref))
+
+  local stats = {}
+  local function parse_numstat(output)
+    if not output then
+      return
+    end
+    for line in output:gmatch("[^\n]+") do
+      local adds, dels, path = line:match("^(%S+)%s+(%S+)%s+(.+)$")
+      if adds and dels and path then
+        local insertions = tonumber(adds) or 0
+        local deletions = tonumber(dels) or 0
+        if not stats[path] then
+          stats[path] = { insertions = insertions, deletions = deletions }
+        else
+          stats[path].insertions = stats[path].insertions + insertions
+          stats[path].deletions = stats[path].deletions + deletions
+        end
+      end
+    end
+  end
+
+  parse_numstat(numstat_staged)
+  parse_numstat(numstat_unstaged)
+
   local seen = {}
   local function parse_status(output)
     if not output then
@@ -46,10 +72,13 @@ function M.list_changed_files(base_ref)
         elseif status:match("^R") then
           file_status = "renamed"
         end
+        local file_stats = stats[path] or { insertions = 0, deletions = 0 }
         table.insert(files, {
           path = path,
           full_path = root .. "/" .. path,
           status = file_status,
+          insertions = file_stats.insertions,
+          deletions = file_stats.deletions,
         })
       end
     end
