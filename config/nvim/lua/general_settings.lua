@@ -36,7 +36,9 @@ vim.cmd("filetype plugin on")
 vim.o.compatible = false
 
 -- Redraw only when we need to (i.e. don't redraw when executing a macro)
--- Experimental
+-- Don't redraw while executing macros or scrolling
+-- Helps with removing content jumps when navigating between files in plugins(onediff and other)
+-- Also improves rendering performance
 vim.o.lazyredraw = true
 
 -- Indicates a fast terminal connection. More characters will be sent to the
@@ -209,8 +211,6 @@ vim.o.signcolumn = "yes"
 --############ NVIM Performance tweaks ########################
 -- Assume fast terminal connection
 vim.opt.ttyfast=true
--- Don't redraw while executing macros or scrolling
-vim.opt.lazyredraw=true
 -- Reduce redraw frequency
 -- vim.opt.updatetime=200
 vim.opt.updatetime=100

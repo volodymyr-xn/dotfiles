@@ -21,12 +21,14 @@ bindkey -s "^o" 'bin/rails c\n'
 
 # Run claude in vertical tmux split
 # ctrl-n
-bindkey -s "^n" $'tmux split-window -h claude\n'
+bindkey -s "^n" $'claude\n'
 
-# bindkey "^w" forward-word
-# bindkey "^b" backward-word
+bindkey "^e" forward-word
+bindkey "^v" backward-word
 # bindkey "^d" backward-delete-word
 # bindkey "^v" delete-word
+
+bindkey "^d" delete-word
 
 # bindkey -s "^x" 'eza -alh\n'
 # bindkey "^e" beginning-of-line

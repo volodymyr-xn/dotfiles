@@ -136,5 +136,5 @@ end
 vim.api.nvim_create_user_command("GitDiffPopup", GitDiffCurrentFilePopup, {})
 
 -- Show git diff in popup
-vim.keymap.set('n', 'sq', ':GitDiffPopup<CR>', { noremap = true, silent = true, desc = "Show git diff popup" })
-vim.keymap.set('n', '<c-i>', '<ESC>', { noremap = true, silent = true, desc = "Show git diff popup" })
+vim.keymap.set('n', 'sw', ':GitDiffPopup<CR>', { noremap = true, silent = true, desc = "Show git diff popup" })
+-- vim.keymap.set('n', '<c-i>', '<ESC>', { noremap = true, silent = true, desc = "Show git diff popup" })

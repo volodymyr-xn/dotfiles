@@ -201,7 +201,7 @@ require("lazy").setup({
   -- "Raimondi/delimitMate",
 
   -- Crystal syntax support
-  -- "rhysd/vim-crystal",
+  "vim-crystal/vim-crystal",
 
   -- Improved JavaScript syntax
   "pangloss/vim-javascript",
@@ -570,6 +570,7 @@ require("lazy").setup({
 
   "folke/snacks.nvim",
 
+  'axkirillov/unified.nvim',
   -- "coder/claudecode.nvim"
 
   {

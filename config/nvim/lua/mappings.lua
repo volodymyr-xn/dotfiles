@@ -218,3 +218,13 @@ vim.keymap.set("t", "<C-h>", [[<C-\><C-n><Cmd>TmuxNavigateLeft<CR>]], opts)
 vim.keymap.set("t", "<C-j>", [[<C-\><C-n><Cmd>TmuxNavigateDown<CR>]], opts)
 vim.keymap.set("t", "<C-k>", [[<C-\><C-n><Cmd>TmuxNavigateUp<CR>]], opts)
 vim.keymap.set("t", "<C-l>", [[<C-\><C-n><Cmd>TmuxNavigateRight<CR>]], opts)
+
+local ruby_toggle = require('my_extensions.ruby_component_toggle')
+vim.api.nvim_set_keymap('n', 's1', '<cmd>lua require("my_extensions.ruby_component_toggle").navigate_to_extension(".rb")<CR>', 
+  { noremap = true, silent = true, desc = "Navigate to .rb file" })
+vim.api.nvim_set_keymap('n', 's2', '<cmd>lua require("my_extensions.ruby_component_toggle").navigate_to_extension(".html.erb")<CR>', 
+  { noremap = true, silent = true, desc = "Navigate to .html.erb file" })
+vim.api.nvim_set_keymap('n', 's3', '<cmd>lua require("my_extensions.ruby_component_toggle").navigate_to_style()<CR>', 
+  { noremap = true, silent = true, desc = "Navigate to .scss/.css file" })
+vim.api.nvim_set_keymap('n', 'sq', '<cmd>lua require("my_extensions.ruby_component_toggle").navigate_to_extension(".js")<CR>', 
+  { noremap = true, silent = true, desc = "Navigate to .js file" })

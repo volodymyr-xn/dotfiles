@@ -643,6 +643,18 @@ function M.setup_keymaps(buf)
     session.focus_diff_window()
     onediff.goto_prev_change()
   end, opts)
+
+  vim.keymap.set("n", "<LeftMouse>", function()
+    local mouse_pos = vim.fn.getmousepos()
+    if mouse_pos.winid == api.nvim_get_current_win() then
+      local buf = api.nvim_get_current_buf()
+      local line_count = api.nvim_buf_line_count(buf)
+      if mouse_pos.line >= 1 and mouse_pos.line <= line_count then
+        api.nvim_win_set_cursor(0, { mouse_pos.line, 0 })
+        M.select_item()
+      end
+    end
+  end, opts)
 end
 
 function M.setup_autocmds(buf)

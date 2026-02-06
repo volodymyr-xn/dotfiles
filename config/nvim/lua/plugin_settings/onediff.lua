@@ -3,6 +3,7 @@ local onediff_debug = require("my_extensions.onediff.debug_helper")
 
 onediff.setup({
   base_ref = "HEAD",
+  picker = "telescope",
   sidebar = {
     width = 47,
     position = "left",
