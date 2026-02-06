@@ -1,9 +1,10 @@
 local onediff = require("my_extensions.onediff")
+local onediff_debug = require("my_extensions.onediff.debug_helper")
 
 onediff.setup({
   base_ref = "HEAD",
   sidebar = {
-    width = 35,
+    width = 47,
     position = "left",
   },
 })
