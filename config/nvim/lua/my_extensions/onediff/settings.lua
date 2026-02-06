@@ -2,6 +2,7 @@ local M = {}
 
 M.defaults = {
   base_ref = "HEAD",
+  picker = "telescope",
   sidebar = {
     width = 35,
     position = "left",

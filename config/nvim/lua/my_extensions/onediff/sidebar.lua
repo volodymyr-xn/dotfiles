@@ -600,7 +600,7 @@ function M.setup_keymaps(buf)
 
   vim.keymap.set("n", keymaps.select, M.select_item, opts)
   vim.keymap.set("n", keymaps.refresh, onediff.refresh, opts)
-  vim.keymap.set("n", "q", onediff.telescope_git_status, opts)
+  vim.keymap.set("n", "q", onediff.open_file_picker, opts)
 
   vim.keymap.set("n", "o", M.open_file_keep_focus, opts)
   vim.keymap.set("n", "za", function()

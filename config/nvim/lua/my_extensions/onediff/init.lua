@@ -116,11 +116,84 @@ function M.open_current()
   display.render_current()
 end
 
-function M.telescope_git_status()
+local function select_file_and_render(selected_path)
   local session = require("my_extensions.onediff.session")
-  local git_ops = require("my_extensions.onediff.git_ops")
   local sidebar = require("my_extensions.onediff.sidebar")
   local display = require("my_extensions.onediff.display")
+  
+  local files = session.get_files()
+  
+  for i, file in ipairs(files) do
+    if file.path == selected_path then
+      session.set_current_index(i)
+      sidebar.render()
+      display.render_current()
+      return
+    end
+  end
+  
+  vim.notify("OneDiff: Selected file not in changed files list", vim.log.levels.WARN)
+end
+
+local function telescope_picker()
+  local ok, telescope = pcall(require, "telescope.builtin")
+  if not ok then
+    vim.notify("OneDiff: Telescope not available", vim.log.levels.ERROR)
+    return
+  end
+  
+  telescope.git_status({
+    attach_mappings = function(_, map)
+      local actions = require("telescope.actions")
+      local action_state = require("telescope.actions.state")
+      
+      map("i", "<CR>", function(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
+        actions.close(prompt_bufnr)
+        if selection then
+          select_file_and_render(selection.value)
+        end
+      end)
+      
+      map("n", "<CR>", function(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
+        actions.close(prompt_bufnr)
+        if selection then
+          select_file_and_render(selection.value)
+        end
+      end)
+      
+      return true
+    end
+  })
+end
+
+local function fzf_lua_picker()
+  local ok, fzf_lua = pcall(require, "fzf-lua")
+  if not ok then
+    vim.notify("OneDiff: fzf-lua not available", vim.log.levels.ERROR)
+    return
+  end
+  
+  fzf_lua.git_status({
+    actions = {
+      ["default"] = function(selected)
+        if selected and #selected > 0 then
+          local file_line = selected[1]
+          local selected_path = file_line:match("^%S+%s+(.+)$")
+          if selected_path then
+            select_file_and_render(selected_path)
+          end
+        end
+      end,
+    },
+  })
+end
+
+function M.open_file_picker()
+  local session = require("my_extensions.onediff.session")
+  local git_ops = require("my_extensions.onediff.git_ops")
+  local settings = require("my_extensions.onediff.settings")
   
   if not session.is_open() then
     vim.notify("OneDiff: Not active", vim.log.levels.WARN)
@@ -133,56 +206,15 @@ function M.telescope_git_status()
     return
   end
   
-  require("telescope.builtin").git_status({
-    attach_mappings = function(_, map)
-      local actions = require("telescope.actions")
-      local action_state = require("telescope.actions.state")
-      
-      map("i", "<CR>", function(prompt_bufnr)
-        local selection = action_state.get_selected_entry()
-        actions.close(prompt_bufnr)
-        
-        if selection then
-          local selected_path = selection.value
-          local files = session.get_files()
-          
-          for i, file in ipairs(files) do
-            if file.path == selected_path then
-              session.set_current_index(i)
-              sidebar.render()
-              display.render_current()
-              return
-            end
-          end
-          
-          vim.notify("OneDiff: Selected file not in changed files list", vim.log.levels.WARN)
-        end
-      end)
-      
-      map("n", "<CR>", function(prompt_bufnr)
-        local selection = action_state.get_selected_entry()
-        actions.close(prompt_bufnr)
-        
-        if selection then
-          local selected_path = selection.value
-          local files = session.get_files()
-          
-          for i, file in ipairs(files) do
-            if file.path == selected_path then
-              session.set_current_index(i)
-              sidebar.render()
-              display.render_current()
-              return
-            end
-          end
-          
-          vim.notify("OneDiff: Selected file not in changed files list", vim.log.levels.WARN)
-        end
-      end)
-      
-      return true
-    end
-  })
+  local picker = settings.get("picker") or "telescope"
+  
+  if picker == "fzf-lua" or picker == "fzf_lua" then
+    fzf_lua_picker()
+  elseif picker == "telescope" then
+    telescope_picker()
+  else
+    vim.notify("OneDiff: Unknown picker '" .. picker .. "'. Use 'telescope' or 'fzf-lua'", vim.log.levels.ERROR)
+  end
 end
 
 return M
