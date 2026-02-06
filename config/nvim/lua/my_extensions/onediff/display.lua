@@ -56,20 +56,41 @@ function M.open_file_with_diff(file, hunks, base_ref)
     return
   end
 
+  local saved_lazyredraw = vim.o.lazyredraw
+  vim.o.lazyredraw = true
+  
   vim.cmd("edit " .. vim.fn.fnameescape(file.full_path))
   local buf = vim.api.nvim_get_current_buf()
   session.set_diff_buf(buf)
 
   M.setup_buffer_keymaps(buf)
+  M.clear_buffer_highlights(buf)
   
-  vim.schedule(function()
-    M.clear_buffer_highlights(buf)
-    if file.status == "untracked" then
-      M.highlight_untracked_file(buf)
-    else
-      M.apply_inline_diff(buf, hunks, file, base_ref)
+  if file.status == "untracked" then
+    M.highlight_untracked_file(buf)
+  else
+    M.apply_inline_diff(buf, hunks, file, base_ref)
+  end
+  
+  local first_change_line = nil
+  if hunks and #hunks > 0 then
+    local diff_parse = require("my_extensions.onediff.diff_parse")
+    local change_blocks = diff_parse.get_change_lines_in_buffer(hunks)
+    if #change_blocks > 0 then
+      first_change_line = change_blocks[1].start
     end
-  end)
+  end
+  
+  if first_change_line then
+    local line_count = vim.api.nvim_buf_line_count(buf)
+    if first_change_line >= 1 and first_change_line <= line_count then
+      vim.api.nvim_win_set_cursor(target_win, { first_change_line, 0 })
+      vim.cmd("normal! zz")
+    end
+  end
+  
+  vim.o.lazyredraw = saved_lazyredraw
+  vim.cmd("redraw")
 end
 
 function M.setup_buffer_keymaps(buf)

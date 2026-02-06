@@ -119,16 +119,6 @@ function M.next_change()
   session.set_current_index(next_idx)
   sidebar.render()
   display.render_current()
-
-  vim.defer_fn(function()
-    local new_hunks = session.get_hunks()
-    if new_hunks and #new_hunks > 0 then
-      local new_blocks = diff_parse.get_change_lines_in_buffer(new_hunks)
-      if #new_blocks > 0 then
-        safe_set_cursor(new_blocks[1].start)
-      end
-    end
-  end, 10)
 end
 
 function M.prev_change()
@@ -184,16 +174,6 @@ function M.prev_change()
   session.set_current_index(prev_idx)
   sidebar.render()
   display.render_current()
-
-  vim.defer_fn(function()
-    local new_hunks = session.get_hunks()
-    if new_hunks and #new_hunks > 0 then
-      local new_blocks = diff_parse.get_change_lines_in_buffer(new_hunks)
-      if #new_blocks > 0 then
-        safe_set_cursor(new_blocks[#new_blocks].start)
-      end
-    end
-  end, 10)
 end
 
 function M.goto_hunk(hunk_index)
