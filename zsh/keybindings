@@ -19,12 +19,16 @@ bindkey -s "^f" 'git status\n'
 # ctrl-o
 bindkey -s "^o" 'bin/rails c\n'
 
-bindkey "^w" forward-word
-bindkey "^b" backward-word
-bindkey "^d" backward-delete-word
-bindkey "^v" delete-word
+# Run claude in vertical tmux split
+# ctrl-n
+bindkey -s "^n" $'tmux split-window -h claude\n'
 
-bindkey -s "^x" 'eza -alh\n'
+# bindkey "^w" forward-word
+# bindkey "^b" backward-word
+# bindkey "^d" backward-delete-word
+# bindkey "^v" delete-word
+
+# bindkey -s "^x" 'eza -alh\n'
 # bindkey "^e" beginning-of-line
 # bindkey "^]" end-of-line
 # bindkey "^u" backward-kill-line
@@ -37,6 +41,7 @@ bindkey -s "^x" 'eza -alh\n'
 # bindkey -s "^x" 'git diff\n'
 #
 # bindkey -s "^n" 'clear\n'
+
 
 # Experimental
 # bindkey -s "^n" 'cd ~/dev_notes\n'
