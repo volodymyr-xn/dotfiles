@@ -13,6 +13,13 @@ function M.render_current()
   end
 
   local base_ref = session.get_base_ref()
+  
+  if file.status == "untracked" then
+    session.set_hunks({})
+    M.open_file_with_diff(file, {}, base_ref)
+    return
+  end
+  
   local diff_text = git_ops.get_file_diff(file.path, base_ref)
   local hunks = diff_parse.parse_hunks(diff_text)
   session.set_hunks(hunks)
@@ -57,7 +64,11 @@ function M.open_file_with_diff(file, hunks, base_ref)
   
   vim.schedule(function()
     M.clear_buffer_highlights(buf)
-    M.apply_inline_diff(buf, hunks, file, base_ref)
+    if file.status == "untracked" then
+      M.highlight_untracked_file(buf)
+    else
+      M.apply_inline_diff(buf, hunks, file, base_ref)
+    end
   end)
 end
 
@@ -173,6 +184,19 @@ function M.apply_inline_diff(buf, hunks, file, base_ref)
     end
 
     flush_deleted_lines()
+  end
+end
+
+function M.highlight_untracked_file(buf)
+  local settings = require("my_extensions.onediff.settings")
+  local ns = settings.get_ns()
+  local hl = settings.get("highlights")
+  
+  local line_count = vim.api.nvim_buf_line_count(buf)
+  for i = 0, line_count - 1 do
+    vim.api.nvim_buf_set_extmark(buf, ns, i, 0, {
+      line_hl_group = hl.line_add,
+    })
   end
 end
 

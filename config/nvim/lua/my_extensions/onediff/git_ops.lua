@@ -87,6 +87,41 @@ function M.list_changed_files(base_ref)
   parse_status(staged)
   parse_status(unstaged)
 
+  local untracked = run_cmd("git status --porcelain --untracked-files=all")
+  if untracked then
+    for line in untracked:gmatch("[^\r\n]+") do
+      local status_prefix = line:sub(1, 2)
+      if status_prefix == "??" then
+        local path = vim.trim(line:sub(4))
+        
+        if path and path ~= "" and not seen[path] then
+          local full_path = root .. "/" .. path
+          
+          if vim.fn.isdirectory(full_path) ~= 1 then
+            seen[path] = true
+            local line_count = 0
+            
+            local file = io.open(full_path, "r")
+            if file then
+              for _ in file:lines() do
+                line_count = line_count + 1
+              end
+              file:close()
+            end
+            
+            table.insert(files, {
+              path = path,
+              full_path = full_path,
+              status = "untracked",
+              insertions = line_count,
+              deletions = 0,
+            })
+          end
+        end
+      end
+    end
+  end
+
   table.sort(files, function(a, b)
     return a.path < b.path
   end)
@@ -96,6 +131,18 @@ end
 
 function M.get_file_diff(file_path, base_ref)
   base_ref = base_ref or "HEAD"
+  
+  local status_output = run_cmd("git status --porcelain --untracked-files=all")
+  if status_output then
+    for line in status_output:gmatch("[^\n]+") do
+      local status_prefix = line:sub(1, 2)
+      local path = line:sub(4)
+      if status_prefix == "??" and path == file_path then
+        return ""
+      end
+    end
+  end
+  
   local diff = run_cmd(string.format("git diff %s -- '%s'", base_ref, file_path))
   if diff and #vim.trim(diff) == 0 then
     diff = run_cmd(string.format("git diff --cached %s -- '%s'", base_ref, file_path))
