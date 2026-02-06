@@ -302,6 +302,39 @@ function M.build_file_tree(files)
   return tree
 end
 
+local function count_children(node)
+  local dir_count = 0
+  for _ in pairs(node.children) do
+    dir_count = dir_count + 1
+  end
+  return dir_count, #node.files
+end
+
+local function get_single_child_dir(node)
+  local dir_count, file_count = count_children(node)
+  if dir_count == 1 and file_count == 0 then
+    for _, child in pairs(node.children) do
+      return child
+    end
+  end
+  return nil
+end
+
+local function collect_chain(node)
+  local chain = { node }
+  local current = node
+  while true do
+    local single_child = get_single_child_dir(current)
+    if single_child then
+      table.insert(chain, single_child)
+      current = single_child
+    else
+      break
+    end
+  end
+  return chain
+end
+
 function M.render_tree(node, lines, hl_marks, start_line, depth, current_idx, all_files)
   local line_idx = start_line
 
@@ -311,19 +344,43 @@ function M.render_tree(node, lines, hl_marks, start_line, depth, current_idx, al
   end
   table.sort(sorted_dirs, function(a, b) return a.name < b.name end)
 
+  local rendered_paths = {}
+
   for _, dir in ipairs(sorted_dirs) do
-    local is_collapsed = M.collapsed_folders[dir.node.path] == true
+    if rendered_paths[dir.node.path] then
+      goto continue
+    end
+
+    local chain = collect_chain(dir.node)
+    local last_node = chain[#chain]
+    local display_name
+
+    if #chain > 1 then
+      local names = {}
+      for _, n in ipairs(chain) do
+        table.insert(names, n.name)
+      end
+      display_name = table.concat(names, "/")
+    else
+      display_name = dir.name
+    end
+
+    for _, n in ipairs(chain) do
+      rendered_paths[n.path] = true
+    end
+
+    local is_collapsed = M.collapsed_folders[last_node.path] == true
     local arrow = is_collapsed and ">" or "˅"
     local folder_icon, folder_icon_hl = get_folder_icon(is_collapsed)
-    local status_icon, status_hl = get_folder_status(dir.node.path, all_files, is_collapsed, M.collapsed_folders)
+    local status_icon, status_hl = get_folder_status(last_node.path, all_files, is_collapsed, M.collapsed_folders)
 
     local tree_indent = string.rep("  ", depth)
     local status_display_width = vim.fn.strdisplaywidth(status_icon)
     local status_padding = string.rep(" ", math.max(0, 3 - status_display_width))
-    local folder_line = " " .. status_icon .. status_padding .. " " .. tree_indent .. arrow .. " " .. folder_icon .. " " .. dir.name
+    local folder_line = " " .. status_icon .. status_padding .. " " .. tree_indent .. arrow .. " " .. folder_icon .. " " .. display_name
 
     table.insert(lines, folder_line)
-    M.folder_line_map[line_idx + 1] = dir.node.path
+    M.folder_line_map[line_idx + 1] = last_node.path
 
     local col = 1
     if status_hl == "mixed" then
@@ -340,13 +397,15 @@ function M.render_tree(node, lines, hl_marks, start_line, depth, current_idx, al
     table.insert(hl_marks, { line = line_idx, col = col, end_col = col + #folder_icon, hl = folder_icon_hl, priority = 200 })
 
     col = col + #folder_icon + 1
-    table.insert(hl_marks, { line = line_idx, col = col, end_col = col + #dir.name, hl = "OneDiffFolderName" })
+    table.insert(hl_marks, { line = line_idx, col = col, end_col = col + #display_name, hl = "OneDiffFolderName" })
 
     line_idx = line_idx + 1
 
     if not is_collapsed then
-      line_idx = M.render_tree(dir.node, lines, hl_marks, line_idx, depth + 1, current_idx, all_files)
+      line_idx = M.render_tree(last_node, lines, hl_marks, line_idx, depth + 1, current_idx, all_files)
     end
+
+    ::continue::
   end
 
   for _, item in ipairs(node.files) do
