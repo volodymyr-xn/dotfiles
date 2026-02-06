@@ -116,4 +116,73 @@ function M.open_current()
   display.render_current()
 end
 
+function M.telescope_git_status()
+  local session = require("my_extensions.onediff.session")
+  local git_ops = require("my_extensions.onediff.git_ops")
+  local sidebar = require("my_extensions.onediff.sidebar")
+  local display = require("my_extensions.onediff.display")
+  
+  if not session.is_open() then
+    vim.notify("OneDiff: Not active", vim.log.levels.WARN)
+    return
+  end
+  
+  local git_root = git_ops.get_root()
+  if not git_root then
+    vim.notify("OneDiff: Not in a git repository", vim.log.levels.WARN)
+    return
+  end
+  
+  require("telescope.builtin").git_status({
+    attach_mappings = function(_, map)
+      local actions = require("telescope.actions")
+      local action_state = require("telescope.actions.state")
+      
+      map("i", "<CR>", function(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
+        actions.close(prompt_bufnr)
+        
+        if selection then
+          local selected_path = selection.value
+          local files = session.get_files()
+          
+          for i, file in ipairs(files) do
+            if file.path == selected_path then
+              session.set_current_index(i)
+              sidebar.render()
+              display.render_current()
+              return
+            end
+          end
+          
+          vim.notify("OneDiff: Selected file not in changed files list", vim.log.levels.WARN)
+        end
+      end)
+      
+      map("n", "<CR>", function(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
+        actions.close(prompt_bufnr)
+        
+        if selection then
+          local selected_path = selection.value
+          local files = session.get_files()
+          
+          for i, file in ipairs(files) do
+            if file.path == selected_path then
+              session.set_current_index(i)
+              sidebar.render()
+              display.render_current()
+              return
+            end
+          end
+          
+          vim.notify("OneDiff: Selected file not in changed files list", vim.log.levels.WARN)
+        end
+      end)
+      
+      return true
+    end
+  })
+end
+
 return M

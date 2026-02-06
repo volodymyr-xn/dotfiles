@@ -101,6 +101,7 @@ function M.setup_buffer_keymaps(buf)
   vim.keymap.set("n", "<S-Tab>", onediff.goto_prev_change, opts)
   vim.keymap.set("n", "<C-i>", onediff.goto_next_change, opts)
   vim.keymap.set("n", "<C-o>", onediff.goto_prev_change, opts)
+  vim.keymap.set("n", "q", onediff.telescope_git_status, opts)
 end
 
 function M.render_deleted_file(file, base_ref, target_win)

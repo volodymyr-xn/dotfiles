@@ -599,8 +599,8 @@ function M.setup_keymaps(buf)
   local opts = { buffer = buf, silent = true, nowait = true }
 
   vim.keymap.set("n", keymaps.select, M.select_item, opts)
-  vim.keymap.set("n", keymaps.close, onediff.close, opts)
   vim.keymap.set("n", keymaps.refresh, onediff.refresh, opts)
+  vim.keymap.set("n", "q", onediff.telescope_git_status, opts)
 
   vim.keymap.set("n", "o", M.open_file_keep_focus, opts)
   vim.keymap.set("n", "za", function()
