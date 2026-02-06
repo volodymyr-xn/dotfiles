@@ -206,11 +206,15 @@ end
 
 function M.get_change_lines_in_buffer(hunks)
   local change_blocks = {}
+  local buf = vim.api.nvim_get_current_buf()
+  local buf_line_count = vim.api.nvim_buf_line_count(buf)
 
   for _, hunk in ipairs(hunks) do
     local current_line = hunk.new_start
     local block_start = nil
     local block_end = nil
+    local has_additions = false
+    local only_deletions = true
 
     for _, change in ipairs(hunk.changes) do
       if change.type == "delete" or change.type == "add" then
@@ -219,20 +223,44 @@ function M.get_change_lines_in_buffer(hunks)
         end
         block_end = current_line
         if change.type == "add" then
+          has_additions = true
+          only_deletions = false
           current_line = current_line + 1
         end
       elseif change.type == "context" then
         if block_start ~= nil then
-          table.insert(change_blocks, { start = block_start, finish = block_end })
+          local start, finish
+          if only_deletions then
+            local attach_line = math.max(block_start - 1, 0)
+            attach_line = math.min(attach_line, buf_line_count - 1)
+            start = math.max(attach_line + 1, 1)
+            finish = start
+          else
+            start = math.max(block_start, 1)
+            finish = math.max(block_end, 1)
+          end
+          table.insert(change_blocks, { start = start, finish = finish })
           block_start = nil
           block_end = nil
+          has_additions = false
+          only_deletions = true
         end
         current_line = current_line + 1
       end
     end
 
     if block_start ~= nil then
-      table.insert(change_blocks, { start = block_start, finish = block_end })
+      local start, finish
+      if only_deletions then
+        local attach_line = math.max(block_start - 1, 0)
+        attach_line = math.min(attach_line, buf_line_count - 1)
+        start = math.max(attach_line + 1, 1)
+        finish = start
+      else
+        start = math.max(block_start, 1)
+        finish = math.max(block_end, 1)
+      end
+      table.insert(change_blocks, { start = start, finish = finish })
     end
   end
 
