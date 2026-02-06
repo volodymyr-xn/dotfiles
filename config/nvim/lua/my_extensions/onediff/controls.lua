@@ -54,6 +54,17 @@ function M.prev_file()
   display.render_current()
 end
 
+local function safe_set_cursor(line)
+  local buf = vim.api.nvim_get_current_buf()
+  local line_count = vim.api.nvim_buf_line_count(buf)
+  if line >= 1 and line <= line_count then
+    vim.api.nvim_win_set_cursor(0, { line, 0 })
+    vim.cmd("normal! zz")
+    return true
+  end
+  return false
+end
+
 function M.next_change()
   local session = require("my_extensions.onediff.session")
   local diff_parse = require("my_extensions.onediff.diff_parse")
@@ -76,16 +87,15 @@ function M.next_change()
 
   for _, block in ipairs(change_blocks) do
     if block.start > current_line then
-      vim.api.nvim_win_set_cursor(0, { block.start, 0 })
-      vim.cmd("normal! zz")
-      return
+      if safe_set_cursor(block.start) then
+        return
+      end
     elseif current_line >= block.start and current_line <= block.finish then
-      -- Inside a block, find the next one
       for _, next_block in ipairs(change_blocks) do
         if next_block.start > block.finish then
-          vim.api.nvim_win_set_cursor(0, { next_block.start, 0 })
-          vim.cmd("normal! zz")
-          return
+          if safe_set_cursor(next_block.start) then
+            return
+          end
         end
       end
       break
@@ -95,8 +105,7 @@ function M.next_change()
   local count = session.get_file_count()
   if count <= 1 then
     if #change_blocks > 0 then
-      vim.api.nvim_win_set_cursor(0, { change_blocks[1].start, 0 })
-      vim.cmd("normal! zz")
+      safe_set_cursor(change_blocks[1].start)
     end
     return
   end
@@ -116,8 +125,7 @@ function M.next_change()
     if new_hunks and #new_hunks > 0 then
       local new_blocks = diff_parse.get_change_lines_in_buffer(new_hunks)
       if #new_blocks > 0 then
-        vim.api.nvim_win_set_cursor(0, { new_blocks[1].start, 0 })
-        vim.cmd("normal! zz")
+        safe_set_cursor(new_blocks[1].start)
       end
     end
   end, 10)
@@ -146,15 +154,14 @@ function M.prev_change()
   for i = #change_blocks, 1, -1 do
     local block = change_blocks[i]
     if block.finish < current_line then
-      vim.api.nvim_win_set_cursor(0, { block.start, 0 })
-      vim.cmd("normal! zz")
-      return
-    elseif current_line >= block.start and current_line <= block.finish then
-      -- Inside a block, find the previous one
-      for j = i - 1, 1, -1 do
-        vim.api.nvim_win_set_cursor(0, { change_blocks[j].start, 0 })
-        vim.cmd("normal! zz")
+      if safe_set_cursor(block.start) then
         return
+      end
+    elseif current_line >= block.start and current_line <= block.finish then
+      for j = i - 1, 1, -1 do
+        if safe_set_cursor(change_blocks[j].start) then
+          return
+        end
       end
       break
     end
@@ -163,8 +170,7 @@ function M.prev_change()
   local count = session.get_file_count()
   if count <= 1 then
     if #change_blocks > 0 then
-      vim.api.nvim_win_set_cursor(0, { change_blocks[#change_blocks].start, 0 })
-      vim.cmd("normal! zz")
+      safe_set_cursor(change_blocks[#change_blocks].start)
     end
     return
   end
@@ -184,8 +190,7 @@ function M.prev_change()
     if new_hunks and #new_hunks > 0 then
       local new_blocks = diff_parse.get_change_lines_in_buffer(new_hunks)
       if #new_blocks > 0 then
-        vim.api.nvim_win_set_cursor(0, { new_blocks[#new_blocks].start, 0 })
-        vim.cmd("normal! zz")
+        safe_set_cursor(new_blocks[#new_blocks].start)
       end
     end
   end, 10)
@@ -212,8 +217,7 @@ function M.goto_hunk(hunk_index)
 
   local hunk = hunks[idx]
   if hunk then
-    vim.api.nvim_win_set_cursor(0, { hunk.new_start, 0 })
-    vim.cmd("normal! zz")
+    safe_set_cursor(hunk.new_start)
   end
 end
 

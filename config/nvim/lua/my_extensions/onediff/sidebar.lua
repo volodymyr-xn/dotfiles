@@ -437,12 +437,25 @@ function M.get_folder_at_line(line_num)
 end
 
 function M.toggle_folder(folder_path)
+  local session = require("my_extensions.onediff.session")
+  local win = session.get_sidebar_win()
+  
   if M.collapsed_folders[folder_path] then
     M.collapsed_folders[folder_path] = nil
   else
     M.collapsed_folders[folder_path] = true
   end
+  
   M.render()
+  
+  if win and api.nvim_win_is_valid(win) then
+    for line_num, path in pairs(M.folder_line_map) do
+      if path == folder_path then
+        pcall(api.nvim_win_set_cursor, win, { line_num, 0 })
+        break
+      end
+    end
+  end
 end
 
 function M.select_item()
