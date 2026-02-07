@@ -145,7 +145,17 @@ function M.hide()
 
   local win = session.get_sidebar_win()
   if win and api.nvim_win_is_valid(win) then
-    api.nvim_win_close(win, true)
+    local all_wins = vim.api.nvim_list_wins()
+    local valid_wins = 0
+    for _, w in ipairs(all_wins) do
+      if vim.api.nvim_win_is_valid(w) and vim.api.nvim_win_get_config(w).relative == "" then
+        valid_wins = valid_wins + 1
+      end
+    end
+    
+    if valid_wins > 1 then
+      api.nvim_win_close(win, true)
+    end
   end
 
   local buf = session.get_sidebar_buf()

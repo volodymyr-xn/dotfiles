@@ -65,6 +65,10 @@ function M.open_file_with_diff(file, hunks, base_ref)
   
   vim.b[buf].is_onediff_buffer = true
   
+  vim.wo[target_win].number = true
+  vim.wo[target_win].relativenumber = false
+  vim.wo[target_win].signcolumn = "yes"
+  
   local file_content = vim.fn.readfile(file.full_path)
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, file_content)
   

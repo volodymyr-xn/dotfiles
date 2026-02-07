@@ -17,6 +17,7 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("OneDiffPrevChange", M.goto_prev_change, { desc = "Go to previous change" })
   vim.api.nvim_create_user_command("OneDiffFocusSidebar", M.focus_sidebar, { desc = "Focus sidebar" })
   vim.api.nvim_create_user_command("OneDiffToggleSidebar", M.toggle_sidebar, { desc = "Toggle sidebar" })
+  vim.api.nvim_create_user_command("OneDiffToggleInstance", M.toggle_instance, { desc = "Toggle OneDiff instance" })
 end
 
 function M.open()
@@ -214,6 +215,22 @@ function M.open_file_picker()
     telescope_picker()
   else
     vim.notify("OneDiff: Unknown picker '" .. picker .. "'. Use 'telescope' or 'fzf-lua'", vim.log.levels.ERROR)
+  end
+end
+
+function M.toggle_instance()
+  local session = require("my_extensions.onediff.session")
+  local current_buf = vim.api.nvim_get_current_buf()
+  
+  if vim.b[current_buf].is_onediff_buffer then
+    M.close()
+  elseif session.get_sidebar_buf() == current_buf then
+    M.close()
+  else
+    if session.is_open() then
+      M.close()
+    end
+    M.open()
   end
 end
 
