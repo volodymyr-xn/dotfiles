@@ -59,9 +59,30 @@ function M.open_file_with_diff(file, hunks, base_ref)
   local saved_lazyredraw = vim.o.lazyredraw
   vim.o.lazyredraw = true
   
-  vim.cmd("edit " .. vim.fn.fnameescape(file.full_path))
-  local buf = vim.api.nvim_get_current_buf()
+  local buf = vim.api.nvim_create_buf(false, false)
+  vim.api.nvim_win_set_buf(target_win, buf)
   session.set_diff_buf(buf)
+  
+  vim.b[buf].is_onediff_buffer = true
+  
+  local file_content = vim.fn.readfile(file.full_path)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, file_content)
+  
+  local filename = vim.fn.fnamemodify(file.path, ':t')
+  vim.api.nvim_buf_set_name(buf, "[OneDiff] " .. filename)
+  
+  local ext = file.path:match("%.(%w+)$")
+  if ext then
+    local ft = vim.filetype.match({ filename = file.path })
+    if ft then
+      vim.bo[buf].filetype = ft
+    end
+  end
+  
+  vim.bo[buf].modified = false
+  vim.bo[buf].buftype = "nofile"
+  vim.bo[buf].bufhidden = "wipe"
+  vim.bo[buf].swapfile = false
 
   M.setup_buffer_keymaps(buf)
   M.clear_buffer_highlights(buf)
@@ -118,6 +139,8 @@ function M.render_deleted_file(file, base_ref, target_win)
   local buf = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_win_set_buf(target_win, buf)
   session.set_diff_buf(buf)
+  
+  vim.b[buf].is_onediff_buffer = true
 
   local lines = vim.split(content, "\n")
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
@@ -237,6 +260,8 @@ function M.clear_all()
   local diff_buf = session.get_diff_buf()
   if diff_buf and vim.api.nvim_buf_is_valid(diff_buf) then
     M.clear_buffer_highlights(diff_buf)
+    
+    vim.api.nvim_buf_delete(diff_buf, { force = true })
   end
 end
 

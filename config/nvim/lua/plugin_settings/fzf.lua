@@ -34,7 +34,18 @@ vim.cmd [[
         \ call fzf#vim#gitfiles("?", { 'window': { 'height': 0.7, 'width': 1 },  'options': ['--info=inline' ]},  <bang>0)
 ]]
 
-vim.api.nvim_set_keymap('n', 'q', ':SearchChangedFilesFZF()<CR>', { noremap = true, silent = true })
+local function smart_git_status_search()
+  local current_buf = vim.api.nvim_get_current_buf()
+  
+  if vim.b[current_buf].is_onediff_buffer then
+    local onediff = require("my_extensions.onediff")
+    onediff.open_file_picker()
+  else
+    vim.cmd('SearchChangedFilesFZF')
+  end
+end
+
+vim.keymap.set('n', 'q', smart_git_status_search, { noremap = true, silent = true, desc = "Git status search (smart)" })
 
 -- To learn more about preview window options, see `--preview-window` section of `man fzf`.
 -- vim.g.fzf_preview_window = {'up:52%', 'ctrl-/'}

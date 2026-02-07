@@ -145,7 +145,14 @@ local function full_text_search_wihout_preview()
 end
 
 local function find_changed_files()
-  telescope.git_status()
+  local current_buf = vim.api.nvim_get_current_buf()
+  
+  if vim.b[current_buf].is_onediff_buffer then
+    local onediff = require("my_extensions.onediff")
+    onediff.open_file_picker()
+  else
+    telescope.git_status()
+  end
 end
 
 local function find_changed_files_by_extension(extension)
