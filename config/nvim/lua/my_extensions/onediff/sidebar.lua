@@ -630,6 +630,11 @@ function M.open_original_file()
       
       vim.cmd('tabnew ' .. vim.fn.fnameescape(full_path))
       
+      local new_win = vim.api.nvim_get_current_win()
+      vim.wo[new_win].number = true
+      vim.wo[new_win].relativenumber = false
+      vim.wo[new_win].signcolumn = "yes"
+      
       local new_buf = vim.api.nvim_get_current_buf()
       local line_count = vim.api.nvim_buf_line_count(new_buf)
       if target_line >= 1 and target_line <= line_count then
