@@ -574,6 +574,72 @@ function M.open_file_keep_focus()
   end
 end
 
+function M.open_original_file()
+  local session = require("my_extensions.onediff.session")
+  local git_ops = require("my_extensions.onediff.git_ops")
+  local diff_parse = require("my_extensions.onediff.diff_parse")
+
+  local cursor = api.nvim_win_get_cursor(0)
+  local line_num = cursor[1]
+
+  local folder_path = M.get_folder_at_line(line_num)
+  if folder_path then
+    M.toggle_folder(folder_path)
+    return
+  end
+
+  local file_idx = M.get_file_at_line(line_num)
+  if file_idx then
+    local files = session.get_files()
+    local file = files[file_idx]
+    
+    if file then
+      local git_root = git_ops.get_root()
+      local full_path = git_root and (git_root .. '/' .. file.path) or file.path
+      
+      local target_line = 1
+      local target_col = 0
+      
+      local current_file_idx = session.get_current_index()
+      if current_file_idx == file_idx then
+        local diff_buf = session.get_diff_buf()
+        if diff_buf and vim.api.nvim_buf_is_valid(diff_buf) then
+          for _, win in ipairs(vim.api.nvim_list_wins()) do
+            if vim.api.nvim_win_get_buf(win) == diff_buf then
+              local pos = vim.api.nvim_win_get_cursor(win)
+              target_line = pos[1]
+              target_col = pos[2]
+              break
+            end
+          end
+        end
+      else
+        if file.status ~= "untracked" and file.status ~= "deleted" then
+          local base_ref = session.get_base_ref()
+          local diff_text = git_ops.get_file_diff(file.path, base_ref)
+          local hunks = diff_parse.parse_hunks(diff_text)
+          
+          if hunks and #hunks > 0 then
+            local change_blocks = diff_parse.get_change_lines_in_buffer(hunks)
+            if #change_blocks > 0 then
+              target_line = change_blocks[1].start
+            end
+          end
+        end
+      end
+      
+      vim.cmd('tabnew ' .. vim.fn.fnameescape(full_path))
+      
+      local new_buf = vim.api.nvim_get_current_buf()
+      local line_count = vim.api.nvim_buf_line_count(new_buf)
+      if target_line >= 1 and target_line <= line_count then
+        vim.api.nvim_win_set_cursor(0, { target_line, target_col })
+        vim.cmd("normal! zz")
+      end
+    end
+  end
+end
+
 function M.select_file()
   M.select_item()
 end
@@ -608,11 +674,11 @@ function M.setup_keymaps(buf)
 
   local opts = { buffer = buf, silent = true, nowait = true }
 
-  vim.keymap.set("n", keymaps.select, M.select_item, opts)
+  vim.keymap.set("n", keymaps.select, M.open_file_keep_focus, opts)
   vim.keymap.set("n", keymaps.refresh, onediff.refresh, opts)
   vim.keymap.set("n", "q", onediff.open_file_picker, opts)
 
-  vim.keymap.set("n", "o", M.open_file_keep_focus, opts)
+  vim.keymap.set("n", "o", M.open_original_file, opts)
   vim.keymap.set("n", "za", function()
     local cursor = api.nvim_win_get_cursor(0)
     local folder_path = M.get_folder_at_line(cursor[1])
@@ -661,7 +727,7 @@ function M.setup_keymaps(buf)
       local line_count = api.nvim_buf_line_count(buf)
       if mouse_pos.line >= 1 and mouse_pos.line <= line_count then
         api.nvim_win_set_cursor(0, { mouse_pos.line, 0 })
-        M.select_item()
+        M.open_file_keep_focus()
       end
     end
   end, opts)

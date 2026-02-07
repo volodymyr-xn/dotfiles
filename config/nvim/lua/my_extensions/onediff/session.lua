@@ -2,6 +2,7 @@ local M = {}
 
 local instances = {}
 local next_instance_id = 1
+local active_instance_id = nil
 
 local function create_instance()
   local id = next_instance_id
@@ -21,6 +22,7 @@ local function create_instance()
     working_dir = vim.fn.getcwd(),
   }
   
+  active_instance_id = id
   return instances[id]
 end
 
@@ -34,8 +36,18 @@ local function get_instance_for_buffer(bufnr)
 end
 
 local function get_current_instance()
+  if active_instance_id and instances[active_instance_id] then
+    return instances[active_instance_id]
+  end
+  
   local current_buf = vim.api.nvim_get_current_buf()
-  return get_instance_for_buffer(current_buf)
+  local instance = get_instance_for_buffer(current_buf)
+  
+  if instance then
+    active_instance_id = instance.id
+  end
+  
+  return instance
 end
 
 function M.start(target_file_path)
@@ -73,6 +85,10 @@ end
 function M.stop(instance_id)
   local state = instance_id and instances[instance_id] or get_current_instance()
   if not state then return end
+  
+  if active_instance_id == state.id then
+    active_instance_id = nil
+  end
   
   instances[state.id] = nil
 end
