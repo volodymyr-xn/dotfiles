@@ -222,14 +222,12 @@ function M.toggle_instance()
   local session = require("my_extensions.onediff.session")
   local current_buf = vim.api.nvim_get_current_buf()
   
-  if vim.b[current_buf].is_onediff_buffer then
-    M.close()
-  elseif session.get_sidebar_buf() == current_buf then
-    M.close()
-  else
-    if session.is_open() then
+  if vim.b[current_buf].is_onediff_buffer or vim.b[current_buf].onediff_instance_id then
+    local instance = session.get_instance_for_buffer(current_buf)
+    if instance then
       M.close()
     end
+  else
     M.open()
   end
 end
