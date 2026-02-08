@@ -228,7 +228,14 @@ function M.toggle_instance()
       M.close()
     end
   else
-    M.open()
+    local current_pwd = vim.fn.getcwd()
+    local existing_instance = session.find_instance_by_working_dir(current_pwd)
+    
+    if existing_instance then
+      session.focus_instance(existing_instance)
+    else
+      M.open()
+    end
   end
 end
 

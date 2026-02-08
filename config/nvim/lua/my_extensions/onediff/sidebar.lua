@@ -725,6 +725,18 @@ function M.setup_keymaps(buf)
     onediff.goto_prev_change()
   end, opts)
 
+  vim.keymap.set("n", "<C-i>", function()
+    local session = require("my_extensions.onediff.session")
+    session.focus_diff_window()
+    onediff.goto_next_change()
+  end, opts)
+
+  vim.keymap.set("n", "<C-o>", function()
+    local session = require("my_extensions.onediff.session")
+    session.focus_diff_window()
+    onediff.goto_prev_change()
+  end, opts)
+
   vim.keymap.set("n", "<LeftMouse>", function()
     local mouse_pos = vim.fn.getmousepos()
     if mouse_pos.winid == api.nvim_get_current_win() then

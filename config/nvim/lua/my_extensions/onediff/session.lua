@@ -50,6 +50,15 @@ local function get_current_instance()
   return instance
 end
 
+local function find_instance_by_working_dir(working_dir)
+  for id, instance in pairs(instances) do
+    if instance.working_dir == working_dir and instance.active then
+      return instance
+    end
+  end
+  return nil
+end
+
 function M.start(target_file_path)
   local git_ops = require("my_extensions.onediff.git_ops")
   local settings = require("my_extensions.onediff.settings")
@@ -222,6 +231,32 @@ end
 
 function M.get_instance_for_buffer(bufnr)
   return get_instance_for_buffer(bufnr)
+end
+
+function M.find_instance_by_working_dir(working_dir)
+  return find_instance_by_working_dir(working_dir)
+end
+
+function M.focus_instance(instance)
+  if not instance then return false end
+  
+  active_instance_id = instance.id
+  
+  if instance.sidebar_win and vim.api.nvim_win_is_valid(instance.sidebar_win) then
+    vim.api.nvim_set_current_win(instance.sidebar_win)
+    return true
+  end
+  
+  if instance.diff_buf and vim.api.nvim_buf_is_valid(instance.diff_buf) then
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+      if vim.api.nvim_win_get_buf(win) == instance.diff_buf then
+        vim.api.nvim_set_current_win(win)
+        return true
+      end
+    end
+  end
+  
+  return false
 end
 
 function M.focus_diff_window()
