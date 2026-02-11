@@ -1,2 +1,8 @@
 set editing-mode vi
 set blink-matching-paren on
+
+"\e[1;5C": forward-word    # Ctrl+Right
+"\e[1;5D": backward-word   # Ctrl+Left
+
+bindkey '^X' backward-word
+bindkey '^V' forward-word

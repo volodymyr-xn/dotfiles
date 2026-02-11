@@ -23,12 +23,18 @@ bindkey -s "^o" 'bin/rails c\n'
 # ctrl-n
 bindkey -s "^n" $'claude\n'
 
-bindkey "^e" forward-word
-bindkey "^v" backward-word
+# bindkey "^e" forward-word
+# bindkey "^v" backward-word
+bindkey "^x" backward-word
+bindkey "^v" forward-word
 # bindkey "^d" backward-delete-word
 # bindkey "^v" delete-word
 
 bindkey "^d" delete-word
+
+# bindkey '^[[1;5D' backward-word   # Ctrl+Left
+bindkey '^[[1;5C' forward-word    # Ctrl+Right
+bindkey '^[[1;5C' forward-word    # Ctrl+Right
 
 # bindkey -s "^x" 'eza -alh\n'
 # bindkey "^e" beginning-of-line
