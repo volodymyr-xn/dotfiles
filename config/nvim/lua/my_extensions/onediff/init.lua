@@ -239,4 +239,36 @@ function M.toggle_instance()
   end
 end
 
+function M.open_or_focus_and_refresh()
+  local session = require("my_extensions.onediff.session")
+  local current_buf = vim.api.nvim_get_current_buf()
+  
+  if vim.b[current_buf].is_onediff_buffer or vim.b[current_buf].onediff_instance_id then
+    M.refresh()
+  else
+    local current_pwd = vim.fn.getcwd()
+    local existing_instance = session.find_instance_by_working_dir(current_pwd)
+    
+    if existing_instance then
+      session.focus_instance(existing_instance)
+      M.refresh()
+    else
+      M.open()
+    end
+  end
+end
+
+function M.reload_current_file()
+  local session = require("my_extensions.onediff.session")
+  local display = require("my_extensions.onediff.display")
+  local sidebar = require("my_extensions.onediff.sidebar")
+  
+  if not session.is_open() then
+    return
+  end
+  
+  display.render_current()
+  sidebar.render()
+end
+
 return M

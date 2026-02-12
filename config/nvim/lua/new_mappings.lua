@@ -99,7 +99,7 @@ vim.keymap.set('n', '#', "*N", { noremap = true, silent = true, desc = "Search w
 vim.keymap.set('n', '<leader>k', ':TestFile<CR>', { noremap = true, silent = true, desc = "Test file" })
 
 -- Start FzfLua menu
-vim.keymap.set('n', 'sj', ':FzfLua<cr>', { noremap = true, silent = true, desc = "FzfLua select" })
+-- vim.keymap.set('n', 'sj', ':FzfLua<cr>', { noremap = true, silent = true, desc = "FzfLua select" })
 
 vim.keymap.set('n', 'go', ':Outline<CR>', { noremap = true, silent = true, desc = "Outline" })
 
@@ -107,6 +107,6 @@ vim.keymap.set('n', 'go', ':Outline<CR>', { noremap = true, silent = true, desc 
 -- vim.api.nvim_set_keymap('n', '=', '<C-W>=', {noremap = true})
 --
 
-vim.keymap.set('n', '}', ':Gitsigns next_hunk<CR>', { noremap = true, silent = false, desc = "Next git hunk" })
-vim.keymap.set('n', '{', ':Gitsigns prev_hunk<CR>', { noremap = true, silent = false, desc = "Previous git hunk" })
-vim.keymap.set('n', 'gp', ':Gitsigns preview_hunk_inline<CR>', { noremap = true, silent = true, desc = "Preview git hunk" })
+vim.keymap.set('n', ']c', function() require('gitsigns').next_hunk() end, { noremap = true, silent = true, desc = "Next git hunk" })
+vim.keymap.set('n', '[c', function() require('gitsigns').prev_hunk() end, { noremap = true, silent = true, desc = "Previous git hunk" })
+vim.keymap.set('n', 'gp', function() require('gitsigns').preview_hunk_inline() end, { noremap = true, silent = true, desc = "Preview git hunk" })

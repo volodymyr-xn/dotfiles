@@ -24,4 +24,4 @@ onediff.setup({
 -- vim.keymap.set("n", "<leader>ds", onediff.focus_sidebar, { desc = "OneDiff: Focus sidebar" })
 -- vim.keymap.set("n", "<leader>db", onediff.toggle_sidebar, { desc = "OneDiff: Toggle sidebar" })
 
-vim.keymap.set("n", "sf", onediff.toggle_instance, { desc = "Toggle OneDiff instance" })
+vim.keymap.set("n", "sf", onediff.open_or_focus_and_refresh, { desc = "Open/focus OneDiff and refresh" })
