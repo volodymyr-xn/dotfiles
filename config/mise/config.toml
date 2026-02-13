@@ -1,6 +1,6 @@
 [tools]
 node = "24.6.0"
-postgres = "18.0"
+postgres = "latest"
 python = "3.12"
 redis = "latest"
 ruby = "4.0.1"
