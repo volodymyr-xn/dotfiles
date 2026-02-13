@@ -59,6 +59,7 @@ alias ctags-ruby='ripper-tags -R --exclude=vendor'
 alias ctag='ctags-ruby'
 alias ctags-javascript="ctags -R app config lib --langmap=javascript:.js.es6.es.jsx--javascript-kinds=-c-f-m-p-v ."
 
+alias g="git"
 alias gd='git diff'
 
 # Claude

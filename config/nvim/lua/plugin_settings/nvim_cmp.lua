@@ -226,8 +226,8 @@ cmp.setup({
       name = 'buffer',
       -- max_item_count = 8,
       option = {
-        get_bufnrs = getVisibleBuffers,
-        -- get_bufnrs = getAllBuffers
+        -- get_bufnrs = getVisibleBuffers,
+        get_bufnrs = getAllBuffers
       }
     },
     {
@@ -239,8 +239,8 @@ cmp.setup({
     -- debounce = 10,
     -- throttle = 5,
     -- debounce = 5,
-    debounce = 20,
-    throttle = 30,
+    debounce = 10,
+    throttle = 20,
     fetching_timeout = 20,
     -- debounce = 60,
     -- throttle = 30,

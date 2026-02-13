@@ -114,8 +114,21 @@ require("neo-tree").setup({
 -- Disable default Ctrl-\ mapping
 vim.api.nvim_set_keymap("n", "<C-\\>", "<NOP>", {noremap = true, silent = true})
 
--- Toggle NvimTree
-vim.api.nvim_set_keymap("n", "<C-\\>", ":Neotree toggle<CR>", {noremap = true, silent = true})
+vim.keymap.set("n", "<C-\\>", function()
+  local current_buf = vim.api.nvim_get_current_buf()
+  
+  if vim.b[current_buf].is_onediff_buffer or vim.b[current_buf].onediff_instance_id then
+    local ok, onediff = pcall(require, "my_extensions.onediff")
+    if ok then
+      onediff.toggle_sidebar()
+    else
+      vim.cmd("Neotree toggle")
+    end
+  else
+    vim.cmd("Neotree toggle")
+  end
+end, {noremap = true, silent = true, desc = "Toggle sidebar"})
+
 vim.api.nvim_set_keymap("n", "<Leader>0", ":Neotree filesystem reveal<CR>", {noremap = true, silent = false})
 vim.api.nvim_set_keymap("n", "=", ":Neotree filesystem reveal<CR>", {noremap = true, silent = false})
 

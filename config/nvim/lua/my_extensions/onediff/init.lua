@@ -241,6 +241,7 @@ end
 
 function M.open_or_focus_and_refresh()
   local session = require("my_extensions.onediff.session")
+  local sidebar = require("my_extensions.onediff.sidebar")
   local current_buf = vim.api.nvim_get_current_buf()
   
   if vim.b[current_buf].is_onediff_buffer or vim.b[current_buf].onediff_instance_id then
@@ -251,6 +252,7 @@ function M.open_or_focus_and_refresh()
     
     if existing_instance then
       session.focus_instance(existing_instance)
+      sidebar.show()
       M.refresh()
     else
       M.open()
@@ -269,6 +271,35 @@ function M.reload_current_file()
   
   display.render_current()
   sidebar.render()
+end
+
+function M.open_current_file_in_new_tab()
+  local session = require("my_extensions.onediff.session")
+  local git_ops = require("my_extensions.onediff.git_ops")
+  
+  if not session.is_open() then
+    return
+  end
+  
+  local current_file = session.get_current_file()
+  if not current_file then
+    vim.notify("OneDiff: No file selected", vim.log.levels.WARN)
+    return
+  end
+  
+  if current_file.status == "deleted" then
+    vim.notify("OneDiff: Cannot open deleted file", vim.log.levels.WARN)
+    return
+  end
+  
+  local git_root = git_ops.get_root()
+  if not git_root then
+    vim.notify("OneDiff: Not in a git repository", vim.log.levels.ERROR)
+    return
+  end
+  
+  local full_path = git_root .. "/" .. current_file.path
+  vim.cmd("tabnew " .. vim.fn.fnameescape(full_path))
 end
 
 return M

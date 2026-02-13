@@ -11,7 +11,7 @@ confirm-close-surface=false
 #font-family = "CaskaydiaMono Nerd Font"
 # font-family = "JetBrains Mono Semi Bold"
 # font-style = "Regular"
-font-size = 15
+font-size = 14
 
 # cursor-style = bar
 
@@ -25,7 +25,7 @@ desktop-notifications = true
 macos-option-as-alt = left
 
 # Open quake like terminal
-keybind = global:cmd+backquote=toggle_quick_terminal
+#keybind = global:cmd+backquote=toggle_quick_terminal
 
 # Used in applications which need newline insert with shitft-enter
 keybind = shift+enter=text:\x1b\r
@@ -34,7 +34,7 @@ keybind = shift+enter=text:\x1b\r
 keybind = ctrl+enter=unbind
 
 # Make fonts bolder (works only on MacOS)
-font-thicken=false
+font-thicken=true
 font-thicken-strength=1
 
 palette = 0=#494d64

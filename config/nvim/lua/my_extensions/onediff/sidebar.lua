@@ -118,9 +118,25 @@ function M.show()
   local session = require("my_extensions.onediff.session")
   local settings = require("my_extensions.onediff.settings")
 
-  if session.get_sidebar_win() and api.nvim_win_is_valid(session.get_sidebar_win()) then
+  local existing_win = session.get_sidebar_win()
+  local is_visible = false
+  
+  if existing_win and api.nvim_win_is_valid(existing_win) then
+    local all_wins = vim.api.nvim_tabpage_list_wins(0)
+    for _, w in ipairs(all_wins) do
+      if w == existing_win then
+        is_visible = true
+        break
+      end
+    end
+  end
+  
+  if is_visible then
     return
   end
+
+  session.set_sidebar_win(nil)
+  session.set_sidebar_buf(nil)
 
   local width = settings.get("sidebar.width")
 

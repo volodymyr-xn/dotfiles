@@ -84,6 +84,9 @@ vim.o.incsearch = true
 -- Highlight search matches
 vim.o.hlsearch = true
 
+-- Show search match count in bottom bar (e.g. [1/5])
+vim.opt.shortmess:remove("S")
+
 -- Ignore case in search if term(s) are lowercase
 -- vim.o.ignorecase = true
 

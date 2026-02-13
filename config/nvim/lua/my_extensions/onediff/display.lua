@@ -132,6 +132,8 @@ function M.setup_buffer_keymaps(buf)
   vim.keymap.set("n", "<Esc>", onediff.close, opts)
   vim.keymap.set("n", "<Leader>e", onediff.reload_current_file, opts)
   vim.keymap.set("n", "sf", onediff.open_or_focus_and_refresh, opts)
+  vim.keymap.set("n", "o", onediff.open_current_file_in_new_tab, opts)
+  vim.keymap.set("n", "i", onediff.open_current_file_in_new_tab, opts)
 end
 
 function M.render_deleted_file(file, base_ref, target_win)

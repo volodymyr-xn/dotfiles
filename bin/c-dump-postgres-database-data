@@ -7,7 +7,7 @@
 database_name="$1"
 backup_name="$database_name_$(date +"%d_%m_%Y")"
 
-pg_dump --format=plain --inserts --column-inserts "$database_name" > backup.sql
+pg_dump --format=plain --inserts --column-inserts "$database_name" > "$backup_name".sql
 
 # pg_dump --format=plain --inserts --column-inserts dbname > backup.sql
 

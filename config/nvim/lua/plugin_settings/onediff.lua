@@ -1,27 +1,27 @@
-local onediff = require("my_extensions.onediff")
-local onediff_debug = require("my_extensions.onediff.debug_helper")
+local onediff_loaded = false
 
-onediff.setup({
-  base_ref = "HEAD",
-  picker = "telescope",
-  sidebar = {
-    width = 47,
-    position = "left",
-  },
-})
+local function load_onediff()
+  if onediff_loaded then
+    return require("my_extensions.onediff")
+  end
+  
+  local onediff = require("my_extensions.onediff")
+  local onediff_debug = require("my_extensions.onediff.debug_helper")
+  
+  onediff.setup({
+    base_ref = "HEAD",
+    picker = "telescope",
+    sidebar = {
+      width = 47,
+      position = "left",
+    },
+  })
+  
+  onediff_loaded = true
+  return onediff
+end
 
--- vim.keymap.set("n", "<leader>do", onediff.open, { desc = "OneDiff: Open" })
--- vim.keymap.set("n", "<leader>dO", onediff.open_current, { desc = "OneDiff: Open current file" })
--- vim.keymap.set("n", "<leader>dc", onediff.close, { desc = "OneDiff: Close" })
--- vim.keymap.set("n", "<leader>dd", onediff.toggle, { desc = "OneDiff: Toggle" })
--- vim.keymap.set("n", "<leader>dr", onediff.refresh, { desc = "OneDiff: Refresh" })
-
--- vim.keymap.set("n", "]f", onediff.goto_next_file, { desc = "OneDiff: Next file" })
--- vim.keymap.set("n", "[f", onediff.goto_prev_file, { desc = "OneDiff: Prev file" })
--- vim.keymap.set("n", "]c", onediff.goto_next_change, { desc = "OneDiff: Next change" })
--- vim.keymap.set("n", "[c", onediff.goto_prev_change, { desc = "OneDiff: Prev change" })
-
--- vim.keymap.set("n", "<leader>ds", onediff.focus_sidebar, { desc = "OneDiff: Focus sidebar" })
--- vim.keymap.set("n", "<leader>db", onediff.toggle_sidebar, { desc = "OneDiff: Toggle sidebar" })
-
-vim.keymap.set("n", "sf", onediff.open_or_focus_and_refresh, { desc = "Open/focus OneDiff and refresh" })
+vim.keymap.set("n", "sf", function()
+  local onediff = load_onediff()
+  onediff.open_or_focus_and_refresh()
+end, { desc = "Open/focus OneDiff and refresh" })

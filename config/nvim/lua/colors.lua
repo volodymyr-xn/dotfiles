@@ -79,7 +79,10 @@ require("catppuccin").setup {
             -- base = "#1f2233",
             -- Darker and bluer
             -- Bluer
+            --
             base = "#212433",
+            -- base = "#0B0F0B",
+
             -- base = "#1E202C"
             -- Darker
             -- base = "#171920"
