@@ -61,49 +61,14 @@ vim.api.nvim_set_hl(0, "@function.builtin.ruby", { link = "Statement" })
 
 vim.api.nvim_set_hl(0, "@punctuation.delimiter.ruby", { link = "Statement" })
 
-local ns = vim.api.nvim_create_namespace("ruby_string_quotes")
+-- 1. @string.ruby is cleared ({}) - treesitter stops coloring strings, so the underlying
+-- vim regex syntax shows through
+-- 2. hi! link rubyStringDelimiter Statement - vim's regex syntax already separates quotes
+-- (rubyStringDelimiter) from content (rubyString), so the quotes get Statement color
+-- while content keeps the String color
 
-local function highlight_ruby_quotes(buf)
-  if not vim.api.nvim_buf_is_valid(buf) then return end
-  if vim.bo[buf].filetype ~= "ruby" then return end
-
-  vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
-
-  local ok, parser = pcall(vim.treesitter.get_parser, buf, "ruby")
-  if not ok or not parser then return end
-
-  local trees = parser:parse()
-  if not trees or not trees[1] then return end
-
-  local query = vim.treesitter.query.parse("ruby", "(string) @str")
-
-  for id, node in query:iter_captures(trees[1]:root(), buf) do
-    local sr, sc, er, ec = node:range()
-    vim.api.nvim_buf_set_extmark(buf, ns, sr, sc, {
-      end_row = sr,
-      end_col = sc + 1,
-      hl_group = "Statement",
-      priority = 200,
-    })
-    if ec > sc + 1 then
-      vim.api.nvim_buf_set_extmark(buf, ns, er, ec - 1, {
-        end_row = er,
-        end_col = ec,
-        hl_group = "Statement",
-        priority = 200,
-      })
-    end
-  end
-end
-
-vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "TextChanged", "TextChangedI", "FileType" }, {
-  pattern = { "*.rb", "ruby" },
-  callback = function(args)
-    vim.schedule(function()
-      highlight_ruby_quotes(args.buf)
-    end)
-  end,
-})
+vim.api.nvim_set_hl(0, "@string.ruby", {})
+vim.cmd("hi! link rubyStringDelimiter Statement")
 
 vim.api.nvim_set_hl(0, "BlinkCmpLabel", { link = "Statement" })
 vim.api.nvim_set_hl(0, "BlinkCmpLabelMatch", { fg = "#ffffff" })
