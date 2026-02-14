@@ -4,7 +4,7 @@
 # echo "Executing .zshrc"
 
 stty -ixon
-bindkey -v
+# bindkey -v
 
 
 #

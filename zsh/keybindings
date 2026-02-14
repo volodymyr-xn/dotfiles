@@ -32,9 +32,18 @@ bindkey "^v" forward-word
 
 bindkey "^d" delete-word
 
-# bindkey '^[[1;5D' backward-word   # Ctrl+Left
+bindkey '^[[1;5D' backward-word   # Ctrl+Left
 bindkey '^[[1;5C' forward-word    # Ctrl+Right
-bindkey '^[[1;5C' forward-word    # Ctrl+Right
+
+bindkey '^[[1;3D' backward-word   # Option+Left
+bindkey '^[[1;3C' forward-word    # Option+Right
+bindkey '\e[1;3D' backward-word   # Option+Left (alternative)
+bindkey '\e[1;3C' forward-word    # Option+Right (alternative)
+bindkey '\eb' backward-word       # Option+Left (emacs-style)
+bindkey '\ef' forward-word        # Option+Right (emacs-style)
+
+bindkey "^n" backward-word
+bindkey "^q" forward-word
 
 # bindkey -s "^x" 'eza -alh\n'
 # bindkey "^e" beginning-of-line
