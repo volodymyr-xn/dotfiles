@@ -25,8 +25,8 @@ bindkey -s "^n" $'claude\n'
 
 # bindkey "^e" forward-word
 # bindkey "^v" backward-word
-bindkey "^x" backward-word
-bindkey "^v" forward-word
+# bindkey "^x" backward-word
+# bindkey "^v" forward-word
 # bindkey "^d" backward-delete-word
 # bindkey "^v" delete-word
 
@@ -34,6 +34,10 @@ bindkey "^d" delete-word
 
 bindkey '^[[1;5D' backward-word   # Ctrl+Left
 bindkey '^[[1;5C' forward-word    # Ctrl+Right
+bindkey '^[[5D' backward-word     # Ctrl+Left (alternative)
+bindkey '^[[5C' forward-word      # Ctrl+Right (alternative)
+bindkey '^[OD' beginning-of-line  # Ctrl+Left (some terminals)
+bindkey '^[OC' end-of-line        # Ctrl+Right (some terminals)
 
 bindkey '^[[1;3D' backward-word   # Option+Left
 bindkey '^[[1;3C' forward-word    # Option+Right
