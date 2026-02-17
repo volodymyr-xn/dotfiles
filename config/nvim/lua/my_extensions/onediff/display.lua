@@ -13,13 +13,13 @@ function M.render_current()
   end
 
   local base_ref = session.get_base_ref()
-  
+
   if file.status == "untracked" then
     session.set_hunks({})
     M.open_file_with_diff(file, {}, base_ref)
     return
   end
-  
+
   local diff_text = git_ops.get_file_diff(file.path, base_ref)
   local hunks = diff_parse.parse_hunks(diff_text)
   session.set_hunks(hunks)
@@ -58,23 +58,19 @@ function M.open_file_with_diff(file, hunks, base_ref)
 
   local saved_lazyredraw = vim.o.lazyredraw
   vim.o.lazyredraw = true
-  
+
   local buf = vim.api.nvim_create_buf(false, false)
   vim.api.nvim_win_set_buf(target_win, buf)
   session.set_diff_buf(buf)
-  
+
   vim.b[buf].is_onediff_buffer = true
-  
-  vim.wo[target_win].number = true
-  vim.wo[target_win].relativenumber = false
-  vim.wo[target_win].signcolumn = "yes"
-  
+
   local file_content = vim.fn.readfile(file.full_path)
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, file_content)
-  
+
   local filename = vim.fn.fnamemodify(file.path, ':t')
   vim.api.nvim_buf_set_name(buf, "[OneDiff] " .. filename)
-  
+
   local ext = file.path:match("%.(%w+)$")
   if ext then
     local ft = vim.filetype.match({ filename = file.path })
@@ -82,7 +78,7 @@ function M.open_file_with_diff(file, hunks, base_ref)
       vim.bo[buf].filetype = ft
     end
   end
-  
+
   vim.bo[buf].modified = false
   vim.bo[buf].modifiable = false
   vim.bo[buf].buftype = "nofile"
@@ -91,13 +87,13 @@ function M.open_file_with_diff(file, hunks, base_ref)
 
   M.setup_buffer_keymaps(buf)
   M.clear_buffer_highlights(buf)
-  
+
   if file.status == "untracked" then
     M.highlight_untracked_file(buf)
   else
     M.apply_inline_diff(buf, hunks, file, base_ref)
   end
-  
+
   local first_change_line = nil
   if hunks and #hunks > 0 then
     local diff_parse = require("my_extensions.onediff.diff_parse")
@@ -106,7 +102,7 @@ function M.open_file_with_diff(file, hunks, base_ref)
       first_change_line = change_blocks[1].start
     end
   end
-  
+
   if first_change_line then
     local line_count = vim.api.nvim_buf_line_count(buf)
     if first_change_line >= 1 and first_change_line <= line_count then
@@ -114,7 +110,7 @@ function M.open_file_with_diff(file, hunks, base_ref)
       vim.cmd("normal! zz")
     end
   end
-  
+
   vim.o.lazyredraw = saved_lazyredraw
   vim.cmd("redraw")
 end
@@ -134,6 +130,19 @@ function M.setup_buffer_keymaps(buf)
   vim.keymap.set("n", "sf", onediff.open_or_focus_and_refresh, opts)
   vim.keymap.set("n", "o", onediff.open_current_file_in_new_tab, opts)
   vim.keymap.set("n", "i", onediff.open_current_file_in_new_tab, opts)
+
+  local group = vim.api.nvim_create_augroup("OneDiffBuffer_" .. buf, { clear = true })
+
+  vim.api.nvim_create_autocmd({"BufWinEnter", "WinEnter"}, {
+    group = group,
+    buffer = buf,
+    callback = function(args)
+      local win = vim.api.nvim_get_current_win()
+      vim.wo[win].number = true
+      vim.wo[win].relativenumber = false
+      vim.wo[win].signcolumn = "yes"
+    end,
+  })
 end
 
 function M.render_deleted_file(file, base_ref, target_win)
@@ -150,7 +159,7 @@ function M.render_deleted_file(file, base_ref, target_win)
   local buf = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_win_set_buf(target_win, buf)
   session.set_diff_buf(buf)
-  
+
   vim.b[buf].is_onediff_buffer = true
 
   local lines = vim.split(content, "\n")
@@ -249,7 +258,7 @@ function M.highlight_untracked_file(buf)
   local settings = require("my_extensions.onediff.settings")
   local ns = settings.get_ns()
   local hl = settings.get("highlights")
-  
+
   local line_count = vim.api.nvim_buf_line_count(buf)
   for i = 0, line_count - 1 do
     vim.api.nvim_buf_set_extmark(buf, ns, i, 0, {
@@ -271,7 +280,7 @@ function M.clear_all()
   local diff_buf = session.get_diff_buf()
   if diff_buf and vim.api.nvim_buf_is_valid(diff_buf) then
     M.clear_buffer_highlights(diff_buf)
-    
+
     vim.api.nvim_buf_delete(diff_buf, { force = true })
   end
 end

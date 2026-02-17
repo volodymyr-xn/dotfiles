@@ -19,7 +19,6 @@ require("nvim-treesitter.configs").setup({
     "python",
     "elixir",
     "sql",
-    "scss",
     "vim",
     "yaml",
     "embedded_template"

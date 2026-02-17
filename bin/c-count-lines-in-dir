@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source_dir="${1:-.}"
+
+find "$source_dir" -type f -exec wc -l {} + | awk '{total += $1} END {print total}'

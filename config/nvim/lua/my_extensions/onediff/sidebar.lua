@@ -148,7 +148,6 @@ function M.show()
   session.set_sidebar_buf(buf)
   api.nvim_win_set_buf(win, buf)
 
-  M.apply_win_options(win)
   M.render()
   M.setup_keymaps(buf)
   M.setup_autocmds(buf)
@@ -215,19 +214,6 @@ function M.create_buffer()
   api.nvim_buf_set_name(buf, "OneDiffPanel")
 
   return buf
-end
-
-function M.apply_win_options(win)
-  vim.wo[win].number = false
-  vim.wo[win].relativenumber = false
-  vim.wo[win].signcolumn = "no"
-  vim.wo[win].foldcolumn = "0"
-  vim.wo[win].wrap = false
-  vim.wo[win].spell = false
-  vim.wo[win].list = false
-  vim.wo[win].cursorline = true
-  vim.wo[win].winfixwidth = true
-  vim.wo[win].winhighlight = "CursorLine:OneDiffCursorLine"
 end
 
 function M.render()
@@ -772,6 +758,24 @@ end
 
 function M.setup_autocmds(buf)
   local group = api.nvim_create_augroup("OneDiffSidebar", { clear = true })
+
+  api.nvim_create_autocmd({"BufWinEnter", "WinEnter"}, {
+    group = group,
+    buffer = buf,
+    callback = function()
+      local win = api.nvim_get_current_win()
+      vim.wo[win].number = false
+      vim.wo[win].relativenumber = false
+      vim.wo[win].signcolumn = "no"
+      vim.wo[win].foldcolumn = "0"
+      vim.wo[win].wrap = false
+      vim.wo[win].spell = false
+      vim.wo[win].list = false
+      vim.wo[win].cursorline = true
+      vim.wo[win].winfixwidth = true
+      vim.wo[win].winhighlight = "CursorLine:OneDiffCursorLine"
+    end,
+  })
 
   api.nvim_create_autocmd("BufWipeout", {
     group = group,
