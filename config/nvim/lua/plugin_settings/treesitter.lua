@@ -68,10 +68,12 @@ vim.cmd("hi! link rubyStringDelimiter Statement")
 vim.api.nvim_set_hl(0, "BlinkCmpLabel", { link = "Statement" })
 vim.api.nvim_set_hl(0, "BlinkCmpLabelMatch", { fg = "#ffffff" })
 
+vim.api.nvim_set_hl(0, "@binding.pry.ruby", { link = "DiagnosticSignHint" })
+vim.api.nvim_set_hl(0, "@ruby.class_dsl.ruby", { link = "Statement" })
+
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "ruby",
   callback = function()
-    vim.fn.matchadd("DiagnosticSignHint", [[\v^[^#]*\zsbinding\.pry]], 200)
     vim.fn.matchadd("Function", [[\w\+\.\(new\|save\|create\|perform_in\|perform_async\|destroy\|delete_all\|update_all\|update\)(]], 200)
   end,
 })
