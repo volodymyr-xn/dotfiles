@@ -172,17 +172,12 @@ function configureRubyLSP()
   })
 end
 
-local ruby_major_version, ruby_minor_version = readRubyVersion()
-
--- Enable Ruby-lsp on Ruby 3.0+ projekts
-if (ruby_major_version > 3 and ruby_minor_version > 4) then
-  -- configureRubyLSP()
-else
-  configureSolargraph()
--- require("lspconfig").ruby_lsp.setup({
---   autostart = false,
--- })
-end
+-- local ruby_major_version, ruby_minor_version = readRubyVersion()
+-- if (ruby_major_version > 3 and ruby_minor_version > 4) then
+--   configureRubyLSP()
+-- else
+--   configureSolargraph()
+-- end
 
 -- vim.lsp.config('tailwindcss', {})
 
@@ -197,7 +192,7 @@ end
 -- require('lspconfig').herb_ls.setup()
 -- vim.lsp.config('herb_ls', {})
 
-vim.lsp.enable("solargraph")
+-- vim.lsp.enable("solargraph")
 vim.lsp.enable("ts_ls")
 vim.lsp.enable("cssls")
 vim.lsp.enable("herb_ls")

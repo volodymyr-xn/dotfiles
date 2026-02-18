@@ -43,9 +43,18 @@ function M.close()
     return
   end
 
-  display.clear_all()
   sidebar.hide()
+  display.clear_all()
   session.stop()
+
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    if vim.api.nvim_win_is_valid(win) then
+      local cfg = vim.api.nvim_win_get_config(win)
+      if cfg.relative == "" then
+        vim.wo[win].number = true
+      end
+    end
+  end
 end
 
 function M.toggle()

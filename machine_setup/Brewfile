@@ -19,6 +19,8 @@ brew "ripgrep"
 # Code-search similar to ack
 brew "the_silver_searcher"
 
+brew "tree"
+
 # Polyglot runtime manager (asdf rust clone)
 brew "mise"
 # Implementation of malloc emphasizing fragmentation avoidance

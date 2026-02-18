@@ -265,3 +265,5 @@ fi
 export PATH="$PATH:$HOME/.local/bin"
 . "$HOME/.cargo/env"
 
+
+export CLAUDE_CODE_DISABLE_AUTO_MEMORY=0
