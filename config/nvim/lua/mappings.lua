@@ -36,7 +36,9 @@ vim.api.nvim_set_keymap('n', 'gj', ':A<CR>', { noremap = true, desc = "Go to alt
 vim.api.nvim_set_keymap('n', 'gk', ':R<CR>', { noremap = true, desc = "Go to related file" })
 vim.api.nvim_set_keymap('n', 'sj', ':A<CR>', { noremap = true, desc = "Go to alternate file" })
 vim.api.nvim_set_keymap('n', 'sk', ':R<CR>', { noremap = true, desc = "Go to related file" })
+-- vim.keymap.set('n', 'sd', ':R<CR>', { noremap = true, silent = true, desc = "Go to related file" })
 
+-- Show git diff in popup
 -- Faster search
 -- vim.api.nvim_set_keymap('n', 's', '/', { noremap = true })
 

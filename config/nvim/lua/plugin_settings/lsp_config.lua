@@ -189,6 +189,7 @@ end
 --   filetypes = { 'html', 'eruby'},
 -- }
 
+-- Deprecated
 -- require('lspconfig').herb_ls.setup()
 -- vim.lsp.config('herb_ls', {})
 

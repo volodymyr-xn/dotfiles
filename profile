@@ -11,7 +11,7 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
-echo "Executing .profile"
+# echo "Executing .profile"
 
 # If running bash
 # if [ -n "$BASH_VERSION" ]; then

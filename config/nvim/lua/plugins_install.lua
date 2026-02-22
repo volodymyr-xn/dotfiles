@@ -569,8 +569,6 @@ require("lazy").setup({
   },
 
   "folke/snacks.nvim",
-
-  'axkirillov/unified.nvim',
   -- "coder/claudecode.nvim"
 
   {

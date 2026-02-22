@@ -152,6 +152,17 @@ function M.show()
   M.setup_keymaps(buf)
   M.setup_autocmds(buf)
 
+  vim.wo[win].number = false
+  vim.wo[win].relativenumber = false
+  vim.wo[win].signcolumn = "no"
+  vim.wo[win].foldcolumn = "0"
+  vim.wo[win].wrap = false
+  vim.wo[win].spell = false
+  vim.wo[win].list = false
+  vim.wo[win].cursorline = true
+  vim.wo[win].winfixwidth = true
+  vim.wo[win].winhighlight = "CursorLine:OneDiffCursorLine"
+
   vim.cmd("wincmd p")
 end
 

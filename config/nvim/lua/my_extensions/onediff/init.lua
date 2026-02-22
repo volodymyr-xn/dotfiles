@@ -26,6 +26,8 @@ function M.open()
   local display = require("my_extensions.onediff.display")
 
   if session.is_open() then
+    sidebar.show()
+    display.render_current()
     return
   end
 
@@ -47,8 +49,9 @@ function M.close()
   display.clear_all()
   session.stop()
 
+  local sidebar_win = session.get_sidebar_win()
   for _, win in ipairs(vim.api.nvim_list_wins()) do
-    if vim.api.nvim_win_is_valid(win) then
+    if vim.api.nvim_win_is_valid(win) and win ~= sidebar_win then
       local cfg = vim.api.nvim_win_get_config(win)
       if cfg.relative == "" then
         vim.wo[win].number = true
@@ -76,6 +79,7 @@ function M.refresh()
   end
 
   session.reload_files()
+  sidebar.show()
   sidebar.refresh()
   display.render_current()
 end
