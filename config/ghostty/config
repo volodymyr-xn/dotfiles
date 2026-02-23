@@ -22,6 +22,12 @@ maximize = true
 
 desktop-notifications = true
 
+
+
+background-opacity = 1
+
+background-blur = 0
+
 macos-option-as-alt = left
 
 # Open quake like terminal

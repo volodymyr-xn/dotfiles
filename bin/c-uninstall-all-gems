@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# List slowest startup services
+
+gem uninstall -aIx

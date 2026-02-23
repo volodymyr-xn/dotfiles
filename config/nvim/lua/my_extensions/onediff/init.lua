@@ -58,6 +58,28 @@ function M.close()
       end
     end
   end
+
+  vim.schedule(function()
+    local has_real_buf = false
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+      if vim.api.nvim_buf_is_valid(buf)
+        and vim.bo[buf].buflisted
+        and not vim.b[buf].is_onediff_buffer
+      then
+        has_real_buf = true
+        break
+      end
+    end
+
+    if not has_real_buf then
+      local ok, snacks = pcall(require, "snacks")
+      if ok and snacks.dashboard then
+        snacks.dashboard.open()
+      else
+        vim.cmd("enew")
+      end
+    end
+  end)
 end
 
 function M.toggle()
@@ -255,14 +277,83 @@ end
 function M.open_or_focus_and_refresh()
   local session = require("my_extensions.onediff.session")
   local sidebar = require("my_extensions.onediff.sidebar")
+  local display = require("my_extensions.onediff.display")
+  local diff_parse = require("my_extensions.onediff.diff_parse")
   local current_buf = vim.api.nvim_get_current_buf()
-  
+
   if vim.b[current_buf].is_onediff_buffer or vim.b[current_buf].onediff_instance_id then
-    M.refresh()
+    local saved_path = nil
+    local saved_line = nil
+    local in_diff = vim.b[current_buf].is_onediff_buffer
+
+    if in_diff then
+      local saved_file = session.get_current_file()
+      saved_path = saved_file and saved_file.path
+      saved_line = vim.api.nvim_win_get_cursor(0)[1]
+    end
+
+    session.reload_files()
+    sidebar.render()
+    display.render_current()
+
+    if in_diff and saved_path and saved_line then
+      vim.schedule(function()
+        local files = session.get_files()
+        local found = false
+        for _, f in ipairs(files) do
+          if f.path == saved_path then
+            found = true
+            break
+          end
+        end
+        if not found then return end
+
+        local diff_buf = session.get_diff_buf()
+        if not diff_buf or not vim.api.nvim_buf_is_valid(diff_buf) then return end
+
+        local hunks = session.get_hunks()
+        local change_blocks = {}
+        if hunks and #hunks > 0 then
+          change_blocks = diff_parse.get_change_lines_in_buffer(hunks)
+        end
+
+        local target_line = nil
+        for _, block in ipairs(change_blocks) do
+          if saved_line >= block.start and saved_line <= block.finish then
+            target_line = saved_line
+            break
+          end
+        end
+        if not target_line then
+          for _, block in ipairs(change_blocks) do
+            if block.start >= saved_line then
+              target_line = block.start
+              break
+            end
+          end
+        end
+        if not target_line and #change_blocks > 0 then
+          target_line = change_blocks[1].start
+        end
+
+        if target_line then
+          for _, win in ipairs(vim.api.nvim_list_wins()) do
+            if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_buf(win) == diff_buf then
+              local line_count = vim.api.nvim_buf_line_count(diff_buf)
+              if target_line >= 1 and target_line <= line_count then
+                vim.api.nvim_win_set_cursor(win, { target_line, 0 })
+                vim.fn.win_execute(win, "normal! zz")
+              end
+              break
+            end
+          end
+        end
+      end)
+    end
   else
     local current_pwd = vim.fn.getcwd()
     local existing_instance = session.find_instance_by_working_dir(current_pwd)
-    
+
     if existing_instance then
       session.focus_instance(existing_instance)
       sidebar.show()
@@ -289,30 +380,39 @@ end
 function M.open_current_file_in_new_tab()
   local session = require("my_extensions.onediff.session")
   local git_ops = require("my_extensions.onediff.git_ops")
-  
+
   if not session.is_open() then
     return
   end
-  
+
   local current_file = session.get_current_file()
   if not current_file then
     vim.notify("OneDiff: No file selected", vim.log.levels.WARN)
     return
   end
-  
+
   if current_file.status == "deleted" then
     vim.notify("OneDiff: Cannot open deleted file", vim.log.levels.WARN)
     return
   end
-  
+
   local git_root = git_ops.get_root()
   if not git_root then
     vim.notify("OneDiff: Not in a git repository", vim.log.levels.ERROR)
     return
   end
-  
+
+  local cursor_line = vim.api.nvim_win_get_cursor(0)[1]
+
   local full_path = git_root .. "/" .. current_file.path
   vim.cmd("tabnew " .. vim.fn.fnameescape(full_path))
+
+  local new_buf = vim.api.nvim_get_current_buf()
+  local line_count = vim.api.nvim_buf_line_count(new_buf)
+  if cursor_line >= 1 and cursor_line <= line_count then
+    vim.api.nvim_win_set_cursor(0, { cursor_line, 0 })
+    vim.cmd("normal! zz")
+  end
 end
 
 return M

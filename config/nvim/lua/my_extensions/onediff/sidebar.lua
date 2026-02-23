@@ -214,6 +214,16 @@ function M.focus()
 end
 
 function M.create_buffer()
+  for _, b in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_valid(b) then
+      local ok, name = pcall(vim.api.nvim_buf_get_name, b)
+      if ok and name == "OneDiffPanel" then
+        pcall(vim.api.nvim_buf_delete, b, { force = true })
+        break
+      end
+    end
+  end
+
   local buf = api.nvim_create_buf(false, true)
 
   vim.bo[buf].buftype = "nofile"

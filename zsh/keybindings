@@ -21,7 +21,7 @@ bindkey -s "^o" 'bin/rails c\n'
 
 # Run claude in vertical tmux split
 # ctrl-n
-bindkey -s "^n" $'claude\n'
+# bindkey -s "^n" $'claude\n'
 
 # bindkey "^e" forward-word
 # bindkey "^v" backward-word
@@ -46,7 +46,7 @@ bindkey '\e[1;3C' forward-word    # Option+Right (alternative)
 bindkey '\eb' backward-word       # Option+Left (emacs-style)
 bindkey '\ef' forward-word        # Option+Right (emacs-style)
 
-bindkey "^n" backward-word
+bindkey "^b" backward-word
 bindkey "^q" forward-word
 
 # bindkey -s "^x" 'eza -alh\n'
