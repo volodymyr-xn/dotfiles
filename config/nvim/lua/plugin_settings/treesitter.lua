@@ -75,6 +75,6 @@ vim.api.nvim_set_hl(0, "@ruby.class_dsl.ruby", { link = "Statement" })
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "ruby",
   callback = function()
-    vim.fn.matchadd("Function", [[\w\+\.\(new\|save\|create\|perform_in\|perform_async\|destroy\|delete_all\|update_all\|update\)(]], 200)
+    vim.fn.matchadd("Function", [[\w\+\zs\.\(new\|save\|create\|perform_in\|perform_async\|destroy\|delete_all\|update_all\|update\)(]], 200)
   end,
 })
