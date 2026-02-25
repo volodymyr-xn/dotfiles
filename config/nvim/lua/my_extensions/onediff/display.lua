@@ -64,12 +64,13 @@ function M.open_file_with_diff(file, hunks, base_ref)
   session.set_diff_buf(buf)
 
   vim.b[buf].is_onediff_buffer = true
+  vim.b[buf].onediff_file_path = file.path
+  vim.wo[target_win].statusline = " %#OneDiffNonText#[OneDiff] %#OneDiffStatusLinePath#" .. file.path
 
   local file_content = vim.fn.readfile(file.full_path)
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, file_content)
 
-  local filename = vim.fn.fnamemodify(file.path, ':t')
-  vim.api.nvim_buf_set_name(buf, "[OneDiff] " .. filename)
+  vim.api.nvim_buf_set_name(buf, "[OneDiff] " .. file.path)
 
   local ext = file.path:match("%.(%w+)$")
   if ext then
@@ -141,6 +142,10 @@ function M.setup_buffer_keymaps(buf)
       vim.wo[win].number = true
       vim.wo[win].relativenumber = false
       vim.wo[win].signcolumn = "yes"
+      local path = vim.b[buf].onediff_file_path
+      if path then
+        vim.wo[win].statusline = " %#OneDiffNonText#[OneDiff] %#OneDiffStatusLinePath#" .. path
+      end
     end,
   })
 end
@@ -161,6 +166,8 @@ function M.render_deleted_file(file, base_ref, target_win)
   session.set_diff_buf(buf)
 
   vim.b[buf].is_onediff_buffer = true
+  vim.b[buf].onediff_file_path = file.path
+  vim.wo[target_win].statusline = " %#OneDiffNonText#[OneDiff] %#OneDiffStatusLinePath#" .. file.path
 
   local lines = vim.split(content, "\n")
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)

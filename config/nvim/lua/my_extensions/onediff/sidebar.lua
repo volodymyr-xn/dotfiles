@@ -112,6 +112,7 @@ function M.init()
   vim.api.nvim_set_hl(0, "OneDiffStatusDeleted", { fg = "#ed8796", default = true })
   vim.api.nvim_set_hl(0, "OneDiffStatusUntracked", { fg = "#8aadf4", default = true })
   vim.api.nvim_set_hl(0, "OneDiffTreeIndent", { fg = "#6c7086", default = true })
+  vim.api.nvim_set_hl(0, "OneDiffStatusLinePath", { fg = "#89b4fa", default = true })
 end
 
 function M.show()

@@ -92,7 +92,7 @@ function CopyCurrentFileRelativePathToClipboard()
 
   -- vim.cmd("let @+ = @%")
   -- local relpath = vim.fn.getreg('+')
-  -- vim.api.nvim_command('echohl Type | echo "Path ' .. clipboard_content .. ' copied to clipboard!" | echohl None')
+  -- vim.api.nvim_command('echohl Type | echo "Path ' .. clipboard_content .. ' copied!" | echohl None')
     -- Try git root, fallback to cwd
   local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
   if vim.v.shell_error ~= 0 then
@@ -105,7 +105,7 @@ function CopyCurrentFileRelativePathToClipboard()
   -- Copy to clipboard
   vim.fn.setreg("+", relpath)
 
-  vim.api.nvim_command('echohl String | echon "' .. relpath .. '" | echohl None | echon " copied to clipboard!"')
+  vim.api.nvim_command('echohl String | echon "' .. relpath .. '" | echohl None | echon " copied!"')
 end
 
 
