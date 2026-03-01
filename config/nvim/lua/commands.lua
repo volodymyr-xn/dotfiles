@@ -100,7 +100,10 @@ function CopyCurrentFileRelativePathToClipboard()
   end
 
   local filepath = vim.fn.expand("%:p")
-  local relpath = vim.fn.fnamemodify(filepath, ":.:" .. git_root)
+  local relpath = filepath
+  if filepath:sub(1, #git_root) == git_root then
+    relpath = filepath:sub(#git_root + 2)
+  end
 
   -- Copy to clipboard
   vim.fn.setreg("+", relpath)

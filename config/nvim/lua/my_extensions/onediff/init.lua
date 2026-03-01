@@ -293,6 +293,7 @@ function M.open_or_focus_and_refresh()
     end
 
     session.reload_files()
+    sidebar.show()
     sidebar.render()
     display.render_current()
 
