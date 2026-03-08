@@ -146,7 +146,7 @@ end
 
 local function find_changed_files()
   local current_buf = vim.api.nvim_get_current_buf()
-  
+
   if vim.b[current_buf].is_onediff_buffer then
     local onediff = require("my_extensions.onediff")
     onediff.open_file_picker()
@@ -248,7 +248,8 @@ end
 local find_models = find_resource_in_dir("app/models")
 local find_controllers = find_resource_in_dir("app/controllers")
 local find_css = find_resource_in_dir("app/assets/stylesheets")
-local find_js = find_resource_in_dir("app/assets/javascripts")
+local js_dir = CustomFindFirstAvailableDir({"app/javascript", "app/assets/javascripts"})
+local find_js = find_resource_in_dir(js_dir)
 
 local find_views = find_resource_in_dir("app/views")
 local find_i18n = find_resource_in_dir("config/locales")

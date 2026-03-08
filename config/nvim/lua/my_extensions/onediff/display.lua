@@ -126,12 +126,19 @@ function M.setup_buffer_keymaps(buf)
   vim.keymap.set("n", "<C-o>", onediff.goto_prev_change, opts)
   vim.keymap.set("n", "q", onediff.open_file_picker, opts)
   vim.keymap.set("n", "<C-q>", onediff.close, opts)
-  vim.keymap.set("n", "<C-c>", onediff.close, opts)
+  vim.keymap.set("n", "<C-c>", function() vim.schedule(onediff.close) end, opts)
   vim.keymap.set("n", "<Esc>", onediff.close, opts)
   vim.keymap.set("n", "<Leader>e", onediff.reload_current_file, opts)
   vim.keymap.set("n", "sf", onediff.open_or_focus_and_refresh, opts)
   vim.keymap.set("n", "o", onediff.open_current_file_in_new_tab, opts)
   vim.keymap.set("n", "i", onediff.open_current_file_in_new_tab, opts)
+  vim.keymap.set("n", "`", function()
+    local path = vim.b[buf].onediff_file_path
+    if path then
+      vim.fn.setreg("+", path)
+      vim.notify(path, vim.log.levels.INFO)
+    end
+  end, opts)
 
   local group = vim.api.nvim_create_augroup("OneDiffBuffer_" .. buf, { clear = true })
 

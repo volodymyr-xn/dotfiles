@@ -25,5 +25,6 @@ dump.rdb
 CLAUDE.local.md
 AGENTS.md
 NOTES.local.md
-C_PLANS
+C_PLANS/
+C_DOCS/
 c_commands/
