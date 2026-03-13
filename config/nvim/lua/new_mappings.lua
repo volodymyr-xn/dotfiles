@@ -31,7 +31,7 @@ vim.api.nvim_set_keymap('n', '<Leader>!', ':Ack "binding.pry"<CR>', {noremap = t
 -- Free mappings for "s" button that works as prefix
 vim.api.nvim_set_keymap('n', 's', '', {noremap = true, silent = false, desc = "Prefix key" })
 -- Split window horizontally
-vim.api.nvim_set_keymap('n', 'st', '<C-w>s', {noremap = true, silent = false, desc = "Split window horizontally" })
+-- vim.api.nvim_set_keymap('n', 'st', '<C-w>s', {noremap = true, silent = false, desc = "Split window horizontally" })
 
 -- vim.api.nvim_set_keymap('n', '<Leader>h', ':Telescope jumplist<CR>', {noremap = true, silent = false })
 -- vim.api.nvim_set_keymap('n', '<Leader>q', ':Telescope buffers<CR>', {noremap = true, silent = false })

@@ -131,7 +131,17 @@ require('lualine').setup {
         end
       }
     },
-    lualine_x = {'diff'},
+    lualine_x = {
+      'diff',
+      {
+        function()
+          local ok, router = pcall(require, "my_extensions.ultraselect")
+          if ok then return "  " .. (router.active or "?") end
+          return ""
+        end,
+        color = { fg = "#efb993" },
+      },
+    },
     lualine_y = {
       -- { get_yaml_key, cond = is_yaml },
       {

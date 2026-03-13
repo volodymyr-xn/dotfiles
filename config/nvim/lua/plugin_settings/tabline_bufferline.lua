@@ -9,6 +9,8 @@ require("bufferline").setup({
       -- buffers (tabs only) | table(int) | the numbers of the buffers in the tab
       -- tabnr (tabs only)   | int        | the "handle" of the tab, can be converted to its ordinal number using: `vim.api.nvim_tabpage_get_number(buf.tabnr)`
       local parent_dir = vim.fn.fnamemodify(vim.fn.fnamemodify(buf.path, ':h'), ':t')
+
+      -- In tab name show "parent_dir/file.extension" name
       return parent_dir .. '/' .. buf.name
     end,
     max_name_lenght = 40,

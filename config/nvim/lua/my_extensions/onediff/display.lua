@@ -14,6 +14,12 @@ function M.render_current()
 
   local base_ref = session.get_base_ref()
 
+  if git_ops.is_binary_file(file.path, base_ref, file.full_path) then
+    session.set_hunks({})
+    M.open_binary_placeholder(file)
+    return
+  end
+
   if file.status == "untracked" then
     session.set_hunks({})
     M.open_file_with_diff(file, {}, base_ref)
@@ -68,6 +74,9 @@ function M.open_file_with_diff(file, hunks, base_ref)
   vim.wo[target_win].statusline = " %#OneDiffNonText#[OneDiff] %#OneDiffStatusLinePath#" .. file.path
 
   local file_content = vim.fn.readfile(file.full_path)
+  for i, line in ipairs(file_content) do
+    file_content[i] = line:gsub("\n", "")
+  end
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, file_content)
 
   vim.api.nvim_buf_set_name(buf, "[OneDiff] " .. file.path)
@@ -114,6 +123,61 @@ function M.open_file_with_diff(file, hunks, base_ref)
 
   vim.o.lazyredraw = saved_lazyredraw
   vim.cmd("redraw")
+end
+
+function M.open_binary_placeholder(file)
+  local session = require("my_extensions.onediff.session")
+
+  local sidebar_win = session.get_sidebar_win()
+  local target_win = nil
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    if win ~= sidebar_win and vim.api.nvim_win_is_valid(win) then
+      target_win = win
+      break
+    end
+  end
+
+  if not target_win then
+    vim.cmd("vsplit")
+    target_win = vim.api.nvim_get_current_win()
+  end
+
+  vim.api.nvim_set_current_win(target_win)
+
+  local buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_win_set_buf(target_win, buf)
+  session.set_diff_buf(buf)
+
+  vim.b[buf].is_onediff_buffer = true
+  vim.b[buf].onediff_file_path = file.path
+  vim.wo[target_win].statusline = " %#OneDiffNonText#[OneDiff] %#OneDiffStatusLinePath#" .. file.path
+
+  local win_width = vim.api.nvim_win_get_width(target_win)
+  local win_height = vim.api.nvim_win_get_height(target_win)
+
+  local msg = "Preview for binary files unavailable"
+  local pad = string.rep(" ", math.max(0, math.floor((win_width - #msg) / 2)))
+  local blank = ""
+  local lines = {}
+  for _ = 1, math.floor(win_height / 2) - 1 do
+    table.insert(lines, blank)
+  end
+  table.insert(lines, pad .. msg)
+
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  vim.bo[buf].modifiable = false
+  vim.bo[buf].buftype = "nofile"
+  vim.bo[buf].bufhidden = "wipe"
+  vim.api.nvim_buf_set_name(buf, "[binary] " .. file.path)
+
+  local ns = vim.api.nvim_create_namespace("onediff_binary")
+  local msg_line = math.floor(win_height / 2) - 1
+  vim.api.nvim_buf_set_extmark(buf, ns, msg_line, #pad, {
+    end_col = #pad + #msg,
+    hl_group = "Comment",
+  })
+
+  M.setup_buffer_keymaps(buf)
 end
 
 function M.setup_buffer_keymaps(buf)

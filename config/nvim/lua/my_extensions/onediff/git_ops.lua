@@ -171,6 +171,33 @@ function M.get_current_content(file_path)
   return content
 end
 
+function M.is_binary_file(file_path, base_ref, full_path)
+  base_ref = base_ref or "HEAD"
+
+  local result = run_cmd(string.format("git diff --numstat %s -- '%s'", base_ref, file_path))
+  if result and result:match("^%-\t%-\t") then
+    return true
+  end
+
+  result = run_cmd(string.format("git diff --cached --numstat %s -- '%s'", base_ref, file_path))
+  if result and result:match("^%-\t%-\t") then
+    return true
+  end
+
+  if full_path then
+    local f = io.open(full_path, "rb")
+    if f then
+      local chunk = f:read(8192)
+      f:close()
+      if chunk and chunk:find("\0") then
+        return true
+      end
+    end
+  end
+
+  return false
+end
+
 function M.is_git_repo()
   return get_git_root() ~= nil
 end

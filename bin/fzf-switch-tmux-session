@@ -4,5 +4,5 @@
 
 set -euo pipefail
 
-tmux_session_name=$(tmux ls -F "#{session_name}" | fzf)
+tmux_session_name=$(tmux ls -F "#{?@hidden,,#{session_name}}" | grep -v '^$' | fzf)
 tmux switch -t "$tmux_session_name"
