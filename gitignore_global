@@ -12,6 +12,7 @@ db/*.sqlite3
 tmp/
 config/local_env.yml
 Session.vim
+.netrwhist
 .powenv
 node_modules/
 *.local
