@@ -135,7 +135,7 @@ require('lualine').setup {
       'diff',
       {
         function()
-          local ok, router = pcall(require, "my_extensions.ultraselect")
+          local ok, router = pcall(require, "my_extensions.fuzzy_picker_selector")
           if ok then return "  " .. (router.active or "?") end
           return ""
         end,

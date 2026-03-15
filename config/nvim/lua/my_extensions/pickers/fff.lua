@@ -57,10 +57,12 @@ function M.find_resource_in_dir(dir)
 end
 
 function M.find_files_in_dirs(dirs)
+  vim.notify("fff: find_files_in_dirs not supported, falling back", vim.log.levels.WARN)
   fallback("find_files_in_dirs", dirs)
 end
 
 function M.find_files_in_dirs_relative(dirs)
+  vim.notify("fff: find_files_in_dirs_relative not supported, falling back", vim.log.levels.WARN)
   fallback("find_files_in_dirs_relative", dirs)
 end
 

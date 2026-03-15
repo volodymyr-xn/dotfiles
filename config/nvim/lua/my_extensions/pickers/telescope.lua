@@ -71,25 +71,17 @@ end
 function M.find_files_in_dirs_relative(dirs)
   local available = vim.tbl_filter(function(d) return d and d ~= "" and vim.fn.isdirectory(d) == 1 end, dirs)
   if #available == 0 then return end
-  local pickers = require("telescope.pickers")
-  local finders = require("telescope.finders")
-  local conf = require("telescope.config").values
-  local entries = {}
-  for _, dir in ipairs(available) do
-    for _, full_path in ipairs(vim.fn.systemlist("fd --type f . " .. dir)) do
-      local relative = full_path:gsub("^" .. vim.pesc(dir) .. "/", "")
-      table.insert(entries, { display = relative, path = full_path, ordinal = relative })
-    end
-  end
-  pickers.new({}, {
-    prompt_title = "Files",
-    finder = finders.new_table({
-      results = entries,
-      entry_maker = function(e) return e end,
-    }),
-    sorter = conf.generic_sorter({}),
-    previewer = conf.file_previewer({}),
-  }):find()
+  builtin().find_files({
+    search_dirs = available,
+    previewer = false,
+    path_display = function(_, path)
+      for _, dir in ipairs(available) do
+        local stripped = path:gsub("^" .. vim.pesc(dir) .. "/", "")
+        if stripped ~= path then return stripped end
+      end
+      return path
+    end,
+  })
 end
 
 function M.buffer_fuzzy_find()

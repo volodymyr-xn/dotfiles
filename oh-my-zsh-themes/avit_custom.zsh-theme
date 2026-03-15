@@ -1,4 +1,6 @@
-# AVIT CUSTOM ZSH Theme
+# ===================================
+# MY CUSTOM VERSION OF AVIT ZSH Theme
+# ===================================
 
 # settings
 typeset +H _current_dir="%{$fg_bold[blue]%}%3~%{$reset_color%} "

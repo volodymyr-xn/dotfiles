@@ -1,4 +1,4 @@
-local R = require("my_extensions.ultraselect")
+local R = require("my_extensions.fuzzy_picker_selector")
 
 local fzf_vim_picker = require("my_extensions.pickers.fzf_vim")
 fzf_vim_picker.setup()
@@ -44,5 +44,5 @@ vim.keymap.set("n", "<Leader>p", function() fzf_vim_picker.custom_full_text_sear
 
 vim.keymap.set("n", "st", function() R.cycle() end, { desc = "Switch picker" })
 
-vim.cmd("command! PickerSwitch lua require('my_extensions.ultraselect').cycle()")
-vim.cmd("command! -nargs=1 PickerSet lua require('my_extensions.ultraselect').set(<q-args>)")
+vim.cmd("command! PickerSwitch lua require('my_extensions.fuzzy_picker_selector').cycle()")
+vim.cmd("command! -nargs=1 PickerSet lua require('my_extensions.fuzzy_picker_selector').set(<q-args>)")

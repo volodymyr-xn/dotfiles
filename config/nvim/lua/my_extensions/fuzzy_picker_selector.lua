@@ -2,7 +2,19 @@ local M = {}
 
 M.PICKERS = { "telescope", "fzf_lua", "fzf_vim", "mini_pick", "fff" }
 
-M.active = vim.g.active_picker or "telescope"
+local state_file = vim.fn.stdpath("data") .. "/ultraselect_picker"
+
+local function read_state()
+  local ok, lines = pcall(vim.fn.readfile, state_file)
+  if ok and lines and lines[1] and lines[1] ~= "" then return lines[1] end
+  return nil
+end
+
+local function write_state(name)
+  vim.fn.writefile({ name }, state_file)
+end
+
+M.active = vim.g.active_picker or read_state() or "telescope"
 
 local function load_picker(name)
   local ok, mod = pcall(require, "my_extensions.pickers." .. name)
@@ -51,6 +63,7 @@ function M.set(name)
 
   M.active = name
   vim.g.active_picker = name
+  write_state(name)
   vim.notify("Active picker: " .. name, vim.log.levels.INFO)
 end
 
