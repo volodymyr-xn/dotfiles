@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+bold='\033[1m'
+dim='\033[2m'
+green='\033[32m'
+red='\033[31m'
+reset='\033[0m'
+
+ruby_path=$(command -v ruby)
+ruby_version=$(ruby -e "puts RUBY_VERSION")
+mainlibs=$(ruby -e "puts RbConfig::CONFIG['MAINLIBS']")
+yjit_supported=$(ruby -e "puts defined?(RubyVM::YJIT) ? 'yes' : 'no'" 2>/dev/null || echo "no")
+yjit_enabled=$(ruby -e "puts defined?(RubyVM::YJIT) && RubyVM::YJIT.enabled? ? 'yes' : 'no'" 2>/dev/null || echo "no")
+
+echo -e "${bold}Ruby:${reset}     $ruby_path ${dim}($ruby_version)${reset}"
+echo -e "${bold}MAINLIBS:${reset} ${dim}$mainlibs${reset}"
+echo ""
+
+if echo "$mainlibs" | grep -q jemalloc; then
+  echo -e "${green}${bold}✓ jemalloc: YES${reset}"
+else
+  echo -e "${red}${bold}✗ jemalloc: NO${reset}"
+fi
+
+if [ "$yjit_supported" = "yes" ]; then
+  echo -e "${green}${bold}✓ YJIT supported: YES${reset}"
+else
+  echo -e "${red}${bold}✗ YJIT supported: NO${reset}"
+fi
+
+if [ "$yjit_enabled" = "yes" ]; then
+  echo -e "${green}${bold}✓ YJIT enabled:   YES${reset}"
+else
+  echo -e "${red}${bold}✗ YJIT enabled:   NO${reset}"
+fi

@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+awk '
+FNR == NR {
+  pid = $1 + 0
+  if (pid == 0) next
+  val = $2
+  mem = 0
+  if (val ~ /[Gg]/) { sub(/[Gg]/, "", val); mem = val * 1024 }
+  else if (val ~ /[Mm]/) { sub(/[Mm]/, "", val); mem = val + 0 }
+  else if (val ~ /[Kk]/) { sub(/[Kk]/, "", val); mem = val / 1024 }
+  else { mem = val / (1024 * 1024) }
+  top_mem[pid] = mem
+  next
+}
+{
+  pid  = $1 + 0
+  ppid = $2 + 0
+  name = $3
+  cmd  = ""
+  for (i = 4; i <= NF; i++) cmd = cmd (i > 4 ? " " : "") $i
+  ps_ppid[pid] = ppid
+  ps_name[pid] = name
+  ps_cmd[pid]  = cmd
+}
+END {
+  n = 0
+  for (pid in ps_name) {
+    if (ps_name[pid] ~ /^ruby/ || ps_cmd[pid] ~ /(^|[[:space:]])ruby([[:space:]]|$)/) {
+      sort_pid[n] = pid
+      sort_mem[n] = (pid in top_mem) ? top_mem[pid] : 0
+      n++
+    }
+  }
+
+  for (i = 0; i < n - 1; i++) {
+    for (j = i + 1; j < n; j++) {
+      if (sort_mem[j] > sort_mem[i]) {
+        tmp = sort_mem[i]; sort_mem[i] = sort_mem[j]; sort_mem[j] = tmp
+        tmp = sort_pid[i]; sort_pid[i] = sort_pid[j]; sort_pid[j] = tmp
+      }
+    }
+  }
+
+  if (n == 0) { print "No Ruby processes found."; exit }
+
+  fmt = "%-7s  %-16s  %-28s  %9s  %-16s  %s\n"
+  printf fmt, "PID", "NAME", "TITLE", "MEM(MB)", "PARENT", "COMMAND"
+  printf fmt, "-------", "----------------", "----------------------------", "---------", "----------------", "------------------------------------------------------------"
+
+  for (i = 0; i < n; i++) {
+    pid         = sort_pid[i]
+    name        = ps_name[pid]
+    ppid        = ps_ppid[pid]
+    parent_name = (ppid in ps_name) ? ps_name[ppid] : "?"
+    mem         = sprintf("%.1f", sort_mem[i])
+    cmd         = ps_cmd[pid]
+
+    split(cmd, argv, " ")
+    title = argv[1]
+    sub(/.*\//, "", title)
+
+    display_cmd = (length(cmd) > 60) ? substr(cmd, 1, 59) "..." : cmd
+
+    printf fmt, pid, name, title, mem, parent_name, display_cmd
+  }
+}
+' <(top -l 1 -stats pid,rsize | tail -n +12) <(ps -Ao pid,ppid,ucomm,args | tail -n +2)

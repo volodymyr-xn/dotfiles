@@ -1,0 +1,63 @@
+#!/usr/bin/env ruby
+
+ps_raw = `ps -Ao pid,ppid,ucomm,args`.lines
+ps_raw.shift
+
+all = ps_raw.map do |line|
+  parts = line.strip.split(/\s+/, 4)
+  { pid: parts[0].to_i, ppid: parts[1].to_i, name: parts[2], command: parts[3] }
+end
+
+pid_name = all.each_with_object({}) { |p, h| h[p[:pid]] = p[:name] }
+
+ruby_pids = all
+  .select { |p| p[:name] =~ /\bruby\b/i || p[:command].to_s =~ /\bruby\b/ }
+  .map { |p| p[:pid] }
+
+if ruby_pids.empty?
+  puts "No Ruby processes found."
+  exit
+end
+
+top_raw = `top -l 1 -stats pid,rsize`.lines.drop(12)
+top_mem = top_raw.each_with_object({}) do |line, h|
+  parts = line.strip.split
+  next unless parts.size >= 2
+  pid = parts[0].to_i
+  next unless ruby_pids.include?(pid)
+  raw_val = parts[1]
+  mb = case raw_val
+       when /(\d+(?:\.\d+)?)G/i then $1.to_f * 1024
+       when /(\d+(?:\.\d+)?)M/i then $1.to_f
+       when /(\d+(?:\.\d+)?)K/i then $1.to_f / 1024
+       when /(\d+)/             then $1.to_f / (1024 * 1024)
+       end
+  h[pid] = mb
+end
+
+col_widths = { pid: 7, name: 16, title: 28, mem_mb: 9, parent: 16, command: 60 }
+
+header = format(
+  "%-#{col_widths[:pid]}s  %-#{col_widths[:name]}s  %-#{col_widths[:title]}s  %#{col_widths[:mem_mb]}s  %-#{col_widths[:parent]}s  %s",
+  "PID", "NAME", "TITLE", "MEM(MB)", "PARENT", "COMMAND"
+)
+sep = format(
+  "%-#{col_widths[:pid]}s  %-#{col_widths[:name]}s  %-#{col_widths[:title]}s  %#{col_widths[:mem_mb]}s  %-#{col_widths[:parent]}s  %s",
+  "-" * col_widths[:pid], "-" * col_widths[:name], "-" * col_widths[:title],
+  "-" * col_widths[:mem_mb], "-" * col_widths[:parent], "-" * col_widths[:command]
+)
+
+puts header
+puts sep
+
+all.select { |p| ruby_pids.include?(p[:pid]) }.sort_by { |p| -(top_mem[p[:pid]] || 0) }.each do |p|
+  parent_name = pid_name[p[:ppid]] || "?"
+  mem_mb      = top_mem[p[:pid]] ? format("%.1f", top_mem[p[:pid]]) : "?"
+  title       = File.basename(p[:command].split.first || p[:name])
+  cmd_display = p[:command].to_s.length > col_widths[:command] ? p[:command][0, col_widths[:command] - 1] + "…" : p[:command]
+
+  puts format(
+    "%-#{col_widths[:pid]}s  %-#{col_widths[:name]}s  %-#{col_widths[:title]}s  %#{col_widths[:mem_mb]}s  %-#{col_widths[:parent]}s  %s",
+    p[:pid], p[:name], title, mem_mb, parent_name, cmd_display
+  )
+end
