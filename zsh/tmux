@@ -23,7 +23,7 @@ function ta() {
 alias tka="tmux kill-server"
 
 # List tmux sessions
-alias tl='tmux ls'
+alias tl='tmux ls | sort'
 
 # Tmuxinator shortcut
 alias tx='tmuxinator'

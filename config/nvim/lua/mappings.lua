@@ -38,6 +38,16 @@ vim.api.nvim_set_keymap('n', 'sj', ':A<CR>', { noremap = true, desc = "Go to alt
 vim.api.nvim_set_keymap('n', 'sk', ':R<CR>', { noremap = true, desc = "Go to related file" })
 -- vim.keymap.set('n', 'sd', ':R<CR>', { noremap = true, silent = true, desc = "Go to related file" })
 
+-- Go to related file
+vim.api.nvim_set_keymap('n', 'ss', ':R<CR>', {noremap = true, silent = false, desc = "Go to related file" })
+-- Go to related file
+vim.api.nvim_set_keymap('n', 'Q', ':A<CR>', {noremap = true, silent = false, desc = "Go to related file" })
+
+-- Go to related file
+-- -- vim.api.nvim_set_keymap('n', '<Leader>r', ':%s/', { noremap = true, desc = "Go to related file" })
+-- vim.api.nvim_set_keymap('n', 'gs', ':R<CR>', { noremap = true, desc = "Go to related file" })
+-- vim.api.nvim_set_keymap('n', '<leader>a', ':A<CR>', { noremap = true, desc = "Go to related file" })
+
 -- Show git diff in popup
 -- Faster search
 -- vim.api.nvim_set_keymap('n', 's', '/', { noremap = true })
@@ -156,11 +166,6 @@ vim.api.nvim_set_keymap('n', '<Leader>T', ':TestFile<CR>', {silent = true, desc 
 -- vim.api.nvim_set_keymap('n', '<Leader>a', ':TestSuite<CR>', {silent = true})
 vim.api.nvim_set_keymap('n', '<Leader>l', ':TestLast<CR>', {silent = true, desc = "Test last"})
 
--- Go to related file
--- vim.api.nvim_set_keymap('n', '<Leader>r', ':%s/', { noremap = true, desc = "Go to related file" })
-vim.api.nvim_set_keymap('n', 'gs', ':R<CR>', { noremap = true, desc = "Go to related file" })
-vim.api.nvim_set_keymap('n', '<leader>a', ':A<CR>', { noremap = true, desc = "Go to related file" })
-
 -- Reload file
 vim.api.nvim_set_keymap('n', '<Leader>e', ':e!<CR>', { noremap = true, silent = true, desc = "Reload file" })
 -- vim.api.nvim_set_keymap('n', '<Leader>r', ':e!<CR>', { noremap = true, silent = true, desc = "Reload file" })
@@ -237,11 +242,11 @@ vim.api.nvim_set_keymap('n', 'sq', '<cmd>lua require("my_extensions.ruby_compone
 vim.api.nvim_set_keymap('n', 'sw', '<cmd>lua require("my_extensions.ruby_component_toggle").toggle_erb_style()<CR>',
   { noremap = true, silent = true, desc = "Toggle between .html.erb and .scss/.css" })
 
-vim.api.nvim_create_autocmd('FileType', {
-  pattern = { 'ruby', 'eruby' },
-  callback = function()
-    vim.api.nvim_buf_set_keymap(0, 'n', '<Leader>r',
-      '<cmd>lua require("my_extensions.ruby_component_toggle").toggle_alternate()<CR>',
-      { noremap = true, silent = true, desc = "Toggle between .rb and .html.erb" })
-  end,
-})
+-- vim.api.nvim_create_autocmd('FileType', {
+--   pattern = { 'ruby', 'eruby' },
+--   callback = function()
+--     vim.api.nvim_buf_set_keymap(0, 'n', '<Leader>r',
+--       '<cmd>lua require("my_extensions.ruby_component_toggle").toggle_alternate()<CR>',
+--       { noremap = true, silent = true, desc = "Toggle between .rb and .html.erb" })
+--   end,
+-- })
