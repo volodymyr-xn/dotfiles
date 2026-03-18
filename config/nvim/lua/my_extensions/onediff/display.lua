@@ -72,6 +72,8 @@ function M.open_file_with_diff(file, hunks, base_ref)
   vim.b[buf].is_onediff_buffer = true
   vim.b[buf].onediff_file_path = file.path
   vim.wo[target_win].statusline = " %#OneDiffNonText#[OneDiff] %#OneDiffStatusLinePath#" .. file.path
+  vim.keymap.set("n", '"', "<Nop>", { buffer = buf, silent = true })
+  vim.keymap.set("n", "m", function() require("my_extensions.onediff").toggle_zoom() end, { buffer = buf, silent = true })
 
   local file_content = vim.fn.readfile(file.full_path)
   for i, line in ipairs(file_content) do
@@ -151,6 +153,8 @@ function M.open_binary_placeholder(file)
   vim.b[buf].is_onediff_buffer = true
   vim.b[buf].onediff_file_path = file.path
   vim.wo[target_win].statusline = " %#OneDiffNonText#[OneDiff] %#OneDiffStatusLinePath#" .. file.path
+  vim.keymap.set("n", '"', "<Nop>", { buffer = buf, silent = true })
+  vim.keymap.set("n", "m", function() require("my_extensions.onediff").toggle_zoom() end, { buffer = buf, silent = true })
 
   local win_width = vim.api.nvim_win_get_width(target_win)
   local win_height = vim.api.nvim_win_get_height(target_win)
@@ -240,6 +244,8 @@ function M.render_deleted_file(file, base_ref, target_win)
   vim.b[buf].is_onediff_buffer = true
   vim.b[buf].onediff_file_path = file.path
   vim.wo[target_win].statusline = " %#OneDiffNonText#[OneDiff] %#OneDiffStatusLinePath#" .. file.path
+  vim.keymap.set("n", '"', "<Nop>", { buffer = buf, silent = true })
+  vim.keymap.set("n", "m", function() require("my_extensions.onediff").toggle_zoom() end, { buffer = buf, silent = true })
 
   local lines = vim.split(content, "\n")
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)

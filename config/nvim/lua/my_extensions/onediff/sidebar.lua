@@ -749,6 +749,8 @@ function M.setup_keymaps(buf)
 
   vim.keymap.set("n", "h", "<Nop>", opts)
   vim.keymap.set("n", "l", "<Nop>", opts)
+  vim.keymap.set("n", '"', "<Nop>", opts)
+  vim.keymap.set("n", "m", onediff.toggle_zoom, opts)
 
   vim.keymap.set("n", "<Tab>", function()
     local session = require("my_extensions.onediff.session")

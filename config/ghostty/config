@@ -39,6 +39,9 @@ keybind = shift+enter=text:\x1b\r
 # Disable default ctrl+enter which expands/zooms ghostty window
 keybind = ctrl+enter=unbind
 
+# Disable split pane shortcut so cmd+d can be used for zsh word forward navigation
+keybind = cmd+d=unbind
+
 # Make fonts bolder (works only on MacOS)
 font-thicken=true
 font-thicken-strength=1

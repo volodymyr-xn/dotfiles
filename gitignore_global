@@ -29,5 +29,7 @@ NOTES.local.md
 C_PLANS/
 C_DOCS/
 C_TEMP/
+C_RESEARCH/
+C_TODO/
 c_commands/
 .playwright-mcp/

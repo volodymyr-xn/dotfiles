@@ -48,6 +48,7 @@ function M.close()
   sidebar.hide()
   display.clear_all()
   session.stop()
+  vim.g.onediff_zoomed = false
 
   local sidebar_win = session.get_sidebar_win()
   for _, win in ipairs(vim.api.nvim_list_wins()) do
@@ -362,6 +363,29 @@ function M.open_or_focus_and_refresh()
     else
       M.open()
     end
+  end
+end
+
+function M.toggle_zoom()
+  local session = require("my_extensions.onediff.session")
+  local sidebar = require("my_extensions.onediff.sidebar")
+
+  if not session.is_open() then
+    ToggleCurrentWindowZoom()
+    return
+  end
+
+  if vim.g.onediff_zoomed then
+    sidebar.show()
+    vim.cmd("wincmd =")
+    vim.g.onediff_zoomed = false
+    vim.g.currentWindowZoomed = false
+  else
+    sidebar.hide()
+    vim.cmd("wincmd |")
+    vim.cmd("wincmd _")
+    vim.g.onediff_zoomed = true
+    vim.g.currentWindowZoomed = true
   end
 end
 

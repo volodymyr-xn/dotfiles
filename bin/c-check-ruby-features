@@ -13,6 +13,8 @@ ruby_version=$(ruby -e "puts RUBY_VERSION")
 mainlibs=$(ruby -e "puts RbConfig::CONFIG['MAINLIBS']")
 yjit_supported=$(ruby -e "puts defined?(RubyVM::YJIT) ? 'yes' : 'no'" 2>/dev/null || echo "no")
 yjit_enabled=$(ruby -e "puts defined?(RubyVM::YJIT) && RubyVM::YJIT.enabled? ? 'yes' : 'no'" 2>/dev/null || echo "no")
+zjit_supported=$(ruby -e "puts defined?(RubyVM::ZJIT) ? 'yes' : 'no'" 2>/dev/null || echo "no")
+zjit_enabled=$(ruby -e "puts defined?(RubyVM::ZJIT) && RubyVM::ZJIT.enabled? ? 'yes' : 'no'" 2>/dev/null || echo "no")
 
 echo -e "${bold}Ruby:${reset}     $ruby_path ${dim}($ruby_version)${reset}"
 echo -e "${bold}MAINLIBS:${reset} ${dim}$mainlibs${reset}"
@@ -34,4 +36,16 @@ if [ "$yjit_enabled" = "yes" ]; then
   echo -e "${green}${bold}✓ YJIT enabled:   YES${reset}"
 else
   echo -e "${red}${bold}✗ YJIT enabled:   NO${reset}"
+fi
+
+if [ "$zjit_supported" = "yes" ]; then
+  echo -e "${green}${bold}✓ ZJIT supported: YES${reset}"
+else
+  echo -e "${red}${bold}✗ ZJIT supported: NO${reset}"
+fi
+
+if [ "$zjit_enabled" = "yes" ]; then
+  echo -e "${green}${bold}✓ ZJIT enabled:   YES${reset}"
+else
+  echo -e "${red}${bold}✗ ZJIT enabled:   NO${reset}"
 fi
