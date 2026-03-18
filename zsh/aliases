@@ -62,10 +62,5 @@ alias ctags-javascript="ctags -R app config lib --langmap=javascript:.js.es6.es.
 alias g="git"
 alias gd='git diff'
 
-# Claude
-alias hc='claude --model haiku'
-alias sc='claude --model sonnet'
-alias oc='claude --model opus'
-alias cx='claude'
-
 alias spring-kill='pkill -f "spring (server|app)"'
+
