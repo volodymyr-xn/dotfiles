@@ -15,6 +15,7 @@ local function create_instance()
     changed_files = {},
     current_index = 0,
     current_hunks = {},
+    staged_hunks = {},
     original_buf = nil,
     diff_buf = nil,
     sidebar_buf = nil,
@@ -184,6 +185,17 @@ end
 function M.get_hunks()
   local state = get_current_instance()
   return state and state.current_hunks or {}
+end
+
+function M.set_staged_hunks(hunks)
+  local state = get_current_instance()
+  if not state then return end
+  state.staged_hunks = hunks
+end
+
+function M.get_staged_hunks()
+  local state = get_current_instance()
+  return state and state.staged_hunks or {}
 end
 
 function M.set_sidebar_buf(buf)

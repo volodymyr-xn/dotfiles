@@ -198,6 +198,33 @@ function M.is_binary_file(file_path, base_ref, full_path)
   return false
 end
 
+function M.get_staged_diff(file_path, base_ref)
+  base_ref = base_ref or "HEAD"
+  return run_cmd(string.format("git diff --cached %s -- '%s'", base_ref, file_path))
+end
+
+function M.stage_hunk(git_root, patch_text)
+  local tmp = os.tmpname()
+  local f = io.open(tmp, "w")
+  if not f then return false end
+  f:write(patch_text)
+  f:close()
+  run_cmd(string.format("cd '%s' && git apply --cached '%s'", git_root, tmp))
+  os.remove(tmp)
+  return true
+end
+
+function M.unstage_hunk(git_root, patch_text)
+  local tmp = os.tmpname()
+  local f = io.open(tmp, "w")
+  if not f then return false end
+  f:write(patch_text)
+  f:close()
+  run_cmd(string.format("cd '%s' && git apply --cached --reverse '%s'", git_root, tmp))
+  os.remove(tmp)
+  return true
+end
+
 function M.is_git_repo()
   return get_git_root() ~= nil
 end

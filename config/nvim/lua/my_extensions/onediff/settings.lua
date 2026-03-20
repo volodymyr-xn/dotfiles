@@ -17,6 +17,7 @@ M.defaults = {
   },
   highlights = {
     line_add = "OneDiffLineAdd",
+    line_staged = "OneDiffLineStaged",
     line_delete = "OneDiffLineDelete",
     char_add = "OneDiffCharAdd",
     char_delete = "OneDiffCharDelete",
@@ -48,6 +49,7 @@ end
 
 function M.setup_highlights()
   vim.api.nvim_set_hl(0, "OneDiffLineAdd", { bg = "#2d4a3e" })
+  vim.api.nvim_set_hl(0, "OneDiffLineStaged", { bg = "#1e3a5f" })
   vim.api.nvim_set_hl(0, "OneDiffLineDelete", { bg = "#4a2d2d" })
   vim.api.nvim_set_hl(0, "OneDiffCharAdd", { bg = "#3d6a5e", bold = true })
   vim.api.nvim_set_hl(0, "OneDiffCharDelete", { bg = "#6a3d3d", bold = true })

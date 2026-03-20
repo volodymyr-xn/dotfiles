@@ -705,6 +705,8 @@ function M.setup_keymaps(buf)
 
   vim.keymap.set("n", keymaps.select, M.open_file_keep_focus, opts)
   vim.keymap.set("n", keymaps.refresh, onediff.refresh, opts)
+  vim.keymap.set("n", "s", onediff.stage_hunk, opts)
+  vim.keymap.set("n", "u", onediff.unstage_hunk, opts)
   vim.keymap.set("n", "q", onediff.open_file_picker, opts)
   vim.keymap.set("n", "<C-q>", onediff.close, opts)
   vim.keymap.set("n", "<C-c>", function() vim.schedule(onediff.close) end, opts)

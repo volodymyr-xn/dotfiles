@@ -18,6 +18,8 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("OneDiffFocusSidebar", M.focus_sidebar, { desc = "Focus sidebar" })
   vim.api.nvim_create_user_command("OneDiffToggleSidebar", M.toggle_sidebar, { desc = "Toggle sidebar" })
   vim.api.nvim_create_user_command("OneDiffToggleInstance", M.toggle_instance, { desc = "Toggle OneDiff instance" })
+  vim.api.nvim_create_user_command("OneDiffStageHunk", M.stage_hunk, { desc = "Stage current hunk" })
+  vim.api.nvim_create_user_command("OneDiffUnstageHunk", M.unstage_hunk, { desc = "Unstage current hunk" })
 end
 
 function M.open()
@@ -273,6 +275,16 @@ function M.toggle_instance()
       M.open()
     end
   end
+end
+
+function M.stage_hunk()
+  local display = require("my_extensions.onediff.display")
+  display.stage_current_hunk()
+end
+
+function M.unstage_hunk()
+  local display = require("my_extensions.onediff.display")
+  display.unstage_current_hunk()
 end
 
 function M.open_or_focus_and_refresh()

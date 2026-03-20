@@ -30,10 +30,14 @@ function M.render_current()
   local hunks = diff_parse.parse_hunks(diff_text)
   session.set_hunks(hunks)
 
-  M.open_file_with_diff(file, hunks, base_ref)
+  local staged_diff = git_ops.get_staged_diff(file.path, base_ref)
+  local staged_hunks = diff_parse.parse_hunks(staged_diff)
+  session.set_staged_hunks(staged_hunks)
+
+  M.open_file_with_diff(file, hunks, base_ref, staged_hunks)
 end
 
-function M.open_file_with_diff(file, hunks, base_ref)
+function M.open_file_with_diff(file, hunks, base_ref, staged_hunks)
   local git_ops = require("my_extensions.onediff.git_ops")
   local diff_parse = require("my_extensions.onediff.diff_parse")
   local session = require("my_extensions.onediff.session")
@@ -103,7 +107,7 @@ function M.open_file_with_diff(file, hunks, base_ref)
   if file.status == "untracked" then
     M.highlight_untracked_file(buf)
   else
-    M.apply_inline_diff(buf, hunks, file, base_ref)
+    M.apply_inline_diff(buf, hunks, file, base_ref, staged_hunks)
   end
 
   local first_change_line = nil
@@ -200,6 +204,8 @@ function M.setup_buffer_keymaps(buf)
   vim.keymap.set("n", "sf", onediff.open_or_focus_and_refresh, opts)
   vim.keymap.set("n", "o", onediff.open_current_file_in_new_tab, opts)
   vim.keymap.set("n", "i", onediff.open_current_file_in_new_tab, opts)
+  vim.keymap.set("n", "s", onediff.stage_hunk, opts)
+  vim.keymap.set("n", "u", onediff.unstage_hunk, opts)
   vim.keymap.set("n", "`", function()
     local path = vim.b[buf].onediff_file_path
     if path then
@@ -274,7 +280,42 @@ function M.render_deleted_file(file, base_ref, target_win)
   M.setup_buffer_keymaps(buf)
 end
 
-function M.apply_inline_diff(buf, hunks, file, base_ref)
+local function is_hunk_staged(hunk, staged_hunks)
+  if not staged_hunks or #staged_hunks == 0 then return false end
+
+  local hunk_adds = {}
+  for _, change in ipairs(hunk.changes) do
+    if change.type == "add" then
+      table.insert(hunk_adds, change.text)
+    end
+  end
+
+  if #hunk_adds == 0 then return false end
+
+  for _, staged_hunk in ipairs(staged_hunks) do
+    local staged_adds = {}
+    for _, change in ipairs(staged_hunk.changes) do
+      if change.type == "add" then
+        table.insert(staged_adds, change.text)
+      end
+    end
+
+    if #staged_adds == #hunk_adds then
+      local match = true
+      for i, line in ipairs(hunk_adds) do
+        if staged_adds[i] ~= line then
+          match = false
+          break
+        end
+      end
+      if match then return true end
+    end
+  end
+
+  return false
+end
+
+function M.apply_inline_diff(buf, hunks, file, base_ref, staged_hunks)
   local settings = require("my_extensions.onediff.settings")
 
   if not hunks or #hunks == 0 then
@@ -290,6 +331,8 @@ function M.apply_inline_diff(buf, hunks, file, base_ref)
     local new_line_idx = hunk.new_start - 1
     local deleted_lines = {}
     local deleted_attach_line = nil
+    local hunk_is_staged = is_hunk_staged(hunk, staged_hunks)
+    local add_hl = hunk_is_staged and hl.line_staged or hl.line_add
 
     local function flush_deleted_lines()
       if #deleted_lines == 0 then
@@ -323,7 +366,7 @@ function M.apply_inline_diff(buf, hunks, file, base_ref)
         flush_deleted_lines()
         if new_line_idx >= 0 and new_line_idx < buf_line_count then
           vim.api.nvim_buf_set_extmark(buf, ns, new_line_idx, 0, {
-            line_hl_group = hl.line_add,
+            line_hl_group = add_hl,
           })
         end
         new_line_idx = new_line_idx + 1
@@ -350,6 +393,122 @@ function M.highlight_untracked_file(buf)
       line_hl_group = hl.line_add,
     })
   end
+end
+
+local function build_patch_for_hunk(file_path, hunk)
+  local lines = {}
+  table.insert(lines, string.format("diff --git a/%s b/%s", file_path, file_path))
+  table.insert(lines, string.format("--- a/%s", file_path))
+  table.insert(lines, string.format("+++ b/%s", file_path))
+
+  local old_count = 0
+  local new_count = 0
+  for _, change in ipairs(hunk.changes) do
+    if change.type == "context" then
+      old_count = old_count + 1
+      new_count = new_count + 1
+    elseif change.type == "add" then
+      new_count = new_count + 1
+    elseif change.type == "delete" then
+      old_count = old_count + 1
+    end
+  end
+
+  table.insert(lines, string.format("@@ -%d,%d +%d,%d @@", hunk.old_start, old_count, hunk.new_start, new_count))
+
+  for _, change in ipairs(hunk.changes) do
+    if change.type == "context" then
+      table.insert(lines, " " .. change.text)
+    elseif change.type == "add" then
+      table.insert(lines, "+" .. change.text)
+    elseif change.type == "delete" then
+      table.insert(lines, "-" .. change.text)
+    end
+  end
+
+  table.insert(lines, "")
+  return table.concat(lines, "\n")
+end
+
+function M.stage_current_hunk()
+  local session = require("my_extensions.onediff.session")
+  local git_ops = require("my_extensions.onediff.git_ops")
+  local controls = require("my_extensions.onediff.controls")
+
+  local file = session.get_current_file()
+  if not file then return end
+
+  local hunks = session.get_hunks()
+  local staged_hunks = session.get_staged_hunks()
+
+  local hunk_idx = controls.get_current_hunk_index()
+  if hunk_idx == 0 then
+    vim.notify("OneDiff: No hunk at cursor", vim.log.levels.INFO)
+    return
+  end
+
+  local hunk = hunks[hunk_idx]
+  if not hunk then return end
+
+  if is_hunk_staged(hunk, staged_hunks) then
+    vim.notify("OneDiff: Hunk already staged", vim.log.levels.INFO)
+    return
+  end
+
+  local git_root = git_ops.get_root()
+  if not git_root then return end
+
+  local patch = build_patch_for_hunk(file.path, hunk)
+  git_ops.stage_hunk(git_root, patch)
+
+  require("my_extensions.onediff").open_or_focus_and_refresh()
+end
+
+function M.unstage_current_hunk()
+  local session = require("my_extensions.onediff.session")
+  local git_ops = require("my_extensions.onediff.git_ops")
+  local controls = require("my_extensions.onediff.controls")
+
+  local file = session.get_current_file()
+  if not file then return end
+
+  local hunks = session.get_hunks()
+  local staged_hunks = session.get_staged_hunks()
+
+  local hunk_idx = controls.get_current_hunk_index()
+  if hunk_idx == 0 then
+    vim.notify("OneDiff: No hunk at cursor", vim.log.levels.INFO)
+    return
+  end
+
+  local hunk = hunks[hunk_idx]
+  if not hunk then return end
+
+  if not is_hunk_staged(hunk, staged_hunks) then
+    vim.notify("OneDiff: Hunk is not staged", vim.log.levels.INFO)
+    return
+  end
+
+  local matching_staged_hunk = nil
+  for _, sh in ipairs(staged_hunks) do
+    if is_hunk_staged(hunk, { sh }) then
+      matching_staged_hunk = sh
+      break
+    end
+  end
+
+  if not matching_staged_hunk then
+    vim.notify("OneDiff: Cannot find staged hunk", vim.log.levels.WARN)
+    return
+  end
+
+  local git_root = git_ops.get_root()
+  if not git_root then return end
+
+  local patch = build_patch_for_hunk(file.path, matching_staged_hunk)
+  git_ops.unstage_hunk(git_root, patch)
+
+  require("my_extensions.onediff").open_or_focus_and_refresh()
 end
 
 function M.clear_buffer_highlights(buf)
