@@ -34,8 +34,8 @@ vim.api.nvim_set_keymap('n', '<Leader>gb', ':Git blame<CR>', { noremap = true, d
 -- vim.api.nvim_set_keymap('n', 'Q', ':A<CR>', { noremap = true, desc = "Go to alternate file" })
 vim.api.nvim_set_keymap('n', 'gj', ':A<CR>', { noremap = true, desc = "Go to alternate file" })
 vim.api.nvim_set_keymap('n', 'gk', ':R<CR>', { noremap = true, desc = "Go to related file" })
-vim.api.nvim_set_keymap('n', 'sj', ':A<CR>', { noremap = true, desc = "Go to alternate file" })
-vim.api.nvim_set_keymap('n', 'sk', ':R<CR>', { noremap = true, desc = "Go to related file" })
+-- vim.api.nvim_set_keymap('n', 'sj', ':A<CR>', { noremap = true, desc = "Go to alternate file" })
+-- vim.api.nvim_set_keymap('n', 'sk', ':R<CR>', { noremap = true, desc = "Go to related file" })
 -- vim.keymap.set('n', 'sd', ':R<CR>', { noremap = true, silent = true, desc = "Go to related file" })
 
 -- Go to related file
