@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 DOTFILES_DIR="$HOME/dotfiles"
 
 mkdir -p /$HOME/.programing_languages/go/bin
@@ -58,7 +60,7 @@ files_to_symlink="\
   config.reek stylelint"
 
 dirs_to_symlink_to_xdg_config="\
-  "
+  nvim vim tmux"
 
 config_dirs_to_symlink_to_xdg_config="\
  fish bundle nvim vim tmux rubocop pry htop ghostty mise kitty"
@@ -89,13 +91,17 @@ for file in $files_to_symlink; do
 done
 
 
-# Symlink fallback files
-for fallback_file in $fallback_files_to_symlink; do
-  symlink_fallback_file_to_home_dir $fallback_file
-done
+# # Symlink fallback files
+# for fallback_file in $fallback_files_to_symlink; do
+#   symlink_fallback_file_to_home_dir $fallback_file
+# done
 
 for dir in $config_dirs_to_symlink_to_xdg_config; do
   symlink_config_directory_to_config_dir "$dir"
+done
+
+for dir in $dirs_to_symlink_to_xdg_config; do
+  symlink_to "$DOTFILES_DIR/$dir" "$HOME/.config/$dir"
 done
 
 # Symlink configuration directories to config directory

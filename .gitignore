@@ -6,5 +6,9 @@ config/vim/plugged/
 config/nvim/plugged/
 config/tmux/plugins/
 !config/tmux/plugins/tpm
+vim/plugged/
+nvim/plugged/
+tmux/plugins/
+!tmux/plugins/tpm
 .vagrant
 *.log
