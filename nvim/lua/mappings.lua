@@ -72,11 +72,8 @@ vim.api.nvim_set_keymap('n', 'sr', ':%s///g<Left><Left><Left>', { noremap = true
 vim.api.nvim_set_keymap('n', '@', ":cfdo %s///g | update <c-b><right><right><right><right><right><right><right><right>", { noremap = true, desc = "Search and replace in quickfix" })
 -- vim.api.nvim_set_keymap('n', '<Leader>r', ":cfdo %s///g | update <c-b><right><right><right><right><right><right><right><right>", { noremap = true })
 
--- Edit vim config
-vim.api.nvim_set_keymap('n', '<Leader>ve', ':e ~/.config/nvim/init.lua<cr>', { noremap = true, desc = "Edit vim config" })
-
 -- Reload vim config
-vim.api.nvim_set_keymap('n', '<Leader>vr', ':luafile %<CR>', { noremap = true, desc = "Reload vim config" })
+vim.api.nvim_set_keymap('n', '<Leader>vr', ':source $MYVIMRC<CR>', { noremap = true, desc = "Reload vim config" })
 
 -- Reload chrome tab
 -- vim.api.nvim_set_keymap('n', 'R', ':lua ReloadActiveChromeTab()<CR>', { noremap = true })

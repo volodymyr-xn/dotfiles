@@ -148,3 +148,4 @@ require("scrollbar").setup({
 })
 
 -- require("neoscroll").setup({})
+vim.api.nvim_set_hl(0, "ScrollbarHandle", { bg = LightenColor("#212433", 70), fg = LightenColor("#212433", 70) })

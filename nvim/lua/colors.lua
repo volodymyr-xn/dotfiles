@@ -133,6 +133,3 @@ require("catppuccin").setup {
 vim.g.custom_color_character = "#98c379"
 vim.cmd("colorscheme catppuccin")
 -- vim.cmd("colorscheme dracula")
-
--- local scrollbar_color = lighten("#212433", 60)
--- vim.api.nvim_set_hl(0, "ScrollbarHandle", { bg = scrollbar_color, fg = scrollbar_color })
