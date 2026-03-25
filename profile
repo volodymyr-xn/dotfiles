@@ -265,8 +265,5 @@ fi
 export PATH="$PATH:$HOME/.local/bin"
 . "$HOME/.cargo/env"
 
-
-export CLAUDE_CODE_DISABLE_AUTO_MEMORY=0
-
 # Reduce meory usage by malloc(ruby garbage collection at the moment)
 export MALLOC_ARENA_MAX=2
