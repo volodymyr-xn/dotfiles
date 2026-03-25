@@ -1,0 +1,4 @@
+[Thumbnailer Entry]
+TryExec=/usr/bin/convert
+Exec=/usr/bin/convert "%i" -flatten "%o"
+MimeType=image/vnd.adobe.photoshop; image/x-photoshop; image/x-psd;

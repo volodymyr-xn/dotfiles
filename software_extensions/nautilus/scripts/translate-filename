@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+for file_path in "$@"
+do
+  c-translate-filename "$file_path"
+done
+
+zenity --info --text="Translation finished"

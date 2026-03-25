@@ -1,0 +1,10 @@
+# #!/usr/bin/env bash
+#
+for file_path in "$@"
+do
+  file_basename=$(basename "$file_path")
+  clean_filename=$(echo $file_basename | tr -d ":" | tr -d "\"")
+  full_path_of_parent_dir=$(dirname "$file_path")
+  new_full_filename="$full_path_of_parent_dir/$clean_filename"
+  mv "$file_path" "$new_full_filename"
+done

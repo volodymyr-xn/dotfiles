@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+for image_file in "$@"
+do
+  png-to-jpg "$image_file"
+done
+

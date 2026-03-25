@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+xsetwacom --list \
+  | grep -i "pad" \
+  | awk '{print $(NF-2)}'

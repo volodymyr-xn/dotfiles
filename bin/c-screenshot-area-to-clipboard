@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+# Creates area screenshot to clipboard
+
+# Important to have DISPLAY variable set
+export DISPLAY=:0
+
+gnome-screenshot --area --clipboard

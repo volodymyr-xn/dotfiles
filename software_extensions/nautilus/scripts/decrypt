@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+first_file="$1"
+
+gpg -d "$first_file" |  tar -xz

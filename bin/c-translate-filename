@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+file_full_path="$1"
+
+file_basename=$(basename "$file_full_path")
+filename_without_extenstion="${file_basename%%.*}"
+file_extension="${file_basename##*.}"
+full_path_of_parent_dir=$(dirname "$file_full_path")
+
+translated_filename=$(trans -brief "$filename_without_extenstion" )
+translated_filename=$(trans -brief "$filename_without_extenstion" )
+short_filename=$(echo "$translated_filename")
+
+new_full_filename="$full_path_of_parent_dir/$short_filename.$file_extension"
+
+mv "$file_full_path" "$new_full_filename"

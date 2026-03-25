@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+for image_file in "$@"
+do
+  image_file_basename=$(basename "$image_file")
+  image_file_without_extenstion="${image_file%%.*}"
+
+  if [ ${image_file: -4} == ".jpg" ] ; then
+    convert -quality 80 "$image_file" "$image_file_without_extenstion-optimized.jpg"
+    gvfs-trash "$image_file"
+  fi
+done

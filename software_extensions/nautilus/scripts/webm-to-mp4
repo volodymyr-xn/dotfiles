@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+for file_path in "$@"
+do
+  if [ ${file_path: -5} == ".webm" ]; then
+    file_basename=$(basename "$file_path")
+    file_basename_without_extension=v2=${file_basename::-5}
+    clean_filename=$(echo $file_basename_without_extension | tr -d "." | tr -d ":" | tr -d "\"")
+    full_path_of_parent_dir=$(dirname "$file_path")
+    new_full_filename="$full_path_of_parent_dir/$clean_filename"
+
+    ffmpeg -i "$file_path" "$file_basename_without_extension.mp4"
+  fi
+done

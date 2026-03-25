@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# We need dbus session address variable to correctly interact with graphical session
+export DBUS_SESSION_BUS_ADDRESS="$(dbus-session-address)"
+
+# current_display=$(w -h $USER | awk '$2 ~ /:[0-9.]*/{print $2}')
+
+# export DISPLAY="$current_display"
+
+# We need DISPLAY variable to work with correct display
+export DISPLAY=:0

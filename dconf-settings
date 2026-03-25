@@ -1,0 +1,5 @@
+[org/gnome/desktop/input-sources]
+mru-sources=[('xkb', 'us'), ('xkb', 'ua')]
+per-window=true
+sources=[('xkb', 'us'), ('xkb', 'ua')]
+xkb-options=['caps:none', 'grp:caps_toggle']

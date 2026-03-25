@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+port="$1"
+kill $(lsof -t -i:$port)

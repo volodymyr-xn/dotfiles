@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+first_file=$1
+
+# TODO
+# File name HACK that allows to use spaces
+IFS_BAK=$IFS
+IFS="
+"
+password=$(zenity --password)
+
+tar -czvf - $first_file | \
+  gpg --symmetric \
+      --passphrase $password  \
+      --batch \
+  > "$1.bin"
+
+# HACK END
+IFS=$IFS_BAK

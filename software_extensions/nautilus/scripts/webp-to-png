@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+for image_file in "$@"
+do
+  if [ ${image_file: -5} == ".webp" ]; then
+    webp-to-png $image_file
+  fi
+done

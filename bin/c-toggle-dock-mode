@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# # gsettings set org.gnome.shell.extensions.dash-to-dock dock-fixed 'true'
+
+dconf_key="/org/gnome/shell/extensions/dash-to-dock/dock-fixed"
+dock_fixed=$(dconf read "$dconf_key")
+
+if [[ "$dock_fixed" == "true" ]]; then
+  dconf write "$dconf_key" "false"
+else
+  dconf write "$dconf_key" "true"
+fi
+
