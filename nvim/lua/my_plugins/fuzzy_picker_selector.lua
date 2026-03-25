@@ -1,6 +1,6 @@
 local M = {}
 
-M.PICKERS = { "telescope", "fzf_lua", "fzf_vim", "mini_pick", "fff" }
+M.PICKERS = { "telescope", "fzf_lua", "fzf_vim", "fff" }
 
 local state_file = vim.fn.stdpath("data") .. "/ultraselect_picker"
 

@@ -65,7 +65,7 @@ require("lazy").setup({
 
   -- Provides devicons
   -- Requires nerdfont: (https://www.nerdfonts.com/)
-  -- "nvim-tree/nvim-web-devicons",
+  "nvim-tree/nvim-web-devicons",
 
   "echasnovski/mini.icons",
   { "echasnovski/mini.pick", version = "*" },
