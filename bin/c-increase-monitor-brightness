@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+# ddcutil often requires root permissions to control the monitor, so you
+# might need to use sudo. However, you can add your user to the i2c group (if
+# available) to avoid using sudo every time:
+# sudo usermod -aG i2c $USER
+
+# Increases monotor brightness with ddcutil
+# ddccontrol -r 0x10 -w 80 dev:/dev/i2c-14
+# ddcutil setvcp 10 + 20 --sleep-multiplier .3
+# ddcutil setvcp 10 + 20
+# ddcutil setvcp 10 + 20 --sleep-multiplier .3 --noverify --enable-capabilities-cache
+ddcutil setvcp --bus 14 --noverify --noverify --enable-capabilities-cache 10 + 20
+

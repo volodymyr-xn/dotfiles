@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+# ddcutil often requires root permissions to control the monitor, so you
+# might need to use sudo. However, you can add your user to the i2c group (if
+# available) to avoid using sudo every time:
+# sudo usermod -aG i2c $USER
+
+ddcutil setvcp --bus 14 --noverify --noverify --enable-capabilities-cache 12 + 20
+

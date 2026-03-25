@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+old_postgres_version=$1
+new_postgres_version=$2
+
+mise use --global postgres@$new_postgres_version
+
+old_postgres_dir=$(mise where postgres "$old_postgres_version")
+new_postgres_dir=$(mise where postgres "$new_postgres_version")
+
+echo "old_postgres_dir $old_postgres_dir"
+echo "new_postgres_dir $new_postgres_dir"
+
+
+# =========================================================
+# =========================================================
+# In case of checksums error use
+# pg_checksums --enable -D "$old_postgres_dir/data"
+# =========================================================
+# =========================================================
+
+pg_upgrade \
+  -b "$old_postgres_dir/bin" \
+  -B "$new_postgres_dir/bin" \
+  -d "$old_postgres_dir/data" \
+  -D "$new_postgres_dir/data" \
+  -U postgres
+

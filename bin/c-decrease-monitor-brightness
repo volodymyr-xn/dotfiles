@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# ddccontrol -r 0x10 -w 80 dev:/dev/i2c-1
+# ddcutil setvcp 10 - 10 --sleep-multiplier .3 --noverify --enable-capabilities-cache
+# ddcutil setvcp 10 - 10 --sleep-multiplier .3
+# ddcutil setvcp 10 - 10
+ddcutil setvcp --bus 14 --noverify --enable-capabilities-cache 10 - 10
