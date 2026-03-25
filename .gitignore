@@ -12,3 +12,5 @@ tmux/plugins/
 !tmux/plugins/tpm
 .vagrant
 *.log
+.DS_Store
+.DS_Store?
