@@ -54,6 +54,7 @@ vim.keymap.set("n", "K", CustomInsertDebug, { noremap = true, silent = true, des
 
 vim.keymap.set("n", "<Leader>`", SendFileToTmux, { noremap = true, silent = true, desc = "Send file path to tmux" })
 vim.keymap.set("v", "<Leader>`", SendSelectionToTmux, { noremap = true, silent = true, desc = "Send file + selection to tmux" })
+vim.keymap.set("n", "<Leader>~", SendGitDiffToTmux, { noremap = true, silent = true, desc = "Send git diff to tmux" })
 
 -- vim.keymap.set("n", "sa", ":A<CR>", { noremap = true, silent = true })
 -- vim.keymap.set('n', 's', ':tabnext<CR>', { noremap = true })
@@ -77,8 +78,40 @@ vim.keymap.set('n', 'go', ':Outline<CR>', { noremap = true, silent = true, desc 
 -- vim.api.nvim_set_keymap('n', '=', '<C-W>=', {noremap = true})
 --
 
-vim.keymap.set('n', ']c', function() require('gitsigns').next_hunk() end, { noremap = true, silent = true, desc = "Next git hunk" })
-vim.keymap.set('n', '[c', function() require('gitsigns').prev_hunk() end, { noremap = true, silent = true, desc = "Previous git hunk" })
-vim.keymap.set('n', ')', function() require('gitsigns').next_hunk() end, { noremap = true, silent = true, desc = "Next git hunk" })
-vim.keymap.set('n', '(', function() require('gitsigns').prev_hunk() end, { noremap = true, silent = true, desc = "Previous git hunk" })
-vim.keymap.set('n', 'gp', function() require('gitsigns').preview_hunk_inline() end, { noremap = true, silent = true, desc = "Preview git hunk" })
+local gitsigns = require('gitsigns')
+local gitsigns_inline_preview_namespace = vim.api.nvim_create_namespace('gitsigns_preview_inline')
+
+local hunk_preview_timer = nil
+
+local function preview_hunk_with_timeout()
+  gitsigns.preview_hunk_inline()
+
+  if hunk_preview_timer then
+    hunk_preview_timer:stop()
+  end
+
+  hunk_preview_timer = vim.defer_fn(function()
+    local namespace = gitsigns_inline_preview_namespace
+    local has_preview = #vim.api.nvim_buf_get_extmarks(0, namespace, 0, -1, { limit = 1 }) > 0
+
+    if has_preview then
+      vim.api.nvim_exec_autocmds('CursorMoved', { buffer = 0 })
+    end
+
+    hunk_preview_timer = nil
+  end, 500)
+end
+
+local function navigate_to_next_hunk()
+  gitsigns.next_hunk()
+  vim.schedule(preview_hunk_with_timeout)
+end
+
+local function navigate_to_prev_hunk()
+  gitsigns.prev_hunk()
+  vim.schedule(preview_hunk_with_timeout)
+end
+
+vim.keymap.set('n', ')', navigate_to_next_hunk, { noremap = true, silent = true, desc = "Next git hunk" })
+vim.keymap.set('n', '(', navigate_to_prev_hunk, { noremap = true, silent = true, desc = "Previous git hunk" })
+vim.keymap.set('n', 'gp', gitsigns.preview_hunk_inline, { noremap = true, silent = true, desc = "Preview git hunk" })

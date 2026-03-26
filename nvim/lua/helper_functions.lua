@@ -195,10 +195,33 @@ end
 
 function SendPathToTmux(path)
   vim.fn.VimuxOpenRunner()
+
   if not IsTmuxRunnerAIProcess() then
     vim.api.nvim_echo({{"Tmux runner pane has no AI process running", "ErrorMsg"}}, true, {})
     return
   end
+
   vim.fn.VimuxSendText("@" .. path .. " ")
+  FocusTmuxRunner()
+end
+
+function SendGitDiffToTmux()
+  local filepath = vim.fn.expand("%")
+  local diff = vim.fn.system("git diff -- " .. vim.fn.shellescape(filepath))
+
+  if vim.v.shell_error ~= 0 or diff == "" then
+    vim.api.nvim_echo({{"No git diff for current file", "WarningMsg"}}, true, {})
+    return
+  end
+
+  vim.fn.VimuxOpenRunner()
+
+  if not IsTmuxRunnerAIProcess() then
+    vim.api.nvim_echo({{"Tmux runner pane has no AI process running", "ErrorMsg"}}, true, {})
+    return
+  end
+
+  vim.fn.VimuxSendText("@" .. filepath .. " git diff:\n```diff\n" .. diff .. "```\n")
+  vim.fn.VimuxSendKeys("S-Enter")
   FocusTmuxRunner()
 end
