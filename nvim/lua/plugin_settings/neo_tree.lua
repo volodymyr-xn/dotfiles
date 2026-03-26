@@ -86,6 +86,16 @@ require("neo-tree").setup({
       ["q"] = "close_window",
       ["R"] = "refresh",
       ["?"] = "show_help",
+      ["`"] = function(state)
+        local node = state.tree:get_node()
+        local filepath = vim.fn.fnamemodify(node:get_id(), ":.")
+
+        CopyToClipboardAndNotify(filepath)
+      end,
+      ["<Leader>`"] = function(state)
+        local node = state.tree:get_node()
+        SendPathToTmux(vim.fn.fnamemodify(node:get_id(), ":."))
+      end,
       -- ["<"] = "prev_source",
       -- [">"] = "next_source",
       ["<"] = "none",
@@ -116,7 +126,7 @@ vim.api.nvim_set_keymap("n", "<C-\\>", "<NOP>", {noremap = true, silent = true})
 
 vim.keymap.set("n", "<C-\\>", function()
   local current_buf = vim.api.nvim_get_current_buf()
-  
+
   if vim.b[current_buf].is_onediff_buffer or vim.b[current_buf].onediff_instance_id then
     local ok, onediff = pcall(require, "my_plugins.onediff")
     if ok then

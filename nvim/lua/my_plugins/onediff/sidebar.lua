@@ -220,7 +220,6 @@ function M.create_buffer()
       local ok, name = pcall(vim.api.nvim_buf_get_name, b)
       if ok and name == "OneDiffPanel" then
         pcall(vim.api.nvim_buf_delete, b, { force = true })
-        break
       end
     end
   end
@@ -233,7 +232,7 @@ function M.create_buffer()
   vim.bo[buf].modifiable = false
   vim.bo[buf].filetype = "OneDiffPanel"
 
-  api.nvim_buf_set_name(buf, "OneDiffPanel")
+  pcall(api.nvim_buf_set_name, buf, "OneDiffPanel")
 
   return buf
 end

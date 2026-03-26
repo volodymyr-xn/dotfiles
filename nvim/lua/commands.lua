@@ -105,10 +105,7 @@ function CopyCurrentFileRelativePathToClipboard()
     relpath = filepath:sub(#git_root + 2)
   end
 
-  -- Copy to clipboard
-  vim.fn.setreg("+", relpath)
-
-  vim.api.nvim_command('echohl String | echon "' .. relpath .. '" | echohl None | echon " copied!"')
+  CopyToClipboardAndNotify(relpath)
 end
 
 

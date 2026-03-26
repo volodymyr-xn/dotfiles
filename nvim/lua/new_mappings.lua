@@ -48,42 +48,12 @@ vim.api.nvim_set_keymap('n', 'ss', ':R<CR>', {noremap = true, silent = false, de
 --  nnoremap <leader>q o<Esc>==i binding.pry<Esc>==o<Esc>kko<Esc>j
 -- ]]
 
--- Define a function to insert the appropriate debug snippet
-local function custom_insert_debug()
-  local ft = vim.bo.filetype
-  local snippet = ""
-
-  if ft == "ruby" then
-    snippet = "binding.pry"
-  elseif ft == "eruby" then -- html.erb is usually detected as 'eruby'
-    snippet = "<% binding.pry %>"
-  elseif ft == "javascript" then
-    snippet = "console.log()"
-  elseif ft == "typescript" then -- optional, for TS
-    snippet = "console.log()"
-  else
-    print("No debug snippet defined for filetype: " .. ft)
-    return
-  end
-
-  -- Insert snippet in new line below current cursor
-  vim.api.nvim_feedkeys("o" .. snippet .. vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
-
-  -- Move cursor inside parentheses if console.log()
-  if snippet == "console.log()" then
-    vim.api.nvim_feedkeys("F(a", "n", false)
-  end
-end
-
-local function highlight_word_under_cursor()
-  local word = vim.fn.expand("<cword>")
-  local pattern = "\\<" .. word .. "\\>"
-  vim.fn.setreg("/", pattern)
-end
-
 -- Insert debug
--- vim.keymap.set("n", "<Leader>q", custom_insert_debug, { noremap = true, silent = true })
-vim.keymap.set("n", "<Leader>`", custom_insert_debug, { noremap = true, silent = true, desc = "Insert debug statement" })
+-- vim.keymap.set("n", "<Leader>q", CustomInsertDebug, { noremap = true, silent = true })
+vim.keymap.set("n", "K", CustomInsertDebug, { noremap = true, silent = true, desc = "Insert debug statement" })
+
+vim.keymap.set("n", "<Leader>`", SendFileToTmux, { noremap = true, silent = true, desc = "Send file path to tmux" })
+vim.keymap.set("v", "<Leader>`", SendSelectionToTmux, { noremap = true, silent = true, desc = "Send file + selection to tmux" })
 
 -- vim.keymap.set("n", "sa", ":A<CR>", { noremap = true, silent = true })
 -- vim.keymap.set('n', 's', ':tabnext<CR>', { noremap = true })
@@ -109,4 +79,6 @@ vim.keymap.set('n', 'go', ':Outline<CR>', { noremap = true, silent = true, desc 
 
 vim.keymap.set('n', ']c', function() require('gitsigns').next_hunk() end, { noremap = true, silent = true, desc = "Next git hunk" })
 vim.keymap.set('n', '[c', function() require('gitsigns').prev_hunk() end, { noremap = true, silent = true, desc = "Previous git hunk" })
+vim.keymap.set('n', ')', function() require('gitsigns').next_hunk() end, { noremap = true, silent = true, desc = "Next git hunk" })
+vim.keymap.set('n', '(', function() require('gitsigns').prev_hunk() end, { noremap = true, silent = true, desc = "Previous git hunk" })
 vim.keymap.set('n', 'gp', function() require('gitsigns').preview_hunk_inline() end, { noremap = true, silent = true, desc = "Preview git hunk" })

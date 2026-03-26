@@ -34,3 +34,4 @@ C_TODO/
 C_TODO_OLD/
 c_commands/
 .playwright-mcp/
+.ruby_lsp
