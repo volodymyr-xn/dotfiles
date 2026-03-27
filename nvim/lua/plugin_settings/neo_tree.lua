@@ -86,6 +86,15 @@ require("neo-tree").setup({
       ["q"] = "close_window",
       ["R"] = "refresh",
       ["?"] = "show_help",
+      ["P"] = { "toggle_preview", config = { use_float = true } },
+      ["<Tab>"] = function(state)
+        local node = state.tree:get_node()
+        if node.type == "file" then
+          local commands = require("neo-tree.sources.filesystem.commands")
+          commands.open(state)
+          vim.cmd("wincmd p")
+        end
+      end,
       ["`"] = function(state)
         local node = state.tree:get_node()
         local filepath = vim.fn.fnamemodify(node:get_id(), ":.")

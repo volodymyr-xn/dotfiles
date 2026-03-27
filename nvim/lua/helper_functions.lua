@@ -170,6 +170,22 @@ function DedentLines(lines)
 end
 
 function SendSelectionToTmux()
+  local mode = vim.fn.mode()
+  local start_pos = vim.fn.getpos("v")
+  local end_pos = vim.fn.getpos(".")
+
+  local start_line = start_pos[2]
+  local start_col = start_pos[3]
+  local end_line = end_pos[2]
+  local end_col = end_pos[3]
+
+  if start_line > end_line or (start_line == end_line and start_col > end_col) then
+    start_line, end_line = end_line, start_line
+    start_col, end_col = end_col, start_col
+  end
+
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "x", false)
+
   vim.fn.VimuxOpenRunner()
 
   if not IsTmuxRunnerAIProcess() then
@@ -177,10 +193,17 @@ function SendSelectionToTmux()
     return
   end
 
-  local start_line = vim.fn.line("'<")
-  local end_line = vim.fn.line("'>")
-  local lines = DedentLines(vim.fn.getline(start_line, end_line))
-  local text = table.concat(lines, "\n")
+  local text
+
+  if mode == "v" then
+    local all_lines = vim.fn.getline(start_line, end_line)
+    all_lines[#all_lines] = all_lines[#all_lines]:sub(1, end_col)
+    all_lines[1] = all_lines[1]:sub(start_col)
+    text = table.concat(DedentLines(all_lines), "\n")
+  else
+    local lines = DedentLines(vim.fn.getline(start_line, end_line))
+    text = table.concat(lines, "\n")
+  end
 
   vim.fn.VimuxSendText("@" .. vim.fn.expand("%") .. " :\n```\n" .. text .. "\n```\n")
   vim.fn.VimuxSendKeys("S-Enter")
@@ -190,7 +213,7 @@ end
 
 function CopyToClipboardAndNotify(text)
   vim.fn.setreg("+", text)
-  vim.api.nvim_command('echohl String | echon "' .. text .. '" | echohl None | echon " copied!"')
+  vim.api.nvim_echo({ { text, "String" }, { " copied!", "Normal" } }, true, {})
 end
 
 function SendPathToTmux(path)

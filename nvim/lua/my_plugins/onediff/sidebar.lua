@@ -703,6 +703,7 @@ function M.setup_keymaps(buf)
   local opts = { buffer = buf, silent = true, nowait = true }
 
   vim.keymap.set("n", keymaps.select, M.open_file_keep_focus, opts)
+  vim.keymap.set("n", "<Tab>", M.open_file_keep_focus, opts)
   vim.keymap.set("n", keymaps.refresh, onediff.refresh, opts)
   vim.keymap.set("n", "s", onediff.stage_hunk, opts)
   vim.keymap.set("n", "u", onediff.unstage_hunk, opts)
@@ -717,8 +718,7 @@ function M.setup_keymaps(buf)
     local session = require("my_plugins.onediff.session")
     local file = session.get_current_file()
     if file and file.path then
-      vim.fn.setreg("+", file.path)
-      vim.notify(file.path, vim.log.levels.INFO)
+      CopyToClipboardAndNotify(file.path)
     end
   end, opts)
   vim.keymap.set("n", "o", M.open_original_file, opts)
@@ -752,12 +752,6 @@ function M.setup_keymaps(buf)
   vim.keymap.set("n", "l", "<Nop>", opts)
   vim.keymap.set("n", '"', "<Nop>", opts)
   vim.keymap.set("n", "m", onediff.toggle_zoom, opts)
-
-  vim.keymap.set("n", "<Tab>", function()
-    local session = require("my_plugins.onediff.session")
-    session.focus_diff_window()
-    onediff.goto_next_change()
-  end, opts)
 
   vim.keymap.set("n", "<S-Tab>", function()
     local session = require("my_plugins.onediff.session")

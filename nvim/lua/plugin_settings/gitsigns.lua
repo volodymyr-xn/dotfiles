@@ -8,4 +8,5 @@ require('gitsigns').setup({
     untracked    = { text = '~' },
   },
   signcolumn = true,  -- Toggle with `:Gitsigns toggle_signs`
+  -- linehl = true,
 })
