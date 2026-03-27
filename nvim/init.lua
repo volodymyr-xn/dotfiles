@@ -1,7 +1,7 @@
 require("plugins_install")
 require("general_settings")
 require("colors")
-require("helper_functions")
+require("functions")
 require("plugins_require")
 require("plugins_to_test_require")
 require("my_plugins/git_diff_popup")
