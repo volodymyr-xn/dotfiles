@@ -92,6 +92,7 @@ vim.api.nvim_set_keymap('n', 'e', 'E', { noremap = true, desc = "Move to end of 
 -- Tabs
 vim.api.nvim_set_keymap('n', '<C-Left>', ':tabprev<CR>', {noremap = true, desc = "Previous tab"})
 vim.api.nvim_set_keymap('n', '<C-Right>', ':tabnext<CR>', {noremap = true, desc = "Next tab"})
+vim.api.nvim_set_keymap('n', '<Leader>qa', ':tabonly<CR>', {noremap = true, desc = "Close all other tabs"})
 
 -- Copy selected text to system clipboard
 vim.api.nvim_set_keymap('v', 'm', '"+y', { noremap = true, desc = "Copy to system clipboard" })

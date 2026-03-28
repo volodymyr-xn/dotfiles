@@ -1,3 +1,6 @@
+// Very old version.
+// Needs to be actualized
+
 module.exports = {
   "extends": [
    "eslint:recommended",

@@ -1,3 +1,14 @@
+local eslint_config_files = {
+  '.eslintrc', '.eslintrc.js', '.eslintrc.cjs',
+  '.eslintrc.yaml', '.eslintrc.yml', '.eslintrc.json',
+  'eslint.config.js', 'eslint.config.mjs', 'eslint.config.cjs',
+}
+
+local function eslint_configured()
+  local dir = vim.fs.dirname(vim.api.nvim_buf_get_name(0))
+  return vim.fs.find(eslint_config_files, { path = dir, upward = true })[1] ~= nil
+end
+
 require('lint').linters_by_ft = {
   -- ruby = {'rubocop'},
   ruby = {'ruby'},
@@ -11,8 +22,10 @@ require('lint').linters_by_ft = {
 -- vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost", "InsertLeave"}, {
 vim.api.nvim_create_autocmd({ "BufWritePost" }, {
   callback = function()
-    -- try_lint without arguments runs the linters defined in `linters_by_ft`
-    -- for the current filetype
+    if vim.bo.filetype == 'javascript' and not eslint_configured() then
+      return
+    end
+
     require("lint").try_lint()
   end,
 })
