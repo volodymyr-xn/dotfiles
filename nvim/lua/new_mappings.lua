@@ -50,7 +50,8 @@ vim.api.nvim_set_keymap('n', 'ss', ':R<CR>', {noremap = true, silent = false, de
 
 -- Insert debug
 -- vim.keymap.set("n", "<Leader>q", CustomInsertDebug, { noremap = true, silent = true })
-vim.keymap.set("n", "K", CustomInsertDebug, { noremap = true, silent = true, desc = "Insert debug statement" })
+vim.keymap.set("n", "K", ":tabnext<CR>", { noremap = true, silent = true, desc = "Next tab" })
+vim.keymap.set("n", "H", CustomInsertDebug, { noremap = true, silent = true, desc = "Insert debug statement" })
 
 vim.keymap.set("n", "<Leader>`", SendFileToTmux, { noremap = true, silent = true, desc = "Send file path to tmux" })
 vim.keymap.set("v", "<Leader>`", SendSelectionToTmux, { noremap = true, silent = true, desc = "Send file + selection to tmux" })

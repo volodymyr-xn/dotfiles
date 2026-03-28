@@ -117,6 +117,11 @@ else
   ln -nsf $HOME/dotfiles/alacritty_linux $HOME/.config/alacritty
 fi
 
+symlink_to "$DOTFILES_DIR/hammerspoon" "$HOME/.hammerspoon"
+
+ln -nsf "../nvim/snippets" "$DOTFILES_DIR/vim/snippets"
+ln -nsf "$DOTFILES_DIR/config/rubocop/config.yml" "$DOTFILES_DIR/.rubocop.yml"
+
 installation_log "-> Linking $HOME/gitignore_global to $HOME/.gitignore"
 ln -nsf "$HOME/.gitignore_global" "$HOME/.gitignore"
 

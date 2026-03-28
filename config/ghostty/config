@@ -42,6 +42,18 @@ keybind = ctrl+enter=unbind
 # Disable split pane shortcut so cmd+d can be used for zsh word forward navigation
 keybind = cmd+d=unbind
 
+# Switch tmux windows with Ctrl+1-9. Sends tmux prefix (Ctrl+A = \x01) + number.
+# Needed because macOS intercepts Ctrl+number for Mission Control before Ghostty sees them.
+keybind = ctrl+one=text:\x01\x31
+keybind = ctrl+two=text:\x01\x32
+keybind = ctrl+three=text:\x01\x33
+keybind = ctrl+four=text:\x01\x34
+keybind = ctrl+five=text:\x01\x35
+keybind = ctrl+six=text:\x01\x36
+keybind = ctrl+seven=text:\x01\x37
+keybind = ctrl+eight=text:\x01\x38
+keybind = ctrl+nine=text:\x01\x39
+
 # Make fonts bolder (works only on MacOS)
 font-thicken=true
 font-thicken-strength=1
