@@ -1,5 +1,5 @@
 [tools]
-node = "24.6.0"
+node = "24.14.1"
 postgres = "latest"
 python = "3.12"
 redis = "latest"
