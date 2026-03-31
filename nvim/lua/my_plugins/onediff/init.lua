@@ -30,12 +30,14 @@ function M.open()
   if session.is_open() then
     sidebar.show()
     display.render_current()
+    sidebar.focus()
     return
   end
 
   session.start()
   sidebar.show()
   display.render_current()
+  sidebar.focus()
 end
 
 function M.close()
@@ -153,6 +155,7 @@ function M.open_current()
   session.start(current_file)
   sidebar.show()
   display.render_current()
+  sidebar.focus()
 end
 
 local function select_file_and_render(selected_path)

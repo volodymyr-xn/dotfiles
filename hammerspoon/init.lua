@@ -9,9 +9,27 @@ local function volumeDown()
 end
 
 -- Volume control: F10 up, F9 down
+-- For keychron mechanic low profile keyboard
 hs.hotkey.bind({}, "f10", volumeUp, nil, volumeUp)
 hs.hotkey.bind({}, "f9", volumeDown, nil, volumeDown)
 
 -- Volume control: Numpad +/- (raw keycodes: 69 = numpad+, 78 = numpad-)
-hs.hotkey.bind({}, 69, volumeUp)
-hs.hotkey.bind({}, 78, volumeDown)
+-- For regular full width membrane keyboard
+hs.hotkey.bind({}, 69, volumeUp, nil, volumeUp)
+hs.hotkey.bind({}, 78, volumeDown, nil, volumeDown)
+
+-- Focus app or launch if not running
+local function focusApp(name)
+  hs.application.launchOrFocus(name)
+end
+
+-- Ctrl+Cmd+T → Ghostty (terminal)
+hs.hotkey.bind({"ctrl", "cmd"}, "t", function() focusApp("Ghostty") end)
+
+-- Ctrl+Cmd+C → Google Chrome (browser)
+hs.hotkey.bind({"ctrl", "cmd"}, "c", function() focusApp("Google Chrome") end)
+
+local dismissNotifications = require("dismiss_notifications").dismiss
+
+-- Cmd+L → dismiss all notifications
+hs.hotkey.bind({"cmd"}, "l", dismissNotifications)

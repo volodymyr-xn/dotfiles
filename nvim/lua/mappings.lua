@@ -30,23 +30,8 @@ vim.api.nvim_set_keymap('n', '<Leader>gb', ':Git blame<CR>', { noremap = true, d
 
 -- Quit
 -- vim.api.nvim_set_keymap('n', 'Q', '<C-W>q', { noremap = true })
--- Go to alternate file
--- vim.api.nvim_set_keymap('n', 'Q', ':A<CR>', { noremap = true, desc = "Go to alternate file" })
-vim.api.nvim_set_keymap('n', 'gj', ':A<CR>', { noremap = true, desc = "Go to alternate file" })
-vim.api.nvim_set_keymap('n', 'gk', ':R<CR>', { noremap = true, desc = "Go to related file" })
--- vim.api.nvim_set_keymap('n', 'sj', ':A<CR>', { noremap = true, desc = "Go to alternate file" })
--- vim.api.nvim_set_keymap('n', 'sk', ':R<CR>', { noremap = true, desc = "Go to related file" })
--- vim.keymap.set('n', 'sd', ':R<CR>', { noremap = true, silent = true, desc = "Go to related file" })
-
--- Go to related file
-vim.api.nvim_set_keymap('n', 'ss', ':R<CR>', {noremap = true, silent = false, desc = "Go to related file" })
--- Go to related file
-vim.api.nvim_set_keymap('n', 'Q', ':A<CR>', {noremap = true, silent = false, desc = "Go to related file" })
-
--- Go to related file
--- -- vim.api.nvim_set_keymap('n', '<Leader>r', ':%s/', { noremap = true, desc = "Go to related file" })
--- vim.api.nvim_set_keymap('n', 'gs', ':R<CR>', { noremap = true, desc = "Go to related file" })
--- vim.api.nvim_set_keymap('n', '<leader>a', ':A<CR>', { noremap = true, desc = "Go to related file" })
+vim.api.nvim_set_keymap('n', 'sa', ':A<CR>', { noremap = true, desc = "Go to alternate file" })
+vim.api.nvim_set_keymap('n', 'sr', ':R<CR>', { noremap = true, desc = "Go to related file" })
 
 -- Show git diff in popup
 -- Faster search
@@ -166,8 +151,6 @@ vim.api.nvim_set_keymap('n', '<Leader>l', ':TestLast<CR>', {silent = true, desc 
 vim.api.nvim_set_keymap('n', '<Leader>e', ':e!<CR>', { noremap = true, silent = true, desc = "Reload file" })
 -- vim.api.nvim_set_keymap('n', '<Leader>r', ':e!<CR>', { noremap = true, silent = true, desc = "Reload file" })
 
--- Go to alternate file
--- vim.api.nvim_set_keymap('n', 'q', ':A<CR>', { noremap = true })
 
 -- Auto indent pasted text
 -- vim.api.nvim_set_keymap('n', 'p', 'p=`]<C-o>', { noremap = true })

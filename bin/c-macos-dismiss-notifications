@@ -1,0 +1,17 @@
+#!/usr/bin/env osascript -l JavaScript
+
+const nc = Application('System Events').processes.byName('NotificationCenter');
+if (nc.windows.length > 0) {
+  const SUBROLES = ['AXNotificationCenterAlert', 'AXNotificationCenterAlertStack'];
+  const alerts = [];
+  (function find(els) {
+    for (const el of els) try {
+      if (SUBROLES.includes(el.subrole())) alerts.push(el);
+      else if (el.uiElements.length) find(el.uiElements());
+    } catch(e) {}
+  })(nc.windows[0].uiElements[0].uiElements[0].uiElements());
+  for (const a of alerts) try {
+    const acts = a.actions();
+    (acts.find(x => x.description() === 'Clear All') || acts.find(x => x.description() === 'Close'))?.perform();
+  } catch(e) {}
+}

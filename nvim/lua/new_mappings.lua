@@ -38,8 +38,6 @@ vim.api.nvim_set_keymap('n', 's', '', {noremap = true, silent = false, desc = "P
 -- Telescope buffers
 vim.api.nvim_set_keymap('n', '<Leader>h', ':Telescope buffers<CR>', {noremap = true, silent = false, desc = "Telescope buffers" })
 
--- Go to related file
-vim.api.nvim_set_keymap('n', 'ss', ':R<CR>', {noremap = true, silent = false, desc = "Go to related file" })
 
 -- vim.api.nvim_set_keymap('n', 'dn', 'bdiw', {})
 
@@ -51,13 +49,11 @@ vim.api.nvim_set_keymap('n', 'ss', ':R<CR>', {noremap = true, silent = false, de
 -- Insert debug
 -- vim.keymap.set("n", "<Leader>q", CustomInsertDebug, { noremap = true, silent = true })
 vim.keymap.set("n", "K", ":tabnext<CR>", { noremap = true, silent = true, desc = "Next tab" })
-vim.keymap.set("n", "H", CustomInsertDebug, { noremap = true, silent = true, desc = "Insert debug statement" })
+vim.keymap.set("n", "<leader>K", CustomInsertDebug, { noremap = true, silent = true, desc = "Insert debug statement" })
 
 vim.keymap.set("n", "<Leader>`", SendFileToTmux, { noremap = true, silent = true, desc = "Send file path to tmux" })
 vim.keymap.set("v", "<Leader>`", SendSelectionToTmux, { noremap = true, silent = true, desc = "Send file + selection to tmux" })
-vim.keymap.set("n", "<Leader>~", SendGitDiffToTmux, { noremap = true, silent = true, desc = "Send git diff to tmux" })
 
--- vim.keymap.set("n", "sa", ":A<CR>", { noremap = true, silent = true })
 -- vim.keymap.set('n', 's', ':tabnext<CR>', { noremap = true })
 
 -- vim.keymap.set('n', '@', highlight_word_under_cursor, { noremap = true, silent = true })
@@ -68,12 +64,17 @@ vim.keymap.set('n', '#', "*N", { noremap = true, silent = true, desc = "Search w
 -- vim.keymap.set('n', 'K', ':OutlineFocus<CR>', { noremap = true, silent = true })
 -- vim.keymap.set('n', '<leader>k', ':Outline!<CR>', { noremap = true, silent = true })
 -- Test current file
-vim.keymap.set('n', '<leader>k', ':TestFile<CR>', { noremap = true, silent = true, desc = "Test file" })
+-- vim.keymap.set('n', '<leader>k', ':TestFile<CR>', { noremap = true, silent = true, desc = "Test file" })
 
 -- Start FzfLua menu
 -- vim.keymap.set('n', 'sj', ':FzfLua<cr>', { noremap = true, silent = true, desc = "FzfLua select" })
 
 vim.keymap.set('n', 'go', ':Outline<CR>', { noremap = true, silent = true, desc = "Outline" })
+
+vim.keymap.set('n', '<Leader>e', function()
+  local ok, onediff = pcall(require, "my_plugins.onediff")
+  if ok then onediff.refresh() end
+end, { noremap = true, silent = true, desc = "Refresh OneDiff diffs" })
 
 -- Re-balance panes
 -- vim.api.nvim_set_keymap('n', '=', '<C-W>=', {noremap = true})

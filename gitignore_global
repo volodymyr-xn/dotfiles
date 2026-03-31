@@ -32,6 +32,7 @@ C_TEMP/
 C_RESEARCH/
 C_TODO/
 C_TODO_OLD/
+C_BRIEF/
 c_commands/
 .playwright-mcp/
 .ruby_lsp

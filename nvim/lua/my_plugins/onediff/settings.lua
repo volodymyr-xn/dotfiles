@@ -4,7 +4,8 @@ M.defaults = {
   base_ref = "HEAD",
   picker = "telescope",
   sidebar = {
-    width = 35,
+    max_width = 45,
+    min_width = 20,
     position = "left",
   },
   icons = {

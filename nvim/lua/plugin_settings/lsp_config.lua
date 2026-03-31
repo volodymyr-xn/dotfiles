@@ -134,44 +134,44 @@ end
 -- })
 
 
-function configureRubyLSP()
-  print("Using ruby_lsp LSP")
-
-  vim.lsp.config('ruby_lsp', {
-  -- Using YJIT with lsp can make 100% CPU usage
-    -- cmd = {'env', 'RUBY_YJIT_ENABLE=1', 'ruby-lsp' },
-    flags = lsp_flags,
-    capabilities = capabilities,
-    -- filetypes = { 'ruby'},
-    filetypes = { 'ruby', 'eruby'},
-    init_options = {
-      enabledFeatures = {
-        -- Disable LSP highlight of code
-        -- "semanticHighlighting",
-        -- "diagnostics",
-        "documentSymbol",
-        "documentLink",
-        "hover",
-        "foldingRange",
-        "selectionRange",
-        "formatting",
-        "onTypeFormatting",
-        "diagnostic",
-        "codeAction",
-        "codeActions",
-        "codeActionResolve",
-        "documentHighlight",
-        "inlayHint",
-        "completion",
-        "codeLens",
-        "definition",
-        "references",
-        "workspaceSymbol",
-        "signatureHelp",
-      }
-    },
-  })
-end
+-- function configureRubyLSP()
+--   print("Using ruby_lsp LSP")
+--
+--   vim.lsp.config('ruby_lsp', {
+--   -- Using YJIT with lsp can make 100% CPU usage
+--     -- cmd = {'env', 'RUBY_YJIT_ENABLE=1', 'ruby-lsp' },
+--     flags = lsp_flags,
+--     capabilities = capabilities,
+--     -- filetypes = { 'ruby'},
+--     filetypes = { 'ruby', 'eruby'},
+--     init_options = {
+--       enabledFeatures = {
+--         -- Disable LSP highlight of code
+--         -- "semanticHighlighting",
+--         -- "diagnostics",
+--         "documentSymbol",
+--         "documentLink",
+--         "hover",
+--         "foldingRange",
+--         "selectionRange",
+--         "formatting",
+--         "onTypeFormatting",
+--         "diagnostic",
+--         "codeAction",
+--         "codeActions",
+--         "codeActionResolve",
+--         "documentHighlight",
+--         "inlayHint",
+--         "completion",
+--         "codeLens",
+--         "definition",
+--         "references",
+--         "workspaceSymbol",
+--         "signatureHelp",
+--       }
+--     },
+--   })
+-- end
 
 -- local ruby_major_version, ruby_minor_version = readRubyVersion()
 -- if (ruby_major_version > 3 and ruby_minor_version > 4) then

@@ -112,7 +112,7 @@ function M.init()
   vim.api.nvim_set_hl(0, "OneDiffStatusDeleted", { fg = "#ed8796", default = true })
   vim.api.nvim_set_hl(0, "OneDiffStatusUntracked", { fg = "#8aadf4", default = true })
   vim.api.nvim_set_hl(0, "OneDiffTreeIndent", { fg = "#6c7086", default = true })
-  vim.api.nvim_set_hl(0, "OneDiffStatusLinePath", { fg = "#89b4fa", default = true })
+  vim.api.nvim_set_hl(0, "OneDiffStatusLinePath", { fg = "#a6e3a1", default = true })
 end
 
 function M.show()
@@ -139,9 +139,9 @@ function M.show()
   session.set_sidebar_win(nil)
   session.set_sidebar_buf(nil)
 
-  local width = settings.get("sidebar.width")
+  local max_width = settings.get("sidebar.max_width")
 
-  vim.cmd("topleft " .. width .. "vsplit")
+  vim.cmd("topleft " .. max_width .. "vsplit")
   local win = api.nvim_get_current_win()
   session.set_sidebar_win(win)
 
@@ -300,12 +300,43 @@ function M.render()
   end
 
   local win = session.get_sidebar_win()
-  if win and api.nvim_win_is_valid(win) and current_idx > 0 then
-    local target_line = M.get_file_line(current_idx)
-    if target_line then
-      pcall(api.nvim_win_set_cursor, win, { target_line, 0 })
+  if win and api.nvim_win_is_valid(win) then
+    M.resize_to_content(lines)
+    
+    if current_idx > 0 then
+      local target_line = M.get_file_line(current_idx)
+      if target_line then
+        pcall(api.nvim_win_set_cursor, win, { target_line, 0 })
+      end
     end
   end
+end
+
+function M.resize_to_content(lines)
+  local session = require("my_plugins.onediff.session")
+  local settings = require("my_plugins.onediff.settings")
+  
+  local win = session.get_sidebar_win()
+  if not win or not api.nvim_win_is_valid(win) then
+    return
+  end
+  
+  local max_width = settings.get("sidebar.max_width")
+  local min_width = settings.get("sidebar.min_width")
+  
+  local max_line_width = 0
+  for _, line in ipairs(lines) do
+    local display_width = vim.fn.strdisplaywidth(line)
+    if display_width > max_line_width then
+      max_line_width = display_width
+    end
+  end
+  
+  local padding = 2
+  local target_width = max_line_width + padding
+  target_width = math.max(min_width, math.min(target_width, max_width))
+  
+  api.nvim_win_set_width(win, target_width)
 end
 
 function M.build_file_tree(files)
@@ -695,6 +726,47 @@ function M.expand_all()
   M.render()
 end
 
+local live_nav_guard = false
+
+local function live_nav_preview()
+  if live_nav_guard then return end
+  if vim.g.onediff_live_nav == false then return end
+
+  local cursor = api.nvim_win_get_cursor(0)
+  local file_idx = M.get_file_at_line(cursor[1])
+  if not file_idx then return end
+
+  local session = require("my_plugins.onediff.session")
+  if file_idx == session.get_current_index() then return end
+
+  live_nav_guard = true
+  local sidebar_win = session.get_sidebar_win()
+  session.set_current_index(file_idx)
+  M.render()
+  require("my_plugins.onediff.display").render_current()
+  if sidebar_win and api.nvim_win_is_valid(sidebar_win) then
+    api.nvim_set_current_win(sidebar_win)
+  end
+  live_nav_guard = false
+end
+
+local function scroll_diff_win(keys)
+  local session = require("my_plugins.onediff.session")
+  local diff_buf = session.get_diff_buf()
+  if not diff_buf or not api.nvim_buf_is_valid(diff_buf) then
+    return
+  end
+  local tc = api.nvim_replace_termcodes(keys, true, false, true)
+  for _, win in ipairs(api.nvim_list_wins()) do
+    if api.nvim_win_get_buf(win) == diff_buf then
+      api.nvim_win_call(win, function()
+        vim.cmd("normal! " .. tc)
+      end)
+      return
+    end
+  end
+end
+
 function M.setup_keymaps(buf)
   local settings = require("my_plugins.onediff.settings")
   local keymaps = settings.get("keymaps.sidebar")
@@ -703,7 +775,15 @@ function M.setup_keymaps(buf)
   local opts = { buffer = buf, silent = true, nowait = true }
 
   vim.keymap.set("n", keymaps.select, M.open_file_keep_focus, opts)
-  vim.keymap.set("n", "<Tab>", M.open_file_keep_focus, opts)
+  vim.keymap.set("n", "<Tab>", function()
+    local session = require("my_plugins.onediff.session")
+    local sidebar_win = session.get_sidebar_win()
+    session.focus_diff_window()
+    onediff.goto_next_change()
+    if sidebar_win and api.nvim_win_is_valid(sidebar_win) then
+      api.nvim_set_current_win(sidebar_win)
+    end
+  end, opts)
   vim.keymap.set("n", keymaps.refresh, onediff.refresh, opts)
   vim.keymap.set("n", "s", onediff.stage_hunk, opts)
   vim.keymap.set("n", "u", onediff.unstage_hunk, opts)
@@ -711,7 +791,7 @@ function M.setup_keymaps(buf)
   vim.keymap.set("n", "<C-q>", onediff.close, opts)
   vim.keymap.set("n", "<C-c>", function() vim.schedule(onediff.close) end, opts)
   vim.keymap.set("n", "<Esc>", onediff.close, opts)
-  vim.keymap.set("n", "<Leader>e", onediff.reload_current_file, opts)
+  vim.keymap.set("n", "<Leader>e", onediff.refresh, opts)
   vim.keymap.set("n", "sf", onediff.open_or_focus_and_refresh, opts)
 
   vim.keymap.set("n", "`", function()
@@ -755,21 +835,27 @@ function M.setup_keymaps(buf)
 
   vim.keymap.set("n", "<S-Tab>", function()
     local session = require("my_plugins.onediff.session")
+    local sidebar_win = session.get_sidebar_win()
     session.focus_diff_window()
     onediff.goto_prev_change()
-  end, opts)
-
-  vim.keymap.set("n", "<C-i>", function()
-    local session = require("my_plugins.onediff.session")
-    session.focus_diff_window()
-    onediff.goto_next_change()
+    if sidebar_win and api.nvim_win_is_valid(sidebar_win) then
+      api.nvim_set_current_win(sidebar_win)
+    end
   end, opts)
 
   vim.keymap.set("n", "<C-o>", function()
     local session = require("my_plugins.onediff.session")
+    local sidebar_win = session.get_sidebar_win()
     session.focus_diff_window()
     onediff.goto_prev_change()
+    if sidebar_win and api.nvim_win_is_valid(sidebar_win) then
+      api.nvim_set_current_win(sidebar_win)
+    end
   end, opts)
+
+  vim.keymap.set("n", "<C-f>", function() scroll_diff_win("<C-f>") end, opts)
+  vim.keymap.set("n", "<C-d>", function() scroll_diff_win("<C-d>") end, opts)
+  vim.keymap.set("n", "<C-u>", function() scroll_diff_win("<C-u>") end, opts)
 
   vim.keymap.set("n", "<LeftMouse>", function()
     local mouse_pos = vim.fn.getmousepos()
@@ -781,6 +867,12 @@ function M.setup_keymaps(buf)
         M.open_file_keep_focus()
       end
     end
+  end, opts)
+
+  vim.keymap.set("n", "<Leader>t", function()
+    vim.g.onediff_live_nav = not (vim.g.onediff_live_nav ~= false)
+    local state = vim.g.onediff_live_nav and "ON" or "OFF"
+    vim.notify("OneDiff: Live navigation " .. state)
   end, opts)
 end
 
@@ -803,6 +895,12 @@ function M.setup_autocmds(buf)
       vim.wo[win].winfixwidth = true
       vim.wo[win].winhighlight = "CursorLine:OneDiffCursorLine"
     end,
+  })
+
+  api.nvim_create_autocmd("CursorMoved", {
+    group = group,
+    buffer = buf,
+    callback = live_nav_preview,
   })
 
   api.nvim_create_autocmd("BufWipeout", {
