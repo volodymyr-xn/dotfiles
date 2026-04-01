@@ -36,7 +36,7 @@ vim.keymap.set("n", "<Leader>d", function() R.call("find_resource_in_dir", "app/
 vim.keymap.set("n", "<Leader>b", function() R.call("find_resource_in_dir", "config/locales") end, vim.tbl_extend("force", opts, { desc = "Find i18n files" }))
 
 vim.keymap.set("n", "<Leader>o", function() fzf_vim_picker.live_grep_changed_files() end, vim.tbl_extend("force", opts, { desc = "Full text search in changed files" }))
-vim.keymap.set("n", "<leader>qp", function() fzf_vim_picker.live_grep() end, vim.tbl_extend("force", opts, { desc = "Live grep (Ag)" }))
+vim.keymap.set("n", "sp", function() fzf_vim_picker.live_grep() end, vim.tbl_extend("force", opts, { desc = "Live grep (Ag)" }))
 vim.keymap.set("n", "<Leader>qq", function() R.call("find_files_in_dirs", task_dirs) end, vim.tbl_extend("force", opts, { desc = "Find files in task dirs" }))
 
 vim.keymap.set("n", "<Leader>x", function() R.call("buffer_fuzzy_find") end, vim.tbl_extend("force", opts, { desc = "Fuzzy find in buffer" }))

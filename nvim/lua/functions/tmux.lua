@@ -47,9 +47,7 @@ function FindAndSetAITmuxPane()
   return false
 end
 
--- Returns true if the current vimux runner has an AI process, or finds and sets one from all panes
 function EnsureAITmuxRunner()
-  if IsTmuxRunnerAIProcess() then return true end
   return FindAndSetAITmuxPane()
 end
 
