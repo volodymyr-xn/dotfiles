@@ -20,8 +20,8 @@ hs.hotkey.bind({}, 78, volumeDown, nil, volumeDown)
 
 -- Mute/unmute: Numpad * (raw keycode 67)
 local function toggleMute()
-  local device = hs.audiodevice.defaultOutputDevice()
-  device:setMuted(not device:muted())
+  hs.eventtap.event.newSystemKeyEvent("MUTE", true):post()
+  hs.eventtap.event.newSystemKeyEvent("MUTE", false):post()
 end
 hs.hotkey.bind({}, 67, toggleMute)
 
