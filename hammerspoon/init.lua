@@ -24,17 +24,12 @@ local function toggleMute()
   hs.eventtap.event.newSystemKeyEvent("MUTE", false):post()
 end
 hs.hotkey.bind({}, 67, toggleMute)
+hs.hotkey.bind({"cmd"}, "0", toggleMute)
 
 -- Focus app or launch if not running
 local function focusApp(name)
   hs.application.launchOrFocus(name)
 end
-
--- Ctrl+Cmd+T → Ghostty (terminal)
-hs.hotkey.bind({"ctrl", "cmd"}, "t", function() focusApp("Ghostty") end)
-
--- Ctrl+Cmd+C → Google Chrome (browser)
-hs.hotkey.bind({"ctrl", "cmd"}, "c", function() focusApp("Google Chrome") end)
 
 local dismissNotifications = require("dismiss_notifications").dismiss
 

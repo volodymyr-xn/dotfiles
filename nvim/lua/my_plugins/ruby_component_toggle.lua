@@ -15,12 +15,12 @@ local function build_file_path(dir, base_name, extension)
   return dir .. '/' .. base_name .. extension
 end
 
-local function open_file_if_exists(file_path, filename)
+local function open_file_if_exists(file_path, extension)
   if vim.fn.filereadable(file_path) == 1 then
     vim.cmd('edit ' .. vim.fn.fnameescape(file_path))
     return true
   else
-    vim.notify('File not found: ' .. filename, vim.log.levels.ERROR)
+    vim.notify('File not found: ' .. extension, vim.log.levels.ERROR)
     return false
   end
 end
@@ -36,7 +36,7 @@ local function try_open_style_file(dir, base_name)
     vim.cmd('edit ' .. vim.fn.fnameescape(css_file))
     return true
   else
-    vim.notify('File not found: ' .. base_name .. '.scss or ' .. base_name .. '.css', vim.log.levels.ERROR)
+    vim.notify('File not found: .scss or .css', vim.log.levels.ERROR)
     return false
   end
 end
@@ -45,9 +45,8 @@ function M.navigate_to_extension(target_extension)
   local file_info = get_current_file_info()
   local base_name = get_base_name(file_info.filename)
   local target_file = build_file_path(file_info.dir, base_name, target_extension)
-  local target_filename = base_name .. target_extension
-  
-  open_file_if_exists(target_file, target_filename)
+
+  open_file_if_exists(target_file, target_extension)
 end
 
 function M.navigate_to_style()
@@ -73,9 +72,8 @@ function M.toggle_alternate()
   end
   
   local target_file = build_file_path(file_info.dir, base_name, target_extension)
-  local target_filename = base_name .. target_extension
-  
-  open_file_if_exists(target_file, target_filename)
+
+  open_file_if_exists(target_file, target_extension)
 end
 
 function M.toggle_js_erb()
@@ -94,9 +92,8 @@ function M.toggle_js_erb()
   end
   
   local target_file = build_file_path(file_info.dir, base_name, target_extension)
-  local target_filename = base_name .. target_extension
-  
-  open_file_if_exists(target_file, target_filename)
+
+  open_file_if_exists(target_file, target_extension)
 end
 
 function M.toggle_erb_style()
@@ -108,8 +105,7 @@ function M.toggle_erb_style()
   elseif file_info.filename:match('%.scss$') or file_info.filename:match('%.css$') then
     local base_name = get_base_name(file_info.filename)
     local target_file = build_file_path(file_info.dir, base_name, '.html.erb')
-    local target_filename = base_name .. '.html.erb'
-    open_file_if_exists(target_file, target_filename)
+    open_file_if_exists(target_file, '.html.erb')
   else
     local base_name = get_base_name(file_info.filename)
     try_open_style_file(file_info.dir, base_name)

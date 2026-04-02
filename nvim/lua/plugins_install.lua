@@ -198,10 +198,6 @@ require("lazy").setup({
   -- Git integration
   "tpope/vim-fugitive",
   "sindrets/diffview.nvim",
-  {
-    "chrisgrieser/nvim-tinygit",
-    dependencies = { "nvim-telescope/telescope.nvim" },
-  },
 
   -- Make terminal vim and tmux work better together.
   "tmux-plugins/vim-tmux-focus-events",

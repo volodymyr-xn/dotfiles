@@ -51,7 +51,7 @@ vim.api.nvim_set_keymap('n', '<Leader>n', ':nohl<CR>', { silent = true, noremap 
 
 -- Enter replace command
 -- Global search and replace in file
-vim.api.nvim_set_keymap('n', 'sr', ':%s///g<Left><Left><Left>', { noremap = true, desc = "Search and replace in file" })
+vim.api.nvim_set_keymap('n', '<Leader>@', ':%s///g<Left><Left><Left>', { noremap = true, desc = "Search and replace in file" })
 -- vim.api.nvim_set_keymap('n', 's', ':w<CR>', { noremap = true })
 -- Global search and replace in quickfix menu
 vim.api.nvim_set_keymap('n', '@', ":cfdo %s///g | update <c-b><right><right><right><right><right><right><right><right>", { noremap = true, desc = "Search and replace in quickfix" })
@@ -216,16 +216,13 @@ vim.api.nvim_set_keymap('n', 's2', '<cmd>lua require("my_plugins.ruby_component_
   { noremap = true, silent = true, desc = "Navigate to .html.erb file" })
 vim.api.nvim_set_keymap('n', 's3', '<cmd>lua require("my_plugins.ruby_component_toggle").navigate_to_style()<CR>',
   { noremap = true, silent = true, desc = "Navigate to .scss/.css file" })
+vim.api.nvim_set_keymap('n', 's4', '<cmd>lua require("my_plugins.ruby_component_toggle").navigate_to_extension(".js")<CR>',
+  { noremap = true, silent = true, desc = "Navigate to .js file" })
 vim.api.nvim_set_keymap('n', 'sq', '<cmd>lua require("my_plugins.ruby_component_toggle").toggle_js_erb()<CR>',
   { noremap = true, silent = true, desc = "Toggle between .js and .html.erb" })
 vim.api.nvim_set_keymap('n', 'sw', '<cmd>lua require("my_plugins.ruby_component_toggle").toggle_erb_style()<CR>',
   { noremap = true, silent = true, desc = "Toggle between .html.erb and .scss/.css" })
 
--- vim.api.nvim_create_autocmd('FileType', {
---   pattern = { 'ruby', 'eruby' },
---   callback = function()
---     vim.api.nvim_buf_set_keymap(0, 'n', '<Leader>r',
---       '<cmd>lua require("my_plugins.ruby_component_toggle").toggle_alternate()<CR>',
---       { noremap = true, silent = true, desc = "Toggle between .rb and .html.erb" })
---   end,
--- })
+-- Toggle between .rb and .html.erb for Ruby view components
+vim.keymap.set('n', '<Leader>r', function() ruby_toggle.toggle_alternate() end,
+  { noremap = true, silent = true, desc = "Toggle between .rb and .html.erb" })
