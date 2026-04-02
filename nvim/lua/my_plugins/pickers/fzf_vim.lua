@@ -68,8 +68,9 @@ function M.setup()
       endif
     endfunction
 
+    " --follow: makes ag follow symlinks when searching
     command! -nargs=* CustomFullTextSearch call fzf#run({
-          \ 'source':  printf('ag --nogroup --column --color "%s"',
+          \ 'source':  printf('ag --nogroup --column --color --follow "%s"',
           \                   escape(empty(<q-args>) ? '^(?=.)' : <q-args>, '"\')),
           \ 'sink*':    function('<sid>ag_handler'),
           \ 'options': '--ansi --expect=ctrl-t,ctrl-v,ctrl-x --delimiter : --nth 4.. '.
