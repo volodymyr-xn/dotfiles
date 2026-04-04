@@ -45,7 +45,7 @@ local function find_ai_panes()
   return matches
 end
 
--- Resolves a single AI pane, showing a picker if multiple found; calls callback(pane_id)
+-- Resolves a single AI pane, showing a picker if multiple found; calls callback(pane)
 local function with_ai_pane(callback)
   local panes = find_ai_panes()
 
@@ -55,7 +55,7 @@ local function with_ai_pane(callback)
   end
 
   if #panes == 1 then
-    callback(panes[1].pane_id)
+    callback(panes[1])
     return
   end
 
@@ -65,7 +65,7 @@ local function with_ai_pane(callback)
       return item.name .. " (pane " .. item.index .. ")"
     end,
   }, function(choice)
-    if choice then callback(choice.pane_id) end
+    if choice then callback(choice) end
   end)
 end
 
@@ -80,9 +80,12 @@ local function send_to_pane(pane_id, text)
   vim.fn.VimuxSendText(text)
 end
 
--- Sends multiline text to tmux by splitting on newlines and using S-Enter as line separator,
--- so TUI inputs (e.g. Claude Code) receive proper newlines instead of submit events.
-local function SendMultilineText(text)
+-- Newline key per AI process: S-Enter for Claude, C-j for Cursor agent
+local NEWLINE_KEYS = { claude = "S-Enter", agent = "C-j" }
+
+-- Sends multiline text to tmux, using process-specific key for newlines
+local function send_multiline_text(text, process_name)
+  local newline_key = NEWLINE_KEYS[process_name] or "S-Enter"
   local lines = vim.split(text, "\n", { plain = true })
 
   for i, line in ipairs(lines) do
@@ -91,7 +94,7 @@ local function SendMultilineText(text)
     end
 
     if i < #lines then
-      vim.fn.VimuxSendKeys("S-Enter")
+      vim.fn.VimuxSendKeys(newline_key)
     end
   end
 end
@@ -99,9 +102,9 @@ end
 function SendFileToTmux()
   local file = vim.fn.expand("%")
 
-  with_ai_pane(function(pane_id)
-    send_to_pane(pane_id, "@" .. file .. " ")
-    focus_pane(pane_id)
+  with_ai_pane(function(pane)
+    send_to_pane(pane.pane_id, "@" .. file .. " ")
+    focus_pane(pane.pane_id)
   end)
 end
 
@@ -157,18 +160,18 @@ function SendSelectionToTmux()
 
   local file = vim.fn.expand("%")
 
-  with_ai_pane(function(pane_id)
-    vim.g.VimuxRunnerIndex = pane_id
-    SendMultilineText("@" .. file .. " \n```\n  " .. text .. "\n```")
-    vim.fn.VimuxSendKeys("S-Enter")
-    focus_pane(pane_id)
+  with_ai_pane(function(pane)
+    vim.g.VimuxRunnerIndex = pane.pane_id
+    send_multiline_text("@" .. file .. " \n```\n  " .. text .. "\n```", pane.name)
+    vim.fn.VimuxSendKeys(NEWLINE_KEYS[pane.name] or "S-Enter")
+    focus_pane(pane.pane_id)
   end)
 end
 
 function SendPathToTmux(path)
-  with_ai_pane(function(pane_id)
-    send_to_pane(pane_id, "@" .. path .. " ")
-    focus_pane(pane_id)
+  with_ai_pane(function(pane)
+    send_to_pane(pane.pane_id, "@" .. path .. " ")
+    focus_pane(pane.pane_id)
   end)
 end
 
