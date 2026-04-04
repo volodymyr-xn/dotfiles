@@ -1,5 +1,8 @@
 local AI_PROCESS_NAMES = { "claude", "agent" }
-local PROCESS_TREE_DEPTH = 4
+local PROCESS_TREE_DEPTH = 3
+-- If process not found increase depth to 4 or 5
+-- local PROCESS_TREE_DEPTH = 4
+
 local NO_AI_PANE_MSG = "No tmux pane with AI process found"
 
 -- Collects process names from a PID's descendant tree up to PROCESS_TREE_DEPTH levels
