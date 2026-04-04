@@ -14,40 +14,113 @@ local NEWLINE_KEYS = { claude = "S-Enter", agent = "C-j" }
 
 local M = {}
 
-local function collect_descendant_names(pid)
-  local cmd = string.format(
-    "pids=%s; for i in $(seq 1 %d); do pids=$(echo \"$pids\" | xargs -I{} pgrep -P {} 2>/dev/null);"
-    .. " [ -z \"$pids\" ] && break; echo \"$pids\" | xargs ps -o comm= -p 2>/dev/null; done",
-    pid, PROCESS_TREE_DEPTH
-  )
+function M.send_file()
+  local file = vim.fn.expand("%")
 
-  return vim.fn.system(cmd)
+  local function handler(pane)
+    send_to_pane(pane.pane_id, "@" .. file .. " ")
+    focus_pane(pane.pane_id)
+  end
+
+  with_ai_pane(handler)
 end
 
-local function find_ai_process_name(pid)
-  local result = collect_descendant_names(pid)
+function M.send_selection()
+  local mode = vim.fn.mode()
 
-  for _, name in ipairs(AI_PROCESS_NAMES) do
-    if result:match(name) then return name end
+  if mode ~= "v" and mode ~= "V" then
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "x", false)
+    vim.notify("Visual-block mode not supported", vim.log.levels.WARN)
+    return
+  end
+
+  local start_pos = vim.fn.getpos("v")
+  local end_pos = vim.fn.getpos(".")
+
+  local start_line = start_pos[2]
+  local start_col = start_pos[3]
+  local end_line = end_pos[2]
+  local end_col = end_pos[3]
+
+  if start_line > end_line or (start_line == end_line and start_col > end_col) then
+    start_line, end_line = end_line, start_line
+    start_col, end_col = end_col, start_col
+  end
+
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "x", false)
+
+  local text
+
+  if mode == "v" then
+    local all_lines = vim.fn.getline(start_line, end_line)
+    all_lines[#all_lines] = all_lines[#all_lines]:sub(1, end_col)
+    all_lines[1] = all_lines[1]:sub(start_col)
+    text = table.concat(dedent_lines(all_lines), "\n")
+  else
+    local lines = dedent_lines(vim.fn.getline(start_line, end_line))
+    text = table.concat(lines, "\n")
+  end
+
+  local file = vim.fn.expand("%")
+
+  local function handler(pane)
+    local indented = text:gsub("([^\n]+)", "  %1")
+    send_multiline_text(pane.pane_id, "@" .. file .. " \n```\n" .. indented .. "\n```", pane.name)
+    vim.fn.VimuxSendKeys(NEWLINE_KEYS[pane.name] or "S-Enter")
+    focus_pane(pane.pane_id)
+  end
+
+  with_ai_pane(handler)
+end
+
+function M.send_path(path)
+  local function handler(pane)
+    send_to_pane(pane.pane_id, "@" .. path .. " ")
+    focus_pane(pane.pane_id)
+  end
+
+  with_ai_pane(handler)
+end
+
+-- Walks a process tree from root_pid; returns matched AI process name or nil
+local function find_ai_process_name(root_pid)
+  local pids = root_pid
+
+  for _ = 1, PROCESS_TREE_DEPTH do
+    local output = vim.fn.system("pgrep -P " .. pids .. " 2>/dev/null")
+    local children = vim.tbl_filter(function(s) return s ~= "" end, vim.split(output, "\n"))
+
+    if #children == 0 then return nil end
+
+    local joined = table.concat(children, ",")
+    local names = vim.fn.system("ps -o comm= -p " .. joined .. " 2>/dev/null")
+
+    for _, name in ipairs(AI_PROCESS_NAMES) do
+      if names:match(name) then return name end
+    end
+
+    pids = joined
   end
 
   return nil
 end
 
+-- Scans all panes in the current tmux window; returns list of { pane_id, name, index, order }
 local function find_ai_panes()
-  local current_pane = vim.fn.system("tmux display-message -p '#{pane_id}'"):gsub("%s+", "")
-  local panes_output = vim.fn.system("tmux list-panes -F '#{pane_id} #{pane_pid} #{pane_index}'")
+  local panes_output = vim.fn.system(
+    "tmux list-panes -F '#{pane_id} #{pane_pid} #{pane_index} #{pane_active}'"
+  )
   local matches = {}
 
   for line in panes_output:gmatch("[^\n]+") do
-    local pane_id, pane_pid, pane_index = line:match("(%S+)%s+(%S+)%s+(%S+)")
+    local pane_id, pane_pid, pane_index, active = line:match("(%S+)%s+(%S+)%s+(%S+)%s+(%S+)")
 
-    if pane_id and pane_pid and pane_id ~= current_pane then
-      local process_name = find_ai_process_name(pane_pid)
+    if pane_id and active ~= "1" then
+      local name = find_ai_process_name(pane_pid)
 
-      if process_name then
+      if name then
         table.insert(matches, {
-          pane_id = pane_id, name = process_name, index = pane_index, order = #matches + 1,
+          pane_id = pane_id, name = name, index = pane_index, order = #matches + 1,
         })
       end
     end
@@ -155,72 +228,5 @@ local function dedent_lines(lines)
   return result
 end
 
-function M.send_file()
-  local file = vim.fn.expand("%")
-
-  local function handler(pane)
-    send_to_pane(pane.pane_id, "@" .. file .. " ")
-    focus_pane(pane.pane_id)
-  end
-
-  with_ai_pane(handler)
-end
-
-function M.send_selection()
-  local mode = vim.fn.mode()
-
-  if mode ~= "v" and mode ~= "V" then
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "x", false)
-    vim.notify("Visual-block mode not supported", vim.log.levels.WARN)
-    return
-  end
-
-  local start_pos = vim.fn.getpos("v")
-  local end_pos = vim.fn.getpos(".")
-
-  local start_line = start_pos[2]
-  local start_col = start_pos[3]
-  local end_line = end_pos[2]
-  local end_col = end_pos[3]
-
-  if start_line > end_line or (start_line == end_line and start_col > end_col) then
-    start_line, end_line = end_line, start_line
-    start_col, end_col = end_col, start_col
-  end
-
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "x", false)
-
-  local text
-
-  if mode == "v" then
-    local all_lines = vim.fn.getline(start_line, end_line)
-    all_lines[#all_lines] = all_lines[#all_lines]:sub(1, end_col)
-    all_lines[1] = all_lines[1]:sub(start_col)
-    text = table.concat(dedent_lines(all_lines), "\n")
-  else
-    local lines = dedent_lines(vim.fn.getline(start_line, end_line))
-    text = table.concat(lines, "\n")
-  end
-
-  local file = vim.fn.expand("%")
-
-  local function handler(pane)
-    local indented = text:gsub("([^\n]+)", "  %1")
-    send_multiline_text(pane.pane_id, "@" .. file .. " \n```\n" .. indented .. "\n```", pane.name)
-    vim.fn.VimuxSendKeys(NEWLINE_KEYS[pane.name] or "S-Enter")
-    focus_pane(pane.pane_id)
-  end
-
-  with_ai_pane(handler)
-end
-
-function M.send_path(path)
-  local function handler(pane)
-    send_to_pane(pane.pane_id, "@" .. path .. " ")
-    focus_pane(pane.pane_id)
-  end
-
-  with_ai_pane(handler)
-end
 
 return M
