@@ -13,31 +13,60 @@ local function collect_descendant_names(pid)
   return vim.fn.system(cmd)
 end
 
--- Checks if a process tree contains an AI process name
-local function has_ai_process(pid)
+-- Returns the matched AI process name from a PID's descendant tree, or nil
+local function find_ai_process_name(pid)
   local result = collect_descendant_names(pid)
 
   for _, name in ipairs(AI_PROCESS_NAMES) do
-    if result:match(name) then return true end
-  end
-
-  return false
-end
-
--- Scans all panes in the current tmux window for one running an AI process; returns pane_id or nil
-local function find_ai_pane()
-  local current_pane = vim.fn.system("tmux display-message -p '#{pane_id}'"):gsub("%s+", "")
-  local panes_output = vim.fn.system("tmux list-panes -F '#{pane_id} #{pane_pid}'")
-
-  for line in panes_output:gmatch("[^\n]+") do
-    local pane_id, pane_pid = line:match("(%S+)%s+(%S+)")
-
-    if pane_id and pane_pid and pane_id ~= current_pane then
-      if has_ai_process(pane_pid) then return pane_id end
-    end
+    if result:match(name) then return name end
   end
 
   return nil
+end
+
+-- Scans all panes in the current tmux window; returns list of { pane_id, process_name }
+local function find_ai_panes()
+  local current_pane = vim.fn.system("tmux display-message -p '#{pane_id}'"):gsub("%s+", "")
+  local panes_output = vim.fn.system("tmux list-panes -F '#{pane_id} #{pane_pid} #{pane_index}'")
+  local matches = {}
+
+  for line in panes_output:gmatch("[^\n]+") do
+    local pane_id, pane_pid, pane_index = line:match("(%S+)%s+(%S+)%s+(%S+)")
+
+    if pane_id and pane_pid and pane_id ~= current_pane then
+      local process_name = find_ai_process_name(pane_pid)
+
+      if process_name then
+        table.insert(matches, { pane_id = pane_id, name = process_name, index = pane_index })
+      end
+    end
+  end
+
+  return matches
+end
+
+-- Resolves a single AI pane, showing a picker if multiple found; calls callback(pane_id)
+local function with_ai_pane(callback)
+  local panes = find_ai_panes()
+
+  if #panes == 0 then
+    vim.api.nvim_echo({{NO_AI_PANE_MSG, "ErrorMsg"}}, true, {})
+    return
+  end
+
+  if #panes == 1 then
+    callback(panes[1].pane_id)
+    return
+  end
+
+  vim.ui.select(panes, {
+    prompt = "Select AI process:",
+    format_item = function(item)
+      return item.name .. " (pane " .. item.index .. ")"
+    end,
+  }, function(choice)
+    if choice then callback(choice.pane_id) end
+  end)
 end
 
 -- Focuses a tmux pane by id
@@ -68,15 +97,12 @@ local function SendMultilineText(text)
 end
 
 function SendFileToTmux()
-  local pane_id = find_ai_pane()
+  local file = vim.fn.expand("%")
 
-  if not pane_id then
-    vim.api.nvim_echo({{NO_AI_PANE_MSG, "ErrorMsg"}}, true, {})
-    return
-  end
-
-  send_to_pane(pane_id, "@" .. vim.fn.expand("%") .. " ")
-  focus_pane(pane_id)
+  with_ai_pane(function(pane_id)
+    send_to_pane(pane_id, "@" .. file .. " ")
+    focus_pane(pane_id)
+  end)
 end
 
 function DedentLines(lines)
@@ -117,13 +143,6 @@ function SendSelectionToTmux()
 
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "x", false)
 
-  local pane_id = find_ai_pane()
-
-  if not pane_id then
-    vim.api.nvim_echo({{NO_AI_PANE_MSG, "ErrorMsg"}}, true, {})
-    return
-  end
-
   local text
 
   if mode == "v" then
@@ -136,22 +155,20 @@ function SendSelectionToTmux()
     text = table.concat(lines, "\n")
   end
 
-  vim.g.VimuxRunnerIndex = pane_id
-  SendMultilineText("@" .. vim.fn.expand("%") .. " \n```\n  " .. text .. "\n```")
-  vim.fn.VimuxSendKeys("S-Enter")
+  local file = vim.fn.expand("%")
 
-  focus_pane(pane_id)
+  with_ai_pane(function(pane_id)
+    vim.g.VimuxRunnerIndex = pane_id
+    SendMultilineText("@" .. file .. " \n```\n  " .. text .. "\n```")
+    vim.fn.VimuxSendKeys("S-Enter")
+    focus_pane(pane_id)
+  end)
 end
 
 function SendPathToTmux(path)
-  local pane_id = find_ai_pane()
-
-  if not pane_id then
-    vim.api.nvim_echo({{NO_AI_PANE_MSG, "ErrorMsg"}}, true, {})
-    return
-  end
-
-  send_to_pane(pane_id, "@" .. path .. " ")
-  focus_pane(pane_id)
+  with_ai_pane(function(pane_id)
+    send_to_pane(pane_id, "@" .. path .. " ")
+    focus_pane(pane_id)
+  end)
 end
 
