@@ -40,7 +40,9 @@ local function find_ai_panes()
       local process_name = find_ai_process_name(pane_pid)
 
       if process_name then
-        table.insert(matches, { pane_id = pane_id, name = process_name, index = pane_index })
+        table.insert(matches, {
+          pane_id = pane_id, name = process_name, index = pane_index, order = #matches + 1,
+        })
       end
     end
   end
@@ -64,7 +66,6 @@ local function with_ai_pane(callback)
 
   local pickers = require("telescope.pickers")
   local finders = require("telescope.finders")
-  local conf = require("telescope.config").values
   local actions = require("telescope.actions")
   local action_state = require("telescope.actions.state")
 
@@ -73,17 +74,10 @@ local function with_ai_pane(callback)
     finder = finders.new_table({
       results = panes,
       entry_maker = function(pane)
-        local idx = 0
-
-        for i, p in ipairs(panes) do
-          if p.pane_id == pane.pane_id then idx = i; break end
-        end
-
-        local display = string.format("%d. %s (pane %s)", idx, pane.name, pane.index)
+        local display = string.format("%d. %s (pane %s)", pane.order, pane.name, pane.index)
         return { value = pane, display = display, ordinal = display }
       end,
     }),
-    sorter = conf.generic_sorter({}),
     attach_mappings = function(prompt_bufnr, map)
       -- Pressing 1-9 instantly selects the corresponding entry
       for i = 1, math.min(9, #panes) do
@@ -199,6 +193,7 @@ function SendSelectionToTmux()
   with_ai_pane(function(pane)
     vim.g.VimuxRunnerIndex = pane.pane_id
     send_multiline_text("@" .. file .. " \n```\n  " .. text .. "\n```", pane.name)
+    -- Move cursor to new line after the closing ``` so the AI prompt is ready for more input
     vim.fn.VimuxSendKeys(NEWLINE_KEYS[pane.name] or "S-Enter")
     focus_pane(pane.pane_id)
   end)
@@ -210,4 +205,3 @@ function SendPathToTmux(path)
     focus_pane(pane.pane_id)
   end)
 end
-
