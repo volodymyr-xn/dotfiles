@@ -59,14 +59,47 @@ local function with_ai_pane(callback)
     return
   end
 
-  vim.ui.select(panes, {
-    prompt = "Select AI process:",
-    format_item = function(item)
-      return item.name .. " (pane " .. item.index .. ")"
+  local pickers = require("telescope.pickers")
+  local finders = require("telescope.finders")
+  local conf = require("telescope.config").values
+  local actions = require("telescope.actions")
+  local action_state = require("telescope.actions.state")
+
+  pickers.new(require("telescope.themes").get_dropdown({}), {
+    prompt_title = "Select AI process",
+    finder = finders.new_table({
+      results = panes,
+      entry_maker = function(pane)
+        local idx = 0
+
+        for i, p in ipairs(panes) do
+          if p.pane_id == pane.pane_id then idx = i; break end
+        end
+
+        local display = string.format("%d. %s (pane %s)", idx, pane.name, pane.index)
+        return { value = pane, display = display, ordinal = display }
+      end,
+    }),
+    sorter = conf.generic_sorter({}),
+    attach_mappings = function(prompt_bufnr, map)
+      -- Pressing 1-9 instantly selects the corresponding entry
+      for i = 1, math.min(9, #panes) do
+        map({ "i", "n" }, tostring(i), function()
+          actions.close(prompt_bufnr)
+          callback(panes[i])
+        end)
+      end
+
+      actions.select_default:replace(function()
+        local entry = action_state.get_selected_entry()
+        actions.close(prompt_bufnr)
+
+        if entry then callback(entry.value) end
+      end)
+
+      return true
     end,
-  }, function(choice)
-    if choice then callback(choice) end
-  end)
+  }):find()
 end
 
 -- Focuses a tmux pane by id
