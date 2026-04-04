@@ -1,3 +1,5 @@
+local tmux = require("functions.tmux")
+
 require("neo-tree").setup({
   -- displays errors or warnings in the file, depending on the language server.
   enable_diagnostics = true,
@@ -103,7 +105,7 @@ require("neo-tree").setup({
       end,
       ["<Leader>`"] = function(state)
         local node = state.tree:get_node()
-        SendPathToTmux(vim.fn.fnamemodify(node:get_id(), ":."))
+        tmux.send_path(vim.fn.fnamemodify(node:get_id(), ":."))
       end,
       -- ["<"] = "prev_source",
       -- [">"] = "next_source",

@@ -1,11 +1,19 @@
+local pickers = require("telescope.pickers")
+local finders = require("telescope.finders")
+local actions = require("telescope.actions")
+local action_state = require("telescope.actions.state")
+local themes = require("telescope.themes")
+
 local AI_PROCESS_NAMES = { "claude", "agent" }
 local PROCESS_TREE_DEPTH = 3
 -- If process not found increase depth to 4 or 5
 -- local PROCESS_TREE_DEPTH = 4
 
 local NO_AI_PANE_MSG = "No tmux pane with AI process found"
+local NEWLINE_KEYS = { claude = "S-Enter", agent = "C-j" }
 
--- Collects process names from a PID's descendant tree up to PROCESS_TREE_DEPTH levels
+local M = {}
+
 local function collect_descendant_names(pid)
   local cmd = string.format(
     "pids=%s; for i in $(seq 1 %d); do pids=$(echo \"$pids\" | xargs -I{} pgrep -P {} 2>/dev/null);"
@@ -16,7 +24,6 @@ local function collect_descendant_names(pid)
   return vim.fn.system(cmd)
 end
 
--- Returns the matched AI process name from a PID's descendant tree, or nil
 local function find_ai_process_name(pid)
   local result = collect_descendant_names(pid)
 
@@ -27,7 +34,6 @@ local function find_ai_process_name(pid)
   return nil
 end
 
--- Scans all panes in the current tmux window; returns list of { pane_id, process_name }
 local function find_ai_panes()
   local current_pane = vim.fn.system("tmux display-message -p '#{pane_id}'"):gsub("%s+", "")
   local panes_output = vim.fn.system("tmux list-panes -F '#{pane_id} #{pane_pid} #{pane_index}'")
@@ -50,7 +56,11 @@ local function find_ai_panes()
   return matches
 end
 
--- Resolves a single AI pane, showing a picker if multiple found; calls callback(pane)
+local function make_pane_entry(pane)
+  local display = string.format("%d. %s (pane %s)", pane.order, pane.name, pane.index)
+  return { value = pane, display = display, ordinal = display }
+end
+
 local function with_ai_pane(callback)
   local panes = find_ai_panes()
 
@@ -64,57 +74,52 @@ local function with_ai_pane(callback)
     return
   end
 
-  local pickers = require("telescope.pickers")
-  local finders = require("telescope.finders")
-  local actions = require("telescope.actions")
-  local action_state = require("telescope.actions.state")
+  local function select_by_number(prompt_bufnr, index)
+    actions.close(prompt_bufnr)
+    callback(panes[index])
+  end
 
-  pickers.new(require("telescope.themes").get_dropdown({}), {
+  local function select_entry(prompt_bufnr)
+    local entry = action_state.get_selected_entry()
+    actions.close(prompt_bufnr)
+    if entry then callback(entry.value) end
+  end
+
+  local function attach_picker_mappings(prompt_bufnr, map)
+    for i = 1, math.min(9, #panes) do
+      map({ "i", "n" }, tostring(i), function()
+        select_by_number(prompt_bufnr, i)
+      end)
+    end
+
+    actions.select_default:replace(function()
+      select_entry(prompt_bufnr)
+    end)
+
+    return true
+  end
+
+  pickers.new(themes.get_dropdown({}), {
     prompt_title = "Select AI process",
     finder = finders.new_table({
       results = panes,
-      entry_maker = function(pane)
-        local display = string.format("%d. %s (pane %s)", pane.order, pane.name, pane.index)
-        return { value = pane, display = display, ordinal = display }
-      end,
+      entry_maker = make_pane_entry,
     }),
-    attach_mappings = function(prompt_bufnr, map)
-      -- Pressing 1-9 instantly selects the corresponding entry
-      for i = 1, math.min(9, #panes) do
-        map({ "i", "n" }, tostring(i), function()
-          actions.close(prompt_bufnr)
-          callback(panes[i])
-        end)
-      end
-
-      actions.select_default:replace(function()
-        local entry = action_state.get_selected_entry()
-        actions.close(prompt_bufnr)
-
-        if entry then callback(entry.value) end
-      end)
-
-      return true
-    end,
+    attach_mappings = attach_picker_mappings,
   }):find()
 end
 
--- Focuses a tmux pane by id
 local function focus_pane(pane_id)
   vim.fn.system("tmux select-pane -t " .. pane_id)
 end
 
--- Sends text to a tmux pane via VimuxSendText, setting the runner index temporarily
 local function send_to_pane(pane_id, text)
   vim.g.VimuxRunnerIndex = pane_id
   vim.fn.VimuxSendText(text)
 end
 
--- Newline key per AI process: S-Enter for Claude, C-j for Cursor agent
-local NEWLINE_KEYS = { claude = "S-Enter", agent = "C-j" }
-
--- Sends multiline text to tmux, using process-specific key for newlines
-local function send_multiline_text(text, process_name)
+local function send_multiline_text(pane_id, text, process_name)
+  vim.g.VimuxRunnerIndex = pane_id
   local newline_key = NEWLINE_KEYS[process_name] or "S-Enter"
   local lines = vim.split(text, "\n", { plain = true })
 
@@ -129,16 +134,7 @@ local function send_multiline_text(text, process_name)
   end
 end
 
-function SendFileToTmux()
-  local file = vim.fn.expand("%")
-
-  with_ai_pane(function(pane)
-    send_to_pane(pane.pane_id, "@" .. file .. " ")
-    focus_pane(pane.pane_id)
-  end)
-end
-
-function DedentLines(lines)
+local function dedent_lines(lines)
   local min_indent = math.huge
 
   for _, line in ipairs(lines) do
@@ -159,8 +155,26 @@ function DedentLines(lines)
   return result
 end
 
-function SendSelectionToTmux()
+function M.send_file()
+  local file = vim.fn.expand("%")
+
+  local function handler(pane)
+    send_to_pane(pane.pane_id, "@" .. file .. " ")
+    focus_pane(pane.pane_id)
+  end
+
+  with_ai_pane(handler)
+end
+
+function M.send_selection()
   local mode = vim.fn.mode()
+
+  if mode ~= "v" and mode ~= "V" then
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "x", false)
+    vim.notify("Visual-block mode not supported", vim.log.levels.WARN)
+    return
+  end
+
   local start_pos = vim.fn.getpos("v")
   local end_pos = vim.fn.getpos(".")
 
@@ -182,26 +196,31 @@ function SendSelectionToTmux()
     local all_lines = vim.fn.getline(start_line, end_line)
     all_lines[#all_lines] = all_lines[#all_lines]:sub(1, end_col)
     all_lines[1] = all_lines[1]:sub(start_col)
-    text = table.concat(DedentLines(all_lines), "\n")
+    text = table.concat(dedent_lines(all_lines), "\n")
   else
-    local lines = DedentLines(vim.fn.getline(start_line, end_line))
+    local lines = dedent_lines(vim.fn.getline(start_line, end_line))
     text = table.concat(lines, "\n")
   end
 
   local file = vim.fn.expand("%")
 
-  with_ai_pane(function(pane)
-    vim.g.VimuxRunnerIndex = pane.pane_id
-    send_multiline_text("@" .. file .. " \n```\n  " .. text .. "\n```", pane.name)
-    -- Move cursor to new line after the closing ``` so the AI prompt is ready for more input
+  local function handler(pane)
+    local indented = text:gsub("([^\n]+)", "  %1")
+    send_multiline_text(pane.pane_id, "@" .. file .. " \n```\n" .. indented .. "\n```", pane.name)
     vim.fn.VimuxSendKeys(NEWLINE_KEYS[pane.name] or "S-Enter")
     focus_pane(pane.pane_id)
-  end)
+  end
+
+  with_ai_pane(handler)
 end
 
-function SendPathToTmux(path)
-  with_ai_pane(function(pane)
+function M.send_path(path)
+  local function handler(pane)
     send_to_pane(pane.pane_id, "@" .. path .. " ")
     focus_pane(pane.pane_id)
-  end)
+  end
+
+  with_ai_pane(handler)
 end
+
+return M

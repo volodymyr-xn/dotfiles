@@ -1,3 +1,5 @@
+local tmux = require("functions.tmux")
+
 -- Copy relative path of the current file to the clipboard
 -- vim.api.nvim_set_keymap('n', '`', ':let @+ = expand("%")<CR>', { noremap = true, silent = true })
 -- vim.api.nvim_set_keymap('n', '`', ':let @+ = @%<CR>', { noremap = true, silent = true })
@@ -51,8 +53,8 @@ vim.api.nvim_set_keymap('n', '<Leader>h', ':Telescope buffers<CR>', {noremap = t
 vim.keymap.set("n", "K", ":tabnext<CR>", { noremap = true, silent = true, desc = "Next tab" })
 vim.keymap.set("n", "<leader>K", CustomInsertDebug, { noremap = true, silent = true, desc = "Insert debug statement" })
 
-vim.keymap.set("n", "<Leader>`", SendFileToTmux, { noremap = true, silent = true, desc = "Send file path to tmux" })
-vim.keymap.set("v", "<Leader>`", SendSelectionToTmux, { noremap = true, silent = true, desc = "Send file + selection to tmux" })
+vim.keymap.set("n", "<Leader>`", tmux.send_file, { noremap = true, silent = true, desc = "Send file path to tmux" })
+vim.keymap.set("v", "<Leader>`", tmux.send_selection, { noremap = true, silent = true, desc = "Send file + selection to tmux" })
 
 -- vim.keymap.set('n', 's', ':tabnext<CR>', { noremap = true })
 
