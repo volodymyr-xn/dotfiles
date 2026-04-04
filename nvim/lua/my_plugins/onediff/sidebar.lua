@@ -730,7 +730,7 @@ local live_nav_guard = false
 
 local function live_nav_preview()
   if live_nav_guard then return end
-  if vim.g.onediff_live_nav == false then return end
+  if not vim.g.onediff_live_nav then return end
 
   local cursor = api.nvim_win_get_cursor(0)
   local file_idx = M.get_file_at_line(cursor[1])
@@ -775,6 +775,7 @@ function M.setup_keymaps(buf)
   local opts = { buffer = buf, silent = true, nowait = true }
 
   vim.keymap.set("n", keymaps.select, M.open_file_keep_focus, opts)
+  vim.keymap.set("n", "i", M.open_file_keep_focus, opts)
   vim.keymap.set("n", "<Tab>", function()
     local session = require("my_plugins.onediff.session")
     local sidebar_win = session.get_sidebar_win()
@@ -870,7 +871,7 @@ function M.setup_keymaps(buf)
   end, opts)
 
   vim.keymap.set("n", "<Leader>t", function()
-    vim.g.onediff_live_nav = not (vim.g.onediff_live_nav ~= false)
+    vim.g.onediff_live_nav = not vim.g.onediff_live_nav
     local state = vim.g.onediff_live_nav and "ON" or "OFF"
     vim.notify("OneDiff: Live navigation " .. state)
   end, opts)

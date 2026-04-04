@@ -267,3 +267,6 @@ export PATH="$PATH:$HOME/.local/bin"
 
 # Reduce meory usage by malloc(ruby garbage collection at the moment)
 export MALLOC_ARENA_MAX=2
+
+# Test change
+alias ag='rg --follow --column --color always'

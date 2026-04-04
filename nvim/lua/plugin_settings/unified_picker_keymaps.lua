@@ -1,7 +1,7 @@
 local R = require("my_plugins.fuzzy_picker_selector")
 
-local fzf_vim_picker = require("my_plugins.pickers.fzf_vim")
-fzf_vim_picker.setup()
+local CustomFileSelectors = require("custom_file_selectors.fzf_vim")
+CustomFileSelectors.setup()
 
 local js_dir = CustomFindFirstAvailableDir({ "app/javascript", "app/assets/javascripts" })
 local components_dir = CustomFindFirstAvailableDir({ "app/components", "app/view_components" })
@@ -35,15 +35,15 @@ vim.keymap.set("n", "<Leader>s", function() R.call("find_resource_in_dir", "app/
 vim.keymap.set("n", "<Leader>d", function() R.call("find_resource_in_dir", "app/views") end, vim.tbl_extend("force", opts, { desc = "Find views" }))
 vim.keymap.set("n", "<Leader>b", function() R.call("find_resource_in_dir", "config/locales") end, vim.tbl_extend("force", opts, { desc = "Find i18n files" }))
 
-vim.keymap.set("n", "<Leader>o", function() fzf_vim_picker.live_grep_changed_files() end, vim.tbl_extend("force", opts, { desc = "Full text search in changed files" }))
-vim.keymap.set("n", "sp", function() fzf_vim_picker.live_grep() end, vim.tbl_extend("force", opts, { desc = "Live grep (Ag)" }))
+vim.keymap.set("n", "<Leader>o", function() CustomFileSelectors.live_grep_changed_files() end, vim.tbl_extend("force", opts, { desc = "Full text search in changed files" }))
+vim.keymap.set("n", "sp", function() CustomFileSelectors.live_grep() end, vim.tbl_extend("force", opts, { desc = "Live grep (Ag)" }))
 vim.keymap.set("n", "<Leader>qq", function() R.call("find_files_in_dirs", task_dirs) end, vim.tbl_extend("force", opts, { desc = "Find files in task dirs" }))
 
 vim.keymap.set("n", "<Leader>x", function() R.call("buffer_fuzzy_find") end, vim.tbl_extend("force", opts, { desc = "Fuzzy find in buffer" }))
 vim.keymap.set("n", ",q", function() R.call("open_picker_menu") end, vim.tbl_extend("force", opts, { desc = "Open picker menu" }))
-vim.keymap.set("n", "<Leader>p", function() fzf_vim_picker.custom_full_text_search() end, vim.tbl_extend("force", opts, { desc = "Custom full text search (fzf.vim)" }))
+vim.keymap.set("n", "<Leader>p", function() CustomFileSelectors.custom_full_text_search() end, vim.tbl_extend("force", opts, { desc = "Custom full text search (fzf.vim)" }))
 
-vim.keymap.set("n", "sp", function() fzf_vim_picker.search_lines_in_all_buffers() end, vim.tbl_extend("force", opts, { desc = "Search lines in all buffers" }))
+vim.keymap.set("n", "sp", function() CustomFileSelectors.search_lines_in_all_buffers() end, vim.tbl_extend("force", opts, { desc = "Search lines in all buffers" }))
 vim.keymap.set("n", "so", function() R.call("live_grep_in_dirs", notes_dirs) end, vim.tbl_extend("force", opts, { desc = "Search in notes dirs" }))
 vim.keymap.set("n", "sl", function() R.call("oldfiles") end, vim.tbl_extend("force", opts, { desc = "Recent files in cwd" }))
 vim.keymap.set("n", "sj", function() R.call("buffer_list") end, vim.tbl_extend("force", opts, { desc = "Select buffer" }))

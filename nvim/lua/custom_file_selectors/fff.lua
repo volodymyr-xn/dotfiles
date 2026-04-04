@@ -5,7 +5,7 @@ local function fff()
 end
 
 local function fallback(action, ...)
-  local ok, fzf_lua = pcall(require, "my_plugins.pickers.fzf_lua")
+  local ok, fzf_lua = pcall(require, "custom_file_selectors.fzf_lua")
   if ok and type(fzf_lua[action]) == "function" then
     fzf_lua[action](...)
   else

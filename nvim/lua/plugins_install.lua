@@ -574,6 +574,12 @@ require("lazy").setup({
     -- stylua: ignore
   },
 
+  {
+    "OXY2DEV/markview.nvim",
+    lazy = false,
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+  },
+
   "folke/snacks.nvim",
   -- "coder/claudecode.nvim"
 

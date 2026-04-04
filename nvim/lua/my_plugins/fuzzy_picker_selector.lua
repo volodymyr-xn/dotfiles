@@ -17,7 +17,7 @@ end
 M.active = vim.g.active_picker or read_state() or "telescope"
 
 local function load_picker(name)
-  local ok, mod = pcall(require, "my_plugins.pickers." .. name)
+  local ok, mod = pcall(require, "custom_file_selectors." .. name)
   if not ok then
     vim.notify("ultraselect: failed to load picker '" .. name .. "': " .. tostring(mod), vim.log.levels.ERROR)
     return nil

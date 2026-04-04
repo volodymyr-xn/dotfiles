@@ -1,27 +1,31 @@
-function FocusTmuxRunner()
-  vim.fn.VimuxTmux("select-pane -t " .. vim.g.VimuxRunnerIndex)
+local AI_PROCESS_NAMES = { "claude", "agent" }
+local PROCESS_TREE_DEPTH = 4
+local NO_AI_PANE_MSG = "No tmux pane with AI process found"
+
+-- Collects process names from a PID's descendant tree up to PROCESS_TREE_DEPTH levels
+local function collect_descendant_names(pid)
+  local cmd = string.format(
+    "pids=%s; for i in $(seq 1 %d); do pids=$(echo \"$pids\" | xargs -I{} pgrep -P {} 2>/dev/null);"
+    .. " [ -z \"$pids\" ] && break; echo \"$pids\" | xargs ps -o comm= -p 2>/dev/null; done",
+    pid, PROCESS_TREE_DEPTH
+  )
+
+  return vim.fn.system(cmd)
 end
 
-local AI_PROCESS_NAMES = { "claude", "agent" }
-
-function IsTmuxRunnerAIProcess()
-  if not vim.g.VimuxRunnerIndex or vim.g.VimuxRunnerIndex == "" then return false end
-
-  local pane_pid = vim.fn.VimuxTmux("display -p -t " .. vim.g.VimuxRunnerIndex .. " '#{pane_pid}'"):gsub("%s+", "")
-  local result = vim.fn.system(
-    "pgrep -P " .. pane_pid ..
-    " | xargs -I{} sh -c 'ps -o comm= -p {}; pgrep -P {} | xargs ps -o comm= -p 2>/dev/null'" ..
-    " 2>/dev/null"
-  )
+-- Checks if a process tree contains an AI process name
+local function has_ai_process(pid)
+  local result = collect_descendant_names(pid)
 
   for _, name in ipairs(AI_PROCESS_NAMES) do
     if result:match(name) then return true end
   end
+
   return false
 end
 
--- Scans all panes in the current tmux window for one running an AI process; sets VimuxRunnerIndex if found
-function FindAndSetAITmuxPane()
+-- Scans all panes in the current tmux window for one running an AI process; returns pane_id or nil
+local function find_ai_pane()
   local current_pane = vim.fn.system("tmux display-message -p '#{pane_id}'"):gsub("%s+", "")
   local panes_output = vim.fn.system("tmux list-panes -F '#{pane_id} #{pane_pid}'")
 
@@ -29,37 +33,50 @@ function FindAndSetAITmuxPane()
     local pane_id, pane_pid = line:match("(%S+)%s+(%S+)")
 
     if pane_id and pane_pid and pane_id ~= current_pane then
-      local result = vim.fn.system(
-        "pgrep -P " .. pane_pid ..
-        " | xargs -I{} sh -c 'ps -o comm= -p {}; pgrep -P {} | xargs ps -o comm= -p 2>/dev/null'" ..
-        " 2>/dev/null"
-      )
-
-      for _, name in ipairs(AI_PROCESS_NAMES) do
-        if result:match(name) then
-          vim.g.VimuxRunnerIndex = pane_id
-          return true
-        end
-      end
+      if has_ai_process(pane_pid) then return pane_id end
     end
   end
 
-  return false
+  return nil
 end
 
-function EnsureAITmuxRunner()
-  return FindAndSetAITmuxPane()
+-- Focuses a tmux pane by id
+local function focus_pane(pane_id)
+  vim.fn.system("tmux select-pane -t " .. pane_id)
+end
+
+-- Sends text to a tmux pane via VimuxSendText, setting the runner index temporarily
+local function send_to_pane(pane_id, text)
+  vim.g.VimuxRunnerIndex = pane_id
+  vim.fn.VimuxSendText(text)
+end
+
+-- Sends multiline text to tmux by splitting on newlines and using S-Enter as line separator,
+-- so TUI inputs (e.g. Claude Code) receive proper newlines instead of submit events.
+local function SendMultilineText(text)
+  local lines = vim.split(text, "\n", { plain = true })
+
+  for i, line in ipairs(lines) do
+    if line ~= "" then
+      vim.fn.VimuxSendText(line)
+    end
+
+    if i < #lines then
+      vim.fn.VimuxSendKeys("S-Enter")
+    end
+  end
 end
 
 function SendFileToTmux()
-  if not EnsureAITmuxRunner() then
-    vim.api.nvim_echo({{"No tmux pane with AI process found", "ErrorMsg"}}, true, {})
+  local pane_id = find_ai_pane()
+
+  if not pane_id then
+    vim.api.nvim_echo({{NO_AI_PANE_MSG, "ErrorMsg"}}, true, {})
     return
   end
 
-  vim.fn.VimuxSendText("@" .. vim.fn.expand("%") .. " ")
-
-  FocusTmuxRunner()
+  send_to_pane(pane_id, "@" .. vim.fn.expand("%") .. " ")
+  focus_pane(pane_id)
 end
 
 function DedentLines(lines)
@@ -100,8 +117,10 @@ function SendSelectionToTmux()
 
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "x", false)
 
-  if not EnsureAITmuxRunner() then
-    vim.api.nvim_echo({{"No tmux pane with AI process found", "ErrorMsg"}}, true, {})
+  local pane_id = find_ai_pane()
+
+  if not pane_id then
+    vim.api.nvim_echo({{NO_AI_PANE_MSG, "ErrorMsg"}}, true, {})
     return
   end
 
@@ -117,35 +136,22 @@ function SendSelectionToTmux()
     text = table.concat(lines, "\n")
   end
 
+  vim.g.VimuxRunnerIndex = pane_id
   SendMultilineText("@" .. vim.fn.expand("%") .. " \n```\n  " .. text .. "\n```")
   vim.fn.VimuxSendKeys("S-Enter")
 
-  FocusTmuxRunner()
+  focus_pane(pane_id)
 end
 
 function SendPathToTmux(path)
-  if not EnsureAITmuxRunner() then
-    vim.api.nvim_echo({{"No tmux pane with AI process found", "ErrorMsg"}}, true, {})
+  local pane_id = find_ai_pane()
+
+  if not pane_id then
+    vim.api.nvim_echo({{NO_AI_PANE_MSG, "ErrorMsg"}}, true, {})
     return
   end
 
-  vim.fn.VimuxSendText("@" .. path .. " ")
-  FocusTmuxRunner()
-end
-
--- Sends multiline text to tmux by splitting on newlines and using S-Enter as line separator,
--- so TUI inputs (e.g. Claude Code) receive proper newlines instead of submit events.
-local function SendMultilineText(text)
-  local lines = vim.split(text, "\n", { plain = true })
-
-  for i, line in ipairs(lines) do
-    if line ~= "" then
-      vim.fn.VimuxSendText(line)
-    end
-
-    if i < #lines then
-      vim.fn.VimuxSendKeys("S-Enter")
-    end
-  end
+  send_to_pane(pane_id, "@" .. path .. " ")
+  focus_pane(pane_id)
 end
 
