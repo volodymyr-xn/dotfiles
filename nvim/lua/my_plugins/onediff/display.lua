@@ -87,11 +87,12 @@ function M.open_file_with_diff(file, hunks, base_ref, staged_hunks)
 
   vim.api.nvim_buf_set_name(buf, "[OneDiff] " .. file.path)
 
-  local ext = file.path:match("%.(%w+)$")
-  if ext then
-    local ft = vim.filetype.match({ filename = file.path })
-    if ft then
-      vim.bo[buf].filetype = ft
+  local ft = vim.filetype.match({ filename = file.path })
+  if ft then
+    -- Use treesitter/syntax directly to avoid triggering FileType autocmds (LSP, formatters, etc.)
+    local lang = vim.treesitter.language.get_lang(ft) or ft
+    if not pcall(vim.treesitter.start, buf, lang) then
+      vim.bo[buf].syntax = ft
     end
   end
 
@@ -261,11 +262,12 @@ function M.render_deleted_file(file, base_ref, target_win)
   vim.bo[buf].bufhidden = "wipe"
   vim.api.nvim_buf_set_name(buf, "[deleted] " .. file.path)
 
-  local ext = file.path:match("%.(%w+)$")
-  if ext then
-    local ft = vim.filetype.match({ filename = file.path })
-    if ft then
-      vim.bo[buf].filetype = ft
+  local ft = vim.filetype.match({ filename = file.path })
+  if ft then
+    -- Use treesitter/syntax directly to avoid triggering FileType autocmds (LSP, formatters, etc.)
+    local lang = vim.treesitter.language.get_lang(ft) or ft
+    if not pcall(vim.treesitter.start, buf, lang) then
+      vim.bo[buf].syntax = ft
     end
   end
 

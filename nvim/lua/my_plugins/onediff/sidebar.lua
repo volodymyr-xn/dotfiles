@@ -5,6 +5,25 @@ local api = vim.api
 M.collapsed_folders = {}
 M.folder_line_map = {}
 M.file_line_map = {}
+M.flat_mode = false
+
+local PREFS_PATH = vim.fn.stdpath("data") .. "/onediff_sidebar_prefs.json"
+
+local function load_prefs()
+  local ok, data = pcall(vim.fn.readfile, PREFS_PATH)
+  if not ok or #data == 0 then return {} end
+  local decoded = vim.json.decode(table.concat(data, "\n"))
+  return decoded or {}
+end
+
+local function save_prefs(prefs)
+  pcall(vim.fn.writefile, { vim.json.encode(prefs) }, PREFS_PATH)
+end
+
+do
+  local prefs = load_prefs()
+  M.flat_mode = prefs.flat_mode == true
+end
 
 local function get_file_icon(filename)
   local ok, devicons = pcall(require, "nvim-web-devicons")
@@ -267,7 +286,8 @@ function M.render()
 
   local changes_title = "Changes"
   local changes_count = "(" .. #files .. ")"
-  table.insert(lines, changes_title .. " " .. changes_count)
+  local mode_label = M.flat_mode and "  ≡" or ""
+  table.insert(lines, changes_title .. " " .. changes_count .. mode_label)
   table.insert(hl_marks, { line = 2, col = 0, end_col = #changes_title, hl = "OneDiffPanelTitle" })
   table.insert(hl_marks, { line = 2, col = #changes_title + 1, end_col = #changes_title + 1 + #changes_count, hl = "OneDiffPanelCount" })
 
@@ -278,9 +298,14 @@ function M.render()
     M.file_line_map = {}
     M.folder_line_map = {}
 
-    local tree = M.build_file_tree(files)
     local line_idx = #lines
-    M.render_tree(tree, lines, hl_marks, line_idx, 0, current_idx, files)
+
+    if M.flat_mode then
+      M.render_flat_list(files, lines, hl_marks, line_idx, current_idx)
+    else
+      local tree = M.build_file_tree(files)
+      M.render_tree(tree, lines, hl_marks, line_idx, 0, current_idx, files)
+    end
   end
 
   vim.bo[buf].modifiable = true
@@ -528,6 +553,76 @@ function M.render_tree(node, lines, hl_marks, start_line, depth, current_idx, al
   end
 
   return line_idx
+end
+
+-- Renders a flat list of files with no directory rows — full path shown for context.
+function M.render_flat_list(files, lines, hl_marks, start_line, current_idx)
+  local line_idx = start_line
+
+  for i, file in ipairs(files) do
+    local status_icon, status_hl = get_file_status_icon(file)
+    local basename = file.path:match("[^/]+$") or file.path
+    local icon, icon_hl = get_file_icon(basename)
+    local is_selected = i == current_idx
+    local file_hl = is_selected and "OneDiffPanelSelected" or "OneDiffPanelFileName"
+
+    local insertions = file.insertions or 0
+    local deletions = file.deletions or 0
+    local stats_str = ""
+    if insertions > 0 or deletions > 0 then
+      stats_str = " " .. insertions .. ", " .. deletions
+    end
+
+    local status_display_width = vim.fn.strdisplaywidth(status_icon)
+    local status_padding = string.rep(" ", math.max(0, 3 - status_display_width))
+    local line = " " .. status_icon .. status_padding .. " " .. icon .. " " .. file.path .. stats_str
+
+    table.insert(lines, line)
+    M.file_line_map[line_idx + 1] = i
+
+    local col = 1
+    if status_hl == "mixed" then
+      table.insert(hl_marks, { line = line_idx, col = col, end_col = col + #ICON_PLUS, hl = "OneDiffStatusAdded", priority = 200 })
+      table.insert(hl_marks, { line = line_idx, col = col + #ICON_PLUS + 1, end_col = col + #ICON_PLUS + 1 + #ICON_MINUS, hl = "OneDiffStatusDeleted", priority = 200 })
+    else
+      table.insert(hl_marks, { line = line_idx, col = col, end_col = col + #status_icon, hl = status_hl, priority = 200 })
+    end
+
+    col = 1 + #status_icon + #status_padding + 1
+    if icon_hl then
+      table.insert(hl_marks, { line = line_idx, col = col, end_col = col + #icon, hl = icon_hl })
+    end
+
+    col = col + #icon + 1
+    table.insert(hl_marks, { line = line_idx, col = col, end_col = col + #file.path, hl = file_hl, priority = 150 })
+
+    if #stats_str > 0 then
+      local stats_start = col + #file.path
+      local comma_pos = stats_str:find(",")
+      if comma_pos then
+        table.insert(hl_marks, { line = line_idx, col = stats_start, end_col = stats_start + comma_pos, hl = "OneDiffPanelInsertions", priority = 150 })
+        table.insert(hl_marks, { line = line_idx, col = stats_start + comma_pos, end_col = stats_start + #stats_str, hl = "OneDiffPanelDeletions", priority = 150 })
+      end
+    end
+
+    if is_selected then
+      table.insert(hl_marks, { line = line_idx, col = 0, end_col = #line, hl = "OneDiffCursorLine", priority = 50 })
+    end
+
+    line_idx = line_idx + 1
+  end
+
+  return line_idx
+end
+
+-- Toggles between tree and flat file-list mode, persisting the preference.
+function M.toggle_flat_mode()
+  M.flat_mode = not M.flat_mode
+  local prefs = load_prefs()
+  prefs.flat_mode = M.flat_mode
+  save_prefs(prefs)
+  M.render()
+  vim.notify("OneDiff: " .. (M.flat_mode and "flat" or "tree") .. " mode")
 end
 
 function M.get_file_line(file_idx)
@@ -794,6 +889,7 @@ function M.setup_keymaps(buf)
   vim.keymap.set("n", "<Esc>", onediff.close, opts)
   vim.keymap.set("n", "<Leader>e", onediff.refresh, opts)
   vim.keymap.set("n", "sf", onediff.open_or_focus_and_refresh, opts)
+  vim.keymap.set("n", "st", M.toggle_flat_mode, opts)
 
   vim.keymap.set("n", "`", function()
     local session = require("my_plugins.onediff.session")
