@@ -1,5 +1,7 @@
 local M = {}
 
+local root = require("custom_file_selectors.root")
+
 local function window_config()
   return {
     height = math.floor(vim.o.lines * 0.9),
@@ -17,7 +19,7 @@ local win_opts = {
 }
 
 function M.find_files()
-  pick().builtin.files({ tool = "fd" }, win_opts)
+  pick().builtin.files({ tool = "fd", cwd = root.get() }, win_opts)
 end
 
 function M.find_sibling_files()

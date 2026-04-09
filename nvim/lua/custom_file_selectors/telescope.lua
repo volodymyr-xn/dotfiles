@@ -1,11 +1,13 @@
 local M = {}
 
+local root = require("custom_file_selectors.root")
+
 local function builtin()
   return require("telescope.builtin")
 end
 
 function M.find_files()
-  builtin().find_files({ previewer = false })
+  builtin().find_files({ previewer = false, cwd = root.get() })
 end
 
 function M.find_sibling_files()

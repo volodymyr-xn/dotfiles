@@ -1,5 +1,7 @@
 local M = {}
 
+local root = require("custom_file_selectors.root")
+
 local setup_done = false
 
 function M.setup()
@@ -122,7 +124,7 @@ function M.setup()
 end
 
 function M.find_files()
-  vim.cmd("FZF")
+  vim.cmd("FZF " .. vim.fn.fnameescape(root.get()))
 end
 
 function M.find_sibling_files()

@@ -1,5 +1,7 @@
 local M = {}
 
+local root = require("custom_file_selectors.root")
+
 local function fff()
   return require("fff")
 end
@@ -16,7 +18,7 @@ end
 function M.find_files()
   local ok, f = pcall(fff)
   if ok and f.files then
-    f.files()
+    f.files({ cwd = root.get() })
   else
     fallback("find_files")
   end

@@ -14,72 +14,17 @@ local NEWLINE_KEYS = { claude = "S-Enter", agent = "C-j" }
 
 local M = {}
 
-function M.send_file()
-  local file = vim.fn.expand("%")
+-- Returns path relative to git root or cwd, whichever applies
+local function relative_path(path)
+  local absolute = vim.fn.fnamemodify(path, ":p")
+  local git_root = vim.fn.systemlist("git rev-parse --show-toplevel 2>/dev/null")[1]
+  local root = (git_root and git_root ~= "" and not git_root:match("^fatal")) and git_root or vim.fn.getcwd()
 
-  local function handler(pane)
-    send_to_pane(pane.pane_id, "@" .. file .. " ")
-    focus_pane(pane.pane_id)
+  if vim.startswith(absolute, root .. "/") then
+    return absolute:sub(#root + 2)
   end
 
-  with_ai_pane(handler)
-end
-
-function M.send_selection()
-  local mode = vim.fn.mode()
-
-  if mode ~= "v" and mode ~= "V" then
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "x", false)
-    vim.notify("Visual-block mode not supported", vim.log.levels.WARN)
-    return
-  end
-
-  local start_pos = vim.fn.getpos("v")
-  local end_pos = vim.fn.getpos(".")
-
-  local start_line = start_pos[2]
-  local start_col = start_pos[3]
-  local end_line = end_pos[2]
-  local end_col = end_pos[3]
-
-  if start_line > end_line or (start_line == end_line and start_col > end_col) then
-    start_line, end_line = end_line, start_line
-    start_col, end_col = end_col, start_col
-  end
-
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "x", false)
-
-  local text
-
-  if mode == "v" then
-    local all_lines = vim.fn.getline(start_line, end_line)
-    all_lines[#all_lines] = all_lines[#all_lines]:sub(1, end_col)
-    all_lines[1] = all_lines[1]:sub(start_col)
-    text = table.concat(dedent_lines(all_lines), "\n")
-  else
-    local lines = dedent_lines(vim.fn.getline(start_line, end_line))
-    text = table.concat(lines, "\n")
-  end
-
-  local file = vim.fn.expand("%")
-
-  local function handler(pane)
-    local indented = text:gsub("([^\n]+)", "  %1")
-    send_multiline_text(pane.pane_id, "@" .. file .. " \n```\n" .. indented .. "\n```", pane.name)
-    vim.fn.VimuxSendKeys(NEWLINE_KEYS[pane.name] or "S-Enter")
-    focus_pane(pane.pane_id)
-  end
-
-  with_ai_pane(handler)
-end
-
-function M.send_path(path)
-  local function handler(pane)
-    send_to_pane(pane.pane_id, "@" .. path .. " ")
-    focus_pane(pane.pane_id)
-  end
-
-  with_ai_pane(handler)
+  return absolute
 end
 
 -- Walks a process tree from root_pid; returns matched AI process name or nil
@@ -207,6 +152,7 @@ local function send_multiline_text(pane_id, text, process_name)
   end
 end
 
+-- Strips the shared leading whitespace from a list of lines
 local function dedent_lines(lines)
   local min_indent = math.huge
 
@@ -226,6 +172,76 @@ local function dedent_lines(lines)
   end
 
   return result
+end
+
+function M.send_file()
+  local file = relative_path(vim.fn.expand("%:p"))
+
+  local function handler(pane)
+    send_to_pane(pane.pane_id, "@" .. file .. " ")
+    focus_pane(pane.pane_id)
+  end
+
+  with_ai_pane(handler)
+end
+
+function M.send_selection()
+  local mode = vim.fn.mode()
+
+  if mode ~= "v" and mode ~= "V" then
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "x", false)
+    vim.notify("Visual-block mode not supported", vim.log.levels.WARN)
+    return
+  end
+
+  local start_pos = vim.fn.getpos("v")
+  local end_pos = vim.fn.getpos(".")
+
+  local start_line = start_pos[2]
+  local start_col = start_pos[3]
+  local end_line = end_pos[2]
+  local end_col = end_pos[3]
+
+  if start_line > end_line or (start_line == end_line and start_col > end_col) then
+    start_line, end_line = end_line, start_line
+    start_col, end_col = end_col, start_col
+  end
+
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "x", false)
+
+  local text
+
+  if mode == "v" then
+    local all_lines = vim.fn.getline(start_line, end_line)
+    all_lines[#all_lines] = all_lines[#all_lines]:sub(1, end_col)
+    all_lines[1] = all_lines[1]:sub(start_col)
+    text = table.concat(dedent_lines(all_lines), "\n")
+  else
+    local lines = dedent_lines(vim.fn.getline(start_line, end_line))
+    text = table.concat(lines, "\n")
+  end
+
+  local file = relative_path(vim.fn.expand("%:p"))
+
+  local function handler(pane)
+    local indented = text:gsub("([^\n]+)", "  %1")
+    send_multiline_text(pane.pane_id, "@" .. file .. " \n```\n" .. indented .. "\n```", pane.name)
+    vim.fn.VimuxSendKeys(NEWLINE_KEYS[pane.name] or "S-Enter")
+    focus_pane(pane.pane_id)
+  end
+
+  with_ai_pane(handler)
+end
+
+function M.send_path(path)
+  local relative = relative_path(path)
+
+  local function handler(pane)
+    send_to_pane(pane.pane_id, "@" .. relative .. " ")
+    focus_pane(pane.pane_id)
+  end
+
+  with_ai_pane(handler)
 end
 
 

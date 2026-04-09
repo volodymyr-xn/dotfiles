@@ -1,5 +1,7 @@
 local M = {}
 
+local root = require("custom_file_selectors.root")
+
 local defaults = {
   winopts = { height = 0.99, width = 0.96 },
   fzf_opts = { ["--layout"] = "default" },
@@ -14,7 +16,7 @@ local function fzf()
 end
 
 function M.find_files()
-  fzf().files(with_defaults({ hidden = true }))
+  fzf().files(with_defaults({ hidden = true, cwd = root.get() }))
 end
 
 function M.find_sibling_files()
