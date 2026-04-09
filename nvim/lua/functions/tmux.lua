@@ -16,7 +16,7 @@ local M = {}
 
 -- Returns path relative to git root or cwd, whichever applies
 local function relative_path(path)
-  local absolute = vim.fn.fnamemodify(path, ":p")
+  local absolute = vim.fn.resolve(vim.fn.fnamemodify(path, ":p"))
   local git_root = vim.fn.systemlist("git rev-parse --show-toplevel 2>/dev/null")[1]
   local root = (git_root and git_root ~= "" and not git_root:match("^fatal")) and git_root or vim.fn.getcwd()
 
