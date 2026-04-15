@@ -81,6 +81,59 @@ end
 
 local relative_path_flag = 1
 
+-- Returns searchcount table only when a search is active
+local function get_search_count()
+  if vim.v.hlsearch == 0 then return nil end
+  local ok, result = pcall(vim.fn.searchcount, { recompute = false, maxcount = 999 })
+  if not ok or result.current == nil then return nil end
+  return result
+end
+
+local search_count_components = {
+  {
+    function()
+      return get_search_count() and "[" or ""
+    end,
+    color = { fg = "#6b7280" },
+    padding = 0,
+    separator = "",
+  },
+  {
+    function()
+      local sc = get_search_count()
+      return sc and tostring(sc.current) or ""
+    end,
+    color = { fg = "#ff9e64", gui = "bold" },
+    padding = 0,
+    separator = "",
+  },
+  {
+    function()
+      return get_search_count() and "/" or ""
+    end,
+    color = { fg = "#6b7280" },
+    padding = 0,
+    separator = "",
+  },
+  {
+    function()
+      local sc = get_search_count()
+      return sc and tostring(sc.total) or ""
+    end,
+    color = { fg = "#a0aec0" },
+    padding = 0,
+    separator = "",
+  },
+  {
+    function()
+      return get_search_count() and "]" or ""
+    end,
+    color = { fg = "#6b7280" },
+    padding = { left = 0, right = 1 },
+    separator = "",
+  },
+}
+
 -- local function is_yaml()
 --   return vim.bo.filetype == "yaml"
 -- end
@@ -123,6 +176,7 @@ require('lualine').setup {
     lualine_a = {'mode'},
     lualine_b = {''},
     lualine_c = {
+      unpack(search_count_components),
       {
         "filename",
         path = relative_path_flag,

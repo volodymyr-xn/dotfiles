@@ -222,10 +222,14 @@ function M.send_selection()
   end
 
   local file = relative_path(vim.fn.expand("%:p"))
+  -- Append :line for single line, or #Lstart-end range for multiline
+  local file_ref = (start_line == end_line)
+    and (file .. ":" .. start_line)
+    or (file .. "#L" .. start_line .. "-" .. end_line)
 
   local function handler(pane)
     local indented = text:gsub("([^\n]+)", "  %1")
-    send_multiline_text(pane.pane_id, "@" .. file .. " \n```\n" .. indented .. "\n```", pane.name)
+    send_multiline_text(pane.pane_id, "@" .. file_ref .. " \n```\n" .. indented .. "\n```", pane.name)
     vim.fn.VimuxSendKeys(NEWLINE_KEYS[pane.name] or "S-Enter")
     focus_pane(pane.pane_id)
   end
