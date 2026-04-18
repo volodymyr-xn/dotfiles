@@ -9,6 +9,12 @@ local PROCESS_TREE_DEPTH = 3
 -- If process not found increase depth to 4 or 5
 -- local PROCESS_TREE_DEPTH = 4
 
+-- Each entry matches a running pane process and carries the command to restart it
+local WATCH_COMMANDS = {
+  { pattern = "build:js:esbuild:watch", command = "yarn run build:js:esbuild:watch" },
+  { pattern = "build:css:watch", command = "yarn run build:css:watch" },
+}
+
 local NO_AI_PANE_MSG = "No tmux pane with AI process found"
 local NEWLINE_KEYS = { claude = "S-Enter", agent = "C-j" }
 
@@ -67,6 +73,50 @@ local function find_ai_panes()
         table.insert(matches, {
           pane_id = pane_id, name = name, index = pane_index, order = #matches + 1,
         })
+      end
+    end
+  end
+
+  return matches
+end
+
+-- Walks the process tree from root_pid checking full args; returns first matched watch spec or nil
+local function find_watch_command(root_pid)
+  local pids = root_pid
+
+  for _ = 1, PROCESS_TREE_DEPTH do
+    local args = vim.fn.system("ps -o args= -p " .. pids .. " 2>/dev/null")
+
+    for _, spec in ipairs(WATCH_COMMANDS) do
+      if args:match(spec.pattern) then return spec end
+    end
+
+    local output = vim.fn.system("pgrep -P " .. pids .. " 2>/dev/null")
+    local children = vim.tbl_filter(function(s) return s ~= "" end, vim.split(output, "\n"))
+
+    if #children == 0 then return nil end
+
+    pids = table.concat(children, ",")
+  end
+
+  return nil
+end
+
+-- Scans all panes in the current tmux session; returns list of { pane_id, command }
+local function find_watch_panes()
+  local panes_output = vim.fn.system(
+    "tmux list-panes -s -F '#{pane_id} #{pane_pid}'"
+  )
+  local matches = {}
+
+  for line in panes_output:gmatch("[^\n]+") do
+    local pane_id, pane_pid = line:match("(%S+)%s+(%S+)")
+
+    if pane_id and pane_pid then
+      local spec = find_watch_command(pane_pid)
+
+      if spec then
+        table.insert(matches, { pane_id = pane_id, command = spec })
       end
     end
   end
@@ -235,6 +285,26 @@ function M.send_selection()
   end
 
   with_ai_pane(handler)
+end
+
+-- Finds all panes in the current session running yarn watch commands and restarts each one
+function M.restart_watchers()
+  local panes = find_watch_panes()
+
+  if #panes == 0 then
+    vim.notify("No yarn watch panes found in current tmux session", vim.log.levels.WARN)
+    return
+  end
+
+  for _, pane in ipairs(panes) do
+    local pane_id = pane.pane_id
+    vim.fn.system(
+      "tmux send-keys -t " .. pane_id .. " C-c " ..
+      vim.fn.shellescape(pane.command.command) .. " Enter"
+    )
+  end
+
+  vim.notify("Restarted " .. #panes .. " watcher(s)", vim.log.levels.INFO)
 end
 
 function M.send_path(path)
