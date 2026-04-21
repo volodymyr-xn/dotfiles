@@ -36,3 +36,4 @@ C_BRIEF/
 c_commands/
 .playwright-mcp/
 .ruby_lsp
+.nvim-asset-watcher-commands

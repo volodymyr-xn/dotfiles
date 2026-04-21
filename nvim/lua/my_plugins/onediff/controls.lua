@@ -176,6 +176,69 @@ function M.prev_change()
   display.render_current()
 end
 
+function M.next_hunk()
+  local session = require("my_plugins.onediff.session")
+  local diff_parse = require("my_plugins.onediff.diff_parse")
+
+  if not session.is_open() then return end
+
+  local hunks = session.get_hunks()
+  if not hunks or #hunks == 0 then return end
+
+  local change_blocks = diff_parse.get_change_lines_in_buffer(hunks)
+  if #change_blocks == 0 then return end
+
+  local current_line = vim.api.nvim_win_get_cursor(0)[1]
+
+  for _, block in ipairs(change_blocks) do
+    if block.start > current_line then
+      safe_set_cursor(block.start)
+      return
+    elseif current_line >= block.start and current_line <= block.finish then
+      for _, next_block in ipairs(change_blocks) do
+        if next_block.start > block.finish then
+          safe_set_cursor(next_block.start)
+          return
+        end
+      end
+      return
+    end
+  end
+
+  safe_set_cursor(change_blocks[1].start)
+end
+
+function M.prev_hunk()
+  local session = require("my_plugins.onediff.session")
+  local diff_parse = require("my_plugins.onediff.diff_parse")
+
+  if not session.is_open() then return end
+
+  local hunks = session.get_hunks()
+  if not hunks or #hunks == 0 then return end
+
+  local change_blocks = diff_parse.get_change_lines_in_buffer(hunks)
+  if #change_blocks == 0 then return end
+
+  local current_line = vim.api.nvim_win_get_cursor(0)[1]
+
+  for i = #change_blocks, 1, -1 do
+    local block = change_blocks[i]
+    if block.finish < current_line then
+      safe_set_cursor(block.start)
+      return
+    elseif current_line >= block.start and current_line <= block.finish then
+      for j = i - 1, 1, -1 do
+        safe_set_cursor(change_blocks[j].start)
+        return
+      end
+      return
+    end
+  end
+
+  safe_set_cursor(change_blocks[#change_blocks].start)
+end
+
 function M.goto_hunk(hunk_index)
   local session = require("my_plugins.onediff.session")
 

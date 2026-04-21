@@ -70,6 +70,7 @@ require("lazy").setup({
   "echasnovski/mini.icons",
   { "echasnovski/mini.pick", version = "*" },
   { "echasnovski/mini.extra", version = "*" },
+  { "echasnovski/mini.ai", version = "*" },
   {
     "dmtrKovalenko/fff.nvim",
     build = ':lua require("fff.download").download_or_build_binary()',
@@ -250,6 +251,14 @@ require("lazy").setup({
     "nvim-treesitter/nvim-treesitter"
   },
 
+  {
+    "nvim-treesitter/nvim-treesitter-context"
+  },
+
+  {
+    "chrisgrieser/nvim-spider"
+  },
+
   -- Better yaml
   "cuducos/yaml.nvim",
 
@@ -357,6 +366,9 @@ require("lazy").setup({
 
   -- Switch between multiline and signleline code
   "AndrewRadev/splitjoin.vim",
+
+  -- Treesitter-aware split/join (smarter than splitjoin.vim)
+  { "Wansmer/treesj", dependencies = { "nvim-treesitter/nvim-treesitter" } },
 
   -- Switch between different things
   -- 'AndrewRadev/switch.vim',

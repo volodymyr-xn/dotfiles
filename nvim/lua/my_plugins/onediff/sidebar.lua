@@ -875,7 +875,7 @@ function M.setup_keymaps(buf)
     local session = require("my_plugins.onediff.session")
     local sidebar_win = session.get_sidebar_win()
     session.focus_diff_window()
-    onediff.goto_next_change()
+    require("my_plugins.onediff.controls").next_hunk()
     if sidebar_win and api.nvim_win_is_valid(sidebar_win) then
       api.nvim_set_current_win(sidebar_win)
     end
@@ -912,16 +912,22 @@ function M.setup_keymaps(buf)
 
   vim.keymap.set("n", "j", function()
     local cursor = api.nvim_win_get_cursor(0)
-    local lines = api.nvim_buf_line_count(0)
-    if cursor[1] < lines then
-      api.nvim_win_set_cursor(0, { cursor[1] + 1, 0 })
+    local total = api.nvim_buf_line_count(0)
+    for line = cursor[1] + 1, total do
+      if M.file_line_map[line] or M.folder_line_map[line] then
+        api.nvim_win_set_cursor(0, { line, 0 })
+        return
+      end
     end
   end, opts)
 
   vim.keymap.set("n", "k", function()
     local cursor = api.nvim_win_get_cursor(0)
-    if cursor[1] > 1 then
-      api.nvim_win_set_cursor(0, { cursor[1] - 1, 0 })
+    for line = cursor[1] - 1, 1, -1 do
+      if M.file_line_map[line] or M.folder_line_map[line] then
+        api.nvim_win_set_cursor(0, { line, 0 })
+        return
+      end
     end
   end, opts)
 
@@ -934,7 +940,7 @@ function M.setup_keymaps(buf)
     local session = require("my_plugins.onediff.session")
     local sidebar_win = session.get_sidebar_win()
     session.focus_diff_window()
-    onediff.goto_prev_change()
+    require("my_plugins.onediff.controls").prev_hunk()
     if sidebar_win and api.nvim_win_is_valid(sidebar_win) then
       api.nvim_set_current_win(sidebar_win)
     end
@@ -944,7 +950,7 @@ function M.setup_keymaps(buf)
     local session = require("my_plugins.onediff.session")
     local sidebar_win = session.get_sidebar_win()
     session.focus_diff_window()
-    onediff.goto_prev_change()
+    require("my_plugins.onediff.controls").prev_hunk()
     if sidebar_win and api.nvim_win_is_valid(sidebar_win) then
       api.nvim_set_current_win(sidebar_win)
     end
@@ -966,7 +972,7 @@ function M.setup_keymaps(buf)
     end
   end, opts)
 
-  vim.keymap.set("n", "<Leader>t", function()
+  vim.keymap.set("n", "sr", function()
     vim.g.onediff_live_nav = not vim.g.onediff_live_nav
     local state = vim.g.onediff_live_nav and "ON" or "OFF"
     vim.notify("OneDiff: Live navigation " .. state)

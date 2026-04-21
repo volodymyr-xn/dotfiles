@@ -34,7 +34,14 @@ require("nvim-treesitter.configs").setup({
   -- },
   highlight = {
     enable = true,
-    disable = { "embedded_template" },
+    -- TEMP_FIX: nvim-treesitter-context crashes on 0.12 with ':range() on nil' inside markdown.
+    disable = function(lang, _)
+      if lang == "embedded_template" then return true end
+      if lang == "markdown" or lang == "markdown_inline" then
+        return TempFixActive("treesitter markdown highlight", "2026-05-05")
+      end
+      return false
+    end,
     additional_vim_regex_highlighting = { "ruby" },
   }
  })

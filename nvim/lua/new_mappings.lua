@@ -1,4 +1,5 @@
 local tmux = require("functions.tmux")
+local tmux_watchers = require("functions.tmux_asset_watchers")
 
 -- Copy relative path of the current file to the clipboard
 -- vim.api.nvim_set_keymap('n', '`', ':let @+ = expand("%")<CR>', { noremap = true, silent = true })
@@ -56,11 +57,14 @@ vim.keymap.set("n", "<leader>K", CustomInsertDebug, { noremap = true, silent = t
 vim.keymap.set("n", "<Leader>`", tmux.send_file, { noremap = true, silent = true, desc = "Send file path to tmux" })
 vim.keymap.set("v", "<Leader>`", tmux.send_selection, { noremap = true, silent = true, desc = "Send file + selection to tmux" })
 
+-- Restart all yarn watch commands running anywhere in the current tmux session
+vim.keymap.set("n", "<Leader>rw", tmux_watchers.restart_watchers, { noremap = true, silent = true, desc = "Restart yarn watch commands" })
+
 -- vim.keymap.set('n', 's', ':tabnext<CR>', { noremap = true })
 
 -- vim.keymap.set('n', '@', highlight_word_under_cursor, { noremap = true, silent = true })
--- Search word under cursor backwards
-vim.keymap.set('n', '#', "*N", { noremap = true, silent = true, desc = "Search word backwards" })
+-- Search word under cursor forwards
+vim.keymap.set('n', '#', "*N", { noremap = true, silent = true, desc = "Search word forwards" })
 
 
 -- vim.keymap.set('n', 'K', ':OutlineFocus<CR>', { noremap = true, silent = true })
