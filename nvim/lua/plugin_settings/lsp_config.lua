@@ -203,25 +203,19 @@ vim.lsp.enable("herb_ls")
 ---------------------------------
 -- Floating diagnostics message
 ---------------------------------
+local sev = vim.diagnostic.severity
 vim.diagnostic.config({
-  -- float = { source = "always", border = border },
-  float = { source = "always"},
-  -- virtual_text = true,
-  signs = true,
-  virtual_text = {
-    source = "always",  -- Or "if_many"
-    -- prefix = '⚠️',
-  },
-  -- if you want diagnostics to update while in insert mode.
+  float = { source = "always" },
+  virtual_text = { source = "always" },
   update_in_insert = false,
-  severity_sort = true
+  severity_sort = true,
+  signs = {
+    text = {
+      [sev.ERROR] = "⛔",
+      [sev.WARN]  = "⚠️",
+      [sev.HINT]  = "💡",
+      [sev.INFO]  = "⚠️",
+    },
+  },
 })
---
-
--- local signs = { Error = "⛔", Warn = "🔶", Hint = "💡", Info = "🔶" }
-local signs = { Error = "⛔", Warn = "⚠️", Hint = "💡", Info = "⚠️" }
-for type, icon in pairs(signs) do
-  local hl = "DiagnosticSign" .. type
-  vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-end
 

@@ -4,6 +4,45 @@ local instances = {}
 local next_instance_id = 1
 local active_instance_id = nil
 
+local state_file = vim.fn.stdpath("data") .. "/onediff_nav.json"
+
+local function read_persisted()
+  local f = io.open(state_file, "r")
+  if not f then return {} end
+  local raw = f:read("*a")
+  f:close()
+  local ok, data = pcall(vim.fn.json_decode, raw)
+  return (ok and type(data) == "table") and data or {}
+end
+
+local function write_persisted(data)
+  local f = io.open(state_file, "w")
+  if not f then return end
+  f:write(vim.fn.json_encode(data))
+  f:close()
+end
+
+local function persist_current(state)
+  if not state then return end
+  local file = state.changed_files and state.changed_files[state.current_index]
+  if not file then return end
+  local all = read_persisted()
+  all[state.working_dir] = { base_ref = state.base_ref, current_file = file.path }
+  write_persisted(all)
+end
+
+local function restore_index(state)
+  local all = read_persisted()
+  local saved = all[state.working_dir]
+  if not saved or saved.base_ref ~= state.base_ref then return end
+  for i, f in ipairs(state.changed_files) do
+    if f.path == saved.current_file then
+      state.current_index = i
+      return
+    end
+  end
+end
+
 local function create_instance()
   local id = next_instance_id
   next_instance_id = next_instance_id + 1
@@ -86,6 +125,8 @@ function M.start(target_file_path)
         end
       end
     end
+  else
+    restore_index(state)
   end
   
   state.active = true
@@ -135,6 +176,7 @@ function M.set_current_index(idx)
   
   if idx >= 1 and idx <= #state.changed_files then
     state.current_index = idx
+    persist_current(state)
   end
 end
 

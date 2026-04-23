@@ -57,6 +57,7 @@ require("nvim-treesitter.configs").setup({
 -- vim.api.nvim_set_hl(0, "@function.builtin.ruby", { link = "Statement" })
 
 
+-- ============ Custom highlight overides ==================
 vim.api.nvim_set_hl(0, "@string.special.symbol.ruby", {  })
 vim.api.nvim_set_hl(0, "@variable.member.ruby", {})
 vim.api.nvim_set_hl(0, "@function.builtin.ruby", { })
