@@ -7,7 +7,7 @@ require("plugin_settings/telescope")
 require("plugin_settings/unified_picker_keymaps")
 
 require('plugin_settings/treesitter')
-require('plugin_settings/treesitter_context')
+-- require('plugin_settings/treesitter_context')
 require('plugin_settings/nvim_spider')
 require('plugin_settings/mini_ai')
 require('plugin_settings/treesj')

@@ -3,6 +3,10 @@
 --   filetypes = { "html" , "eruby" },
 -- })
 
+-- NOTE: nvim-treesitter/nvim-treesitter was archived Apr 3 2026 (maintainer burnout after the
+-- 0.12 rewrite). We stay on it because the community fork (neovim-treesitter/nvim-treesitter)
+-- is still an incompatible early rewrite. The 0.12 breaking change (iter_matches now returns
+-- TSNode[] instead of TSNode) is patched in functions/nvim_compat.lua via a get_range guard.
 require("nvim-treesitter.configs").setup({
   -- auto_install = true,
 
@@ -20,7 +24,9 @@ require("nvim-treesitter.configs").setup({
     "sql",
     "vim",
     "yaml",
-    "embedded_template"
+    "embedded_template",
+    "markdown",
+    "markdown_inline",
   },
   ignore_install = { "lua" },
 
@@ -34,12 +40,8 @@ require("nvim-treesitter.configs").setup({
   -- },
   highlight = {
     enable = true,
-    -- TEMP_FIX: nvim-treesitter-context crashes on 0.12 with ':range() on nil' inside markdown.
     disable = function(lang, _)
       if lang == "embedded_template" then return true end
-      if lang == "markdown" or lang == "markdown_inline" then
-        return TempFixActive("treesitter markdown highlight", "2026-05-05")
-      end
       return false
     end,
     additional_vim_regex_highlighting = { "ruby" },
