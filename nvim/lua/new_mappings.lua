@@ -77,10 +77,8 @@ vim.keymap.set('n', '#', "*N", { noremap = true, silent = true, desc = "Search w
 
 vim.keymap.set('n', 'go', ':Outline<CR>', { noremap = true, silent = true, desc = "Outline" })
 
-vim.keymap.set('n', '<Leader>e', function()
-  local ok, onediff = pcall(require, "my_plugins.onediff")
-  if ok then onediff.refresh() end
-end, { noremap = true, silent = true, desc = "Refresh OneDiff diffs" })
+-- Reload current file from disk (OneDiff buffers have their own buffer-local <Leader>e)
+vim.keymap.set('n', '<Leader>e', '<Cmd>e!<CR>', { noremap = true, silent = true, desc = "Reload file" })
 
 -- Re-balance panes
 -- vim.api.nvim_set_keymap('n', '=', '<C-W>=', {noremap = true})
