@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# Regenerate ctags for the current directory
+ctags -R .

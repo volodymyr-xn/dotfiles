@@ -153,7 +153,7 @@ require('lualine').setup {
     icons_enabled = true,
     -- theme = 'horizon',
     -- theme = 'gruvbox',
-    theme = "catppuccin",
+    theme = "catppuccin-macchiato",
     -- theme = 'dracula',
     -- component_separators = { left = '|', right = '|'},
     component_separators = { left = '', right = ''},

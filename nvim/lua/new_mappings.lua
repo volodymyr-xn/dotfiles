@@ -77,8 +77,17 @@ vim.keymap.set('n', '#', "*N", { noremap = true, silent = true, desc = "Search w
 
 vim.keymap.set('n', 'go', ':Outline<CR>', { noremap = true, silent = true, desc = "Outline" })
 
+-- Reload current file from disk and flash a confirmation message that auto-clears after 1s
+local function reload_file_with_message()
+  vim.cmd('edit!')
+  vim.api.nvim_echo({ { "File reloaded", "MoreMsg" } }, false, {})
+  vim.defer_fn(function()
+    vim.api.nvim_echo({ { "" } }, false, {})
+  end, 1000)
+end
+
 -- Reload current file from disk (OneDiff buffers have their own buffer-local <Leader>e)
-vim.keymap.set('n', '<Leader>e', '<Cmd>e!<CR>', { noremap = true, silent = true, desc = "Reload file" })
+vim.keymap.set('n', '<Leader>e', reload_file_with_message, { noremap = true, silent = true, desc = "Reload file" })
 
 -- Re-balance panes
 -- vim.api.nvim_set_keymap('n', '=', '<C-W>=', {noremap = true})
