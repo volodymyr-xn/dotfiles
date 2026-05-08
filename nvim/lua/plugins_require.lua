@@ -4,7 +4,6 @@ require("plugin_settings/lualine")
 
 require("plugin_settings/fzf")
 require("plugin_settings/telescope")
-require("plugin_settings/unified_picker_keymaps")
 
 require('plugin_settings/treesitter')
 -- require('plugin_settings/treesitter_context')
