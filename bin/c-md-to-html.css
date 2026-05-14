@@ -1,0 +1,141 @@
+/* GitHub-like markdown stylesheet for c-md-to-image.
+ * Tuned for offscreen rendering at ~900px viewport width. */
+
+:root {
+  --fg: #1f2328;
+  --fg-muted: #59636e;
+  --bg: #ffffff;
+  --border: #d1d9e0;
+  --border-muted: #d1d9e0b3;
+  --accent: #0969da;
+  --code-bg: #f6f8fa;
+  --code-fg: #1f2328;
+  --quote-fg: #59636e;
+  --quote-border: #d1d9e0;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
+    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--fg);
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 40px 44px 56px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 28px 0 14px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 { font-size: 2em;    border-bottom: 1px solid var(--border-muted); padding-bottom: .35em; }
+h2 { font-size: 1.5em;  border-bottom: 1px solid var(--border-muted); padding-bottom: .3em; }
+h3 { font-size: 1.25em; }
+h4 { font-size: 1em; }
+h5 { font-size: .9em;  color: var(--fg-muted); }
+h6 { font-size: .85em; color: var(--fg-muted); }
+
+p, ul, ol, dl, blockquote, pre, table {
+  margin: 0 0 16px;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover { text-decoration: underline; }
+
+ul, ol { padding-left: 2em; }
+li + li { margin-top: 4px; }
+li > p { margin-top: 12px; }
+
+blockquote {
+  padding: 0 1em;
+  color: var(--quote-fg);
+  border-left: 4px solid var(--quote-border);
+}
+
+code, kbd, samp, pre {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+  font-size: 14px;
+}
+
+code {
+  padding: 2px 6px;
+  background: var(--code-bg);
+  border-radius: 6px;
+  color: var(--code-fg);
+}
+
+pre {
+  padding: 14px 16px;
+  background: var(--code-bg);
+  border-radius: 8px;
+  overflow: auto;
+  line-height: 1.45;
+}
+
+pre code {
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  font-size: 13.5px;
+  white-space: pre;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+
+th, td {
+  padding: 8px 13px;
+  border: 1px solid var(--border);
+}
+
+th {
+  background: var(--code-bg);
+  font-weight: 600;
+}
+
+tr:nth-child(2n) td { background: #f6f8fa80; }
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--border-muted);
+  margin: 24px 0;
+}
+
+img { max-width: 100%; height: auto; }
+
+kbd {
+  padding: 3px 6px;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1;
+}
+
+/* pandoc highlight (github style) — let pandoc's inline styles win,
+ * but keep the wrapper consistent with code blocks. */
+div.sourceCode { background: var(--code-bg); border-radius: 8px; }
+pre.sourceCode { margin: 0; }
+
+/* Task list checkboxes from GFM. */
+ul.task-list { list-style: none; padding-left: 1.4em; }
+ul.task-list li input[type="checkbox"] { margin-right: 0.4em; }

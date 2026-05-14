@@ -563,9 +563,11 @@ require("lazy").setup({
       triggers = {
         { "<leader>", mode = { "n", "v" } },
         { "s", mode = { "n" } },
+        { "<C-w>", mode = { "n" } },
       },
       spec = {
         { "s", group = "navigate/search" },
+        { "<C-w>", group = "windows" },
       },
     },
     keys = {
@@ -603,7 +605,12 @@ require("lazy").setup({
     build = function() vim.fn["mkdp#util#install"]() end,
   },
 
-  "folke/snacks.nvim",
+  {
+    "folke/snacks.nvim",
+    lazy = false,
+    priority = 1000,
+    opts = {},
+  },
   -- "coder/claudecode.nvim"
 
   -- {

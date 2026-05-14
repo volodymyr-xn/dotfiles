@@ -79,15 +79,12 @@ map("<Leader>b",
   function() R.call("find_resource_in_dir", "config/locales") end,
   "Find i18n files")
 
-map("<Leader>o",
-  function() CustomFileSelectors.live_grep_changed_files() end,
-  "Full text search in changed files")
 
 map("<Leader>qq",
   function() R.call("find_files_in_dirs", task_dirs) end,
   "Find files in task dirs")
 
-map("<Leader>x",
+map("si",
   function() R.call("buffer_fuzzy_find") end,
   "Fuzzy find in buffer")
 
@@ -95,17 +92,21 @@ map(",q",
   function() R.call("open_picker_menu") end,
   "Open picker menu")
 
+map("<Leader>o",
+  function() CustomFileSelectors.live_grep() end,
+  "Live grep (Ag)")
+
 map("<Leader>p",
   function() CustomFileSelectors.custom_full_text_search() end,
   "Custom full text search (fzf.vim)")
 
-map("sp",
-  function() CustomFileSelectors.live_grep() end,
-  "Live grep (Ag)")
-
 map("so",
   function() CustomFileSelectors.search_lines_in_all_buffers() end,
   "Search lines in all buffers")
+
+map("sp",
+  function() CustomFileSelectors.live_grep_changed_files() end,
+  "Full text search in changed files")
 
 map("sk",
   function() R.call("live_grep_in_dirs", notes_dirs) end,

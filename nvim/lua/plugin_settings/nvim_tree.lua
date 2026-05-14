@@ -91,8 +91,11 @@ vim.api.nvim_set_keymap("n", "<C-\\>", ":NvimTreeToggle<CR>", {noremap = true, s
 -- Find current file in NvimTree
 vim.api.nvim_set_keymap("n", "<Leader>0", ":NvimTreeFindFile<CR>", {noremap = true, silent = true, desc = "Find file in NvimTree"})
 
--- Disable json plugin conceal
 vim.g.vim_json_syntax_conceal = 0
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "json",
+  callback = function() vim.opt_local.conceallevel = 0 end,
+})
 
 -- vim.cmd("autocmd VimEnter * nnoremap <C-\\> :NERDTreeToggle<CR>")
 -- vim.cmd("autocmd VimEnter * nnoremap <Leader>0 :NERDTreeFind<CR>")

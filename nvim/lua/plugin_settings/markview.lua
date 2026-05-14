@@ -8,7 +8,13 @@ require("markview").setup({
     },
   },
   markdown = {
-    headings = { shift_width = 0 },
+    headings = {
+      shift_width = 0,
+      org_indent = true,
+      org_shift_width = 2,
+      org_shift_char = " ",
+      org_indent_wrap = true,
+    },
     list_items = {
       indent_size = 2,
       shift_width = 2,

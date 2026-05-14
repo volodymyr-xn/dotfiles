@@ -40,15 +40,28 @@ require("nvim-treesitter.configs").setup({
   -- },
   highlight = {
     enable = true,
-    disable = function(lang, _)
+    disable = function(lang, buf)
       if lang == "embedded_template" then return true end
+      if lang == "markdown" and vim.api.nvim_buf_line_count(buf) > 1000 then return true end
       return false
     end,
     additional_vim_regex_highlighting = { "ruby" },
   }
  })
 
- require('match-up').setup({
+-- Common shorthand aliases for fenced code block injection
+vim.treesitter.language.register('ruby', 'rb')
+vim.treesitter.language.register('javascript', 'js')
+vim.treesitter.language.register('typescript', 'ts')
+vim.treesitter.language.register('bash', { 'sh', 'shell', 'zsh' })
+vim.treesitter.language.register('python', 'py')
+vim.treesitter.language.register('go', 'golang')
+vim.treesitter.language.register('elixir', { 'ex', 'exs' })
+vim.treesitter.language.register('yaml', 'yml')
+vim.treesitter.language.register('vim', 'viml')
+vim.treesitter.language.register('embedded_template', 'erb')
+
+require('match-up').setup({
    treesitter = {
      stopline = 500
    }

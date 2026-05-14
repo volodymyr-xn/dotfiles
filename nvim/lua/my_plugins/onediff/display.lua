@@ -205,8 +205,8 @@ function M.setup_buffer_keymaps(buf)
   vim.keymap.set("n", "sf", onediff.open_or_focus_and_refresh, opts)
   vim.keymap.set("n", "o", onediff.open_current_file_in_new_tab, opts)
   vim.keymap.set("n", "i", onediff.open_current_file_in_new_tab, opts)
-  vim.keymap.set("n", "s", onediff.stage_hunk, opts)
-  vim.keymap.set("n", "u", onediff.unstage_hunk, opts)
+  vim.keymap.set("n", "sn", onediff.stage_hunk, opts)
+  vim.keymap.set("n", "sm", onediff.unstage_hunk, opts)
   vim.keymap.set("n", "`", function()
     local path = vim.b[buf].onediff_file_path
     if path then

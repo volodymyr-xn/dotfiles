@@ -49,6 +49,7 @@ require('plugin_settings/1_ror')
 require('plugin_settings/onediff')
 require('plugin_settings/markview')
 require('plugin_settings/markdown_preview')
+require('plugin_settings/markdown_html_preview')
 
 -- require('plugin_settings/indent_blankline')
 -- require('plugin_settings/local_highlight')

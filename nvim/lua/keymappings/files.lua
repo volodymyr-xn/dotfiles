@@ -42,3 +42,14 @@ vim.api.nvim_set_keymap('n', 'sw', '<cmd>lua require("my_plugins.ruby_component_
 -- Toggle between .rb and .html.erb for Ruby view components
 vim.keymap.set('n', '<Leader>r', function() ruby_toggle.toggle_alternate() end,
   { noremap = true, silent = true, desc = "Toggle between .rb and .html.erb" })
+
+-- Open current file in default app; HTML/HTM files open in Chrome with the "1 Work" profile
+vim.keymap.set('n', 'sn', function()
+  local filepath = vim.fn.expand('%:p')
+  local ext = vim.fn.expand('%:e')
+  if ext == 'html' or ext == 'htm' then
+    vim.fn.jobstart({ 'c-open-work-chrome', filepath }, { detach = true })
+  else
+    vim.fn.jobstart({ 'open', filepath }, { detach = true })
+  end
+end, { noremap = true, silent = true, desc = "Open file in default application" })
