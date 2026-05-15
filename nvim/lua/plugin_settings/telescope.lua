@@ -67,7 +67,16 @@ require('telescope').setup{
     buffer_previewer_maker = require("telescope.previewers").buffer_previewer_maker,
     mappings = {
       n = { ["q"] = require("telescope.actions").close },
-      i = { ["<esc>"] = require("telescope.actions").close },
+      i = {
+        ["<esc>"] = require("telescope.actions").close,
+        -- readline-style line navigation in the prompt
+        ["<C-a>"] = function()
+          vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Home>", true, false, true), "i", false)
+        end,
+        ["<C-e>"] = function()
+          vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<End>", true, false, true), "i", false)
+        end,
+      },
     },
   },
   pickers = {

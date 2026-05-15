@@ -16,6 +16,41 @@ ch() {
   git checkout $(echo "$branch" | sed "s/.* //" | sed "s#remotes/[^/]*/##")
 }
 
+# Fast branch picker sorted by recency, formatted as `branch_name  10h ago`.
+cf() {
+  local list branch target
+  list=$(git for-each-ref --sort=-committerdate \
+    --format='%(refname:short)%09%(committerdate:unix)' \
+    refs/heads refs/remotes \
+  | awk -v now="$(date +%s)" '
+      $1 == "HEAD" || $1 ~ /\/HEAD$/ { next }
+      {
+        d = now - $2
+        if      (d < 3600)     u = int(d/60)     "m"
+        else if (d < 86400)    u = int(d/3600)   "h"
+        else if (d < 604800)   u = int(d/86400)  "d"
+        else if (d < 2592000)  u = int(d/604800) "w"
+        else if (d < 31536000) u = int(d/2592000)"mo"
+        else                   u = int(d/31536000)"y"
+        names[++n] = $1
+        ages[n]   = u
+        if (length($1) > w) w = length($1)
+      }
+      END {
+        for (i = 1; i <= n; i++)
+          printf "%-*s   \033[92m%s ago\033[0m\n", w, names[i], ages[i]
+      }') &&
+  branch=$(echo "$list" \
+    | fzf-tmux --ansi -d $(( 2 + $(wc -l <<< "$list") )) +m \
+    | awk '{print $1}') &&
+  if git show-ref --verify --quiet "refs/heads/$branch"; then
+    target="$branch"
+  else
+    target="${branch#*/}"
+  fi
+  git checkout "$target"
+}
+
 # Like `ch`, but lists branches sorted by most recent commit date instead of alphabetically.
 chh() {
   local branches branch target

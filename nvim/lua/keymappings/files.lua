@@ -13,10 +13,14 @@ vim.api.nvim_set_keymap('n', 'sr', ':R<CR>', { noremap = true, desc = "Go to rel
 -- Copy relative path of current file to system clipboard
 vim.api.nvim_set_keymap('n', '`', ':CopyCurrentFileRelativePathToClipboard<CR>', { noremap = true, desc = "Copy file path to clipboard" })
 
--- Reload file from disk with a brief status echo
+-- Reload file from disk with a brief status echo, highlighting the file name distinctly
 local function reload_file_with_message()
   vim.cmd('edit!')
-  vim.api.nvim_echo({ { "File reloaded", "MoreMsg" } }, false, {})
+  local filename = vim.fn.expand('%:t')
+  vim.api.nvim_echo({
+    { "File reloaded ", "MoreMsg" },
+    { filename,        "Special" },
+  }, false, {})
   vim.defer_fn(function()
     vim.api.nvim_echo({ { "" } }, false, {})
   end, 1000)

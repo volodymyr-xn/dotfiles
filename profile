@@ -47,7 +47,7 @@ fi
 # export EDITOR='nvim'
 
 # Use nvim as IDE editor but regular vim as more lighweiht editor for 3rd party
-# apps inline edit intergrations, so prefer less plugin and configuration heavy
+# apps inline edit intergrations, so prefer less plugin and <configuration></configuration> heavy
 # editor, to make integrated edit startup more instant
 export EDITOR='vim'
 
