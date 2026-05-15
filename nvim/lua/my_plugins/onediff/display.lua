@@ -85,6 +85,8 @@ local function acquire_diff_buf(session, settings)
     vim.bo[buf].modifiable = true
     -- Clear extmarks from every namespace this plugin writes to (settings ns + onediff_binary).
     vim.api.nvim_buf_clear_namespace(buf, -1, 0, -1)
+    -- Detach any treesitter highlighter from the previous render so the next file's parser can attach.
+    pcall(vim.treesitter.stop, buf)
   end
   return buf
 end
