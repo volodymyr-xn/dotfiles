@@ -3,6 +3,8 @@ local M = {}
 M.defaults = {
   base_ref = "HEAD",
   picker = "telescope",
+  -- When true, attach treesitter for syntax highlighting; otherwise use Vim's built-in `:syntax`.
+  use_treesitter = false,
   sidebar = {
     max_width = 45,
     min_width = 20,

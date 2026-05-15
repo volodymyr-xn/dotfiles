@@ -20,6 +20,22 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("OneDiffToggleInstance", M.toggle_instance, { desc = "Toggle OneDiff instance" })
   vim.api.nvim_create_user_command("OneDiffStageHunk", M.stage_hunk, { desc = "Stage current hunk" })
   vim.api.nvim_create_user_command("OneDiffUnstageHunk", M.unstage_hunk, { desc = "Unstage current hunk" })
+  vim.api.nvim_create_user_command("OneDiffToggleTreesitter", M.toggle_treesitter, { desc = "Toggle treesitter highlighting" })
+end
+
+-- Flip treesitter highlighting on/off for the current session and re-render the active file.
+function M.toggle_treesitter()
+  local settings = require("my_plugins.onediff.settings")
+  local session = require("my_plugins.onediff.session")
+  local display = require("my_plugins.onediff.display")
+
+  settings.current.use_treesitter = not settings.current.use_treesitter
+  local state = settings.current.use_treesitter and "ON" or "OFF"
+  vim.notify("OneDiff: Treesitter " .. state)
+
+  if session.is_open() then
+    display.render_current()
+  end
 end
 
 function M.open()

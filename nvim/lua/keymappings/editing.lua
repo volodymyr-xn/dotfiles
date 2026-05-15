@@ -25,3 +25,9 @@ vim.api.nvim_set_keymap('x', 'p', '"_dP', { noremap = true, desc = "Paste withou
 
 -- Change surrounding single quotes to double quotes (vim-surround)
 vim.api.nvim_set_keymap('n', '-', 'cs\'\"', { desc = "Change single to double quotes" })
+
+-- Readline-style navigation in insert mode
+vim.keymap.set('i', '<C-a>', '<Home>', { noremap = true, desc = "Go to beginning of line" })
+vim.keymap.set('i', '<C-e>', '<End>', { noremap = true, desc = "Go to end of line" })
+vim.keymap.set('i', '<C-f>', '<C-Left>', { noremap = true, desc = "Move backward one word" })
+vim.keymap.set('i', '<C-b>', '<C-Right>', { noremap = true, desc = "Move forward one word" })

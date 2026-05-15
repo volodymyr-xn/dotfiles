@@ -13,13 +13,16 @@ vim.api.nvim_set_keymap('n', 'sr', ':R<CR>', { noremap = true, desc = "Go to rel
 -- Copy relative path of current file to system clipboard
 vim.api.nvim_set_keymap('n', '`', ':CopyCurrentFileRelativePathToClipboard<CR>', { noremap = true, desc = "Copy file path to clipboard" })
 
--- Reload file from disk with a brief status echo, highlighting the file name distinctly
+-- Custom highlight group: green color for reloaded filenames in echo message
+vim.api.nvim_set_hl(0, "OneDiffReloadedFile", { fg = "#00ff00", bold = true })
+
+-- Reload file from disk with a brief status echo, highlighting the file name in green
 local function reload_file_with_message()
   vim.cmd('edit!')
   local filename = vim.fn.expand('%:t')
   vim.api.nvim_echo({
     { "File reloaded ", "MoreMsg" },
-    { filename,        "Special" },
+    { filename,        "OneDiffReloadedFile" },
   }, false, {})
   vim.defer_fn(function()
     vim.api.nvim_echo({ { "" } }, false, {})
@@ -38,11 +41,6 @@ vim.api.nvim_set_keymap('n', 's3', '<cmd>lua require("my_plugins.ruby_component_
   { noremap = true, silent = true, desc = "Navigate to .scss/.css file" })
 vim.api.nvim_set_keymap('n', 's4', '<cmd>lua require("my_plugins.ruby_component_toggle").navigate_to_extension(".js")<CR>',
   { noremap = true, silent = true, desc = "Navigate to .js file" })
-vim.api.nvim_set_keymap('n', 'sq', '<cmd>lua require("my_plugins.ruby_component_toggle").toggle_js_erb()<CR>',
-  { noremap = true, silent = true, desc = "Toggle between .js and .html.erb" })
-vim.api.nvim_set_keymap('n', 'sw', '<cmd>lua require("my_plugins.ruby_component_toggle").toggle_erb_style()<CR>',
-  { noremap = true, silent = true, desc = "Toggle between .html.erb and .scss/.css" })
-
 -- Toggle between .rb and .html.erb for Ruby view components
 vim.keymap.set('n', 'gr', function() ruby_toggle.toggle_alternate() end,
   { noremap = true, silent = true, desc = "Toggle between .rb and .html.erb" })

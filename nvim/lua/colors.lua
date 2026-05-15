@@ -83,6 +83,10 @@ require("catppuccin").setup {
     color_overrides = {
         all = {
             text = "#ffffff",
+            -- peach = "#f5a97f", -- catppuccin macchiato default
+            peach = "#F5B07F",
+            -- violet = "#c6a0f6", -- catppuccin macchiato default
+            violet = "#C69FF6",
             -- base = "#1f2233",
             -- Darker and bluer
             -- Bluer

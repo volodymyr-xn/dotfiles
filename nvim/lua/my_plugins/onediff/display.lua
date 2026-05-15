@@ -107,11 +107,17 @@ local function attach_syntax(buf, file_path, line_count)
   local ft = vim.filetype.match({ filename = file_path })
   if not ft then return end
 
+  -- Default path: Vim's regex `:syntax` — lazy, ships with every filetype, no parser-install dance.
+  if not require("my_plugins.onediff.settings").current.use_treesitter then
+    vim.bo[buf].syntax = ft
+    return
+  end
+
   if buffer_has_treesitter(buf) then
     return
   end
 
-  -- Defer parsing so the first paint shows diff highlights immediately; syntax fades in next tick.
+  -- Treesitter is opt-in: defer parsing so the first paint shows diff highlights immediately.
   vim.schedule(function()
     if not vim.api.nvim_buf_is_valid(buf) then return end
     local lang = vim.treesitter.language.get_lang(ft) or ft
@@ -293,6 +299,8 @@ function M.setup_buffer_keymaps(buf)
   vim.keymap.set("n", "i", onediff.open_current_file_in_new_tab, opts)
   vim.keymap.set("n", "sn", onediff.stage_hunk, opts)
   vim.keymap.set("n", "sm", onediff.unstage_hunk, opts)
+  -- Toggle treesitter highlighting for the current OneDiff session.
+  vim.keymap.set("n", "si", onediff.toggle_treesitter, opts)
   vim.keymap.set("n", "`", function()
     local path = vim.b[buf].onediff_file_path
     if path then

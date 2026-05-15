@@ -903,6 +903,8 @@ function M.setup_keymaps(buf)
   vim.keymap.set("n", keymaps.refresh, onediff.refresh, opts)
   vim.keymap.set("n", "sn", onediff.stage_hunk, opts)
   vim.keymap.set("n", "sm", onediff.unstage_hunk, opts)
+  -- Toggle treesitter highlighting for the current OneDiff session.
+  vim.keymap.set("n", "si", onediff.toggle_treesitter, opts)
   vim.keymap.set("n", "q", onediff.open_file_picker, opts)
   vim.keymap.set("n", "<C-q>", onediff.close, opts)
   vim.keymap.set("n", "<C-c>", function() vim.schedule(onediff.close) end, opts)

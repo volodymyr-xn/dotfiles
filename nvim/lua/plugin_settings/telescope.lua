@@ -69,12 +69,18 @@ require('telescope').setup{
       n = { ["q"] = require("telescope.actions").close },
       i = {
         ["<esc>"] = require("telescope.actions").close,
-        -- readline-style line navigation in the prompt
+        -- readline-style navigation in the prompt
         ["<C-a>"] = function()
           vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Home>", true, false, true), "i", false)
         end,
         ["<C-e>"] = function()
           vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<End>", true, false, true), "i", false)
+        end,
+        ["<C-f>"] = function()
+          vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-Left>", true, false, true), "i", false)
+        end,
+        ["<C-b>"] = function()
+          vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-Right>", true, false, true), "i", false)
         end,
       },
     },
