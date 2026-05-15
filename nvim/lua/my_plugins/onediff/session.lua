@@ -102,7 +102,10 @@ end
 function M.start(target_file_path)
   local git_ops = require("my_plugins.onediff.git_ops")
   local settings = require("my_plugins.onediff.settings")
-  
+
+  -- Drop cached git root/binary flags so a new repo or cwd change doesn't leak prior state.
+  git_ops.invalidate_root()
+
   local state = create_instance()
 
   state.original_buf = vim.api.nvim_get_current_buf()

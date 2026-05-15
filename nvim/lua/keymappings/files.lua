@@ -40,7 +40,7 @@ vim.api.nvim_set_keymap('n', 'sw', '<cmd>lua require("my_plugins.ruby_component_
   { noremap = true, silent = true, desc = "Toggle between .html.erb and .scss/.css" })
 
 -- Toggle between .rb and .html.erb for Ruby view components
-vim.keymap.set('n', '<Leader>r', function() ruby_toggle.toggle_alternate() end,
+vim.keymap.set('n', 'gr', function() ruby_toggle.toggle_alternate() end,
   { noremap = true, silent = true, desc = "Toggle between .rb and .html.erb" })
 
 -- Open current file in default app; HTML/HTM files open in Chrome with the "1 Work" profile

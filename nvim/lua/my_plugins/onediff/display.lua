@@ -1,5 +1,40 @@
 local M = {}
 
+-- Files larger than this skip treesitter and per-line extmarks; an info header is rendered instead.
+local SIZE_GATE_BYTES = 2 * 1024 * 1024
+-- Per-line extmark loop is O(changed lines); above this many lines we skip syntax + bound the loop.
+local TREESITTER_LINE_GATE = 10000
+
+local function read_file_sync(path)
+  local fd = vim.loop.fs_open(path, "r", 438)
+  if not fd then return nil end
+
+  local stat = vim.loop.fs_fstat(fd)
+  if not stat then
+    vim.loop.fs_close(fd)
+    return nil
+  end
+
+  local data = vim.loop.fs_read(fd, stat.size, 0) or ""
+  vim.loop.fs_close(fd)
+  return data
+end
+
+local function split_lines(data)
+  local lines = vim.split(data, "\n", { plain = true })
+  -- Trailing newline produces an empty final element; drop it so line count matches file.
+  if lines[#lines] == "" then
+    table.remove(lines)
+  end
+  return lines
+end
+
+local function buffer_has_treesitter(buf)
+  local ok, hl = pcall(require, "vim.treesitter.highlighter")
+  if not ok then return false end
+  return hl.active and hl.active[buf] ~= nil
+end
+
 function M.render_current()
   local session = require("my_plugins.onediff.session")
   local git_ops = require("my_plugins.onediff.git_ops")
@@ -37,12 +72,57 @@ function M.render_current()
   M.open_file_with_diff(file, hunks, base_ref, staged_hunks)
 end
 
+-- Acquire the one reusable scratch buffer; create on first use, otherwise wipe its contents.
+local function acquire_diff_buf(session, settings)
+  local buf = session.get_diff_buf()
+  if not buf or not vim.api.nvim_buf_is_valid(buf) then
+    buf = vim.api.nvim_create_buf(false, true)
+    session.set_diff_buf(buf)
+    vim.bo[buf].buftype = "nofile"
+    vim.bo[buf].bufhidden = "hide"
+    vim.bo[buf].swapfile = false
+  else
+    vim.bo[buf].modifiable = true
+    -- Clear extmarks from every namespace this plugin writes to (settings ns + onediff_binary).
+    vim.api.nvim_buf_clear_namespace(buf, -1, 0, -1)
+  end
+  return buf
+end
+
+local function configure_diff_buf(buf, target_win, file)
+  vim.b[buf].is_onediff_buffer = true
+  vim.b[buf].onediff_file_path = file.path
+  vim.wo[target_win].statusline = " %#OneDiffNonText#[OneDiff] %#OneDiffStatusLinePath#" .. file.path
+  vim.keymap.set("n", '"', "<Nop>", { buffer = buf, silent = true })
+  vim.keymap.set("n", "m", function() require("my_plugins.onediff").toggle_zoom() end, { buffer = buf, silent = true })
+end
+
+local function attach_syntax(buf, file_path, line_count)
+  if line_count > TREESITTER_LINE_GATE then
+    return
+  end
+
+  local ft = vim.filetype.match({ filename = file_path })
+  if not ft then return end
+
+  if buffer_has_treesitter(buf) then
+    return
+  end
+
+  -- Defer parsing so the first paint shows diff highlights immediately; syntax fades in next tick.
+  vim.schedule(function()
+    if not vim.api.nvim_buf_is_valid(buf) then return end
+    local lang = vim.treesitter.language.get_lang(ft) or ft
+    if not pcall(vim.treesitter.start, buf, lang) then
+      vim.bo[buf].syntax = ft
+    end
+  end)
+end
+
 function M.open_file_with_diff(file, hunks, base_ref, staged_hunks)
-  local git_ops = require("my_plugins.onediff.git_ops")
-  local diff_parse = require("my_plugins.onediff.diff_parse")
   local session = require("my_plugins.onediff.session")
   local settings = require("my_plugins.onediff.settings")
-  local sidebar = require("my_plugins.onediff.sidebar")
+  local diff_parse = require("my_plugins.onediff.diff_parse")
 
   local sidebar_win = session.get_sidebar_win()
   local target_win = nil
@@ -69,51 +149,55 @@ function M.open_file_with_diff(file, hunks, base_ref, staged_hunks)
   local saved_lazyredraw = vim.o.lazyredraw
   vim.o.lazyredraw = true
 
-  local buf = vim.api.nvim_create_buf(false, false)
-  vim.api.nvim_win_set_buf(target_win, buf)
-  session.set_diff_buf(buf)
-
-  vim.b[buf].is_onediff_buffer = true
-  vim.b[buf].onediff_file_path = file.path
-  vim.wo[target_win].statusline = " %#OneDiffNonText#[OneDiff] %#OneDiffStatusLinePath#" .. file.path
-  vim.keymap.set("n", '"', "<Nop>", { buffer = buf, silent = true })
-  vim.keymap.set("n", "m", function() require("my_plugins.onediff").toggle_zoom() end, { buffer = buf, silent = true })
-
-  local file_content = vim.fn.readfile(file.full_path)
-  for i, line in ipairs(file_content) do
-    file_content[i] = line:gsub("\n", "")
+  local buf = acquire_diff_buf(session, settings)
+  if vim.api.nvim_win_get_buf(target_win) ~= buf then
+    vim.api.nvim_win_set_buf(target_win, buf)
   end
-  vim.api.nvim_buf_set_lines(buf, 0, -1, false, file_content)
 
-  vim.api.nvim_buf_set_name(buf, "[OneDiff] " .. file.path)
+  configure_diff_buf(buf, target_win, file)
 
-  local ft = vim.filetype.match({ filename = file.path })
-  if ft then
-    -- Use treesitter/syntax directly to avoid triggering FileType autocmds (LSP, formatters, etc.)
-    local lang = vim.treesitter.language.get_lang(ft) or ft
-    if not pcall(vim.treesitter.start, buf, lang) then
-      vim.bo[buf].syntax = ft
-    end
+  -- fs_stat lets us pick an oversize path before reading the whole file into memory.
+  local stat = vim.loop.fs_stat(file.full_path)
+  local oversize = stat and stat.size > SIZE_GATE_BYTES
+
+  local lines
+  if oversize then
+    local size_mb = string.format("%.1f", (stat.size or 0) / 1024 / 1024)
+    lines = {
+      "",
+      "  OneDiff: file is " .. size_mb .. " MB — diff view skipped.",
+      "  Inline highlights and syntax are disabled above " ..
+        string.format("%.0f", SIZE_GATE_BYTES / 1024 / 1024) .. " MB.",
+      "",
+      "  Press `o` to open the file in a new tab.",
+    }
+  else
+    local data = read_file_sync(file.full_path) or ""
+    lines = split_lines(data)
+  end
+
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  pcall(vim.api.nvim_buf_set_name, buf, "[OneDiff] " .. file.path)
+
+  if not oversize then
+    attach_syntax(buf, file.path, #lines)
   end
 
   vim.bo[buf].modified = false
   vim.bo[buf].modifiable = false
-  vim.bo[buf].buftype = "nofile"
-  vim.bo[buf].bufhidden = "wipe"
-  vim.bo[buf].swapfile = false
 
   M.setup_buffer_keymaps(buf)
-  M.clear_buffer_highlights(buf)
 
-  if file.status == "untracked" then
-    M.highlight_untracked_file(buf)
-  else
-    M.apply_inline_diff(buf, hunks, file, base_ref, staged_hunks)
+  if not oversize then
+    if file.status == "untracked" then
+      M.highlight_untracked_file(buf)
+    else
+      M.apply_inline_diff(buf, hunks, file, base_ref, staged_hunks)
+    end
   end
 
   local first_change_line = nil
-  if hunks and #hunks > 0 then
-    local diff_parse = require("my_plugins.onediff.diff_parse")
+  if not oversize and hunks and #hunks > 0 then
     local change_blocks = diff_parse.get_change_lines_in_buffer(hunks)
     if #change_blocks > 0 then
       first_change_line = change_blocks[1].start
@@ -134,6 +218,7 @@ end
 
 function M.open_binary_placeholder(file)
   local session = require("my_plugins.onediff.session")
+  local settings = require("my_plugins.onediff.settings")
 
   local sidebar_win = session.get_sidebar_win()
   local target_win = nil
@@ -151,15 +236,12 @@ function M.open_binary_placeholder(file)
 
   vim.api.nvim_set_current_win(target_win)
 
-  local buf = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_win_set_buf(target_win, buf)
-  session.set_diff_buf(buf)
+  local buf = acquire_diff_buf(session, settings)
+  if vim.api.nvim_win_get_buf(target_win) ~= buf then
+    vim.api.nvim_win_set_buf(target_win, buf)
+  end
 
-  vim.b[buf].is_onediff_buffer = true
-  vim.b[buf].onediff_file_path = file.path
-  vim.wo[target_win].statusline = " %#OneDiffNonText#[OneDiff] %#OneDiffStatusLinePath#" .. file.path
-  vim.keymap.set("n", '"', "<Nop>", { buffer = buf, silent = true })
-  vim.keymap.set("n", "m", function() require("my_plugins.onediff").toggle_zoom() end, { buffer = buf, silent = true })
+  configure_diff_buf(buf, target_win, file)
 
   local win_width = vim.api.nvim_win_get_width(target_win)
   local win_height = vim.api.nvim_win_get_height(target_win)
@@ -175,9 +257,7 @@ function M.open_binary_placeholder(file)
 
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
   vim.bo[buf].modifiable = false
-  vim.bo[buf].buftype = "nofile"
-  vim.bo[buf].bufhidden = "wipe"
-  vim.api.nvim_buf_set_name(buf, "[binary] " .. file.path)
+  pcall(vim.api.nvim_buf_set_name, buf, "[binary] " .. file.path)
 
   local ns = vim.api.nvim_create_namespace("onediff_binary")
   local msg_line = math.floor(win_height / 2) - 1
@@ -197,6 +277,10 @@ function M.setup_buffer_keymaps(buf)
   vim.keymap.set("n", "<S-Tab>", onediff.goto_prev_change, opts)
   vim.keymap.set("n", "<C-i>", onediff.goto_next_change, opts)
   vim.keymap.set("n", "<C-o>", onediff.goto_prev_change, opts)
+  vim.keymap.set("n", ")", onediff.goto_next_change, opts)
+  vim.keymap.set("n", "(", onediff.goto_prev_change, opts)
+  -- Jump back to the sidebar window from the diff view.
+  vim.keymap.set("n", "<C-0>", onediff.focus_sidebar, opts)
   vim.keymap.set("n", "q", onediff.open_file_picker, opts)
   vim.keymap.set("n", "<C-q>", onediff.close, opts)
   vim.keymap.set("n", "<C-c>", function() vim.schedule(onediff.close) end, opts)
@@ -244,40 +328,33 @@ function M.render_deleted_file(file, base_ref, target_win)
     return
   end
 
-  local buf = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_win_set_buf(target_win, buf)
-  session.set_diff_buf(buf)
+  local buf = acquire_diff_buf(session, settings)
+  if vim.api.nvim_win_get_buf(target_win) ~= buf then
+    vim.api.nvim_win_set_buf(target_win, buf)
+  end
 
-  vim.b[buf].is_onediff_buffer = true
-  vim.b[buf].onediff_file_path = file.path
-  vim.wo[target_win].statusline = " %#OneDiffNonText#[OneDiff] %#OneDiffStatusLinePath#" .. file.path
-  vim.keymap.set("n", '"', "<Nop>", { buffer = buf, silent = true })
-  vim.keymap.set("n", "m", function() require("my_plugins.onediff").toggle_zoom() end, { buffer = buf, silent = true })
+  configure_diff_buf(buf, target_win, file)
 
-  local lines = vim.split(content, "\n")
+  local lines = vim.split(content, "\n", { plain = true })
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
 
   vim.bo[buf].modifiable = false
-  vim.bo[buf].buftype = "nofile"
-  vim.bo[buf].bufhidden = "wipe"
-  vim.api.nvim_buf_set_name(buf, "[deleted] " .. file.path)
+  pcall(vim.api.nvim_buf_set_name, buf, "[deleted] " .. file.path)
 
-  local ft = vim.filetype.match({ filename = file.path })
-  if ft then
-    -- Use treesitter/syntax directly to avoid triggering FileType autocmds (LSP, formatters, etc.)
-    local lang = vim.treesitter.language.get_lang(ft) or ft
-    if not pcall(vim.treesitter.start, buf, lang) then
-      vim.bo[buf].syntax = ft
-    end
-  end
+  attach_syntax(buf, file.path, #lines)
 
   local ns = settings.get_ns()
   local hl = settings.get("highlights")
-  for i = 0, #lines - 1 do
-    vim.api.nvim_buf_set_extmark(buf, ns, i, 0, {
-      line_hl_group = hl.line_delete,
-    })
-  end
+  local line_count = #lines
+
+  -- One nvim_buf_call avoids per-extmark window revalidation when the buffer isn't the current one.
+  vim.api.nvim_buf_call(buf, function()
+    for i = 0, line_count - 1 do
+      vim.api.nvim_buf_set_extmark(buf, ns, i, 0, {
+        line_hl_group = hl.line_delete,
+      })
+    end
+  end)
 
   M.setup_buffer_keymaps(buf)
 end
@@ -326,62 +403,64 @@ function M.apply_inline_diff(buf, hunks, file, base_ref, staged_hunks)
 
   local ns = settings.get_ns()
   local hl = settings.get("highlights")
-  local buf_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-  local buf_line_count = #buf_lines
+  local buf_line_count = vim.api.nvim_buf_line_count(buf)
 
-  for _, hunk in ipairs(hunks) do
-    local new_line_idx = hunk.new_start - 1
-    local deleted_lines = {}
-    local deleted_attach_line = nil
-    local hunk_is_staged = is_hunk_staged(hunk, staged_hunks)
-    local add_hl = hunk_is_staged and hl.line_staged or hl.line_add
+  -- All extmark writes run inside one buf_call so window revalidation happens at most once.
+  vim.api.nvim_buf_call(buf, function()
+    for _, hunk in ipairs(hunks) do
+      local new_line_idx = hunk.new_start - 1
+      local deleted_lines = {}
+      local deleted_attach_line = nil
+      local hunk_is_staged = is_hunk_staged(hunk, staged_hunks)
+      local add_hl = hunk_is_staged and hl.line_staged or hl.line_add
 
-    local function flush_deleted_lines()
-      if #deleted_lines == 0 then
-        return
-      end
-      if buf_line_count == 0 then
+      local function flush_deleted_lines()
+        if #deleted_lines == 0 then
+          return
+        end
+        if buf_line_count == 0 then
+          deleted_lines = {}
+          deleted_attach_line = nil
+          return
+        end
+
+        local attach_line = math.min(deleted_attach_line, buf_line_count - 1)
+        local virt_lines = {}
+        for _, text in ipairs(deleted_lines) do
+          table.insert(virt_lines, { { text, hl.line_delete } })
+        end
+        vim.api.nvim_buf_set_extmark(buf, ns, attach_line, 0, {
+          virt_lines = virt_lines,
+          virt_lines_above = deleted_attach_line > 0,
+        })
+
         deleted_lines = {}
         deleted_attach_line = nil
-        return
       end
 
-      local attach_line = math.min(deleted_attach_line, buf_line_count - 1)
-      local virt_lines = {}
-      for _, text in ipairs(deleted_lines) do
-        table.insert(virt_lines, { { text, hl.line_delete } })
-      end
-      vim.api.nvim_buf_set_extmark(buf, ns, attach_line, 0, {
-        virt_lines = virt_lines,
-        virt_lines_above = deleted_attach_line > 0,
-      })
-
-      deleted_lines = {}
-      deleted_attach_line = nil
-    end
-
-    for _, change in ipairs(hunk.changes) do
-      if change.type == "context" then
-        flush_deleted_lines()
-        new_line_idx = new_line_idx + 1
-      elseif change.type == "add" then
-        flush_deleted_lines()
-        if new_line_idx >= 0 and new_line_idx < buf_line_count then
-          vim.api.nvim_buf_set_extmark(buf, ns, new_line_idx, 0, {
-            line_hl_group = add_hl,
-          })
+      for _, change in ipairs(hunk.changes) do
+        if change.type == "context" then
+          flush_deleted_lines()
+          new_line_idx = new_line_idx + 1
+        elseif change.type == "add" then
+          flush_deleted_lines()
+          if new_line_idx >= 0 and new_line_idx < buf_line_count then
+            vim.api.nvim_buf_set_extmark(buf, ns, new_line_idx, 0, {
+              line_hl_group = add_hl,
+            })
+          end
+          new_line_idx = new_line_idx + 1
+        elseif change.type == "delete" then
+          if deleted_attach_line == nil then
+            deleted_attach_line = math.max(new_line_idx, 0)
+          end
+          table.insert(deleted_lines, change.text)
         end
-        new_line_idx = new_line_idx + 1
-      elseif change.type == "delete" then
-        if deleted_attach_line == nil then
-          deleted_attach_line = math.max(new_line_idx, 0)
-        end
-        table.insert(deleted_lines, change.text)
       end
-    end
 
-    flush_deleted_lines()
-  end
+      flush_deleted_lines()
+    end
+  end)
 end
 
 function M.highlight_untracked_file(buf)
@@ -390,11 +469,13 @@ function M.highlight_untracked_file(buf)
   local hl = settings.get("highlights")
 
   local line_count = vim.api.nvim_buf_line_count(buf)
-  for i = 0, line_count - 1 do
-    vim.api.nvim_buf_set_extmark(buf, ns, i, 0, {
-      line_hl_group = hl.line_add,
-    })
-  end
+  vim.api.nvim_buf_call(buf, function()
+    for i = 0, line_count - 1 do
+      vim.api.nvim_buf_set_extmark(buf, ns, i, 0, {
+        line_hl_group = hl.line_add,
+      })
+    end
+  end)
 end
 
 local function build_patch_for_hunk(file_path, hunk)
@@ -521,12 +602,11 @@ end
 
 function M.clear_all()
   local session = require("my_plugins.onediff.session")
-  local settings = require("my_plugins.onediff.settings")
 
+  -- Buffer is bufhidden=hide so it survives window switches; close fully wipes it.
   local diff_buf = session.get_diff_buf()
   if diff_buf and vim.api.nvim_buf_is_valid(diff_buf) then
     M.clear_buffer_highlights(diff_buf)
-
     vim.api.nvim_buf_delete(diff_buf, { force = true })
   end
 end

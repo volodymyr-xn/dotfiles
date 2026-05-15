@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+# Open a new tmux window inside a subdirectory of the session's start dir.
+# The window is named after the chosen subdirectory.
+
+set -euo pipefail
+
+base_dir=$(tmux display-message -p '#{session_path}')
+
+if [ -z "$base_dir" ] || [ ! -d "$base_dir" ]; then
+  echo "tmux-new-window-from-subdir: session_path '$base_dir' is not a directory" >&2
+  echo "Press any key to close..." >&2
+  read -rn 1
+  exit 1
+fi
+
+selected=$(
+  cd "$base_dir" && \
+  find . -mindepth 1 -maxdepth 1 -type d \
+    | sed 's|^\./||' \
+    | sort \
+    | fzf --prompt="New window in subdir > " --height=100% --reverse
+) || exit 0
+
+[ -z "$selected" ] && exit 0
+
+target_dir="$base_dir/$selected"
+
+# Left pane runs nvim, right pane is an empty shell in the same dir.
+window_id=$(tmux new-window -P -F '#{window_id}' \
+  -c "$target_dir" -n "$selected" "nvim")
+tmux split-window -h -t "$window_id" -c "$target_dir"
+tmux select-pane -t "${window_id}.2"

@@ -113,6 +113,11 @@ local function get_folder_status(folder_path, files, is_collapsed, collapsed_fol
 end
 
 function M.init()
+  -- Live navigation defaults to ON; user can toggle off in-session with `sr`.
+  if vim.g.onediff_live_nav == nil then
+    vim.g.onediff_live_nav = true
+  end
+
   vim.api.nvim_set_hl(0, "OneDiffPanelTitle", { fg = "#cdd6f4", bold = true, default = true })
   vim.api.nvim_set_hl(0, "OneDiffPanelCount", { fg = "#6c7086", default = true })
   vim.api.nvim_set_hl(0, "OneDiffPanelPath", { fg = "#6c7086", italic = true, default = true })
@@ -845,6 +850,28 @@ local function live_nav_preview()
   live_nav_guard = false
 end
 
+-- Move the diff window to the next hunk (across files) while keeping focus in the sidebar.
+local function focus_diff_next_change()
+  local session = require("my_plugins.onediff.session")
+  local sidebar_win = session.get_sidebar_win()
+  session.focus_diff_window()
+  require("my_plugins.onediff.controls").next_change()
+  if sidebar_win and api.nvim_win_is_valid(sidebar_win) then
+    api.nvim_set_current_win(sidebar_win)
+  end
+end
+
+-- Move the diff window to the previous hunk (across files) while keeping focus in the sidebar.
+local function focus_diff_prev_change()
+  local session = require("my_plugins.onediff.session")
+  local sidebar_win = session.get_sidebar_win()
+  session.focus_diff_window()
+  require("my_plugins.onediff.controls").prev_change()
+  if sidebar_win and api.nvim_win_is_valid(sidebar_win) then
+    api.nvim_set_current_win(sidebar_win)
+  end
+end
+
 local function scroll_diff_win(keys)
   local session = require("my_plugins.onediff.session")
   local diff_buf = session.get_diff_buf()
@@ -871,15 +898,8 @@ function M.setup_keymaps(buf)
 
   vim.keymap.set("n", keymaps.select, M.open_file_keep_focus, opts)
   vim.keymap.set("n", "i", M.open_file_keep_focus, opts)
-  vim.keymap.set("n", "<Tab>", function()
-    local session = require("my_plugins.onediff.session")
-    local sidebar_win = session.get_sidebar_win()
-    session.focus_diff_window()
-    require("my_plugins.onediff.controls").next_hunk()
-    if sidebar_win and api.nvim_win_is_valid(sidebar_win) then
-      api.nvim_set_current_win(sidebar_win)
-    end
-  end, opts)
+  vim.keymap.set("n", "<Tab>", focus_diff_next_change, opts)
+  vim.keymap.set("n", "<C-i>", focus_diff_next_change, opts)
   vim.keymap.set("n", keymaps.refresh, onediff.refresh, opts)
   vim.keymap.set("n", "sn", onediff.stage_hunk, opts)
   vim.keymap.set("n", "sm", onediff.unstage_hunk, opts)
@@ -936,25 +956,13 @@ function M.setup_keymaps(buf)
   vim.keymap.set("n", '"', "<Nop>", opts)
   vim.keymap.set("n", "m", onediff.toggle_zoom, opts)
 
-  vim.keymap.set("n", "<S-Tab>", function()
-    local session = require("my_plugins.onediff.session")
-    local sidebar_win = session.get_sidebar_win()
-    session.focus_diff_window()
-    require("my_plugins.onediff.controls").prev_hunk()
-    if sidebar_win and api.nvim_win_is_valid(sidebar_win) then
-      api.nvim_set_current_win(sidebar_win)
-    end
-  end, opts)
+  vim.keymap.set("n", "<S-Tab>", focus_diff_prev_change, opts)
 
-  vim.keymap.set("n", "<C-o>", function()
-    local session = require("my_plugins.onediff.session")
-    local sidebar_win = session.get_sidebar_win()
-    session.focus_diff_window()
-    require("my_plugins.onediff.controls").prev_hunk()
-    if sidebar_win and api.nvim_win_is_valid(sidebar_win) then
-      api.nvim_set_current_win(sidebar_win)
-    end
-  end, opts)
+  vim.keymap.set("n", "<C-o>", focus_diff_prev_change, opts)
+
+  -- ) / ( navigate next/prev hunk (across files) in the diff window without leaving the sidebar.
+  vim.keymap.set("n", ")", focus_diff_next_change, opts)
+  vim.keymap.set("n", "(", focus_diff_prev_change, opts)
 
   vim.keymap.set("n", "<C-f>", function() scroll_diff_win("<C-f>") end, opts)
   vim.keymap.set("n", "<C-d>", function() scroll_diff_win("<C-d>") end, opts)
