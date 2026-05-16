@@ -1,5 +1,35 @@
 local M = {}
 
+-- Fallback editor background used when `Normal` has no resolvable bg (e.g. transparent terminal).
+local DEFAULT_BG = "#1e1e2e"
+
+-- Parse a "#rrggbb" string into r, g, b integers.
+local function hex_to_rgb(hex)
+  return tonumber(hex:sub(2, 3), 16), tonumber(hex:sub(4, 5), 16), tonumber(hex:sub(6, 7), 16)
+end
+
+-- Format r, g, b integers back into a "#rrggbb" string.
+local function rgb_to_hex(r, g, b)
+  return string.format("#%02x%02x%02x", r, g, b)
+end
+
+-- Resolve the current editor background color, falling back to DEFAULT_BG.
+local function normal_bg()
+  local hl = vim.api.nvim_get_hl(0, { name = "Normal", link = false })
+  if hl and hl.bg then
+    return string.format("#%06x", hl.bg)
+  end
+  return DEFAULT_BG
+end
+
+-- Blend `fg_hex` over `bg_hex` at `alpha` (0..1) to fake transparency for buffer line highlights.
+local function blend(fg_hex, bg_hex, alpha)
+  local fr, fg, fb = hex_to_rgb(fg_hex)
+  local br, bg, bb = hex_to_rgb(bg_hex)
+  local mix = function(f, b) return math.floor(f * alpha + b * (1 - alpha) + 0.5) end
+  return rgb_to_hex(mix(fr, br), mix(fg, bg), mix(fb, bb))
+end
+
 M.defaults = {
   base_ref = "HEAD",
   picker = "telescope",
@@ -51,10 +81,15 @@ function M.apply(opts)
 end
 
 function M.setup_highlights()
-  vim.api.nvim_set_hl(0, "OneDiffLineAdd", { bg = "#2d4a3e" })
+  -- Simulated transparency: pre-blend the original diff colors over Normal's bg
+  -- since Neovim's `blend` attribute does not apply to buffer line highlights.
+  local bg = normal_bg()
+  local line_add_alpha = 0.45
+  local char_add_alpha = 0.65
+  vim.api.nvim_set_hl(0, "OneDiffLineAdd", { bg = blend("#2d4a3e", bg, line_add_alpha) })
   vim.api.nvim_set_hl(0, "OneDiffLineStaged", { bg = "#1e3a5f" })
   vim.api.nvim_set_hl(0, "OneDiffLineDelete", { bg = "#4a2d2d" })
-  vim.api.nvim_set_hl(0, "OneDiffCharAdd", { bg = "#3d6a5e", bold = true })
+  vim.api.nvim_set_hl(0, "OneDiffCharAdd", { bg = blend("#3d6a5e", bg, char_add_alpha), bold = true })
   vim.api.nvim_set_hl(0, "OneDiffCharDelete", { bg = "#6a3d3d", bold = true })
   vim.api.nvim_set_hl(0, "OneDiffSidebarFile", { link = "Normal", default = true })
   vim.api.nvim_set_hl(0, "OneDiffSidebarFolder", { link = "Directory", default = true })

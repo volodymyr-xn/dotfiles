@@ -783,18 +783,28 @@ function M.open_original_file()
       end
       
       vim.cmd('tabnew ' .. vim.fn.fnameescape(full_path))
-      
+
+      local new_tab = api.nvim_get_current_tabpage()
       local new_win = vim.api.nvim_get_current_win()
       vim.wo[new_win].number = true
       vim.wo[new_win].relativenumber = false
       vim.wo[new_win].signcolumn = "yes"
-      
+
       local new_buf = vim.api.nvim_get_current_buf()
       local line_count = vim.api.nvim_buf_line_count(new_buf)
       if target_line >= 1 and target_line <= line_count then
         vim.api.nvim_win_set_cursor(0, { target_line, target_col })
         vim.cmd("normal! zz")
       end
+
+      -- Tear down the OneDiff session now that the user has switched to the real file;
+      -- defer so the new tab/buffer is fully settled before close() inspects window state.
+      vim.schedule(function()
+        require("my_plugins.onediff").close()
+        if api.nvim_tabpage_is_valid(new_tab) then
+          api.nvim_set_current_tabpage(new_tab)
+        end
+      end)
     end
   end
 end

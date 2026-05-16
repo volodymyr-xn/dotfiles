@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# Reload the running Hammerspoon config from the CLI.
+#
+# Uses a DEFERRED reload: a synchronous `hs -c "hs.reload()"` tears down the
+# hs.ipc message port it is replying over, so it always exits 69 with a
+# "corrupt Mach message" even on success. Deferring by 0.2s lets the IPC call
+# return cleanly first, then the reload fires.
+#
+# If the IPC port is unavailable (Hammerspoon not running, or started before
+# `require("hs.ipc")` existed) it bootstraps by fully relaunching the app —
+# a plain Quit event, needing neither IPC nor AppleScript-in-config.
+set -euo pipefail
+
+ipc_ready() { hs -c 'return 1' >/dev/null 2>&1; }
+
+# Poll the IPC port for up to ~15s; succeeds as soon as it answers.
+wait_for_ipc() {
+  local _
+  for _ in $(seq 1 15); do
+    ipc_ready && return 0
+    sleep 1
+  done
+  return 1
+}
+
+# Wait until a FRESH instance answers (sentinel absent => new Lua state).
+wait_for_fresh() {
+  local _
+  for _ in $(seq 1 15); do
+    if [ "$(hs -c 'return RELOAD_SENTINEL == nil and "fresh" or "stale"' 2>/dev/null)" = "fresh" ]; then
+      return 0
+    fi
+    sleep 1
+  done
+  return 1
+}
+
+if ipc_ready; then
+  hs -c 'RELOAD_SENTINEL = true; hs.timer.doAfter(0.2, hs.reload)' >/dev/null 2>&1 || true
+
+  if wait_for_fresh; then
+    echo "Hammerspoon reloaded."
+    exit 0
+  fi
+
+  echo "Reload issued but no fresh instance answered; check the Hammerspoon console." >&2
+  exit 1
+fi
+
+echo "IPC port unavailable; relaunching Hammerspoon to bootstrap..." >&2
+osascript -e 'quit app "Hammerspoon"' >/dev/null 2>&1 || true
+sleep 2
+open -a Hammerspoon
+
+if wait_for_ipc; then
+  echo "Hammerspoon relaunched; IPC live."
+  exit 0
+fi
+
+echo "Hammerspoon relaunched but IPC still unavailable." >&2
+echo 'Check that init.lua has require("hs.ipc") at the top and loads without errors.' >&2
+exit 1

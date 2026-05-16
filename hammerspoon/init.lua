@@ -1,3 +1,6 @@
+-- Open the IPC Mach port so the `hs` CLI can drive this running instance
+require("hs.ipc")
+
 local function volumeUp()
   hs.eventtap.event.newSystemKeyEvent("SOUND_UP", true):post()
   hs.eventtap.event.newSystemKeyEvent("SOUND_UP", false):post()
@@ -32,6 +35,10 @@ local function focusApp(name)
 end
 
 local dismissNotifications = require("dismiss_notifications").dismiss
+local openNotification = require("click_notification").open
 
 -- Cmd+L → dismiss all notifications
 hs.hotkey.bind({"cmd"}, "l", dismissNotifications)
+
+-- Cmd+` → activate (click) the topmost notification's default action
+hs.hotkey.bind({"cmd"}, "`", openNotification)

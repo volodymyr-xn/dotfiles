@@ -46,7 +46,7 @@ end
 local function create_instance()
   local id = next_instance_id
   next_instance_id = next_instance_id + 1
-  
+
   instances[id] = {
     id = id,
     active = false,
@@ -63,7 +63,7 @@ local function create_instance()
     diff_cache = {},
     diff_cache_version = 0,
   }
-  
+
   active_instance_id = id
   return instances[id]
 end
@@ -81,14 +81,14 @@ local function get_current_instance()
   if active_instance_id and instances[active_instance_id] then
     return instances[active_instance_id]
   end
-  
+
   local current_buf = vim.api.nvim_get_current_buf()
   local instance = get_instance_for_buffer(current_buf)
-  
+
   if instance then
     active_instance_id = instance.id
   end
-  
+
   return instance
 end
 
@@ -114,7 +114,7 @@ function M.start(target_file_path)
   state.base_ref = settings.get("base_ref")
   state.changed_files = git_ops.list_changed_files(state.base_ref)
   state.current_index = 1
-  
+
   if target_file_path then
     local git_root = git_ops.get_root()
     if git_root then
@@ -122,7 +122,7 @@ function M.start(target_file_path)
       if target_file_path:find("^" .. vim.pesc(git_root)) then
         relative_path = target_file_path:sub(#git_root + 2)
       end
-      
+
       for i, file in ipairs(state.changed_files) do
         if file.path == relative_path then
           state.current_index = i
@@ -133,7 +133,7 @@ function M.start(target_file_path)
   else
     restore_index(state)
   end
-  
+
   state.active = true
   return state.id
 end
@@ -141,11 +141,11 @@ end
 function M.stop(instance_id)
   local state = instance_id and instances[instance_id] or get_current_instance()
   if not state then return end
-  
+
   if active_instance_id == state.id then
     active_instance_id = nil
   end
-  
+
   instances[state.id] = nil
 end
 
@@ -178,7 +178,7 @@ end
 function M.set_current_index(idx)
   local state = get_current_instance()
   if not state then return end
-  
+
   if idx >= 1 and idx <= #state.changed_files then
     state.current_index = idx
     persist_current(state)
@@ -278,9 +278,9 @@ end
 function M.set_sidebar_buf(buf)
   local state = get_current_instance()
   if not state then return end
-  
+
   state.sidebar_buf = buf
-  
+
   if buf then
     vim.b[buf].onediff_instance_id = state.id
   end
@@ -305,9 +305,9 @@ end
 function M.set_diff_buf(buf)
   local state = get_current_instance()
   if not state then return end
-  
+
   state.diff_buf = buf
-  
+
   if buf then
     vim.b[buf].onediff_instance_id = state.id
   end
@@ -328,14 +328,14 @@ end
 
 function M.focus_instance(instance)
   if not instance then return false end
-  
+
   active_instance_id = instance.id
-  
+
   if instance.sidebar_win and vim.api.nvim_win_is_valid(instance.sidebar_win) then
     vim.api.nvim_set_current_win(instance.sidebar_win)
     return true
   end
-  
+
   if instance.diff_buf and vim.api.nvim_buf_is_valid(instance.diff_buf) then
     for _, win in ipairs(vim.api.nvim_list_wins()) do
       if vim.api.nvim_win_get_buf(win) == instance.diff_buf then
@@ -344,7 +344,7 @@ function M.focus_instance(instance)
       end
     end
   end
-  
+
   return false
 end
 
@@ -353,21 +353,21 @@ function M.focus_diff_window()
   if not state or not state.diff_buf or not vim.api.nvim_buf_is_valid(state.diff_buf) then
     return false
   end
-  
+
   for _, win in ipairs(vim.api.nvim_list_wins()) do
     if vim.api.nvim_win_get_buf(win) == state.diff_buf then
       vim.api.nvim_set_current_win(win)
       return true
     end
   end
-  
+
   return false
 end
 
 function M.get_hunk_start_lines()
   local state = get_current_instance()
   if not state then return {} end
-  
+
   local lines = {}
   for _, hunk in ipairs(state.current_hunks) do
     table.insert(lines, hunk.new_start)
