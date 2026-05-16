@@ -158,22 +158,72 @@ end
 function M.get_file_diff(file_path, base_ref)
   base_ref = base_ref or "HEAD"
 
-  local status_output = run_argv({ "git", "status", "--porcelain", "--untracked-files=all" })
-  if status_output then
-    for line in status_output:gmatch("[^\n]+") do
-      local status_prefix = line:sub(1, 2)
-      local path = line:sub(4)
-      if status_prefix == "??" and path == file_path then
-        return ""
-      end
-    end
-  end
-
   local diff = run_argv({ "git", "diff", base_ref, "--", file_path })
   if diff and #vim.trim(diff) == 0 then
     diff = run_argv({ "git", "diff", "--cached", base_ref, "--", file_path })
   end
   return diff
+end
+
+local function spawn_diff(argv)
+  local ok, job = pcall(vim.system, argv, { text = true })
+  if not ok then return nil end
+  return job
+end
+
+local function read_job(job)
+  if not job then return "" end
+  local ok, res = pcall(function() return job:wait() end)
+  if not ok or not res or res.code ~= 0 then return "" end
+  return res.stdout or ""
+end
+
+-- Spawn the two diff jobs without blocking; caller waits on both after doing other work.
+function M.dispatch_diffs(file_path, base_ref)
+  base_ref = base_ref or "HEAD"
+  local file_job = spawn_diff({ "git", "diff", base_ref, "--", file_path })
+  local staged_job = spawn_diff({ "git", "diff", "--cached", base_ref, "--", file_path })
+  return file_job, staged_job
+end
+
+-- Wait on both diff jobs; if working-copy diff is empty, fall back to staged so fully-staged
+-- files still render the staged changes as the main diff (matches get_file_diff semantics).
+function M.wait_diffs(file_job, staged_job)
+  local file_diff = read_job(file_job)
+  local staged_diff = read_job(staged_job)
+  if #vim.trim(file_diff) == 0 then
+    file_diff = staged_diff
+  end
+  return file_diff, staged_diff
+end
+
+-- Async variant for background prefetch; callback is scheduled on the main loop.
+function M.get_diffs_async(file_path, base_ref, callback)
+  base_ref = base_ref or "HEAD"
+  local file_diff, staged_diff
+  local file_done, staged_done = false, false
+
+  local function maybe_finish()
+    if not (file_done and staged_done) then return end
+    local main = file_diff or ""
+    local staged = staged_diff or ""
+    if #vim.trim(main) == 0 then
+      main = staged
+    end
+    callback(main, staged)
+  end
+
+  vim.system({ "git", "diff", base_ref, "--", file_path }, { text = true }, vim.schedule_wrap(function(res)
+    if res and res.code == 0 then file_diff = res.stdout end
+    file_done = true
+    maybe_finish()
+  end))
+
+  vim.system({ "git", "diff", "--cached", base_ref, "--", file_path }, { text = true }, vim.schedule_wrap(function(res)
+    if res and res.code == 0 then staged_diff = res.stdout end
+    staged_done = true
+    maybe_finish()
+  end))
 end
 
 function M.get_base_content(file_path, base_ref)

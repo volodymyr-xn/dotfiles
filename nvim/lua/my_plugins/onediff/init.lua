@@ -424,11 +424,17 @@ function M.reload_current_file()
   local session = require("my_plugins.onediff.session")
   local display = require("my_plugins.onediff.display")
   local sidebar = require("my_plugins.onediff.sidebar")
-  
+
   if not session.is_open() then
     return
   end
-  
+
+  -- Force a fresh git diff for just this file; whole-session cache stays intact for neighbors.
+  local file = session.get_current_file()
+  if file then
+    session.invalidate_diff_cache_for(file.path)
+  end
+
   display.render_current()
   sidebar.render()
 end

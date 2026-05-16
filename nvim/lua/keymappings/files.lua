@@ -14,7 +14,8 @@ vim.api.nvim_set_keymap('n', 'sr', ':R<CR>', { noremap = true, desc = "Go to rel
 vim.api.nvim_set_keymap('n', '`', ':CopyCurrentFileRelativePathToClipboard<CR>', { noremap = true, desc = "Copy file path to clipboard" })
 
 -- Custom highlight group: green color for reloaded filenames in echo message
-vim.api.nvim_set_hl(0, "OneDiffReloadedFile", { fg = "#00ff00", bold = true })
+-- vim.api.nvim_set_hl(0, "ReloadedFilename", { fg = "#00ff00", bold = true })
+vim.api.nvim_set_hl(0, "ReloadedFilename", { fg = "#a6e3a1", bold = true })
 
 -- Reload file from disk with a brief status echo, highlighting the file name in green
 local function reload_file_with_message()
@@ -22,7 +23,7 @@ local function reload_file_with_message()
   local filename = vim.fn.expand('%:t')
   vim.api.nvim_echo({
     { "File reloaded ", "MoreMsg" },
-    { filename,        "OneDiffReloadedFile" },
+    { filename,        "ReloadedFilename" },
   }, false, {})
   vim.defer_fn(function()
     vim.api.nvim_echo({ { "" } }, false, {})

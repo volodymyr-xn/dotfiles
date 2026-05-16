@@ -29,17 +29,70 @@ local function split_lines(data)
   return lines
 end
 
-local function buffer_has_treesitter(buf)
-  local ok, hl = pcall(require, "vim.treesitter.highlighter")
-  if not ok then return false end
-  return hl.active and hl.active[buf] ~= nil
+-- Pre-read working-copy content so render_current can call this between diff dispatch and wait,
+-- letting the file IO overlap with the git subprocesses.
+local function read_working_copy_content(full_path)
+  local stat = vim.loop.fs_stat(full_path)
+  local oversize = stat and stat.size > SIZE_GATE_BYTES
+  if oversize then
+    local size_mb = string.format("%.1f", (stat.size or 0) / 1024 / 1024)
+    return {
+      oversize = true,
+      lines = {
+        "",
+        "  OneDiff: file is " .. size_mb .. " MB — diff view skipped.",
+        "  Inline highlights and syntax are disabled above " ..
+          string.format("%.0f", SIZE_GATE_BYTES / 1024 / 1024) .. " MB.",
+        "",
+        "  Press `o` to open the file in a new tab.",
+      },
+    }
+  end
+  local data = read_file_sync(full_path) or ""
+  return { oversize = false, lines = split_lines(data) }
+end
+
+local function prefetch_neighbors()
+  local session = require("my_plugins.onediff.session")
+  local git_ops = require("my_plugins.onediff.git_ops")
+  local diff_parse = require("my_plugins.onediff.diff_parse")
+
+  local files = session.get_files()
+  local count = #files
+  if count <= 1 then return end
+
+  local idx = session.get_current_index()
+  local next_i = idx % count + 1
+  local prev_i = (idx - 2) % count + 1
+  local base_ref = session.get_base_ref()
+  local version = session.get_diff_cache_version()
+
+  local function schedule_one(i)
+    if i == idx then return end
+    local file = files[i]
+    if not file then return end
+    if file.status == "untracked" or file.status == "deleted" or file.is_binary then return end
+    if session.get_cached_diff(file.path) then return end
+
+    git_ops.get_diffs_async(file.path, base_ref, function(diff_text, staged_diff)
+      -- reload_files / stage / unstage bumps the version; discard fills that crossed that line.
+      if session.get_diff_cache_version() ~= version then return end
+      local hunks = diff_parse.parse_hunks(diff_text)
+      local staged_hunks = diff_parse.parse_hunks(staged_diff)
+      session.set_cached_diff(file.path, hunks, staged_hunks, version)
+    end)
+  end
+
+  schedule_one(next_i)
+  if prev_i ~= next_i then
+    schedule_one(prev_i)
+  end
 end
 
 function M.render_current()
   local session = require("my_plugins.onediff.session")
   local git_ops = require("my_plugins.onediff.git_ops")
   local diff_parse = require("my_plugins.onediff.diff_parse")
-  local settings = require("my_plugins.onediff.settings")
 
   local file = session.get_current_file()
   if not file then
@@ -57,19 +110,34 @@ function M.render_current()
 
   if file.status == "untracked" then
     session.set_hunks({})
-    M.open_file_with_diff(file, {}, base_ref)
+    session.set_staged_hunks({})
+    M.open_file_with_diff(file, {}, base_ref, {})
+    vim.schedule(prefetch_neighbors)
     return
   end
 
-  local diff_text = git_ops.get_file_diff(file.path, base_ref)
-  local hunks = diff_parse.parse_hunks(diff_text)
-  session.set_hunks(hunks)
+  local hunks, staged_hunks
+  local prefetched_content = nil
 
-  local staged_diff = git_ops.get_staged_diff(file.path, base_ref)
-  local staged_hunks = diff_parse.parse_hunks(staged_diff)
+  local cached = session.get_cached_diff(file.path)
+  if cached then
+    hunks = cached.hunks
+    staged_hunks = cached.staged_hunks
+  else
+    -- Spawn both diffs first, then read the working copy while they run, then collect results.
+    local file_job, staged_job = git_ops.dispatch_diffs(file.path, base_ref)
+    prefetched_content = read_working_copy_content(file.full_path)
+    local diff_text, staged_diff = git_ops.wait_diffs(file_job, staged_job)
+    hunks = diff_parse.parse_hunks(diff_text)
+    staged_hunks = diff_parse.parse_hunks(staged_diff)
+    session.set_cached_diff(file.path, hunks, staged_hunks)
+  end
+
+  session.set_hunks(hunks)
   session.set_staged_hunks(staged_hunks)
 
-  M.open_file_with_diff(file, hunks, base_ref, staged_hunks)
+  M.open_file_with_diff(file, hunks, base_ref, staged_hunks, prefetched_content)
+  vim.schedule(prefetch_neighbors)
 end
 
 -- Acquire the one reusable scratch buffer; create on first use, otherwise wipe its contents.
@@ -84,9 +152,9 @@ local function acquire_diff_buf(session, settings)
   else
     vim.bo[buf].modifiable = true
     -- Clear extmarks from every namespace this plugin writes to (settings ns + onediff_binary).
+    -- Treesitter highlights use decoration providers (not extmarks) so they aren't affected;
+    -- attach_syntax decides whether to keep or rebuild the parser based on the new filetype.
     vim.api.nvim_buf_clear_namespace(buf, -1, 0, -1)
-    -- Detach any treesitter highlighter from the previous render so the next file's parser can attach.
-    pcall(vim.treesitter.stop, buf)
   end
   return buf
 end
@@ -107,27 +175,50 @@ local function attach_syntax(buf, file_path, line_count)
   local ft = vim.filetype.match({ filename = file_path })
   if not ft then return end
 
+  local use_ts = require("my_plugins.onediff.settings").current.use_treesitter
+  local new_mode = use_ts and "treesitter" or "syntax"
+  local prev_ft = vim.b[buf].onediff_current_ft
+  local prev_mode = vim.b[buf].onediff_current_syntax_mode
+
+  -- Same filetype and same mode as the previous render: reuse the existing parser/syntax engine.
+  if prev_ft == ft and prev_mode == new_mode then
+    return
+  end
+
+  -- Filetype or mode changed: detach the old parser before switching.
+  pcall(vim.treesitter.stop, buf)
+
+  vim.b[buf].onediff_current_ft = ft
+  vim.b[buf].onediff_current_syntax_mode = new_mode
+
   -- Default path: Vim's regex `:syntax` — lazy, ships with every filetype, no parser-install dance.
-  if not require("my_plugins.onediff.settings").current.use_treesitter then
+  if not use_ts then
     vim.bo[buf].syntax = ft
     return
   end
 
-  if buffer_has_treesitter(buf) then
-    return
+  -- Treesitter mode: kill any leftover vim regex syntax (e.g. from a prior toggle-off render)
+  -- so it doesn't run alongside treesitter and double-paint highlights.
+  if vim.bo[buf].syntax ~= "" then
+    vim.bo[buf].syntax = ""
   end
 
-  -- Treesitter is opt-in: defer parsing so the first paint shows diff highlights immediately.
+  -- Treesitter is opt-in and runs async: defer parsing so the first paint shows diff highlights
+  -- immediately, then the parser attaches on the next loop tick.
   vim.schedule(function()
     if not vim.api.nvim_buf_is_valid(buf) then return end
+    if vim.b[buf].onediff_current_ft ~= ft then return end
     local lang = vim.treesitter.language.get_lang(ft) or ft
     if not pcall(vim.treesitter.start, buf, lang) then
+      -- Parser unavailable: fall back to regex syntax and record the mode so the next render
+      -- doesn't short-circuit thinking treesitter is still active.
       vim.bo[buf].syntax = ft
+      vim.b[buf].onediff_current_syntax_mode = "syntax"
     end
   end)
 end
 
-function M.open_file_with_diff(file, hunks, base_ref, staged_hunks)
+function M.open_file_with_diff(file, hunks, base_ref, staged_hunks, prefetched_content)
   local session = require("my_plugins.onediff.session")
   local settings = require("my_plugins.onediff.settings")
   local diff_parse = require("my_plugins.onediff.diff_parse")
@@ -164,25 +255,10 @@ function M.open_file_with_diff(file, hunks, base_ref, staged_hunks)
 
   configure_diff_buf(buf, target_win, file)
 
-  -- fs_stat lets us pick an oversize path before reading the whole file into memory.
-  local stat = vim.loop.fs_stat(file.full_path)
-  local oversize = stat and stat.size > SIZE_GATE_BYTES
-
-  local lines
-  if oversize then
-    local size_mb = string.format("%.1f", (stat.size or 0) / 1024 / 1024)
-    lines = {
-      "",
-      "  OneDiff: file is " .. size_mb .. " MB — diff view skipped.",
-      "  Inline highlights and syntax are disabled above " ..
-        string.format("%.0f", SIZE_GATE_BYTES / 1024 / 1024) .. " MB.",
-      "",
-      "  Press `o` to open the file in a new tab.",
-    }
-  else
-    local data = read_file_sync(file.full_path) or ""
-    lines = split_lines(data)
-  end
+  -- Caller may have read the file in parallel with the git diff jobs; otherwise read it now.
+  local content = prefetched_content or read_working_copy_content(file.full_path)
+  local lines = content.lines
+  local oversize = content.oversize
 
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
   pcall(vim.api.nvim_buf_set_name, buf, "[OneDiff] " .. file.path)

@@ -60,6 +60,8 @@ local function create_instance()
     sidebar_buf = nil,
     sidebar_win = nil,
     working_dir = vim.fn.getcwd(),
+    diff_cache = {},
+    diff_cache_version = 0,
   }
   
   active_instance_id = id
@@ -203,7 +205,11 @@ function M.reload_files()
   local git_ops = require("my_plugins.onediff.git_ops")
   local state = get_current_instance()
   if not state then return end
-  
+
+  -- Wipe memoized hunks; staging/unstaging or external edits may have invalidated them.
+  state.diff_cache = {}
+  state.diff_cache_version = state.diff_cache_version + 1
+
   local current_file = M.get_current_file()
   state.changed_files = git_ops.list_changed_files(state.base_ref)
 
@@ -219,6 +225,32 @@ function M.reload_files()
   if state.current_index < 1 and #state.changed_files > 0 then
     state.current_index = 1
   end
+end
+
+-- Lazy per-file memo of parsed hunks; bumped version lets prefetch callbacks discard stale fills.
+function M.get_cached_diff(path)
+  local state = get_current_instance()
+  if not state then return nil end
+  return state.diff_cache[path]
+end
+
+function M.set_cached_diff(path, hunks, staged_hunks, version)
+  local state = get_current_instance()
+  if not state then return end
+  if version ~= nil and version ~= state.diff_cache_version then return end
+  state.diff_cache[path] = { hunks = hunks, staged_hunks = staged_hunks }
+end
+
+-- Drop the memoized hunks for one file; next render of that path will re-fetch from git.
+function M.invalidate_diff_cache_for(path)
+  local state = get_current_instance()
+  if not state or not path then return end
+  state.diff_cache[path] = nil
+end
+
+function M.get_diff_cache_version()
+  local state = get_current_instance()
+  return state and state.diff_cache_version or 0
 end
 
 function M.set_hunks(hunks)
