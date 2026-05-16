@@ -26,9 +26,12 @@ vim.keymap.set("n", "sf", function()
   onediff.open_or_focus_and_refresh()
 end, { desc = "Open/focus OneDiff and refresh" })
 
--- Quick-open OneDiff with capital Q (overrides default Ex-mode binding).
--- Pressing Q again while focused inside any OneDiff buffer closes the session.
-vim.keymap.set("n", "Q", function()
+-- Disable Vim's default Q (Ex mode) so it doesn't fire accidentally.
+vim.keymap.set("n", "Q", "<Nop>", { desc = "Disabled" })
+
+-- Quick-open OneDiff with capital M.
+-- Pressing M again while focused inside any OneDiff buffer closes the session.
+vim.keymap.set("n", "M", function()
   local onediff = load_onediff()
   local session = require("my_plugins.onediff.session")
   local buf = vim.api.nvim_get_current_buf()

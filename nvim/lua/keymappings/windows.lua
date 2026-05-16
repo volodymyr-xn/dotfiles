@@ -1,6 +1,3 @@
--- Split window vertically
-vim.api.nvim_set_keymap('n', 'M', ':vsplit<CR>', { noremap = true, silent = true, desc = "Split window vertically" })
-
 -- Close current window
 vim.api.nvim_set_keymap('n', '<C-c>', '<C-w>q', { noremap = true, desc = "Close window" })
 
