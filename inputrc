@@ -1,6 +1,28 @@
 set editing-mode vi
 set blink-matching-paren on
 
+# Keeps the 8th bit of input characters intact instead of clearing it.
+# Required for UTF-8; auto-enabled when LC_CTYPE demands it.
+# Alias: meta-flag.
+set input-meta on
+
+# Displays 8-bit output characters directly rather than as escape sequences.
+# Required for UTF-8; auto-enabled when LC_CTYPE demands it.
+# Pair with input-meta on.
+set output-meta on
+
+# Prevents 8-bit characters from being re-encoded as meta-prefixed sequences.
+# Must be off for UTF-8 — converting strips the high bit and corrupts chars.
+# Auto-disabled when LC_CTYPE requires 8-bit encoding.
+set convert-meta off
+
+# Stops readline from always forcing meta keys to use the escape prefix.
+# Only relevant when convert-meta is off; off is the readline 8.3 default.
+# Has no effect on older readline versions.
+$if version >= 8.3
+set force-meta-prefix off
+$endif
+
 "\e[1;5C": forward-word
 "\e[1;5D": backward-word
 
@@ -11,7 +33,4 @@ set blink-matching-paren on
 "^n" backward-word
 "^q" forward-word
 
-# Enable 8-bit input (required for UTF-8)
-# The setting `meta-flag` is an alias for this setting.
-set input-meta on
 
