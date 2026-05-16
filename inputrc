@@ -10,3 +10,8 @@ set blink-matching-paren on
 
 "^n" backward-word
 "^q" forward-word
+
+# Enable 8-bit input (required for UTF-8)
+# The setting `meta-flag` is an alias for this setting.
+set input-meta on
+
