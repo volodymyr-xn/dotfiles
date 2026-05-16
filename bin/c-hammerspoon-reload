@@ -11,7 +11,16 @@
 # a plain Quit event, needing neither IPC nor AppleScript-in-config.
 set -euo pipefail
 
-ipc_ready() { hs -c 'return 1' >/dev/null 2>&1; }
+# Run `hs -c` with a hard timeout. macOS has no `timeout(1)`, and a wedged
+# Hammerspoon IPC port makes `hs -c` block forever instead of erroring —
+# which would hang every probe below. signal.alarm gives us a portable
+# timeout: SIGALRM kills the child, and execvp inherits the pending timer.
+hs_timed() {
+  local secs="$1"; shift
+  python3 -c 'import os, signal, sys; signal.alarm(int(sys.argv[1])); os.execvp(sys.argv[2], sys.argv[2:])' "$secs" hs "$@"
+}
+
+ipc_ready() { hs_timed 2 -c 'return 1' >/dev/null 2>&1; }
 
 # Poll the IPC port for up to ~15s; succeeds as soon as it answers.
 wait_for_ipc() {
@@ -25,9 +34,10 @@ wait_for_ipc() {
 
 # Wait until a FRESH instance answers (sentinel absent => new Lua state).
 wait_for_fresh() {
-  local _
+  local _ out
   for _ in $(seq 1 15); do
-    if [ "$(hs -c 'return RELOAD_SENTINEL == nil and "fresh" or "stale"' 2>/dev/null)" = "fresh" ]; then
+    out=$(hs_timed 2 -c 'return RELOAD_SENTINEL == nil and "fresh" or "stale"' 2>/dev/null || true)
+    if [ "$out" = "fresh" ]; then
       return 0
     fi
     sleep 1
@@ -36,7 +46,7 @@ wait_for_fresh() {
 }
 
 if ipc_ready; then
-  hs -c 'RELOAD_SENTINEL = true; hs.timer.doAfter(0.2, hs.reload)' >/dev/null 2>&1 || true
+  hs_timed 2 -c 'RELOAD_SENTINEL = true; hs.timer.doAfter(0.2, hs.reload)' >/dev/null 2>&1 || true
 
   if wait_for_fresh; then
     echo "Hammerspoon reloaded."
@@ -48,8 +58,18 @@ if ipc_ready; then
 fi
 
 echo "IPC port unavailable; relaunching Hammerspoon to bootstrap..." >&2
+
+# Cooperative quit first (gives Hammerspoon a chance to flush state). If it's
+# wedged it will ignore both AppleScript quit and SIGTERM, so escalate.
 osascript -e 'quit app "Hammerspoon"' >/dev/null 2>&1 || true
-sleep 2
+pkill -TERM -f "/Applications/Hammerspoon.app/Contents/MacOS/Hammerspoon" 2>/dev/null || true
+for _ in $(seq 1 5); do
+  pgrep -f "/Applications/Hammerspoon.app/Contents/MacOS/Hammerspoon" >/dev/null || break
+  sleep 1
+done
+pkill -KILL -f "/Applications/Hammerspoon.app/Contents/MacOS/Hammerspoon" 2>/dev/null || true
+sleep 1
+
 open -a Hammerspoon
 
 if wait_for_ipc; then
