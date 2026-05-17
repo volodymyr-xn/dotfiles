@@ -24,62 +24,72 @@ vim.cmd("command! Q q")
 --   echo "Servers reloaded"
 -- endfunction
 
+-- Reloads the active tab of the Chrome work-profile window and focuses it.
+-- macOS delegates to bin/c-chrome-reload-work-tab, which resolves the profile
+-- directory from c-chrome-profile-directory; Linux falls back to xdotool
+-- against any Chromium window (no per-profile targeting available there).
 function ReloadActiveChromeTab()
-    -- Detect OS
   local sysname = vim.loop.os_uname().sysname
 
-  -- ANSI escape codes for purple text
-  local purple = "\27[35m"
-  local reset = "\27[0m"
-
-  local success = false
-
-  if sysname == "Linux" then
-    -- Linux: use xdotool
-    vim.fn.system("xdotool search --onlyvisible --class Chromium windowactivate windowfocus key F5")
-    if vim.v.shell_error == 0 then
-      success = true
-    end
-
-  elseif sysname == "Darwin" then
-    -- macOS: use AppleScript via osascript
-    local applescript = [[
-      osascript -e '
-        tell application "Google Chrome"
-          if (count of windows) > 0 then
-            tell active tab of front window to reload
-          end if
-          activate
-        end tell
-      '
-    ]]
-    vim.fn.system(applescript)
-    if vim.v.shell_error == 0 then
-      success = true
-    end
+  local cmd
+  if sysname == "Darwin" then
+    cmd = { "c-chrome-reload-work-tab" }
+  elseif sysname == "Linux" then
+    cmd = { "sh", "-c", "xdotool search --onlyvisible --class Chromium windowactivate windowfocus key F5" }
+  else
+    vim.api.nvim_echo({{"ReloadActiveChromeTab: unsupported OS " .. sysname, "ErrorMsg"}}, true, {})
+    return
   end
 
-  if success then
-    vim.api.nvim_echo({{"Chrome tab reloaded ✅", "Keyword"}}, false, {})
+  local output = vim.fn.system(cmd)
+  local ok = vim.v.shell_error == 0
+
+  if ok then
+    vim.api.nvim_echo({{"Chrome work tab reloaded ✅", "Keyword"}}, false, {})
   else
-    print("Error reloading chrome tab ✅")
+    local msg = (output and output ~= "") and output or "unknown error"
+    msg = msg:gsub("%s+$", "")
+    vim.api.nvim_echo({{"Reload failed: " .. msg, "ErrorMsg"}}, true, {})
   end
 end
 
--- Reload active Chrome tab
-vim.keymap.set("n", "R", ReloadActiveChromeTab, { silent = true, desc = "Reload active Chrome tab" })
+-- Reload active Chrome tab in the "1 Work" profile
+vim.keymap.set("n", "R", ReloadActiveChromeTab, { silent = true, desc = "Reload active Chrome work-profile tab" })
 
+
+-- Returns true if a Neo-tree window is open in the current tab
+local function neotree_is_open()
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    local buf = vim.api.nvim_win_get_buf(win)
+    if vim.bo[buf].filetype == "neo-tree" then
+      return true
+    end
+  end
+  return false
+end
+
+-- Returns true if the :Neotree user command is defined (plugin loaded)
+local function neotree_command_exists()
+  return vim.fn.exists(":Neotree") == 2
+end
 
 function ToggleCurrentWindowZoom()
   if vim.g.currentWindowZoomed == nil then
     vim.g.currentWindowZoomed = false
+    vim.g.neotreeWasOpenBeforeZoom = false
   end
 
   if vim.g.currentWindowZoomed then
     vim.cmd("wincmd =")
+    if vim.g.neotreeWasOpenBeforeZoom and neotree_command_exists() then
+      vim.cmd("Neotree show")
+    end
     vim.g.currentWindowZoomed = false
   else
-    vim.cmd("Neotree close")
+    vim.g.neotreeWasOpenBeforeZoom = neotree_is_open()
+    if neotree_command_exists() then
+      vim.cmd("Neotree close")
+    end
     vim.cmd("wincmd |")
     vim.cmd("wincmd _")
     vim.g.currentWindowZoomed = true
