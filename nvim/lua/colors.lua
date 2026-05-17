@@ -82,6 +82,7 @@ require("catppuccin").setup {
     },
     color_overrides = {
         all = {
+
             text = "#ffffff",
             -- peach = "#f5a97f", -- catppuccin macchiato default
             peach = "#F5B07F",
@@ -103,10 +104,35 @@ require("catppuccin").setup {
             -- base = "#262833",
             -- base = "#242533"
             -- base = "#252633"
+
+            -- mantle = "#0a0a13",
+            -- crust = "#05050c",
         },
         frappe = {},
         macchiato = {},
         mocha = {},
+    },
+    styles = {
+      comments = { "italic" }
+    },
+    lsp_styles = {
+      virtual_text = {
+        errors = { "italic" },
+        hints = { "italic" },
+        warnings = { "italic" },
+        information = { "italic" },
+        ok = { "italic" },
+      },
+      underlines = {
+        errors = { "underline" },
+        hints = { "underline" },
+        warnings = { "underline" },
+        information = { "underline" },
+        ok = { "underline" },
+      },
+      inlay_hints = {
+        background = true,
+      },
     },
     integrations = {
       blink_cmp = true,
