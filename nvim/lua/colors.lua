@@ -77,11 +77,11 @@ require("catppuccin").setup {
 
           }
         end,
-    background = {
-       dark = "macchiato"
-    },
-    color_overrides = {
-        all = {
+        background = {
+          dark = "macchiato"
+        },
+        color_overrides = {
+          all = {
 
             text = "#ffffff",
             -- peach = "#f5a97f", -- catppuccin macchiato default
@@ -107,59 +107,59 @@ require("catppuccin").setup {
 
             -- mantle = "#0a0a13",
             -- crust = "#05050c",
+          },
+          frappe = {},
+          macchiato = {},
+          mocha = {},
         },
-        frappe = {},
-        macchiato = {},
-        mocha = {},
-    },
-    styles = {
-      comments = { "italic" }
-    },
-    lsp_styles = {
-      virtual_text = {
-        errors = { "italic" },
-        hints = { "italic" },
-        warnings = { "italic" },
-        information = { "italic" },
-        ok = { "italic" },
-      },
-      underlines = {
-        errors = { "underline" },
-        hints = { "underline" },
-        warnings = { "underline" },
-        information = { "underline" },
-        ok = { "underline" },
-      },
-      inlay_hints = {
-        background = true,
-      },
-    },
-    integrations = {
-      blink_cmp = true,
-      cmp = true,
-      gitsigns = true,
-      nvimtree = true,
-      treesitter = true,
-      notify = false,
-      mini = {
-        enabled = true,
-        indentscope_color = "",
-      },
-    }
-}
+        styles = {
+          comments = { "italic" }
+        },
+        lsp_styles = {
+          virtual_text = {
+            errors = { "italic" },
+            hints = { "italic" },
+            warnings = { "italic" },
+            information = { "italic" },
+            ok = { "italic" },
+          },
+          underlines = {
+            errors = { "underline" },
+            hints = { "underline" },
+            warnings = { "underline" },
+            information = { "underline" },
+            ok = { "underline" },
+          },
+          inlay_hints = {
+            background = true,
+          },
+        },
+        integrations = {
+          blink_cmp = true,
+          cmp = true,
+          gitsigns = true,
+          nvimtree = true,
+          treesitter = true,
+          notify = false,
+          mini = {
+            enabled = true,
+            indentscope_color = "",
+          },
+        }
+      }
 
--- vim.cmd("colorscheme gruvbox")
+      -- vim.cmd("colorscheme gruvbox")
 
--- vim.cmd("colorscheme rose-pine")
--- vim.cmd("colorscheme nightfox")
--- vim.cmd("colorscheme sonokai")
--- vim.cmd("colorscheme kanagawa")
--- vim.cmd("colorscheme dracula")
+      -- vim.cmd("colorscheme rose-pine")
+      -- vim.cmd("colorscheme nightfox")
+      -- vim.cmd("colorscheme sonokai")
+      -- vim.cmd("colorscheme kanagawa")
+      -- vim.cmd("colorscheme dracula")
 
--- vim.cmd[[
---  let g:gruvbox_material_background = 'soft'
--- ]]
+      -- vim.cmd[[
+      --  let g:gruvbox_material_background = 'soft'
+      -- ]]
 
-vim.g.custom_color_character = "#98c379"
-vim.cmd("colorscheme catppuccin")
--- vim.cmd("colorscheme dracula")
+      vim.g.custom_color_character = "#98c379"
+      vim.cmd("colorscheme catppuccin")
+      -- vim.cmd("colorscheme dracula")
