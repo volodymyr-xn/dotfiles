@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Reload the active tab of the Chrome window for the work profile and bring it
+# to front. The profile directory name comes from c-chrome-profile-directory so
+# changing the work profile is a single-file edit. Errors out (without leaving
+# a stray new window behind) when no work-profile window is currently open.
+#
+# Strategy: launch Chrome with --profile-directory=<work>. On a running Chrome
+# this activates the most-recent window of that profile or, if none exists,
+# opens a fresh one. We count windows before/after to detect that
+# "opened a fresh one" case, close the stray window, and report a clean error.
+
+set -euo pipefail
+
+CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+PROFILE_DIR="$(c-chrome-profile-directory)"
+
+before=$(osascript -e 'tell application "Google Chrome" to count windows' 2>/dev/null || echo 0)
+
+"$CHROME" --profile-directory="$PROFILE_DIR" >/dev/null 2>&1 &
+disown
+
+osascript <<APPLESCRIPT
+-- Wait up to ~1.5s for Chrome to become frontmost so the reload below targets
+-- the work-profile window Chrome just raised.
+tell application "System Events"
+  repeat 60 times
+    try
+      if frontmost of application process "Google Chrome" is true then exit repeat
+    end try
+    delay 0.025
+  end repeat
+end tell
+
+tell application "Google Chrome"
+  if (count of windows) is 0 then error "No Chrome windows open"
+
+  if (count of windows) > $before then
+    -- A new window appeared => work-profile window wasn't already open.
+    -- Close it and report cleanly rather than reloading a fresh new-tab page.
+    close front window
+    error "No Chrome window for profile '$PROFILE_DIR' is open"
+  end if
+
+  tell active tab of front window to reload
+  activate
+end tell
+APPLESCRIPT

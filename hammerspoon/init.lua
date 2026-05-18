@@ -29,6 +29,13 @@ end
 hs.hotkey.bind({}, 67, toggleMute)
 hs.hotkey.bind({"cmd"}, "0", toggleMute)
 
+-- Play/pause (continue) media playback: Numpad 0 (raw keycode 82)
+local function togglePlayPause()
+  hs.eventtap.event.newSystemKeyEvent("PLAY", true):post()
+  hs.eventtap.event.newSystemKeyEvent("PLAY", false):post()
+end
+hs.hotkey.bind({}, 82, togglePlayPause)
+
 -- Focus app or launch if not running
 local function focusApp(name)
   hs.application.launchOrFocus(name)
@@ -38,7 +45,7 @@ local dismissNotifications = require("dismiss_notifications").dismiss
 local openNotification = require("click_notification").open
 
 -- Cmd+L → dismiss all notifications
--- hs.hotkey.bind({"cmd"}, "l", dismissNotifications)
+hs.hotkey.bind({"cmd"}, "k", dismissNotifications)
 
 -- Cmd+` → activate (click) the topmost notification's default action
 hs.hotkey.bind({"cmd"}, "l", openNotification)
@@ -63,4 +70,5 @@ local function cycleAppWindows()
   end
   if target then target:focus() end
 end
+
 hs.hotkey.bind({"cmd"}, "`", cycleAppWindows)

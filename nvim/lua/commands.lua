@@ -24,10 +24,9 @@ vim.cmd("command! Q q")
 --   echo "Servers reloaded"
 -- endfunction
 
--- Reloads the active tab of the Chrome work-profile window and focuses it.
--- macOS delegates to bin/c-chrome-reload-work-tab, which resolves the profile
--- directory from c-chrome-profile-directory; Linux falls back to xdotool
--- against any Chromium window (no per-profile targeting available there).
+-- Reloads the active tab of the frontmost Chrome window and focuses it.
+-- macOS delegates to bin/c-chrome-reload-work-tab; Linux falls back to
+-- xdotool against any Chromium window.
 function ReloadActiveChromeTab()
   local sysname = vim.loop.os_uname().sysname
 
