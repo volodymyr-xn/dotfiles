@@ -592,6 +592,9 @@ require("lazy").setup({
     -- stylua: ignore
   },
 
+  -- Visual glow feedback for undo, redo, yank, paste, and search
+  { "y3owk1n/undo-glow.nvim", version = "*", event = "VeryLazy" },
+
   {
     "OXY2DEV/markview.nvim",
     lazy = false,
