@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Renders a Markdown file to a self-contained HTML file (pandoc + embedded CSS/images).
+# Usage: c-md-to-html <input.md> <output.html>
+# The result can be opened directly in any browser; resources are inlined so it
+# travels as a single file.
+
+set -euo pipefail
+
+if [[ $# -lt 2 ]]; then
+  echo "usage: c-md-to-html <input.md> <output.html>" >&2
+  exit 64
+fi
+
+input_md="$1"
+output_html="$2"
+
+if [[ ! -f "$input_md" ]]; then
+  echo "c-md-to-html: input file not found: $input_md" >&2
+  exit 66
+fi
+
+if ! command -v pandoc >/dev/null 2>&1; then
+  echo "c-md-to-html: pandoc not found" >&2
+  exit 69
+fi
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+css_file="$script_dir/c-md-to-html.css"
+if [[ ! -f "$css_file" ]]; then
+  echo "c-md-to-html: missing stylesheet at $css_file" >&2
+  exit 70
+fi
+
+# Resolve to absolute paths so file:// references and pandoc resource-path work
+# regardless of where this script is invoked from.
+abs_md="$(cd "$(dirname "$input_md")" && pwd)/$(basename "$input_md")"
+md_dir="$(dirname "$abs_md")"
+
+pandoc \
+  --from=gfm \
+  --to=html5 \
+  --standalone \
+  --metadata title="$(basename "$input_md")" \
+  --css "file://${css_file}" \
+  --highlight-style=pygments \
+  --embed-resources \
+  --resource-path="${md_dir}" \
+  "$abs_md" \
+  -o "$output_html" 2> >(grep -v 'Deprecated: --highlight-style' >&2)

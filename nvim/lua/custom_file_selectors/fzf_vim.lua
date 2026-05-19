@@ -121,6 +121,20 @@ function M.setup()
       down = "50%",
     })
   end, { nargs = "*" })
+
+  local RG_CMD = "rg --column --line-number --no-heading --color=always --smart-case --max-columns=500"
+
+  vim.api.nvim_create_user_command("CustomFullTextSearchRg", function(opts)
+    local query = opts.args ~= "" and opts.args or "."
+    vim.fn["fzf#run"]({
+      source = RG_CMD .. " " .. vim.fn.shellescape(query),
+      ["sink*"] = ag_handler,
+      options = "--ansi --expect=ctrl-t,ctrl-v,ctrl-x --delimiter : --nth 4.. "
+        .. "--multi --bind=ctrl-a:select-all,ctrl-d:deselect-all "
+        .. "--color hl:68,hl+:110",
+      down = "50%",
+    })
+  end, { nargs = "*" })
 end
 
 function M.find_files()
@@ -266,6 +280,10 @@ end
 
 function M.custom_full_text_search()
   vim.cmd("CustomFullTextSearch")
+end
+
+function M.custom_full_text_search_rg()
+  vim.cmd("CustomFullTextSearchRg")
 end
 
 function M.live_grep_changed_files()

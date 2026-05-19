@@ -4,7 +4,6 @@
 :root {
   --fg: #1f2328;
   --fg-muted: #59636e;
-  --bg: #ffffff;
   --border: #d1d9e0;
   --border-muted: #d1d9e0b3;
   --accent: #0969da;
@@ -17,7 +16,6 @@
 html, body {
   margin: 0;
   padding: 0;
-  background: var(--bg);
 }
 
 body {

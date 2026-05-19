@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+
+<link rel="stylesheet" href="./base.css">
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<!-- Add language packs needed for the post (bash/applescript/shell/ini/python/ruby/js/...) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+</head>
+<body>
+<main class="container">
+
+  <div class="meta">
+    <span class="tag">{{TAG}}</span>
+    <span class="dot">·</span>
+    <span>{{CATEGORY}}</span>
+    <span class="dot">·</span>
+    <span>{{YYYY-MM-DD}}</span>
+    <span class="dot">·</span>
+    <span>~{{N}} min read</span>
+  </div>
+
+  <h1>{{HEADLINE}}</h1>
+
+  <p class="lede">{{1-3 sentence summary of the post's promise}}</p>
+
+  <h2>{{Section heading}}</h2>
+  <p>{{paragraphs...}}</p>
+
+  <!-- Optional building blocks (use only when they earn their place):
+       .flow      — ASCII / unicode-box diagram of a process
+       .aside     — short callout: gotcha, side-note, caveat
+       .pullquote — one sentence the post pivots around
+       <table>    — comparisons across 2-4 columns
+       <pre><code class="language-bash">…</code></pre>  for code
+  -->
+
+  <!-- Sources section: include only when the calling command requires it,
+       or when the post actually cites external resources. Omit entirely
+       otherwise. -->
+  <section class="sources">
+    <h2>Sources</h2>
+
+    <h3>Top sources</h3>
+    <ul>
+      <li><span class="title">{{Source title}}</span> — {{one-sentence annotation}} — <a target="_blank" href="{{url}}">{{url}}</a> — <span class="year">{{YEAR}}</span></li>
+    </ul>
+
+    <h3>Recent sources (last 12–24 months)</h3>
+    <ul>
+      <li><span class="title">{{Source title}}</span> — {{one-sentence annotation}} — <a target="_blank" href="{{url}}">{{url}}</a> — <span class="year">{{YEAR}}</span></li>
+    </ul>
+  </section>
+
+  <div class="colophon">{{Short footer line — directory and date}}</div>
+
+</main>
+
+<script>hljs.highlightAll();</script>
+</body>
+</html>

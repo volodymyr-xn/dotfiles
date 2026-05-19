@@ -100,6 +100,10 @@ map("<Leader>p",
   function() CustomFileSelectors.custom_full_text_search() end,
   "Custom full text search (fzf.vim)")
 
+map("s[",
+  function() CustomFileSelectors.custom_full_text_search_rg() end,
+  "Custom full text search rg+reload (fzf.vim)")
+
 map("so",
   function() CustomFileSelectors.search_lines_in_all_buffers() end,
   "Search lines in all buffers")
