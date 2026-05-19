@@ -12,11 +12,11 @@ undo_glow.setup({
     easing = "out_sine",
   },
   highlights = {
-    undo = { hl = "UgUndo", hl_color = { bg = "#7e5263" } },
-    redo = { hl = "UgRedo", hl_color = { bg = "#5f7863" } },
-    yank = { hl = "UgYank", hl_color = { bg = "#7f7567" } },
-    paste = { hl = "UgPaste", hl_color = { bg = "#52757b" } },
-    search = { hl = "UgSearch", hl_color = { bg = "#6d5d8f" } },
+    undo = { hl = "UgUndo", hl_color = { bg = "#604456" } },
+    redo = { hl = "UgRedo", hl_color = { bg = "#4b5d55" } },
+    yank = { hl = "UgYank", hl_color = { bg = "#615b58" } },
+    paste = { hl = "UgPaste", hl_color = { bg = "#435b65" } },
+    search = { hl = "UgSearch", hl_color = { bg = "#554b72" } },
   },
 })
 
