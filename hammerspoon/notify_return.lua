@@ -27,11 +27,10 @@ end
 
 -- Post a macOS Notification Center notification; optional `detail` becomes
 -- the subtitle. Silent (no sound). Auto-withdraws after a few seconds.
-local function notify(text, detail)
+local function notify(title, detail)
   local attrs = {
-    title = "Return",
-    informativeText = text,
-    withdrawAfter = 4,
+    title = title,
+    withdrawAfter = 3,
   }
 
   if detail then attrs.subTitle = detail end
@@ -161,6 +160,7 @@ end
 -- For pane-id form (%N) queries tmux; for session:window.pane parses directly.
 local function tmuxLocLabel(loc)
   local session, window, pane = loc:match("^(.+):(.+)%.(.+)$")
+
   if session then
     return session .. " " .. window .. "#" .. pane
   end
@@ -191,6 +191,7 @@ end
 -- handles the Space switch implicitly by surfacing the app's window.
 function M.restoreFull()
   local snap = readJSON(FULL_PATH)
+
   if not snap then
     log("restoreFull: no snapshot")
     notify("Cmd+K · no snapshot", "Nothing to restore")
@@ -210,6 +211,7 @@ function M.restoreFull()
       tostring(snap.app_bundle or snap.app_name)))
   else
     local ok = activateApp(snap.app_name, snap.app_bundle)
+
     log(string.format("restoreFull: activate name=%s bundle=%s ok=%s",
       tostring(snap.app_name), tostring(snap.app_bundle), tostring(ok)))
   end
@@ -218,14 +220,17 @@ function M.restoreFull()
     applyTmux(snap.tmux)
   end
 
-  local title
+  local appLabel = snap.app_name or snap.app_bundle or "?"
+  local title = "Return to " .. appLabel
+  local subtitle
+
   if snap.is_ghostty and isTmuxLoc(snap.tmux) then
-    title = 'Back to Ghostty tmux "' .. tmuxLocLabel(snap.tmux) .. '"'
+    subtitle = tmuxLocLabel(snap.tmux)
   else
-    title = "Back to " .. tostring(snap.app_name or snap.app_bundle or "?")
+    subtitle = "-"
   end
 
-  notify(title)
+  notify(title, subtitle)
 end
 
 return M
