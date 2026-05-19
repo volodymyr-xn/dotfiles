@@ -44,11 +44,8 @@ local dismissNotifications = require("dismiss_notifications").dismiss
 local openNotification = require("click_notification").open
 local notifyReturn = require("notify_return")
 
--- Cmd+K → return to the pre-jump Space + window (+ tmux loc if it was Ghostty)
+-- Cmd+K → return to the pre-jump app (+ tmux loc if it was Ghostty)
 hs.hotkey.bind({"cmd"}, "k", notifyReturn.restoreFull)
-
--- Cmd+I → focus Ghostty and restore the stored (or C_TMUX_BACK) tmux location
-hs.hotkey.bind({"cmd"}, "i", notifyReturn.restoreTmux)
 
 -- Cmd+0 → dismiss all notifications (numpad * keycode 67 still toggles mute)
 hs.hotkey.bind({"cmd"}, "0", dismissNotifications)
