@@ -27,7 +27,6 @@ local function toggleMute()
   hs.eventtap.event.newSystemKeyEvent("MUTE", false):post()
 end
 hs.hotkey.bind({}, 67, toggleMute)
-hs.hotkey.bind({"cmd"}, "0", toggleMute)
 
 -- Play/pause (continue) media playback: Numpad 0 (raw keycode 82)
 local function togglePlayPause()
@@ -43,11 +42,18 @@ end
 
 local dismissNotifications = require("dismiss_notifications").dismiss
 local openNotification = require("click_notification").open
+local notifyReturn = require("notify_return")
 
--- Cmd+L → dismiss all notifications
-hs.hotkey.bind({"cmd"}, "k", dismissNotifications)
+-- Cmd+K → return to the pre-jump Space + window (+ tmux loc if it was Ghostty)
+hs.hotkey.bind({"cmd"}, "k", notifyReturn.restoreFull)
 
--- Cmd+` → activate (click) the topmost notification's default action
+-- Cmd+I → focus Ghostty and restore the stored (or C_TMUX_BACK) tmux location
+hs.hotkey.bind({"cmd"}, "i", notifyReturn.restoreTmux)
+
+-- Cmd+0 → dismiss all notifications (numpad * keycode 67 still toggles mute)
+hs.hotkey.bind({"cmd"}, "0", dismissNotifications)
+
+-- Cmd+L → activate (click) the topmost notification's default action
 hs.hotkey.bind({"cmd"}, "l", openNotification)
 
 -- Cmd+` → cycle through windows of the frontmost app (layout-independent

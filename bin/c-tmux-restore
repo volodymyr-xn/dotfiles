@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# Restore the focused tmux client to a target location.
+#
+# Shared by the Hammerspoon agent-notify return commands (restoreFull /
+# restoreTmux). Accepts either form:
+#   * a globally-unique pane id  (e.g. %370)            -- preferred, robust
+#   * a session:window.pane str  (e.g. "dotfiles 🏡:5.2") -- C_TMUX_BACK form
+# Pane ids carry no spaces/colons/emoji so they sidestep all session-name
+# parsing fragility (the proven forward-jump path uses pane ids too). The
+# session:window.pane form is only needed for the C_TMUX_BACK fallback, which
+# tmux.conf writes in that shape. Read-only on the tmux environment — never
+# writes C_TMUX_BACK. Silent + best-effort: any tmux failure still exits 0.
+set -euo pipefail
+
+target="${1:-}"
+[ -n "$target" ] || exit 0
+
+LOG="${AGENT_NOTIFY_LOG:-$HOME/.cache/agent_notify/watcher.log}"
+log() { printf '%s c-tmux-restore %s\n' "$(date '+%H:%M:%S')" "$*" \
+          >>"$LOG" 2>/dev/null || true; }
+
+# The client with the largest #{client_activity} is the focused one.
+client=$(tmux list-clients -F '#{client_activity} #{client_tty}' 2>/dev/null \
+         | sort -rn | awk 'NR==1 {print $2}' || true)
+
+switch_to() {
+  local t="$1"
+  if [ -n "$client" ]; then
+    tmux switch-client -c "$client" -t "$t" 2>>"$LOG" || true
+  else
+    tmux switch-client -t "$t" 2>>"$LOG" || true
+  fi
+  tmux select-window -t "$t" 2>>"$LOG" || true
+  tmux select-pane -t "$t" 2>>"$LOG" || true
+}
+
+case "$target" in
+  %[0-9]*)
+    # Pane-id form: one unambiguous target for all three selects.
+    log "pane-id target='$target' client='${client:-?}'"
+    switch_to "$target"
+    ;;
+  *:*.*)
+    # session:window.pane form (C_TMUX_BACK fallback for Cmd+i).
+    session="${target%%:*}"
+    session_window="${target%.*}"
+    log "swp target='$target' session='$session' client='${client:-?}'"
+    if [ -n "$client" ]; then
+      tmux switch-client -c "$client" -t "$session" 2>>"$LOG" || true
+    else
+      tmux switch-client -t "$session" 2>>"$LOG" || true
+    fi
+    tmux select-window -t "$session_window" 2>>"$LOG" || true
+    tmux select-pane -t "$target" 2>>"$LOG" || true
+    ;;
+  *)
+    log "unrecognized target='$target' — ignored"
+    exit 0
+    ;;
+esac
+
+exit 0

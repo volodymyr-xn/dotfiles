@@ -150,8 +150,10 @@ vim.keymap.set("n", "<C-\\>", function()
   end
 end, {noremap = true, silent = true, desc = "Toggle sidebar"})
 
-vim.api.nvim_set_keymap("n", "<Leader>0", ":Neotree filesystem reveal<CR>", {noremap = true, silent = false})
-vim.api.nvim_set_keymap("n", "=", ":Neotree filesystem reveal<CR>", {noremap = true, silent = false})
+-- reveal_force_cwd: if the file is outside cwd, silently change cwd to its
+-- directory instead of prompting "Change cwd to …? [Y]es, (N)o".
+vim.api.nvim_set_keymap("n", "<Leader>0", ":Neotree filesystem reveal_force_cwd<CR>", {noremap = true, silent = false})
+vim.api.nvim_set_keymap("n", "=", ":Neotree filesystem reveal_force_cwd<CR>", {noremap = true, silent = false})
 
 
 -- vim.cmd('highlight! NeoTreeGitAdded guifg=#ffffff gui=bold')

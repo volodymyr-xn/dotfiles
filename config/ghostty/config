@@ -48,6 +48,9 @@ keybind = cmd+t=unbind
 # Disable new window shortcut so cmd+n can be used by the shell/app inside Ghostty
 keybind = cmd+n=unbind
 
+# Pass cmd+k to Hammerspoon for app/Space/tmux navigation (restoreFull)
+keybind = cmd+k=unbind
+
 # Switch tmux windows with Ctrl+1-9. Sends tmux prefix (Ctrl+A = \x01) + number.
 # Needed because macOS intercepts Ctrl+number for Mission Control before Ghostty sees them.
 keybind = ctrl+one=text:\x01\x31
