@@ -1,4 +1,5 @@
 local undo_glow = require("undo-glow")
+local hlslens = require("hlslens")
 
 -- Colors are the catppuccin macchiato accents blended ~65% toward the base
 -- (#24273a), preserving hue while keeping the glow subtle on a dark bg.
@@ -28,9 +29,21 @@ vim.keymap.set("n", "<C-r>", undo_glow.redo, { noremap = true, desc = "Redo with
 vim.keymap.set("n", "p", undo_glow.paste_below, { noremap = true, desc = "Paste below with glow" })
 vim.keymap.set("n", "P", undo_glow.paste_above, { noremap = true, desc = "Paste above with glow" })
 
--- Search navigation with glow
-vim.keymap.set("n", "n", undo_glow.search_next, { noremap = true, desc = "Search next with glow" })
-vim.keymap.set("n", "N", undo_glow.search_prev, { noremap = true, desc = "Search prev with glow" })
+-- Search forward: undo-glow flash + hlslens lens (match index/total + scrollbar marks).
+local function search_next_with_lens()
+  undo_glow.search_next()
+  hlslens.start()
+end
+
+-- Search backward: undo-glow flash + hlslens lens.
+local function search_prev_with_lens()
+  undo_glow.search_prev()
+  hlslens.start()
+end
+
+-- Search navigation with glow + hlslens lens
+vim.keymap.set("n", "n", search_next_with_lens, { noremap = true, desc = "Search next with glow + lens" })
+vim.keymap.set("n", "N", search_prev_with_lens, { noremap = true, desc = "Search prev with glow + lens" })
 
 -- Highlight yanked text after any yank operation
 vim.api.nvim_create_autocmd("TextYankPost", {

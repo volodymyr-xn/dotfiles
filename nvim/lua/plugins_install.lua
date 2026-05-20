@@ -544,10 +544,19 @@ require("lazy").setup({
 
   -- Highligh color codes
   -- "lilydjwg/colorizer", -- Old plugin, works OK
+  -- Declared before nvim-highlight-colors so lazy.nvim adds it to rtp first when
+  -- both fire on BufReadPost; the require("colorizer") inside the shared config
+  -- file then resolves to this fork.
   {
-    'brenoprata10/nvim-highlight-colors',
+    'catgoose/nvim-colorizer.lua',
     event = { "BufReadPost", "BufNewFile" },
     config = function() require("plugin_settings.colorizer") end,
+  },
+  -- Kept installed for easy fallback; never auto-loaded.
+  -- Re-add event/config to reactivate (and comment catgoose above).
+  {
+    'brenoprata10/nvim-highlight-colors',
+    lazy = true,
   },
   -- "NvChad/nvim-colorizer.lua",
   -- A high-performance color highlighter for Neovim which has no
@@ -567,7 +576,12 @@ require("lazy").setup({
     event = { "BufReadPost", "BufNewFile" },
     config = function() require("plugin_settings.nvim_scrollview") end,
   },
-  { "kevinhwang91/nvim-hlslens", keys = { "/", "?", "n", "N", "*", "#", "g*", "g#" } },
+  {
+    "kevinhwang91/nvim-hlslens",
+    event = { "BufReadPost", "BufNewFile" },
+    dependencies = { "petertriho/nvim-scrollbar" },
+    config = function() require("plugin_settings.nvim_hlslens") end,
+  },
 
   -- Indent line guides
   -- "lukas-reineke/indent-blankline.nvim",

@@ -43,6 +43,16 @@ require("nvim-treesitter.configs").setup({
     disable = function(lang, buf)
       if lang == "embedded_template" then return true end
       if lang == "markdown" and vim.api.nvim_buf_line_count(buf) > 1000 then return true end
+
+      -- Skip parsing on very large buffers; the incremental parser still
+      -- bites at 5k+ lines, especially on nested grammars.
+      if vim.api.nvim_buf_line_count(buf) > 3000 then return true end
+
+      -- Skip on huge files where the size lives in one or few lines
+      -- (e.g. minified JS / generated bundles).
+      local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+      if ok and stats and stats.size > 200 * 1024 then return true end
+
       return false
     end,
     additional_vim_regex_highlighting = { "ruby" },

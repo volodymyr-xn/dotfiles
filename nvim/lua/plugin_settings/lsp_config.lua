@@ -52,8 +52,9 @@ end
 -- })
 
 local lsp_flags = {
-  -- This is the default in Nvim 0.7+
-  -- debounce_text_changes = 150,
+  -- Coalesce `didChange` notifications so the server doesn't process every
+  -- keystroke; trades a bit of diagnostic freshness for typing responsiveness.
+  debounce_text_changes = 250,
 }
 
 -- lspconfig['lua_ls'].setup{
