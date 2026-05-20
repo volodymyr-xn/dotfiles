@@ -281,7 +281,9 @@ require("lazy").setup({
   {
     "cuducos/yaml.nvim",
     ft = { "yaml", "yml" },
-    keys = { { "<Leader>`", desc = "Copy YAML key" } },
+    -- <Leader>` is owned by keymappings/terminal.lua (tmux.send_file); the
+    -- yaml.nvim mapping inside plugin_settings/yaml_nvim.lua was already
+    -- dead code in the eager config. ft trigger only.
     config = function() require("plugin_settings.yaml_nvim") end,
   },
 
@@ -414,7 +416,10 @@ require("lazy").setup({
   -- Switch between multiline and signleline code
   {
     "AndrewRadev/splitjoin.vim",
-    keys = { "gS", "gJ", "<Leader>7", "<Leader>8" },
+    -- <Leader>7 / <Leader>8 are owned by keymappings/windows.lua
+    -- (Go to tab N); they were dead splitjoin triggers in both the eager
+    -- and lazy configs. Trigger on gS/gJ only.
+    keys = { "gS", "gJ" },
     config = function() require("plugin_settings.splitjoin") end,
   },
 

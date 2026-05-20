@@ -56,4 +56,8 @@ vim.api.nvim_create_autocmd({ "BufWritePost" }, {
 
 -- -- Show LSP/linter/nvim-lint diagnostic for line in popup
 -- -- vim.keymap.set('n', '<Leader>k', vim.diagnostic.open_float, opts)
-vim.keymap.set('n', ')', vim.diagnostic.open_float, bufopts)
+-- ')' is owned by keymappings/git.lua (NavigateHunk('next')). Originally
+-- this line was overridden by that file via load order in the eager config;
+-- once nvim-lint became lazy (event = BufReadPost) it started winning and
+-- broke hunk navigation. Disabled to restore the original behavior.
+-- vim.keymap.set('n', ')', vim.diagnostic.open_float, bufopts)

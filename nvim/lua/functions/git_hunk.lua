@@ -1,4 +1,6 @@
-local gitsigns = require('gitsigns')
+-- gitsigns is lazy-required inside each function so its
+-- `event = "BufReadPre"` defers loading. Top-level require would trip
+-- lazy.nvim's auto-loader and eager-load the plugin at startup.
 
 local hunk_flash_ns = vim.api.nvim_create_namespace('hunk_flash')
 local hunk_flash_generation = 0
@@ -6,7 +8,7 @@ local hunk_flash_generation = 0
 local function flash_current_hunk()
   local bufnr = vim.api.nvim_get_current_buf()
   local cursor_line = vim.api.nvim_win_get_cursor(0)[1]
-  local hunks = gitsigns.get_hunks(bufnr)
+  local hunks = require('gitsigns').get_hunks(bufnr)
 
   if not hunks then return end
 
@@ -36,7 +38,7 @@ local function flash_current_hunk()
 end
 
 function NavigateHunk(direction)
-  gitsigns.nav_hunk(direction)
+  require('gitsigns').nav_hunk(direction)
 
   vim.defer_fn(flash_current_hunk, 50)
 end
