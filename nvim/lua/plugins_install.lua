@@ -580,32 +580,13 @@ require("lazy").setup({
     config = function() require("plugin_settings.undo_glow") end,
   },
 
-  {
-    "folke/snacks.nvim",
-    lazy = false,
-    priority = 1000,
-    opts = {},
-  },
+  -- {
+  --   "folke/snacks.nvim",
+  --   lazy = false,
+  --   priority = 1000,
+  --   opts = {},
+  -- },
 
-  --{
-  --  "folke/snacks.nvim",
-  --  ---@type snacks.Config
-  --  opts = {
-  --    explorer = {
-  --      -- your explorer configuration comes here
-  --      -- or leave it empty to use the default settings
-  --      -- refer to the configuration section below
-  --    },
-  --    picker = {
-  --      sources = {
-  --        explorer = {
-  --          -- your explorer picker configuration comes here
-  --          -- or leave it empty to use the default settings
-  --        }
-  --      }
-  --    }
-  --  }
-  --}
 
   -- ======== Tesing area ====================
   -- "rcarriga/nvim-notify",
@@ -677,71 +658,11 @@ require("lazy").setup({
   -- ============================================================
 
   -- Use local Ollama AI in VIM
-  {
-    "David-Kunz/gen.nvim",
-    cmd = "Gen",
-    keys = { { "<leader>q", ":Gen<CR>", mode = "v", desc = "Gen AI prompts" } },
-    config = function() require("plugin_settings.gen_nvim") end,
-  },
-
-  -- Cursor like code completion
   -- {
-  --   "yetone/avante.nvim",
-  --   event = "VeryLazy",
-  --   lazy = false,
-  --   version = false, -- Set this to "*" to always pull the latest release version, or set it to false to update to the latest code changes.
-  --   opts = {
-  --     -- add any opts here
-  --     -- for example
-  --     provider = "openai",
-  --     openai = {
-  --       endpoint = "https://api.openai.com/v1",
-  --       model = "gpt-4o", -- your desired model (or use gpt-4o, etc.)
-  --       timeout = 30000, -- timeout in milliseconds
-  --       temperature = 0, -- adjust if needed
-  --       max_tokens = 4096,
-  --     },
-  --   },
-  --   -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
-  --   build = "make",
-  --   -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
-  --   dependencies = {
-  --     "stevearc/dressing.nvim",
-  --     "nvim-lua/plenary.nvim",
-  --     "MunifTanjim/nui.nvim",
-  --     --- The below dependencies are optional,
-  --     "echasnovski/mini.pick", -- for file_selector provider mini.pick
-  --     "nvim-telescope/telescope.nvim", -- for file_selector provider telescope
-  --     "hrsh7th/nvim-cmp", -- autocompletion for avante commands and mentions
-  --     "ibhagwan/fzf-lua", -- for file_selector provider fzf
-  --     "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
-  --     "zbirenbaum/copilot.lua", -- for providers='copilot'
-  --     {
-  --       -- support for image pasting
-  --       "HakonHarnes/img-clip.nvim",
-  --       event = "VeryLazy",
-  --       opts = {
-  --         -- recommended settings
-  --         default = {
-  --           embed_image_as_base64 = false,
-  --           prompt_for_file_name = false,
-  --           drag_and_drop = {
-  --             insert_mode = true,
-  --           },
-  --           -- required for Windows users
-  --           use_absolute_path = true,
-  --         },
-  --       },
-  --     },
-  --     {
-  --       -- Make sure to set this up properly if you have lazy=true
-  --       'MeanderingProgrammer/render-markdown.nvim',
-  --       opts = {
-  --         file_types = { "markdown", "Avante" },
-  --       },
-  --       ft = { "markdown", "Avante" },
-  --     },
-  --   },
+  --   "David-Kunz/gen.nvim",
+  --   cmd = "Gen",
+  --   keys = { { "<leader>q", ":Gen<CR>", mode = "v", desc = "Gen AI prompts" } },
+  --   config = function() require("plugin_settings.gen_nvim") end,
   -- },
 
   -- For some reason right now(24.01.2025) this plugin works very slowly
@@ -754,52 +675,6 @@ require("lazy").setup({
   --     "nvim-treesitter/nvim-treesitter",
   --   },
   --   config = true
-  -- },
-
-  -- {
-  --   "huynle/ogpt.nvim",
-  --   event = "VeryLazy",
-  --   config = function()
-  --     require("ogpt").setup()
-  --   end,
-  --   dependencies = {
-  --     "MunifTanjim/nui.nvim",
-  --     "nvim-lua/plenary.nvim",
-  --     "nvim-telescope/telescope.nvim"
-  --   }
-  -- },
-
-  -- "coder/claudecode.nvim"
-
-  -- {
-  --   "coder/claudecode.nvim",
-  --   dependencies = { "folke/snacks.nvim" },
-  --   config = true,
-  --   terminal_cmd = "~/.claude/local/claude",
-  --   keys = {
-  --     { "<leader>a", nil, desc = "AI/Claude Code" },
-  --     { "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude" },
-  --     { "<leader>af", "<cmd>ClaudeCodeFocus<cr>", desc = "Focus Claude" },
-  --     { "<leader>ar", "<cmd>ClaudeCode --resume<cr>", desc = "Resume Claude" },
-  --     { "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "Continue Claude" },
-  --     { "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Select Claude model" },
-  --     { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", desc = "Add current buffer" },
-  --     { "<leader>as", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Send to Claude" },
-  --     {
-  --       "<leader>as",
-  --       "<cmd>ClaudeCodeTreeAdd<cr>",
-  --       desc = "Add file",
-  --       ft = { "NvimTree", "neo-tree", "oil", "minifiles", "netrw" },
-  --     },
-  --     -- Diff management
-  --     { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept diff" },
-  --     { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny diff" },
-  --   },
-  --   opts = {
-  --     terminal = {
-  --       provider = "none", -- no UI actions; server + tools remain available
-  --     },
-  --   },
   -- },
 
   -- ============================================================
