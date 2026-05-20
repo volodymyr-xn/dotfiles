@@ -47,6 +47,11 @@ require("lazy").setup({
       },
     },
   },
+
+  -- ============================================================
+  -- Filetree & navigation
+  -- ============================================================
+
   -- Filetree
   -- "scrooloose/nerdtree",
   -- TODO Replace nerdtree with fern
@@ -65,43 +70,40 @@ require("lazy").setup({
     config = function() require("plugin_settings.neo_tree") end,
   },
 
-  -- Provides devicons
-  -- Requires nerdfont: (https://www.nerdfonts.com/)
-  "nvim-tree/nvim-web-devicons",
+  -- Easily navigate between vim and tmux panes
+  "christoomey/vim-tmux-navigator",
 
-  "echasnovski/mini.icons",
-  { "echasnovski/mini.extra", version = "*" },
+  -- Open in split select for NeoTree
   {
-    "echasnovski/mini.ai",
-    version = "*",
-    config = function() require("plugin_settings.mini_ai") end,
+    's1n7ax/nvim-window-picker',
+    name = 'window-picker',
+    event = 'VeryLazy',
+    version = '2.*',
+    config = function()
+      require'window-picker'.setup({
+        hint = 'floating-big-letter',
+             floating_big_letter = {
+            -- window picker plugin provides bunch of big letter fonts
+            -- fonts will be lazy loaded as they are being requested
+            -- additionally, user can pass in a table of fonts in to font
+            -- property to use instead
+
+            font = 'ansi-shadow', -- ansi-shadow |
+        },
+      })
+    end,
   },
+
+  -- ============================================================
+  -- Fuzzy finders / pickers
+  -- ============================================================
+
   {
     "dmtrKovalenko/fff.nvim",
     build = ':lua require("fff.download").download_or_build_binary()',
   },
 
   "ibhagwan/fzf-lua",
-
-  -- Alternative plugin:
-  -- "preservim/nerdcommenter",
-  -- At the time of installing (2024) only tpope/vim-commentary
-  -- works correcly for commenting erb files
-  "tpope/vim-commentary",
-  "JoosepAlviste/nvim-ts-context-commentstring",
-
-  { "tpope/vim-haml", ft = { "haml", "eruby" } },
-
-  -- Linting
-  -- "w0rp/ale",
-
-  -- TODO Alternative linting plugin(Consider to switch in future)
-  -- "neomake/neomake",
-
-  -- Enable repeating supported plugin maps with '.'
-  "tpope/vim-repeat",
-
-  -- 'alvan/vim-closetag',
 
   -- FZF integration
   {
@@ -133,76 +135,13 @@ require("lazy").setup({
   -- "piersolenski/telescope-import.nvim",
   -- 'piersolenski/telescope-import.nvim',
 
+  -- ============================================================
+  -- Git
+  -- ============================================================
+
   -- Show changed lines from git
   -- "airblade/vim-gitgutter",
   -- gitsigns.nvim spec is declared below with its config
-
-  -- Ruby on Rails power tool
-  -- This is a massive (in a good way) Vim plugin for editing Ruby on Rails applications.
-  -- Partial and concern extraction. In a view, :Extract {file} replaces the
-  -- desired range (typically selected in visual line mode) with render '{file}',
-  -- which is automatically created with your content. In a model or controller, a
-  -- concern is created, with the appropriate include declaration left behind.
-  -- :help rails-:Extract
-  {
-    "tpope/vim-rails",
-    ft = { "ruby", "eruby", "haml", "yaml" },
-    config = function() require("plugin_settings.vim_rails") end,
-  },
-
-  -- Better rspec syntax highlighting for Vim
-  { "keith/rspec.vim", ft = "ruby" },
-
-  -- Ruby syntax highlighting
-  { "vim-ruby/vim-ruby", ft = "ruby" },
-
-  -- Vim highlighting & completion for MiniTest
-  { "sunaku/vim-ruby-minitest", ft = "ruby" },
-
-  -- Create your own text objects
-  "kana/vim-textobj-user",
-
-  -- Make text objects with various ruby block structures.
-  -- TODO: replace with NEOVIM equvivalent
-  -- "rhysd/vim-textobj-ruby",
-  {
-    "chrisgrieser/nvim-various-textobjs",
-    event = "VeryLazy",
-    opts = {
-      keymaps = {
-        useDefaults = true
-      }
-    }
-  },
-
-  "michaeljsmith/vim-indent-object",
-
-  -- Automaticaly add end in ruby scrips
-  { "tpope/vim-endwise", ft = { "ruby", "lua", "vim", "sh", "zsh", "elixir", "crystal" } },
-
-  -- quoting/parenthesizing made simple
-  -- "tpope/vim-surround",
-
-  -- Provides additional text objects
-  -- Example:
-  -- ci* - change inside star
-  -- va| - visually select around pipe
-  -- ci_ - change inside underscore
-  -- ca/aa/Ia/Aa  - change inside function/method argument
-  -- "wellle/targets.vim",
-
-  -- Run various tests from vim
-  {
-    "janko-m/vim-test",
-    cmd = { "TestNearest", "TestFile", "TestSuite", "TestLast", "TestVisit" },
-    config = function() require("plugin_settings.vim_test") end,
-  },
-
-  -- Allows vim to communicate and run commands in tmux
-  "benmills/vimux",
-
-  -- CSS3 syntax support
-  { "hail2u/vim-css3-syntax", ft = { "css", "scss" } },
 
   -- Git integration
   {
@@ -215,80 +154,19 @@ require("lazy").setup({
     cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewToggleFiles", "DiffviewFocusFiles", "DiffviewFileHistory", "DiffviewRefresh" },
     config = function() require("plugin_settings.diffview") end,
   },
-
-  -- Make terminal vim and tmux work better together.
-  { "tmux-plugins/vim-tmux-focus-events", event = "VeryLazy" },
-
-  -- Provides insert mode auto-completion for quotes, parens, brackets
-  -- TODO: Replace of NEOVIM equvivalent
-  -- "Raimondi/delimitMate",
-
-  -- Crystal syntax support
-  { "vim-crystal/vim-crystal", ft = "crystal" },
-
-  -- Improved JavaScript syntax
-  { "pangloss/vim-javascript", ft = { "javascript", "javascriptreact" } },
-
-  -- JSX syntax support
-  -- "mxw/vim-jsx",
-
-  -- Multiple cursors
-  "mg979/vim-visual-multi",
-
-  -- Brewfile syntax highlighting
-  { "bfontaine/brewfile.vim", ft = "ruby" },
-
-  -- Auto close (X)HTML tags
-  -- "alvan/vim-closetag",
-
-  -- Base16 color schemes
-  -- "Mofiqul/dracula.nvim",
-  -- "folke/tokyonight.nvim",
-  -- "rose-pine/neovim",
-  -- "EdenEast/nightfox.nvim",
-  "catppuccin/nvim",
-  -- "tinted-theming/base16-vim",
-  -- "ellisonleao/gruvbox.nvim",
-  -- "rebelot/kanagawa.nvim",
-  -- "dracula/vim",
-  -- "sainnhe/sonokai",
-
-  -- Delete entries from quickfix
-  -- "stefandtw/quickfix-reflector.vim",
-
-  -- Delete entries from quickfix (alt)
-  { "itchyny/vim-qfedit", ft = "qf" },
-
-  -- Shows yaml path under cursor,
-  -- allows to search by YAML key
-  { "Einenlum/yaml-revealer", ft = { "yaml", "yml" } },
-
   {
-    "nvim-treesitter/nvim-treesitter",
-    config = function() require("plugin_settings.treesitter") end,
+    "lewis6991/gitsigns.nvim",
+    event = { "BufReadPre", "BufNewFile" },
+    config = function() require("plugin_settings.gitsigns") end,
   },
 
-  -- {
-  --   "nvim-treesitter/nvim-treesitter-context"
-  -- },
+  -- A plugin to visualise and resolve merge conflicts in neovim
+  -- 'akinsho/git-conflict.nvim',
+  -- 'rhysd/conflict-marker.vim',
 
-  {
-    "chrisgrieser/nvim-spider",
-    config = function() require("plugin_settings.nvim_spider") end,
-  },
-
-  -- Better yaml
-  {
-    "cuducos/yaml.nvim",
-    ft = { "yaml", "yml" },
-    -- <Leader>` is owned by keymappings/terminal.lua (tmux.send_file); the
-    -- yaml.nvim mapping inside plugin_settings/yaml_nvim.lua was already
-    -- dead code in the eager config. ft trigger only.
-    config = function() require("plugin_settings.yaml_nvim") end,
-  },
-
-  -- Better yaml folding
-  -- "pedrohdz/vim-yaml-folds",
+  -- ============================================================
+  -- LSP & completion
+  -- ============================================================
 
   -- Portable package manager for Neovim that runs everywhere Neovim runs.
   -- easily install and manage LSP servers, DAP servers, linters, and
@@ -340,34 +218,116 @@ require("lazy").setup({
   -- "zbirenbaum/copilot-cmp",
   -- "ray-x/cmp-treesitter",
 
-
-  -- Automatically highlighting other uses of the current word under the cursor
-  -- "RRethy/vim-illuminate",
-  -- Alternative to vim-illuminate
-  -- "tzachar/local-highlight.nvim",
-
   -- Utility functions for getting diagnostic status and progress messages from
   -- LSP servers, for use in the Neovim statusline
   "nvim-lua/lsp-status.nvim",
-  -- Statusline
-  {
-    "nvim-lualine/lualine.nvim",
-    config = function() require("plugin_settings.lualine") end,
-  },
-  -- Alternative statusline
-  -- "rebelot/heirline.nvim",
 
-  -- Highligh color codes
-  -- "lilydjwg/colorizer", -- Old plugin, works OK
+  "ray-x/navigator.lua",
+
+  -- Old and broken
+  -- Snippets
+  -- "MarcWeber/vim-addon-mw-utils",
   {
-    'brenoprata10/nvim-highlight-colors',
-    event = { "BufReadPost", "BufNewFile" },
-    config = function() require("plugin_settings.colorizer") end,
+    "L3MON4D3/LuaSnip",
+    config = function() require("plugin_settings.luasnip") end,
   },
-  -- "NvChad/nvim-colorizer.lua",
-  -- A high-performance color highlighter for Neovim which has no
-  -- external dependencies! Written in performant Luajit.
-  -- "norcalli/nvim-colorizer.lua",
+  'saadparwaiz1/cmp_luasnip',
+  -- "rafamadriz/friendly-snippets",
+
+  -- VSCode bulb bulb for neovim's built-in LSP.
+  -- 'kosayoda/nvim-lightbulb',
+
+  -- A lightweight LSP plugin based on Neovim's built-in LSP with a highly
+  -- performant UI.
+  -- 'glepnir/lspsaga.nvim',
+
+  -- Neovim setup for init.lua and plugin development with full signature help,
+  -- docs and completion for the nvim lua API.
+  -- 'folke/neodev.nvim',
+
+  -- ============================================================
+  -- Treesitter
+  -- ============================================================
+
+  "JoosepAlviste/nvim-ts-context-commentstring",
+
+  {
+    "nvim-treesitter/nvim-treesitter",
+    config = function() require("plugin_settings.treesitter") end,
+  },
+
+  -- {
+  --   "nvim-treesitter/nvim-treesitter-context"
+  -- },
+
+  -- Use treesitter to autoclose and autorename html tag
+  -- "windwp/nvim-ts-autotag",
+
+  -- ============================================================
+  -- Syntax / filetype
+  -- ============================================================
+
+  { "tpope/vim-haml", ft = { "haml", "eruby" } },
+
+  -- Ruby on Rails power tool
+  -- This is a massive (in a good way) Vim plugin for editing Ruby on Rails applications.
+  -- Partial and concern extraction. In a view, :Extract {file} replaces the
+  -- desired range (typically selected in visual line mode) with render '{file}',
+  -- which is automatically created with your content. In a model or controller, a
+  -- concern is created, with the appropriate include declaration left behind.
+  -- :help rails-:Extract
+  {
+    "tpope/vim-rails",
+    ft = { "ruby", "eruby", "haml", "yaml" },
+    config = function() require("plugin_settings.vim_rails") end,
+  },
+
+  -- Better rspec syntax highlighting for Vim
+  { "keith/rspec.vim", ft = "ruby" },
+
+  -- Ruby syntax highlighting
+  { "vim-ruby/vim-ruby", ft = "ruby" },
+
+  -- Vim highlighting & completion for MiniTest
+  { "sunaku/vim-ruby-minitest", ft = "ruby" },
+
+  -- "weizheheng/ror.nvim",
+  -- "jonsmithers/vim-html-template-literals",
+
+  -- CSS3 syntax support
+  { "hail2u/vim-css3-syntax", ft = { "css", "scss" } },
+
+  -- Crystal syntax support
+  { "vim-crystal/vim-crystal", ft = "crystal" },
+
+  -- Improved JavaScript syntax
+  { "pangloss/vim-javascript", ft = { "javascript", "javascriptreact" } },
+
+  -- JSX syntax support
+  -- "mxw/vim-jsx",
+
+  -- Brewfile syntax highlighting
+  { "bfontaine/brewfile.vim", ft = "ruby" },
+
+  -- Auto close (X)HTML tags
+  -- "alvan/vim-closetag",
+
+  -- Shows yaml path under cursor,
+  -- allows to search by YAML key
+  { "Einenlum/yaml-revealer", ft = { "yaml", "yml" } },
+
+  -- Better yaml
+  {
+    "cuducos/yaml.nvim",
+    ft = { "yaml", "yml" },
+    -- <Leader>` is owned by keymappings/terminal.lua (tmux.send_file); the
+    -- yaml.nvim mapping inside plugin_settings/yaml_nvim.lua was already
+    -- dead code in the eager config. ft trigger only.
+    config = function() require("plugin_settings.yaml_nvim") end,
+  },
+
+  -- Better yaml folding
+  -- "pedrohdz/vim-yaml-folds",
 
   -- AppArmor syntax highlight
   -- 'ClockworkNet/vim-apparmor')
@@ -381,14 +341,106 @@ require("lazy").setup({
   -- Syntax highlighting and filetype detection for systemd unit files
   { "wgwoods/vim-systemd-syntax", ft = "systemd" },
 
+  --- Syntax highlighting for Nix configs
+  -- "LnL7/vim-nix",
+
+  -- Better markdown support
+  -- "plasticboy/vim-markdown",
+
+  -- GTK Blueprint syntax
+  -- "thetek42/vim-blueprint-syntax",
+
+  -- Emmet
+  {
+    "mattn/emmet-vim",
+    -- TODO: write issue on github regarding bug on main
+    commit = "3fb2f63799e1922f7647ed9ff3b32154031a76ee",
+    ft = { "html", "css", "scss", "sass", "javascriptreact", "typescriptreact", "vue", "eruby", "haml", "xml" },
+    config = function() require("plugin_settings.emmet") end,
+  },
+  -- LSP for emmet
+  -- "olrtg/nvim-emmet",
+
+  {
+    "OXY2DEV/markview.nvim",
+    ft = { "markdown", "Avante", "codecompanion" },
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function() require("plugin_settings.markview") end,
+  },
+
+  {
+    "iamcco/markdown-preview.nvim",
+    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+    ft = { "markdown" },
+    build = function() vim.fn["mkdp#util#install"]() end,
+  },
+
+  -- ============================================================
+  -- Editing (motions, textobjs, pairs, surround, comments)
+  -- ============================================================
+
+  {
+    "echasnovski/mini.ai",
+    version = "*",
+    config = function() require("plugin_settings.mini_ai") end,
+  },
+
+  -- Alternative plugin:
+  -- "preservim/nerdcommenter",
+  -- At the time of installing (2024) only tpope/vim-commentary
+  -- works correcly for commenting erb files
+  "tpope/vim-commentary",
+
+  -- Enable repeating supported plugin maps with '.'
+  "tpope/vim-repeat",
+
+  -- 'alvan/vim-closetag',
+
+  -- Create your own text objects
+  "kana/vim-textobj-user",
+
+  -- Make text objects with various ruby block structures.
+  -- TODO: replace with NEOVIM equvivalent
+  -- "rhysd/vim-textobj-ruby",
+  {
+    "chrisgrieser/nvim-various-textobjs",
+    event = "VeryLazy",
+    opts = {
+      keymaps = {
+        useDefaults = true
+      }
+    }
+  },
+
+  "michaeljsmith/vim-indent-object",
+
+  -- Automaticaly add end in ruby scrips
+  { "tpope/vim-endwise", ft = { "ruby", "lua", "vim", "sh", "zsh", "elixir", "crystal" } },
+
+  -- quoting/parenthesizing made simple
+  -- "tpope/vim-surround",
+
+  -- Provides additional text objects
+  -- Example:
+  -- ci* - change inside star
+  -- va| - visually select around pipe
+  -- ci_ - change inside underscore
+  -- ca/aa/Ia/Aa  - change inside function/method argument
+  -- "wellle/targets.vim",
+
+  -- Provides insert mode auto-completion for quotes, parens, brackets
+  -- TODO: Replace of NEOVIM equvivalent
+  -- "Raimondi/delimitMate",
+
+  -- Multiple cursors
+  "mg979/vim-visual-multi",
+
   -- Auto close quotes, parenthesiz, etc
   {
     "windwp/nvim-autopairs",
     event = "InsertEnter",
     config = function() require("plugin_settings.nvim_autopairs") end,
   },
-  -- Use treesitter to autoclose and autorename html tag
-  -- "windwp/nvim-ts-autotag",
 
   {
     "andymass/vim-matchup",
@@ -398,20 +450,8 @@ require("lazy").setup({
   -- Alternative plugin
   -- "echasnovski/mini.pairs",
 
-  --- Syntax highlighting for Nix configs
-  -- "LnL7/vim-nix",
-
-  -- Dracula color scheme
-  -- 'dracula/vim',
-
-  -- Better markdown support
-  -- "plasticboy/vim-markdown",
-
   -- unimpaired.vim: Pairs of handy bracket mappings
   { "tpope/vim-unimpaired", event = "VeryLazy" },
-
-  -- GTK Blueprint syntax
-  -- "thetek42/vim-blueprint-syntax",
 
   -- Switch between multiline and signleline code
   {
@@ -439,37 +479,80 @@ require("lazy").setup({
   -- TODO: check how good is performance
   -- 'leafOfTree/vim-matchtag',
 
-  -- Global search by ack cli util
-  -- "mileszs/ack.vim",
-
-  -- Emmet
   {
-    "mattn/emmet-vim",
-    -- TODO: write issue on github regarding bug on main
-    commit = "3fb2f63799e1922f7647ed9ff3b32154031a76ee",
-    ft = { "html", "css", "scss", "sass", "javascriptreact", "typescriptreact", "vue", "eruby", "haml", "xml" },
-    config = function() require("plugin_settings.emmet") end,
+    "chrisgrieser/nvim-spider",
+    config = function() require("plugin_settings.nvim_spider") end,
   },
-  -- LSP for emmet
-  -- "olrtg/nvim-emmet",
 
-  -- Indent line guides
-  -- "lukas-reineke/indent-blankline.nvim",
-
-  -- Easily navigate between vim and tmux panes
-  "christoomey/vim-tmux-navigator",
-
-  "ray-x/navigator.lua",
-
-  -- Old and broken
-  -- Snippets
-  -- "MarcWeber/vim-addon-mw-utils",
   {
-    "L3MON4D3/LuaSnip",
-    config = function() require("plugin_settings.luasnip") end,
+    "kylechui/nvim-surround",
+    version = "*", -- Use for stability; omit to use `main` branch for the latest features
+    event = "VeryLazy",
+    config = function()
+      require("nvim-surround").setup({
+        -- Configuration here, or leave empty to use defaults
+      })
+    end
   },
-  'saadparwaiz1/cmp_luasnip',
-  -- "rafamadriz/friendly-snippets",
+
+  -- "ggandor/leap.nvim",
+
+  {
+    "folke/flash.nvim",
+    event = "VeryLazy",
+    config = function() require("plugin_settings.flash") end,
+  },
+
+  -- ============================================================
+  -- UI (statusline, tabline, scrollbar, colors, highlights)
+  -- ============================================================
+
+  -- Provides devicons
+  -- Requires nerdfont: (https://www.nerdfonts.com/)
+  "nvim-tree/nvim-web-devicons",
+
+  "echasnovski/mini.icons",
+  { "echasnovski/mini.extra", version = "*" },
+
+  -- Base16 color schemes
+  -- "Mofiqul/dracula.nvim",
+  -- "folke/tokyonight.nvim",
+  -- "rose-pine/neovim",
+  -- "EdenEast/nightfox.nvim",
+  "catppuccin/nvim",
+  -- "tinted-theming/base16-vim",
+  -- "ellisonleao/gruvbox.nvim",
+  -- "rebelot/kanagawa.nvim",
+  -- "dracula/vim",
+  -- "sainnhe/sonokai",
+
+  -- Dracula color scheme
+  -- 'dracula/vim',
+
+  -- Automatically highlighting other uses of the current word under the cursor
+  -- "RRethy/vim-illuminate",
+  -- Alternative to vim-illuminate
+  -- "tzachar/local-highlight.nvim",
+
+  -- Statusline
+  {
+    "nvim-lualine/lualine.nvim",
+    config = function() require("plugin_settings.lualine") end,
+  },
+  -- Alternative statusline
+  -- "rebelot/heirline.nvim",
+
+  -- Highligh color codes
+  -- "lilydjwg/colorizer", -- Old plugin, works OK
+  {
+    'brenoprata10/nvim-highlight-colors',
+    event = { "BufReadPost", "BufNewFile" },
+    config = function() require("plugin_settings.colorizer") end,
+  },
+  -- "NvChad/nvim-colorizer.lua",
+  -- A high-performance color highlighter for Neovim which has no
+  -- external dependencies! Written in performant Luajit.
+  -- "norcalli/nvim-colorizer.lua",
 
   -- Tabline
   {
@@ -485,11 +568,67 @@ require("lazy").setup({
     config = function() require("plugin_settings.nvim_scrollview") end,
   },
   { "kevinhwang91/nvim-hlslens", keys = { "/", "?", "n", "N", "*", "#", "g*", "g#" } },
+
+  -- Indent line guides
+  -- "lukas-reineke/indent-blankline.nvim",
+
+  -- Visual glow feedback for undo, redo, yank, paste, and search
   {
-    "lewis6991/gitsigns.nvim",
-    event = { "BufReadPre", "BufNewFile" },
-    config = function() require("plugin_settings.gitsigns") end,
+    "y3owk1n/undo-glow.nvim",
+    version = "*",
+    event = "VeryLazy",
+    config = function() require("plugin_settings.undo_glow") end,
   },
+
+  {
+    "folke/snacks.nvim",
+    lazy = false,
+    priority = 1000,
+    opts = {},
+  },
+
+  --{
+  --  "folke/snacks.nvim",
+  --  ---@type snacks.Config
+  --  opts = {
+  --    explorer = {
+  --      -- your explorer configuration comes here
+  --      -- or leave it empty to use the default settings
+  --      -- refer to the configuration section below
+  --    },
+  --    picker = {
+  --      sources = {
+  --        explorer = {
+  --          -- your explorer picker configuration comes here
+  --          -- or leave it empty to use the default settings
+  --        }
+  --      }
+  --    }
+  --  }
+  --}
+
+  -- ======== Tesing area ====================
+  -- "rcarriga/nvim-notify",
+  -- "stevearc/dressing.nvim",
+
+  -- ============================================================
+  -- Search / quickfix / lint / format
+  -- ============================================================
+
+  -- Global search by ack cli util
+  -- "mileszs/ack.vim",
+
+  -- Delete entries from quickfix
+  -- "stefandtw/quickfix-reflector.vim",
+
+  -- Delete entries from quickfix (alt)
+  { "itchyny/vim-qfedit", ft = "qf" },
+
+  -- Linting
+  -- "w0rp/ale",
+
+  -- TODO Alternative linting plugin(Consider to switch in future)
+  -- "neomake/neomake",
 
   -- Run linters and formaters as fake LSP
   -- 'jose-elias-alvarez/null-ls.nvim',
@@ -499,6 +638,43 @@ require("lazy").setup({
     event = { "BufReadPost", "BufNewFile", "BufWritePost" },
     config = function() require("plugin_settings.nvim_lint") end,
   },
+
+  -- Formating framework (like null-ls, syntastic, etc)
+  {
+    "stevearc/conform.nvim",
+    event = { "BufReadPre", "BufNewFile" },
+    cmd = { "ConformInfo" },
+    config = function() require("plugin_settings.conform_formater") end,
+  },
+
+  -- Very cool search & replace plugin similar to Atom
+  -- "MagicDuck/grug-far.nvim",
+
+  -- A collection of improvements for the quickfix buffer
+  -- "stevearc/qf_helper.nvim",
+
+  -- 'MunifTanjim/prettier.nvim',
+
+  -- ============================================================
+  -- Test / terminal
+  -- ============================================================
+
+  -- Run various tests from vim
+  {
+    "janko-m/vim-test",
+    cmd = { "TestNearest", "TestFile", "TestSuite", "TestLast", "TestVisit" },
+    config = function() require("plugin_settings.vim_test") end,
+  },
+
+  -- Allows vim to communicate and run commands in tmux
+  "benmills/vimux",
+
+  -- Make terminal vim and tmux work better together.
+  { "tmux-plugins/vim-tmux-focus-events", event = "VeryLazy" },
+
+  -- ============================================================
+  -- AI
+  -- ============================================================
 
   -- Use local Ollama AI in VIM
   {
@@ -593,48 +769,42 @@ require("lazy").setup({
   --   }
   -- },
 
-  -- Formating framework (like null-ls, syntastic, etc)
-  {
-    "stevearc/conform.nvim",
-    event = { "BufReadPre", "BufNewFile" },
-    cmd = { "ConformInfo" },
-    config = function() require("plugin_settings.conform_formater") end,
-  },
+  -- "coder/claudecode.nvim"
 
-  -- Measure startuptime
-  { "dstein64/vim-startuptime", cmd = "StartupTime" },
+  -- {
+  --   "coder/claudecode.nvim",
+  --   dependencies = { "folke/snacks.nvim" },
+  --   config = true,
+  --   terminal_cmd = "~/.claude/local/claude",
+  --   keys = {
+  --     { "<leader>a", nil, desc = "AI/Claude Code" },
+  --     { "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude" },
+  --     { "<leader>af", "<cmd>ClaudeCodeFocus<cr>", desc = "Focus Claude" },
+  --     { "<leader>ar", "<cmd>ClaudeCode --resume<cr>", desc = "Resume Claude" },
+  --     { "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "Continue Claude" },
+  --     { "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Select Claude model" },
+  --     { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", desc = "Add current buffer" },
+  --     { "<leader>as", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Send to Claude" },
+  --     {
+  --       "<leader>as",
+  --       "<cmd>ClaudeCodeTreeAdd<cr>",
+  --       desc = "Add file",
+  --       ft = { "NvimTree", "neo-tree", "oil", "minifiles", "netrw" },
+  --     },
+  --     -- Diff management
+  --     { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept diff" },
+  --     { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny diff" },
+  --   },
+  --   opts = {
+  --     terminal = {
+  --       provider = "none", -- no UI actions; server + tools remain available
+  --     },
+  --   },
+  -- },
 
-  -- Open in split select for NeoTree
-  {
-    's1n7ax/nvim-window-picker',
-    name = 'window-picker',
-    event = 'VeryLazy',
-    version = '2.*',
-    config = function()
-      require'window-picker'.setup({
-        hint = 'floating-big-letter',
-             floating_big_letter = {
-            -- window picker plugin provides bunch of big letter fonts
-            -- fonts will be lazy loaded as they are being requested
-            -- additionally, user can pass in a table of fonts in to font
-            -- property to use instead
-
-            font = 'ansi-shadow', -- ansi-shadow |
-        },
-      })
-    end,
-  },
-
-  {
-    "kylechui/nvim-surround",
-    version = "*", -- Use for stability; omit to use `main` branch for the latest features
-    event = "VeryLazy",
-    config = function()
-      require("nvim-surround").setup({
-        -- Configuration here, or leave empty to use defaults
-      })
-    end
-  },
+  -- ============================================================
+  -- Outline / keymap helpers / misc
+  -- ============================================================
 
   -- Show methods in file in sidebar(Has nice navigaton)
   {
@@ -680,104 +850,13 @@ require("lazy").setup({
     },
   },
 
+  -- Measure startuptime
+  { "dstein64/vim-startuptime", cmd = "StartupTime" },
 
-  -- "ggandor/leap.nvim",
+  -- ============================================================
+  -- Notes / wishlist (kept verbatim)
+  -- ============================================================
 
-  {
-    "folke/flash.nvim",
-    event = "VeryLazy",
-    config = function() require("plugin_settings.flash") end,
-  },
-
-  -- Visual glow feedback for undo, redo, yank, paste, and search
-  {
-    "y3owk1n/undo-glow.nvim",
-    version = "*",
-    event = "VeryLazy",
-    config = function() require("plugin_settings.undo_glow") end,
-  },
-
-  {
-    "OXY2DEV/markview.nvim",
-    ft = { "markdown", "Avante", "codecompanion" },
-    dependencies = { "nvim-tree/nvim-web-devicons" },
-    config = function() require("plugin_settings.markview") end,
-  },
-
-  {
-    "iamcco/markdown-preview.nvim",
-    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
-    ft = { "markdown" },
-    build = function() vim.fn["mkdp#util#install"]() end,
-  },
-
-  {
-    "folke/snacks.nvim",
-    lazy = false,
-    priority = 1000,
-    opts = {},
-  },
-  -- "coder/claudecode.nvim"
-
-  -- {
-  --   "coder/claudecode.nvim",
-  --   dependencies = { "folke/snacks.nvim" },
-  --   config = true,
-  --   terminal_cmd = "~/.claude/local/claude",
-  --   keys = {
-  --     { "<leader>a", nil, desc = "AI/Claude Code" },
-  --     { "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude" },
-  --     { "<leader>af", "<cmd>ClaudeCodeFocus<cr>", desc = "Focus Claude" },
-  --     { "<leader>ar", "<cmd>ClaudeCode --resume<cr>", desc = "Resume Claude" },
-  --     { "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "Continue Claude" },
-  --     { "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Select Claude model" },
-  --     { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", desc = "Add current buffer" },
-  --     { "<leader>as", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Send to Claude" },
-  --     {
-  --       "<leader>as",
-  --       "<cmd>ClaudeCodeTreeAdd<cr>",
-  --       desc = "Add file",
-  --       ft = { "NvimTree", "neo-tree", "oil", "minifiles", "netrw" },
-  --     },
-  --     -- Diff management
-  --     { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept diff" },
-  --     { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny diff" },
-  --   },
-  --   opts = {
-  --     terminal = {
-  --       provider = "none", -- no UI actions; server + tools remain available
-  --     },
-  --   },
-  -- },
-
-  --{
-  --  "folke/snacks.nvim",
-  --  ---@type snacks.Config
-  --  opts = {
-  --    explorer = {
-  --      -- your explorer configuration comes here
-  --      -- or leave it empty to use the default settings
-  --      -- refer to the configuration section below
-  --    },
-  --    picker = {
-  --      sources = {
-  --        explorer = {
-  --          -- your explorer picker configuration comes here
-  --          -- or leave it empty to use the default settings
-  --        }
-  --      }
-  --    }
-  --  }
-  --}
-
-  -- "weizheheng/ror.nvim",
-  -- "jonsmithers/vim-html-template-literals",
-
-  -- Very cool search & replace plugin similar to Atom
-  -- "MagicDuck/grug-far.nvim",
-
-  -- A collection of improvements for the quickfix buffer
-  -- "stevearc/qf_helper.nvim",
   -- {
   --   "ray-x/go.nvim",
   --   dependencies = {  -- optional packages
@@ -792,36 +871,12 @@ require("lazy").setup({
   --   ft = {"go", 'gomod'},
   --   build = ':lua require("go.install").update_all_sync()' -- if you need to install/update all binaries
   -- },
-  -- ======== Tesing area ====================
-  -- "rcarriga/nvim-notify",
-  -- "stevearc/dressing.nvim",
 
   -- ============= CURRENT EXPERIMENTAL PLUGINS ======================
-
-  -- VSCode bulb bulb for neovim's built-in LSP.
-  -- 'kosayoda/nvim-lightbulb',
-
-  -- A lightweight LSP plugin based on Neovim's built-in LSP with a highly
-  -- performant UI.
-  -- 'glepnir/lspsaga.nvim',
-
-  -- A plugin to visualise and resolve merge conflicts in neovim
-  -- 'akinsho/git-conflict.nvim',
-  -- 'rhysd/conflict-marker.vim',
-  -- 'folke/neodev.nvim',
-
-  -- A pretty list for showing diagnostics, references, telescope results,
-  -- quickfix and location lists to help you solve all the trouble your code is
-  -- causing.
-  --
-  -- 'MunifTanjim/prettier.nvim',
 
   ----------------- NEXT IN LINE ========================
   -- "folke/trouble.nvim",
 
-  -- Neovim setup for init.lua and plugin development with full signature help,
-  -- docs and completion for the nvim lua API.
-  -- 'folke/neodev.nvim',
   -- A tree like view for symbols in Neovim using the Language Server Protocol.
   -- Supports all your favourite languages.
   -- 'simrat39/symbols-outline.nvim'
