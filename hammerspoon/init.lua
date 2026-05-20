@@ -48,7 +48,7 @@ local notifyReturn = require("notify_return")
 hs.hotkey.bind({"cmd"}, "k", notifyReturn.restoreFull)
 
 -- Cmd+0 → dismiss all notifications (numpad * keycode 67 still toggles mute)
-hs.hotkey.bind({"cmd"}, "0", dismissNotifications)
+hs.hotkey.bind({"cmd"}, "i", dismissNotifications)
 
 -- Cmd+L → activate (click) the topmost notification's default action
 hs.hotkey.bind({"cmd"}, "l", openNotification)
@@ -75,3 +75,32 @@ local function cycleAppWindows()
 end
 
 hs.hotkey.bind({"cmd"}, "`", cycleAppWindows)
+
+-- Cmd+` → Mission Control (all apps overview)
+hs.hotkey.bind({"cmd"}, "e", function()
+  hs.spaces.toggleAppExpose()
+end)
+
+-- Mouse side buttons → App Exposé / click notification
+-- otherMouseDown button numbers (0-indexed):
+--   3 = back side button (closer to wrist) → App Exposé (current app windows)
+--   4 = forward side button (closer to fingers) → click topmost notification
+-- Swap the button numbers below if your mouse maps them the other way.
+local MOUSE_BUTTON_APP_EXPOSE         = 4
+local MOUSE_BUTTON_OPEN_NOTIFICATION  = 3
+
+mouseOverviewTap = hs.eventtap.new(
+  { hs.eventtap.event.types.otherMouseDown },
+  function(event)
+    local button = event:getProperty(hs.eventtap.event.properties.mouseEventButtonNumber)
+    if button == MOUSE_BUTTON_APP_EXPOSE then
+      hs.spaces.toggleMissionControl()
+      return true
+    elseif button == MOUSE_BUTTON_OPEN_NOTIFICATION then
+      openNotification()
+      return true
+    end
+    return false
+  end
+)
+mouseOverviewTap:start()

@@ -63,3 +63,18 @@ vim.api.nvim_create_autocmd("FocusGained", {
     end
   end,
 })
+
+--============================================================================
+--================== JSON: never conceal quotes ==============================
+--============================================================================
+-- Two independent conceal sources exist for JSON in this setup:
+--   1. Neovim built-in syntax/json.vim — gated on g:vim_json_conceal
+--   2. nvim-treesitter queries/json/highlights.scm — conceals every "
+-- Both honor &conceallevel, so pinning it to 0 for json filetypes
+-- (json, jsonc, json5) is the canonical kill-switch.
+vim.g.vim_json_conceal = 0
+vim.g.vim_json_syntax_conceal = 0
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "json", "jsonc", "json5" },
+  callback = function() vim.opt_local.conceallevel = 0 end,
+})
