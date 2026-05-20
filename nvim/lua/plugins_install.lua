@@ -177,8 +177,12 @@ require("lazy").setup({
   "williamboman/mason-lspconfig.nvim",
 
   -- Configs for the Nvim LSP client (:help lsp).(Quickstart configs for Nvim LSP )
+  -- Lazy on first real buffer; mason + mason-lspconfig load as deps right
+  -- before lsp_config runs, so mason.setup()/mason-lspconfig.setup() no
+  -- longer cost anything at startup.
   {
     "neovim/nvim-lspconfig",
+    event = { "BufReadPre", "BufNewFile" },
     dependencies = { "williamboman/mason.nvim", "williamboman/mason-lspconfig.nvim" },
     config = function() require("plugin_settings.lsp_config") end,
   },

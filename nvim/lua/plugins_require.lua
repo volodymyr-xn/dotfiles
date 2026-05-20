@@ -14,8 +14,23 @@ require('plugin_settings/onediff')
 require('plugin_settings/markdown_preview')
 require('plugin_settings/markdown_html_preview')
 
--- Idle-buffer unload, RSS notifier, lualine stats, and :MemDashboard.
-require('my_plugins/memory_manager').setup()
+-- Memory manager loads on first invocation of :MemPrune or :MemDashboard.
+-- The stubs below register the same command names; on first call they require
+-- the real module, run its setup() (which replaces these stubs with the real
+-- commands), then re-dispatch with the original args.
+local function load_memory_manager()
+  require("my_plugins.memory_manager").setup()
+end
+
+vim.api.nvim_create_user_command("MemPrune", function(opts)
+  load_memory_manager()
+  vim.cmd(("MemPrune %s"):format(opts.args))
+end, { nargs = "?" })
+
+vim.api.nvim_create_user_command("MemDashboard", function()
+  load_memory_manager()
+  vim.cmd("MemDashboard")
+end, {})
 
 -- ====================== Vim highlight tag settings ======================
 vim.cmd('highlight link matchTagError Todo')

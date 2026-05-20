@@ -10,31 +10,61 @@
 
 -- Force Ruby syntax for Pry config file
 -- vim.api.nvim_command("autocmd BufRead,BufNewFile .pryrc setlocal syntax=ruby")
+-- Shared augroup for all user autocmds defined in this file. `clear = true`
+-- makes re-sourcing idempotent (no duplicate handlers on :so $MYVIMRC).
+local group = vim.api.nvim_create_augroup("UserAutocmds", { clear = true })
+
+-- Auto-reload files changed outside of vim, except while typing a command.
 vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter" }, {
-  command = "if mode() != 'c' | checktime | endif",
+  group = group,
   pattern = "*",
+  command = "if mode() != 'c' | checktime | endif",
 })
 
-if vim.fn.has("nvim") == 1 then
-  -- Highligh text on yank
-  vim.api.nvim_command("autocmd TextYankPost * silent! lua vim.highlight.on_yank {higroup=\"Type\", timeout=250}")
-end
+-- Highlight yanked text.
+vim.api.nvim_create_autocmd("TextYankPost", {
+  group = group,
+  callback = function()
+    vim.highlight.on_yank({ higroup = "Type", timeout = 250 })
+  end,
+})
 
 --============================================================================
---================== YAML settings ===========================================
+--================== YAML / HTML / eruby settings ============================
 --============================================================================
--- Set folding rules for yaml
-vim.api.nvim_command("autocmd BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml foldmethod=indent")
--- By default fold just opened yaml file
-vim.api.nvim_command("autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab foldenable")
+-- Force filetype + indent-based folding for yaml/html/erb on read.
+vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPost" }, {
+  group = group,
+  pattern = { "*.yaml", "*.yml", "*.html", "*.erb" },
+  callback = function(args)
+    local ext_to_ft = { yaml = "yaml", yml = "yaml", html = "html", erb = "eruby" }
+    local ext = args.file:match("%.([^.]+)$")
+    local ft = ext_to_ft[ext]
 
--- Set folding rules for html and erb files
-vim.api.nvim_command("autocmd BufNewFile,BufReadPost *.{html} set filetype=html foldmethod=indent")
-vim.api.nvim_command("autocmd BufNewFile,BufReadPost *.{erb} set filetype=eruby foldmethod=indent")
--- vim.api.nvim_command("autocmd BufNewFile,BufReadPost *.{html} set filetype=html foldmethod=expr")
--- vim.api.nvim_command("autocmd BufNewFile,BufReadPost *.{erb} set filetype=eruby foldmethod=expr")
-vim.api.nvim_command("autocmd FileType html setlocal ts=2 sts=2 sw=2 expandtab")
-vim.api.nvim_command("autocmd FileType eruby setlocal ts=2 sts=2 sw=2 expandtab")
+    if ft then
+      vim.bo[args.buf].filetype = ft
+    end
+
+    vim.wo.foldmethod = "indent"
+  end,
+})
+
+-- Shared 2-space indent for yaml/html/eruby; yaml additionally opens folded.
+vim.api.nvim_create_autocmd("FileType", {
+  group = group,
+  pattern = { "yaml", "html", "eruby" },
+  callback = function(args)
+    local o = vim.opt_local
+    o.tabstop = 2
+    o.softtabstop = 2
+    o.shiftwidth = 2
+    o.expandtab = true
+
+    if args.match == "yaml" then
+      o.foldenable = true
+    end
+  end,
+})
 
 --local lsp_util = vim.lsp.util
 
@@ -57,6 +87,7 @@ vim.api.nvim_command("autocmd FileType eruby setlocal ts=2 sts=2 sw=2 expandtab"
 -- Correcly Focus cursor and go to insert mode in nvim-terminal widnow.
 -- This is very import to have different types of terminal tui tools work correcly in nvim terminal window.
 vim.api.nvim_create_autocmd("FocusGained", {
+  group = group,
   callback = function()
     if vim.bo.buftype == "terminal" then
       vim.cmd("startinsert")
@@ -75,6 +106,7 @@ vim.api.nvim_create_autocmd("FocusGained", {
 vim.g.vim_json_conceal = 0
 vim.g.vim_json_syntax_conceal = 0
 vim.api.nvim_create_autocmd("FileType", {
+  group = group,
   pattern = { "json", "jsonc", "json5" },
   callback = function() vim.opt_local.conceallevel = 0 end,
 })
