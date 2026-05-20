@@ -198,6 +198,15 @@ require('lualine').setup {
     },
     lualine_y = {
       -- { get_yaml_key, cond = is_yaml },
+      -- Memory-manager segment: loaded buffers · TS parsers · RSS MB.
+      {
+        function()
+          local ok, mm = pcall(require, "my_plugins.memory_manager")
+          if ok then return mm.stats_string() end
+          return ""
+        end,
+        color = { fg = "#a3be8c" },
+      },
       {
         is_curent_window_zoomed,
         color = function(section)

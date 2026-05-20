@@ -52,6 +52,9 @@ require('plugin_settings/markview')
 require('plugin_settings/markdown_preview')
 require('plugin_settings/markdown_html_preview')
 
+-- Idle-buffer unload, RSS notifier, lualine stats, and :MemDashboard.
+require('my_plugins/memory_manager').setup()
+
 -- require('plugin_settings/indent_blankline')
 -- require('plugin_settings/local_highlight')
 -- require('plugin_settings/ale')
