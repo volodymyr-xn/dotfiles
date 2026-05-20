@@ -26,6 +26,42 @@ local function getAllBuffers()
   return vim.api.nvim_list_bufs()
 end
 
+-- Only the current buffer; used by the cheapest buffer-completion tier.
+local function getCurrentBuffer()
+  return { vim.api.nvim_get_current_buf() }
+end
+
+-- Visible buffers minus the current one; dedupe tier 2 against tier 1.
+local function getVisibleOtherBuffers()
+  local current = vim.api.nvim_get_current_buf()
+  local bufs = {}
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    local buf = vim.api.nvim_win_get_buf(win)
+    if buf ~= current then
+      local filetype = vim.api.nvim_buf_get_option(buf, 'filetype')
+      if filetype ~= "Neotree" then
+        bufs[buf] = true
+      end
+    end
+  end
+  return vim.tbl_keys(bufs)
+end
+
+-- Loaded buffers not visible in any window; dedupe tier 3 against tiers 1+2.
+local function getHiddenBuffers()
+  local visible = {}
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    visible[vim.api.nvim_win_get_buf(win)] = true
+  end
+  local bufs = {}
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if not visible[buf] then
+      bufs[#bufs + 1] = buf
+    end
+  end
+  return bufs
+end
+
 local kind_icons = {
   Text = "",
   Method = "",
@@ -221,15 +257,30 @@ cmp.setup({
     }
   },
   sources = cmp.config.sources({
-    -- { name = "copilot"},
     {
-      name = 'buffer',
-      -- max_item_count = 8,
-      option = {
-        -- get_bufnrs = getVisibleBuffers,
-        get_bufnrs = getAllBuffers
-      }
+      name = "buffer",
+      keyword_length = 1,
+      option = { get_bufnrs = getAllBuffers }
     },
+    -- { name = "copilot"},
+    -- {
+    --   name = 'buffer',
+    --   keyword_length = 1,
+    --   max_item_count = 2,
+    --   option = { get_bufnrs = getCurrentBuffer },
+    -- },
+    -- {
+    --   name = 'buffer',
+    --   keyword_length = 3,
+    --   max_item_count = 2,
+    --   option = { get_bufnrs = getVisibleOtherBuffers },
+    -- },
+    -- {
+    --   name = 'buffer',
+    --   keyword_length = 5,
+    --   max_item_count = 2,
+    --   option = { get_bufnrs = getHiddenBuffers },
+    -- },
     {
       name = 'nvim_lsp',
     }
@@ -247,12 +298,14 @@ cmp.setup({
     -- filtering_context_budget = 3,
     -- confirm_resolve_timeout = 80,
     -- async_budget = 1,
-    -- max_view_entries = 200,
+    max_view_entries = 200,
   },
 
   formatting = {
     format = lspkind.cmp_format({
       mode = "symbol_text",
+      maxwidth = 50,
+      ellipsis_char = '…',
       menu = ({
         buffer = "[Buffer]",
         nvim_lsp = "[LSP]",
