@@ -46,6 +46,35 @@ vim.api.nvim_set_keymap('n', 's4', '<cmd>lua require("my_plugins.ruby_component_
 vim.keymap.set('n', 'gr', function() ruby_toggle.toggle_alternate() end,
   { noremap = true, silent = true, desc = "Toggle between .rb and .html.erb" })
 
+-- Neo-tree: defined here (not inside plugin_settings/neo_tree.lua) so that
+-- the keymaps exist at startup. Pressing them dispatches :Neotree, which
+-- triggers neo-tree's `cmd` lazy-load. Plugin config still applies via the
+-- spec's `config = function()` callback the first time the cmd runs.
+
+-- Disable default Ctrl-Backslash so Vim does not eat the keystroke before
+-- our mapping resolves.
+vim.api.nvim_set_keymap("n", "<C-\\>", "<NOP>", { noremap = true, silent = true })
+
+-- Toggle sidebar: route to onediff in onediff buffers, otherwise Neotree.
+vim.keymap.set("n", "<C-\\>", function()
+  local current_buf = vim.api.nvim_get_current_buf()
+
+  if vim.b[current_buf].is_onediff_buffer or vim.b[current_buf].onediff_instance_id then
+    local ok, onediff = pcall(require, "my_plugins.onediff")
+    if ok then
+      onediff.toggle_sidebar()
+      return
+    end
+  end
+
+  vim.cmd("Neotree toggle")
+end, { noremap = true, silent = true, desc = "Toggle sidebar" })
+
+-- reveal_force_cwd: if file is outside cwd, silently change cwd to its
+-- directory instead of prompting "Change cwd to …? [Y]es, (N)o".
+vim.api.nvim_set_keymap("n", "<Leader>0", ":Neotree filesystem reveal_force_cwd<CR>",
+  { noremap = true, silent = false, desc = "Reveal file in neo-tree" })
+
 -- Open current file in default app; HTML/HTM files open in Chrome with the "1 Work" profile
 vim.keymap.set('n', 'sn', function()
   local filepath = vim.fn.expand('%:p')

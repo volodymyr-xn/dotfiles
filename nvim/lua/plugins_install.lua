@@ -56,11 +56,13 @@ require("lazy").setup({
   -- 'nvim-tree/nvim-tree.lua',
 
   {
-  "nvim-neo-tree/neo-tree.nvim",
+    "nvim-neo-tree/neo-tree.nvim",
+    cmd = { "Neotree" },
     dependencies = {
       "nvim-lua/plenary.nvim",
       "MunifTanjim/nui.nvim",
-    }
+    },
+    config = function() require("plugin_settings.neo_tree") end,
   },
 
   -- Provides devicons
@@ -68,9 +70,12 @@ require("lazy").setup({
   "nvim-tree/nvim-web-devicons",
 
   "echasnovski/mini.icons",
-  { "echasnovski/mini.pick", version = "*" },
   { "echasnovski/mini.extra", version = "*" },
-  { "echasnovski/mini.ai", version = "*" },
+  {
+    "echasnovski/mini.ai",
+    version = "*",
+    config = function() require("plugin_settings.mini_ai") end,
+  },
   {
     "dmtrKovalenko/fff.nvim",
     build = ':lua require("fff.download").download_or_build_binary()',
@@ -85,7 +90,7 @@ require("lazy").setup({
   "tpope/vim-commentary",
   "JoosepAlviste/nvim-ts-context-commentstring",
 
-  "tpope/vim-haml",
+  { "tpope/vim-haml", ft = { "haml", "eruby" } },
 
   -- Linting
   -- "w0rp/ale",
@@ -101,7 +106,8 @@ require("lazy").setup({
   -- FZF integration
   {
     "junegunn/fzf.vim",
-    dependencies = { 'junegunn/fzf' }
+    dependencies = { 'junegunn/fzf' },
+    config = function() require("plugin_settings.fzf") end,
   },
 
   -- Lua port of FZF for neovim
@@ -110,7 +116,8 @@ require("lazy").setup({
   {
     'nvim-telescope/telescope.nvim',
     dependencies = { 'nvim-lua/plenary.nvim' },
-    commit = "cb3f98d935842836cc115e8c9e4b38c1380fbb6b"
+    commit = "cb3f98d935842836cc115e8c9e4b38c1380fbb6b",
+    config = function() require("plugin_settings.telescope") end,
   },
   "nvim-telescope/telescope-ui-select.nvim",
   -- Enabled live grep in dir
@@ -128,8 +135,7 @@ require("lazy").setup({
 
   -- Show changed lines from git
   -- "airblade/vim-gitgutter",
-  -- TODO: Consider switch to
-  'lewis6991/gitsigns.nvim',
+  -- gitsigns.nvim spec is declared below with its config
 
   -- Ruby on Rails power tool
   -- This is a massive (in a good way) Vim plugin for editing Ruby on Rails applications.
@@ -138,22 +144,20 @@ require("lazy").setup({
   -- which is automatically created with your content. In a model or controller, a
   -- concern is created, with the appropriate include declaration left behind.
   -- :help rails-:Extract
-  "tpope/vim-rails",
-
-  -- Minimal rbenv support
-  "tpope/vim-rbenv",
+  {
+    "tpope/vim-rails",
+    ft = { "ruby", "eruby", "haml", "yaml" },
+    config = function() require("plugin_settings.vim_rails") end,
+  },
 
   -- Better rspec syntax highlighting for Vim
-  "keith/rspec.vim",
+  { "keith/rspec.vim", ft = "ruby" },
 
   -- Ruby syntax highlighting
-  "vim-ruby/vim-ruby",
-
-  -- Lightweight support for Ruby's Bundler
-  "tpope/vim-bundler",
+  { "vim-ruby/vim-ruby", ft = "ruby" },
 
   -- Vim highlighting & completion for MiniTest
-  "sunaku/vim-ruby-minitest",
+  { "sunaku/vim-ruby-minitest", ft = "ruby" },
 
   -- Create your own text objects
   "kana/vim-textobj-user",
@@ -174,7 +178,7 @@ require("lazy").setup({
   "michaeljsmith/vim-indent-object",
 
   -- Automaticaly add end in ruby scrips
-  "tpope/vim-endwise",
+  { "tpope/vim-endwise", ft = { "ruby", "lua", "vim", "sh", "zsh", "elixir", "crystal" } },
 
   -- quoting/parenthesizing made simple
   -- "tpope/vim-surround",
@@ -188,30 +192,42 @@ require("lazy").setup({
   -- "wellle/targets.vim",
 
   -- Run various tests from vim
-  "janko-m/vim-test",
+  {
+    "janko-m/vim-test",
+    cmd = { "TestNearest", "TestFile", "TestSuite", "TestLast", "TestVisit" },
+    config = function() require("plugin_settings.vim_test") end,
+  },
 
   -- Allows vim to communicate and run commands in tmux
   "benmills/vimux",
 
   -- CSS3 syntax support
-  "hail2u/vim-css3-syntax",
+  { "hail2u/vim-css3-syntax", ft = { "css", "scss" } },
 
   -- Git integration
-  "tpope/vim-fugitive",
-  "sindrets/diffview.nvim",
+  {
+    "tpope/vim-fugitive",
+    cmd = { "G", "Git", "Gdiffsplit", "Gread", "Gwrite", "Ggrep", "Glgrep", "Gclog", "Gllog", "Gedit", "Gsplit", "Gvsplit", "Gtabedit", "Gpedit", "GBrowse" },
+    config = function() require("plugin_settings.fugitive") end,
+  },
+  {
+    "sindrets/diffview.nvim",
+    cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewToggleFiles", "DiffviewFocusFiles", "DiffviewFileHistory", "DiffviewRefresh" },
+    config = function() require("plugin_settings.diffview") end,
+  },
 
   -- Make terminal vim and tmux work better together.
-  "tmux-plugins/vim-tmux-focus-events",
+  { "tmux-plugins/vim-tmux-focus-events", event = "VeryLazy" },
 
   -- Provides insert mode auto-completion for quotes, parens, brackets
   -- TODO: Replace of NEOVIM equvivalent
   -- "Raimondi/delimitMate",
 
   -- Crystal syntax support
-  "vim-crystal/vim-crystal",
+  { "vim-crystal/vim-crystal", ft = "crystal" },
 
   -- Improved JavaScript syntax
-  "pangloss/vim-javascript",
+  { "pangloss/vim-javascript", ft = { "javascript", "javascriptreact" } },
 
   -- JSX syntax support
   -- "mxw/vim-jsx",
@@ -220,7 +236,7 @@ require("lazy").setup({
   "mg979/vim-visual-multi",
 
   -- Brewfile syntax highlighting
-  "bfontaine/brewfile.vim",
+  { "bfontaine/brewfile.vim", ft = "ruby" },
 
   -- Auto close (X)HTML tags
   -- "alvan/vim-closetag",
@@ -232,7 +248,7 @@ require("lazy").setup({
   -- "EdenEast/nightfox.nvim",
   "catppuccin/nvim",
   -- "tinted-theming/base16-vim",
-  "ellisonleao/gruvbox.nvim",
+  -- "ellisonleao/gruvbox.nvim",
   -- "rebelot/kanagawa.nvim",
   -- "dracula/vim",
   -- "sainnhe/sonokai",
@@ -241,14 +257,15 @@ require("lazy").setup({
   -- "stefandtw/quickfix-reflector.vim",
 
   -- Delete entries from quickfix (alt)
-  "itchyny/vim-qfedit",
+  { "itchyny/vim-qfedit", ft = "qf" },
 
   -- Shows yaml path under cursor,
   -- allows to search by YAML key
-  "Einenlum/yaml-revealer",
+  { "Einenlum/yaml-revealer", ft = { "yaml", "yml" } },
 
   {
-    "nvim-treesitter/nvim-treesitter"
+    "nvim-treesitter/nvim-treesitter",
+    config = function() require("plugin_settings.treesitter") end,
   },
 
   -- {
@@ -256,11 +273,17 @@ require("lazy").setup({
   -- },
 
   {
-    "chrisgrieser/nvim-spider"
+    "chrisgrieser/nvim-spider",
+    config = function() require("plugin_settings.nvim_spider") end,
   },
 
   -- Better yaml
-  "cuducos/yaml.nvim",
+  {
+    "cuducos/yaml.nvim",
+    ft = { "yaml", "yml" },
+    keys = { { "<Leader>`", desc = "Copy YAML key" } },
+    config = function() require("plugin_settings.yaml_nvim") end,
+  },
 
   -- Better yaml folding
   -- "pedrohdz/vim-yaml-folds",
@@ -268,22 +291,20 @@ require("lazy").setup({
   -- Portable package manager for Neovim that runs everywhere Neovim runs.
   -- easily install and manage LSP servers, DAP servers, linters, and
   -- formatters.
-  "williamboman/mason.nvim",
+  { "williamboman/mason.nvim", cmd = { "Mason", "MasonInstall", "MasonInstallAll", "MasonUpdate", "MasonUninstall", "MasonUninstallAll", "MasonLog" } },
   -- mason-lspconfig bridges mason.nvim with the lspconfig plugin - making it
   -- easier to use both plugins together.
   "williamboman/mason-lspconfig.nvim",
 
   -- Configs for the Nvim LSP client (:help lsp).(Quickstart configs for Nvim LSP )
-  "neovim/nvim-lspconfig",
+  {
+    "neovim/nvim-lspconfig",
+    dependencies = { "williamboman/mason.nvim", "williamboman/mason-lspconfig.nvim" },
+    config = function() require("plugin_settings.lsp_config") end,
+  },
 
   -- A neovim plugin that preview code with LSP code actions applied.
-  -- The following backends are available:
-  "aznhe21/actions-preview.nvim",
-  "hrsh7th/cmp-nvim-lsp",
-  "hrsh7th/cmp-buffer",
-  "hrsh7th/cmp-path",
-  "hrsh7th/cmp-cmdline",
-  "onsails/lspkind.nvim",
+  -- actions-preview and cmp sources/icons are loaded as deps of nvim-cmp below.
   -- {
   --   "tzachar/cmp-fuzzy-buffer",
   --   dependencies = {
@@ -292,7 +313,18 @@ require("lazy").setup({
   -- },
 
   -- Autocomplte plugin
-  "hrsh7th/nvim-cmp",
+  {
+    "hrsh7th/nvim-cmp",
+    dependencies = {
+      "aznhe21/actions-preview.nvim",
+      "hrsh7th/cmp-nvim-lsp",
+      "hrsh7th/cmp-buffer",
+      "hrsh7th/cmp-path",
+      "hrsh7th/cmp-cmdline",
+      "onsails/lspkind.nvim",
+    },
+    config = function() require("plugin_settings.nvim_cmp") end,
+  },
   -- "lukas-reineke/cmp-rg",
 
   -- Alternative fast completion plugin
@@ -316,13 +348,20 @@ require("lazy").setup({
   -- LSP servers, for use in the Neovim statusline
   "nvim-lua/lsp-status.nvim",
   -- Statusline
-  "nvim-lualine/lualine.nvim",
+  {
+    "nvim-lualine/lualine.nvim",
+    config = function() require("plugin_settings.lualine") end,
+  },
   -- Alternative statusline
   -- "rebelot/heirline.nvim",
 
   -- Highligh color codes
   -- "lilydjwg/colorizer", -- Old plugin, works OK
-  'brenoprata10/nvim-highlight-colors',
+  {
+    'brenoprata10/nvim-highlight-colors',
+    event = { "BufReadPost", "BufNewFile" },
+    config = function() require("plugin_settings.colorizer") end,
+  },
   -- "NvChad/nvim-colorizer.lua",
   -- A high-performance color highlighter for Neovim which has no
   -- external dependencies! Written in performant Luajit.
@@ -338,14 +377,22 @@ require("lazy").setup({
   -- "elzr/vim-json",
 
   -- Syntax highlighting and filetype detection for systemd unit files
-  "wgwoods/vim-systemd-syntax",
+  { "wgwoods/vim-systemd-syntax", ft = "systemd" },
 
   -- Auto close quotes, parenthesiz, etc
-  "windwp/nvim-autopairs",
+  {
+    "windwp/nvim-autopairs",
+    event = "InsertEnter",
+    config = function() require("plugin_settings.nvim_autopairs") end,
+  },
   -- Use treesitter to autoclose and autorename html tag
   -- "windwp/nvim-ts-autotag",
 
-  "andymass/vim-matchup",
+  {
+    "andymass/vim-matchup",
+    event = { "BufReadPost", "BufNewFile" },
+    config = function() require("plugin_settings.vim_matchup") end,
+  },
   -- Alternative plugin
   -- "echasnovski/mini.pairs",
 
@@ -359,16 +406,26 @@ require("lazy").setup({
   -- "plasticboy/vim-markdown",
 
   -- unimpaired.vim: Pairs of handy bracket mappings
-  "tpope/vim-unimpaired",
+  { "tpope/vim-unimpaired", event = "VeryLazy" },
 
   -- GTK Blueprint syntax
   -- "thetek42/vim-blueprint-syntax",
 
   -- Switch between multiline and signleline code
-  "AndrewRadev/splitjoin.vim",
+  {
+    "AndrewRadev/splitjoin.vim",
+    keys = { "gS", "gJ", "<Leader>7", "<Leader>8" },
+    config = function() require("plugin_settings.splitjoin") end,
+  },
 
   -- Treesitter-aware split/join (smarter than splitjoin.vim)
-  { "Wansmer/treesj", dependencies = { "nvim-treesitter/nvim-treesitter" } },
+  {
+    "Wansmer/treesj",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    cmd = { "TSJToggle", "TSJSplit", "TSJJoin" },
+    keys = { { "<leader>M", desc = "Toggle split/join" } },
+    config = function() require("plugin_settings.treesj") end,
+  },
 
   -- Switch between different things
   -- 'AndrewRadev/switch.vim',
@@ -384,7 +441,9 @@ require("lazy").setup({
   {
     "mattn/emmet-vim",
     -- TODO: write issue on github regarding bug on main
-    commit = "3fb2f63799e1922f7647ed9ff3b32154031a76ee"
+    commit = "3fb2f63799e1922f7647ed9ff3b32154031a76ee",
+    ft = { "html", "css", "scss", "sass", "javascriptreact", "typescriptreact", "vue", "eruby", "haml", "xml" },
+    config = function() require("plugin_settings.emmet") end,
   },
   -- LSP for emmet
   -- "olrtg/nvim-emmet",
@@ -400,25 +459,49 @@ require("lazy").setup({
   -- Old and broken
   -- Snippets
   -- "MarcWeber/vim-addon-mw-utils",
-  "L3MON4D3/LuaSnip",
+  {
+    "L3MON4D3/LuaSnip",
+    config = function() require("plugin_settings.luasnip") end,
+  },
   'saadparwaiz1/cmp_luasnip',
   -- "rafamadriz/friendly-snippets",
 
   -- Tabline
-  "akinsho/bufferline.nvim",
+  {
+    "akinsho/bufferline.nvim",
+    event = "VeryLazy",
+    config = function() require("plugin_settings.tabline_bufferline") end,
+  },
 
   -- Show scrollbar for VIM buffer(SUPER COOL!)
-   'petertriho/nvim-scrollbar',
-   "kevinhwang91/nvim-hlslens",
-   "lewis6991/gitsigns.nvim",
+  {
+    'petertriho/nvim-scrollbar',
+    event = { "BufReadPost", "BufNewFile" },
+    config = function() require("plugin_settings.nvim_scrollview") end,
+  },
+  { "kevinhwang91/nvim-hlslens", keys = { "/", "?", "n", "N", "*", "#", "g*", "g#" } },
+  {
+    "lewis6991/gitsigns.nvim",
+    event = { "BufReadPre", "BufNewFile" },
+    config = function() require("plugin_settings.gitsigns") end,
+  },
 
   -- Run linters and formaters as fake LSP
   -- 'jose-elias-alvarez/null-ls.nvim',
   -- Linting syntastic like plugin
-  'mfussenegger/nvim-lint',
+  {
+    'mfussenegger/nvim-lint',
+    event = { "BufReadPost", "BufNewFile", "BufWritePost" },
+    config = function() require("plugin_settings.nvim_lint") end,
+  },
 
   -- Use local Ollama AI in VIM
-  "David-Kunz/gen.nvim",
+  {
+    "David-Kunz/gen.nvim",
+    cmd = "Gen",
+    keys = { { "<leader>q", ":Gen<CR>", mode = "v", desc = "Gen AI prompts" } },
+    config = function() require("plugin_settings.gen_nvim") end,
+  },
 
   -- Cursor like code completion
   -- {
@@ -506,10 +589,15 @@ require("lazy").setup({
   -- },
 
   -- Formating framework (like null-ls, syntastic, etc)
-  "stevearc/conform.nvim",
+  {
+    "stevearc/conform.nvim",
+    event = { "BufReadPre", "BufNewFile" },
+    cmd = { "ConformInfo" },
+    config = function() require("plugin_settings.conform_formater") end,
+  },
 
   -- Measure startuptime
-  "dstein64/vim-startuptime",
+  { "dstein64/vim-startuptime", cmd = "StartupTime" },
 
   -- Open in split select for NeoTree
   {
@@ -544,16 +632,22 @@ require("lazy").setup({
   },
 
   -- Show methods in file in sidebar(Has nice navigaton)
-  "stevearc/aerial.nvim",
+  {
+    "stevearc/aerial.nvim",
+    cmd = { "AerialToggle", "AerialOpen", "AerialClose", "AerialNext", "AerialPrev" },
+    keys = { { "<leader>z", "<cmd>AerialToggle!<CR>", desc = "Toggle aerial outline" } },
+    config = function() require("plugin_settings.aerial") end,
+  },
 
   -- Use both plugins for outline
   -- Show methods in file in sidebar (Has nice highlight)
   {
     'hedyhli/outline.nvim',
-    event = "VeryLazy",
+    cmd = { "Outline", "OutlineOpen", "OutlineClose", "OutlineFocus", "OutlineFocusOutline" },
     dependencies = {
       'epheien/outline-treesitter-provider.nvim'
-    }
+    },
+    config = function() require("plugin_settings.outline") end,
   },
 
   {
@@ -587,18 +681,22 @@ require("lazy").setup({
   {
     "folke/flash.nvim",
     event = "VeryLazy",
-    ---@type Flash.Config
-    opts = {},
-    -- stylua: ignore
+    config = function() require("plugin_settings.flash") end,
   },
 
   -- Visual glow feedback for undo, redo, yank, paste, and search
-  { "y3owk1n/undo-glow.nvim", version = "*", event = "VeryLazy" },
+  {
+    "y3owk1n/undo-glow.nvim",
+    version = "*",
+    event = "VeryLazy",
+    config = function() require("plugin_settings.undo_glow") end,
+  },
 
   {
     "OXY2DEV/markview.nvim",
-    lazy = false,
+    ft = { "markdown", "Avante", "codecompanion" },
     dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function() require("plugin_settings.markview") end,
   },
 
   {

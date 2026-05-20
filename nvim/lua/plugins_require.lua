@@ -1,66 +1,21 @@
+-- All plugin-scoped setup files now live in each plugin's `config = function()`
+-- block in plugins_install.lua. This file only loads custom code that is NOT
+-- tied to a lazy.nvim plugin spec (local utilities, custom keymaps).
+
 require("plugin_settings/icons")
-require("plugin_settings/neo_tree")
-require("plugin_settings/lualine")
-
-require("plugin_settings/fzf")
-require("plugin_settings/telescope")
-
-require('plugin_settings/treesitter')
--- require('plugin_settings/treesitter_context')
-require('plugin_settings/nvim_spider')
-require('plugin_settings/mini_ai')
-require('plugin_settings/treesj')
-require('plugin_settings/vim_matchup')
-require('plugin_settings/yaml_nvim')
-require('plugin_settings/lsp_config')
-
--- require('plugin_settings/copilot')
-require('plugin_settings/nvim_cmp')
---require('plugin_settings/blink_cmp')
---
-require("plugin_settings/vim_rails")
-require("plugin_settings/emmet")
 require('plugin_settings/ack')
 require('plugin_settings/ctags')
-require('plugin_settings/vim_test')
-require('plugin_settings/nvim_lint')
-require('plugin_settings/conform_formater')
-require('plugin_settings/luasnip')
-require('plugin_settings/splitjoin')
-require('plugin_settings/fugitive')
-require('plugin_settings/diffview')
-require('plugin_settings/nvim_autopairs')
 require('plugin_settings/ts_autotag')
-require("plugin_settings/tabline_bufferline")
-require('plugin_settings/nvim_scrollview')
 require('plugin_settings/vim_illuminate')
-require('plugin_settings/gitsigns')
 require('plugin_settings/comment_nvim')
-require('plugin_settings/gen_nvim')
-require('plugin_settings/colorizer')
 require('plugin_settings/quickfix')
-require('plugin_settings/aerial')
-require('plugin_settings/flash')
-require('plugin_settings/undo_glow')
--- require('plugin_settings/codecompanion')
--- require('plugin_settings/ogpt')
--- require('plugin_settings/vim_markdown')
--- require("plugin_settings/git_conflict")
 require('plugin_settings/1_ror')
 require('plugin_settings/onediff')
-require('plugin_settings/markview')
 require('plugin_settings/markdown_preview')
 require('plugin_settings/markdown_html_preview')
 
 -- Idle-buffer unload, RSS notifier, lualine stats, and :MemDashboard.
 require('my_plugins/memory_manager').setup()
-
--- require('plugin_settings/indent_blankline')
--- require('plugin_settings/local_highlight')
--- require('plugin_settings/ale')
--- require('plugin_settings/nvim_snippy')
-
--- require("plugin_settings/lightbulb")
 
 -- ====================== Vim highlight tag settings ======================
 vim.cmd('highlight link matchTagError Todo')

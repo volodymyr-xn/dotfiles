@@ -131,29 +131,8 @@ require("neo-tree").setup({
   use_popups_for_input = false,
 })
 
--- ======================== neo-tree mappings ===================================
--- Disable default Ctrl-\ mapping
-vim.api.nvim_set_keymap("n", "<C-\\>", "<NOP>", {noremap = true, silent = true})
-
-vim.keymap.set("n", "<C-\\>", function()
-  local current_buf = vim.api.nvim_get_current_buf()
-
-  if vim.b[current_buf].is_onediff_buffer or vim.b[current_buf].onediff_instance_id then
-    local ok, onediff = pcall(require, "my_plugins.onediff")
-    if ok then
-      onediff.toggle_sidebar()
-    else
-      vim.cmd("Neotree toggle")
-    end
-  else
-    vim.cmd("Neotree toggle")
-  end
-end, {noremap = true, silent = true, desc = "Toggle sidebar"})
-
--- reveal_force_cwd: if the file is outside cwd, silently change cwd to its
--- directory instead of prompting "Change cwd to …? [Y]es, (N)o".
-vim.api.nvim_set_keymap("n", "<Leader>0", ":Neotree filesystem reveal_force_cwd<CR>", {noremap = true, silent = false})
-vim.api.nvim_set_keymap("n", "=", ":Neotree filesystem reveal_force_cwd<CR>", {noremap = true, silent = false})
+-- neo-tree keymaps live in keymappings/files.lua so they exist at startup
+-- and trigger neo-tree's `cmd` lazy-load on first use.
 
 
 -- vim.cmd('highlight! NeoTreeGitAdded guifg=#ffffff gui=bold')

@@ -18,9 +18,9 @@ require("aerial").setup({
     Class = "𝓒",
     Method = "ƒ",
     Function = "ƒ",
-    -- Variable = "",
-    -- Field = "",
-    Property = "",
+    -- Variable = "",
+    -- Field = "",
+    Property = "",
   },
 
   -- optionally use on_attach to set keymaps when aerial has attached to a buffer
@@ -35,29 +35,6 @@ require("aerial").setup({
     ["l"] = "actions.scroll",
   },
 })
-
-require('outline').setup({
-  providers = {
-    priority = { 'lsp', 'coc', 'markdown', 'norg', 'treesitter' },
-  },
-  symbol_folding = {
-    -- Depth past which nodes will be folded by default. Set to false to unfold all on open.
-    autofold_depth = 1,
-    -- When to auto unfold nodes
-    auto_unfold = {
-      -- Auto unfold currently hovered symbol
-      hovered = false,
-      -- Auto fold when the root level only has this many nodes.
-      -- Set true for 1 node, false for 0.
-      only = true,
-    },
-    markers = { '', '' },
-  },
-})
-
--- Toggle aerial outline
-vim.keymap.set("n", "<leader>z", "<cmd>AerialToggle!<CR>", { desc = "Toggle aerial outline" })
-
 
 vim.api.nvim_set_hl(0, "AerialLine", { fg = "#a6da95", bg = "#2e3245" })
 
