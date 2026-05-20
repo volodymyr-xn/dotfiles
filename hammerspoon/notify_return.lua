@@ -30,7 +30,7 @@ end
 local function notify(title, detail)
   local attrs = {
     title = title,
-    withdrawAfter = 3,
+    withdrawAfter = 1,
   }
 
   if detail then attrs.subTitle = detail end

@@ -85,6 +85,7 @@ end)
 -- otherMouseDown button numbers (0-indexed):
 --   3 = back side button (closer to wrist) → App Exposé (current app windows)
 --   4 = forward side button (closer to fingers) → click topmost notification
+-- Cmd + button 4 → notify_return.restoreFull (mouse mirror of Cmd+K)
 -- Swap the button numbers below if your mouse maps them the other way.
 local MOUSE_BUTTON_APP_EXPOSE         = 4
 local MOUSE_BUTTON_OPEN_NOTIFICATION  = 3
@@ -93,8 +94,14 @@ mouseOverviewTap = hs.eventtap.new(
   { hs.eventtap.event.types.otherMouseDown },
   function(event)
     local button = event:getProperty(hs.eventtap.event.properties.mouseEventButtonNumber)
+    local flags = event:getFlags()
+
     if button == MOUSE_BUTTON_APP_EXPOSE then
-      hs.spaces.toggleMissionControl()
+      if flags.cmd then
+        notifyReturn.restoreFull()
+      else
+        hs.spaces.toggleMissionControl()
+      end
       return true
     elseif button == MOUSE_BUTTON_OPEN_NOTIFICATION then
       openNotification()
