@@ -149,11 +149,11 @@ require("lazy").setup({
     cmd = { "G", "Git", "Gdiffsplit", "Gread", "Gwrite", "Ggrep", "Glgrep", "Gclog", "Gllog", "Gedit", "Gsplit", "Gvsplit", "Gtabedit", "Gpedit", "GBrowse" },
     config = function() require("plugin_settings.fugitive") end,
   },
-  {
-    "sindrets/diffview.nvim",
-    cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewToggleFiles", "DiffviewFocusFiles", "DiffviewFileHistory", "DiffviewRefresh" },
-    config = function() require("plugin_settings.diffview") end,
-  },
+  -- {
+  --   "sindrets/diffview.nvim",
+  --   cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewToggleFiles", "DiffviewFocusFiles", "DiffviewFileHistory", "DiffviewRefresh" },
+  --   config = function() require("plugin_settings.diffview") end,
+  -- },
   {
     "lewis6991/gitsigns.nvim",
     event = { "BufReadPre", "BufNewFile" },
@@ -267,7 +267,7 @@ require("lazy").setup({
   -- Syntax / filetype
   -- ============================================================
 
-  { "tpope/vim-haml", ft = { "haml", "eruby" } },
+  { "tpope/vim-haml", ft = { "haml" } },
 
   -- Ruby on Rails power tool
   -- This is a massive (in a good way) Vim plugin for editing Ruby on Rails applications.
@@ -307,7 +307,7 @@ require("lazy").setup({
   -- "mxw/vim-jsx",
 
   -- Brewfile syntax highlighting
-  { "bfontaine/brewfile.vim", ft = "ruby" },
+  -- { "bfontaine/brewfile.vim", ft = "ruby" },
 
   -- Auto close (X)HTML tags
   -- "alvan/vim-closetag",

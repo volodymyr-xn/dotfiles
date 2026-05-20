@@ -1,5 +1,5 @@
-require("diffview").setup({
-  diff_binaries = false,
-  enhanced_diff_hl = false,
-  use_icons = true,
-})
+-- require("diffview").setup({
+--   diff_binaries = false,
+--   enhanced_diff_hl = false,
+--   use_icons = true,
+-- })
