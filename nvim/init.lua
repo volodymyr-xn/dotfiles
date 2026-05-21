@@ -1,3 +1,7 @@
+-- Enable the bytecode cache for Lua modules (20-30% startup speedup);
+-- must run before any require() so cached modules are picked up.
+vim.loader.enable()
+
 -- mapleader must be set BEFORE lazy.setup(), otherwise lazy resolves
 -- `<Leader>X` triggers with the default `\` mapleader and registers wrong
 -- stubs (e.g. `\0` instead of `<Space>0`).

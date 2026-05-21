@@ -14,21 +14,16 @@ require('plugin_settings/onediff')
 require('plugin_settings/markdown_preview')
 require('plugin_settings/markdown_html_preview')
 
--- Memory manager loads on first invocation of :MemPrune or :MemDashboard.
--- The stubs below register the same command names; on first call they require
--- the real module, run its setup() (which replaces these stubs with the real
--- commands), then re-dispatch with the original args.
-local function load_memory_manager()
-  require("my_plugins.memory_manager").setup()
-end
+-- Memory cleaner is the schedule-driven cleanup engine; it owns the autocmds,
+-- 60s prune timer, 20-min RSS sampler, and :MemPrune. Loaded eagerly so the
+-- timers start ticking even when the dashboard is never opened.
+require("my_plugins.memory_cleaner").setup()
 
-vim.api.nvim_create_user_command("MemPrune", function(opts)
-  load_memory_manager()
-  vim.cmd(("MemPrune %s"):format(opts.args))
-end, { nargs = "?" })
-
+-- Memory manager is the cross-process dashboard. Lazy-loaded on first
+-- :MemDashboard call: the stub below requires the real module (whose setup()
+-- replaces this stub with the real command), then re-dispatches.
 vim.api.nvim_create_user_command("MemDashboard", function()
-  load_memory_manager()
+  require("my_plugins.memory_manager").setup()
   vim.cmd("MemDashboard")
 end, {})
 

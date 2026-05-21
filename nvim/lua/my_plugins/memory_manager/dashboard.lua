@@ -14,8 +14,9 @@
 local api = vim.api
 local fn = vim.fn
 local shared = require("my_plugins.memory_manager.shared")
-local stats = require("my_plugins.memory_manager.stats")
-local prune = require("my_plugins.memory_manager.prune")
+local cleaner = require("my_plugins.memory_cleaner.shared")
+local stats = require("my_plugins.memory_cleaner.stats")
+local prune = require("my_plugins.memory_cleaner.prune")
 local rpc = require("my_plugins.memory_manager.rpc")
 
 local M = {}
@@ -207,26 +208,26 @@ local function render_view_model(view, width)
 
   -- ------- Header banner (ASCII-table card with bg-tinted rows) -------
   local rss_now = stats.rss_mb() or 0
-  local rss_hl = rss_now > shared.config.rss_warn_mb and "MemDashRSSWarn" or "MemDashRSS"
+  local rss_hl = rss_now > cleaner.config.rss_warn_mb and "MemDashRSSWarn" or "MemDashRSS"
 
   -- Peak + trend over the 24h ring buffer; replaces the sparkline.
   local peak_mb, trend_glyph, trend_hl = nil, "—", "MemDashSummary"
 
-  if #shared.rss_history > 0 then
+  if #cleaner.rss_history > 0 then
     local mx = -math.huge
 
-    for _, v in ipairs(shared.rss_history) do
+    for _, v in ipairs(cleaner.rss_history) do
       if v > mx then mx = v end
     end
 
     peak_mb = mx
   end
 
-  if #shared.rss_history >= 3 then
-    local sorted = vim.deepcopy(shared.rss_history)
+  if #cleaner.rss_history >= 3 then
+    local sorted = vim.deepcopy(cleaner.rss_history)
     table.sort(sorted)
     local median = sorted[math.floor(#sorted / 2) + 1]
-    local last = shared.rss_history[#shared.rss_history]
+    local last = cleaner.rss_history[#cleaner.rss_history]
     local delta = (last - median) / math.max(1, median)
 
     if delta > 0.10 then
@@ -239,14 +240,14 @@ local function render_view_model(view, width)
   end
 
   -- Format-duration helper used by the timings row.
-  local cfg = shared.config
+  local cfg = cleaner.config
   local now_epoch = os.time()
   local prune_period = math.floor(cfg.timer_interval_ms / 1000)
   local rss_period = math.floor(cfg.rss_sample_interval_ms / 1000)
   local next_prune = math.max(0,
-    (shared.timer_state.last_prune_at + prune_period) - now_epoch)
+    (cleaner.timer_state.last_prune_at + prune_period) - now_epoch)
   local next_sample = math.max(0,
-    (shared.timer_state.last_rss_sample_at + rss_period) - now_epoch)
+    (cleaner.timer_state.last_rss_sample_at + rss_period) - now_epoch)
 
   local function fmt_dur(s)
     if s < 60 then
@@ -372,7 +373,7 @@ local function render_view_model(view, width)
   push_rule("╭", "┬", "╮")
 
   -- Row 1: instant state.
-  local total_hl = total_rss > shared.config.rss_warn_mb * 4
+  local total_hl = total_rss > cleaner.config.rss_warn_mb * 4
     and "MemDashMetricWarn" or "MemDashMetric"
   push_data_row({
     { "RSS",        string.format("%dM", rss_now), rss_hl },
@@ -413,7 +414,7 @@ local function render_view_model(view, width)
 
     -- Right side metrics, right-aligned to width.
     local rss_text = string.format("%4sM", tostring(p.rss_mb or "?"))
-    local rss_metric_hl = (p.rss_mb and p.rss_mb > shared.config.rss_warn_mb)
+    local rss_metric_hl = (p.rss_mb and p.rss_mb > cleaner.config.rss_warn_mb)
       and "MemDashMetricWarn" or "MemDashMetric"
     local loaded_text = string.format("%3dL", p.loaded or 0)
     local parser_text = string.format("%3dP", p.parsers or 0)
@@ -677,7 +678,7 @@ local function refresh()
     return ar > br
   end)
 
-  shared.buf_bytes_cache = {}
+  cleaner.buf_bytes_cache = {}
   shared.dashboard_state.view = view
   rerender()
 end

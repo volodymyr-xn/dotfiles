@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+# Print the OS family as a single lowercase token, for use in shell
+# `case` statements: macos | arch | ubuntu | unknown. Ubuntu covers
+# Debian-family distros (Debian, Mint, Pop!_OS) via ID_LIKE matching.
+
+set -euo pipefail
+
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  echo "macos"
+  exit 0
+fi
+
+if [[ -r /etc/os-release ]]; then
+  # shellcheck disable=SC1091
+  . /etc/os-release
+  case "${ID:-}${ID_LIKE:-}" in
+    *arch*)            echo "arch";   exit 0 ;;
+    *ubuntu*|*debian*) echo "ubuntu"; exit 0 ;;
+  esac
+fi
+
+echo "unknown"

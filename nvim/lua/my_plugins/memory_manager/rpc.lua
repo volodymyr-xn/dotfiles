@@ -9,9 +9,9 @@
 local uv = vim.uv or vim.loop
 local api = vim.api
 local fn = vim.fn
-local shared = require("my_plugins.memory_manager.shared")
-local stats = require("my_plugins.memory_manager.stats")
-local prune = require("my_plugins.memory_manager.prune")
+local cleaner_shared = require("my_plugins.memory_cleaner.shared")
+local stats = require("my_plugins.memory_cleaner.stats")
+local prune = require("my_plugins.memory_cleaner.prune")
 
 local M = {}
 
@@ -133,7 +133,7 @@ local function local_buffers()
     if fn.buflisted(buf) == 1 or api.nvim_buf_is_loaded(buf) then
       local name = api.nvim_buf_get_name(buf)
       local has_parser = pcall(vim.treesitter.get_parser, buf)
-      local last = shared.last_left_at[buf]
+      local last = cleaner_shared.last_left_at[buf]
       local idle_min = last and math.max(0, math.floor((now_seconds - last) / 60)) or 0
       table.insert(bufs, {
         bufnr = buf,

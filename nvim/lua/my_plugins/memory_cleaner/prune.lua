@@ -3,7 +3,7 @@
 local uv = vim.uv or vim.loop
 local api = vim.api
 local fn = vim.fn
-local shared = require("my_plugins.memory_manager.shared")
+local shared = require("my_plugins.memory_cleaner.shared")
 
 local M = {}
 

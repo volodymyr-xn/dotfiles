@@ -39,7 +39,10 @@ vim.o.compatible = false
 -- Don't redraw while executing macros or scrolling
 -- Helps with removing content jumps when navigating between files in plugins(onediff and other)
 -- Also improves rendering performance
-vim.o.lazyredraw = true
+-- Outdated wisdom. In modern Neovim it causes
+-- broken statusline/winbar with laststatus=3, random cursor movement, and unbounded RAM growth
+-- when combined with plugins like noice.nvim. Noice's healthcheck explicitly warns against it.
+-- vim.o.lazyredraw = true
 
 -- Indicates a fast terminal connection. More characters will be sent to the
 -- screen for redrawing, instead of using insert/delete line commands.
@@ -216,7 +219,8 @@ vim.o.signcolumn = "yes"
 vim.opt.ttyfast=true
 -- Reduce redraw frequency
 -- vim.opt.updatetime=200
-vim.opt.updatetime=100
+-- vim.opt.updatetime=100
+vim.opt.updatetime=200
 -- INPUT RESPONSIVENESS ---
 -- timeoutlen affects how responsive Neovim feels, especially when typing
 -- commands or using keymaps.
