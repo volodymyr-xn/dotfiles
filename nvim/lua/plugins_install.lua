@@ -397,12 +397,12 @@ require("lazy").setup({
   -- LSP for emmet
   -- "olrtg/nvim-emmet",
 
-  {
-    "OXY2DEV/markview.nvim",
-    ft = { "markdown", "Avante", "codecompanion" },
-    dependencies = { "nvim-tree/nvim-web-devicons" },
-    config = function() require("plugin_settings.markview") end,
-  },
+  -- {
+  --   "OXY2DEV/markview.nvim",
+  --   ft = { "markdown", "Avante", "codecompanion" },
+  --   dependencies = { "nvim-tree/nvim-web-devicons" },
+  --   config = function() require("plugin_settings.markview") end,
+  -- },
 
   {
     "iamcco/markdown-preview.nvim",
@@ -415,11 +415,11 @@ require("lazy").setup({
   -- Editing (motions, textobjs, pairs, surround, comments)
   -- ============================================================
 
-  {
-    "echasnovski/mini.ai",
-    version = "*",
-    config = function() require("plugin_settings.mini_ai") end,
-  },
+  -- {
+  --   "echasnovski/mini.ai",
+  --   version = "*",
+  --   config = function() require("plugin_settings.mini_ai") end,
+  -- },
 
   -- Alternative plugin:
   -- "preservim/nerdcommenter",
@@ -436,7 +436,7 @@ require("lazy").setup({
 
   -- Enable repeating supported plugin maps with '.'. Hooks `.` only after
   -- another plugin map fires, so post-startup is fine.
-  { "tpope/vim-repeat", event = "VeryLazy" },
+  -- { "tpope/vim-repeat", event = "VeryLazy" },
 
   -- 'alvan/vim-closetag',
 
@@ -470,7 +470,11 @@ require("lazy").setup({
   },
 
   -- Automaticaly add end in ruby scrips
-  { "tpope/vim-endwise", ft = { "ruby", "lua", "vim", "sh", "zsh", "elixir", "crystal" } },
+  {
+    "tpope/vim-endwise",
+    ft = { "ruby", "lua", "vim", "sh", "zsh", "elixir", "crystal"
+    }
+  },
 
   -- quoting/parenthesizing made simple
   -- "tpope/vim-surround",
@@ -562,11 +566,11 @@ require("lazy").setup({
 
   -- "ggandor/leap.nvim",
 
-  {
-    "folke/flash.nvim",
-    event = "VeryLazy",
-    config = function() require("plugin_settings.flash") end,
-  },
+  -- {
+  --   "folke/flash.nvim",
+  --   event = "VeryLazy",
+  --   config = function() require("plugin_settings.flash") end,
+  -- },
 
   -- ============================================================
   -- UI (statusline, tabline, scrollbar, colors, highlights)
@@ -723,10 +727,7 @@ require("lazy").setup({
   -- ============================================================
 
   -- Run various tests from vim. Vimux is the configured strategy (see
-  -- plugin_settings/vim_test.lua: test#strategy = 'vimux') and is
-  -- invoked via vimscript function calls — which lazy.nvim's `cmd`
-  -- trigger does NOT catch — so vimux must load with vim-test, hence
-  -- the dependency edge.
+  -- plugin_settings/vim_test.lua: test#strategy = 'vimux').
   {
     "janko-m/vim-test",
     cmd = { "TestNearest", "TestFile", "TestSuite", "TestLast", "TestVisit" },
@@ -734,20 +735,10 @@ require("lazy").setup({
     config = function() require("plugin_settings.vim_test") end,
   },
 
-  -- Vimux: still cmd-lazy for direct :Vimux* user invocation. When
-  -- vim-test fires, it pulls vimux in as a dependency (above).
-  {
-    "benmills/vimux",
-    cmd = {
-      "VimuxRunCommand", "VimuxPromptCommand", "VimuxOpenRunner",
-      "VimuxCloseRunner", "VimuxInspectRunner", "VimuxScrollUpInspect",
-      "VimuxScrollDownInspect", "VimuxRunLastCommand",
-      "VimuxInterruptRunner", "VimuxZoomRunner",
-    },
-  },
-
-  -- Make terminal vim and tmux work better together.
-  { "tmux-plugins/vim-tmux-focus-events", event = "VeryLazy" },
+  -- Eager-loaded: AI-pane send helpers in functions/tmux.lua call
+  -- VimuxSendText/VimuxSendKeys via vim.fn, which does not trigger
+  -- lazy.nvim's `cmd` loader.
+  "benmills/vimux",
 
   -- ============================================================
   -- AI

@@ -124,7 +124,8 @@ Plug('hail2u/vim-css3-syntax')
 Plug('tpope/vim-fugitive')
 
 " Make terminal vim and tmux work better together.
-Plug('tmux-plugins/vim-tmux-focus-events')
+" Not needed on new vim versions
+" Plug('tmux-plugins/vim-tmux-focus-events')
 
 " Provides insert mode auto-completion for quotes, parens, brackets
 Plug('Raimondi/delimitMate')
@@ -359,8 +360,8 @@ set background=dark
 
 " Use pywal colorscheme
 " colorscheme wal
-colorscheme dracula
-" colorscheme catppuccin_frappe
+" colorscheme dracula
+colorscheme catppuccin
 
 " colorscheme one
 

@@ -22,6 +22,7 @@ require('plugin_settings/markdown_html_preview')
 require('plugin_settings/fuzzy_picker_selector')
 require('plugin_settings/memory_cleaner')
 require('plugin_settings/memory_manager')
+require('plugin_settings/statusline_memory')
 require('plugin_settings/git_diff_popup')
 require('plugin_settings/ruby_component_toggle')
 

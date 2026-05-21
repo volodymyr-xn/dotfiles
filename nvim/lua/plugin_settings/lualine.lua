@@ -81,6 +81,11 @@ end
 
 local relative_path_flag = 1
 
+-- Statusline memory readout (RSS + nf-md-chip glyph); timers + warm-up
+-- samples are owned by `my_plugins.statusline_memory`, tuned in
+-- `plugin_settings/statusline_memory.lua`.
+local statusline_memory = require("my_plugins.statusline_memory")
+
 -- Returns searchcount table only when a search is active
 local function get_search_count()
   if vim.v.hlsearch == 0 then return nil end
@@ -186,6 +191,12 @@ require('lualine').setup {
       }
     },
     lualine_x = {
+      {
+        -- Nvim process RSS with chip glyph; refresh cadence + warm-up
+        -- samples are owned by `my_plugins.statusline_memory`.
+        statusline_memory.get_string,
+        color = { fg = "#a0aec0" },
+      },
       {
         -- Native LSP progress (Neovim 0.12+); empty when no work in progress.
         function()
