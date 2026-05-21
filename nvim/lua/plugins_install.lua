@@ -70,26 +70,13 @@ require("lazy").setup({
     config = function() require("plugin_settings.neo_tree") end,
   },
 
-  -- Easily navigate between vim and tmux panes. Lazy on the C-h/j/k/l/\
-  -- pane-move chords plus :Tmux* commands; the plugin sets up the real
-  -- mappings on load and re-dispatches the keystroke.
-  {
-    "christoomey/vim-tmux-navigator",
-    cmd = {
-      "TmuxNavigateLeft",
-      "TmuxNavigateDown",
-      "TmuxNavigateUp",
-      "TmuxNavigateRight",
-      "TmuxNavigatePrevious",
-    },
-    keys = {
-      { "<C-h>", "<cmd>TmuxNavigateLeft<CR>" },
-      { "<C-j>", "<cmd>TmuxNavigateDown<CR>" },
-      { "<C-k>", "<cmd>TmuxNavigateUp<CR>" },
-      { "<C-l>", "<cmd>TmuxNavigateRight<CR>" },
-      { "<C-\\>", "<cmd>TmuxNavigatePrevious<CR>" },
-    },
-  },
+  -- Easily navigate between vim and tmux panes. Eager on purpose: the
+  -- plugin installs `<C-h/j/k/l/\>` defaults on load, and the user's
+  -- `<C-\>` → Neotree-toggle binding in `keymappings/files.lua` then
+  -- overrides the `<C-\>` default (load order: plugins_install runs at
+  -- init.lua:18, keymappings.files at init.lua:34). Lazy-loading breaks
+  -- this because the plugin's defaults arrive *after* the override.
+  "christoomey/vim-tmux-navigator",
 
   -- Open in split select for NeoTree
   {
