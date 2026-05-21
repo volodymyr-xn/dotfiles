@@ -70,8 +70,26 @@ require("lazy").setup({
     config = function() require("plugin_settings.neo_tree") end,
   },
 
-  -- Easily navigate between vim and tmux panes
-  "christoomey/vim-tmux-navigator",
+  -- Easily navigate between vim and tmux panes. Lazy on the C-h/j/k/l/\
+  -- pane-move chords plus :Tmux* commands; the plugin sets up the real
+  -- mappings on load and re-dispatches the keystroke.
+  {
+    "christoomey/vim-tmux-navigator",
+    cmd = {
+      "TmuxNavigateLeft",
+      "TmuxNavigateDown",
+      "TmuxNavigateUp",
+      "TmuxNavigateRight",
+      "TmuxNavigatePrevious",
+    },
+    keys = {
+      { "<C-h>", "<cmd>TmuxNavigateLeft<CR>" },
+      { "<C-j>", "<cmd>TmuxNavigateDown<CR>" },
+      { "<C-k>", "<cmd>TmuxNavigateUp<CR>" },
+      { "<C-l>", "<cmd>TmuxNavigateRight<CR>" },
+      { "<C-\\>", "<cmd>TmuxNavigatePrevious<CR>" },
+    },
+  },
 
   -- Open in split select for NeoTree
   {
@@ -98,37 +116,49 @@ require("lazy").setup({
   -- Fuzzy finders / pickers
   -- ============================================================
 
+  -- All four pickers below are reached only through
+  -- `my_plugins.fuzzy_picker_selector` (which `require`s the chosen one) or
+  -- through their own `:` commands. `lazy = true` defers them until that
+  -- require fires; `cmd` covers direct command invocation.
   {
     "dmtrKovalenko/fff.nvim",
+    lazy = true,
     build = ':lua require("fff.download").download_or_build_binary()',
   },
 
-  "ibhagwan/fzf-lua",
+  { "ibhagwan/fzf-lua", lazy = true, cmd = "FzfLua" },
 
   -- FZF integration
   {
     "junegunn/fzf.vim",
     dependencies = { 'junegunn/fzf' },
+    cmd = {
+      "Files", "Buffers", "GFiles", "Rg", "Ag", "BLines", "Lines",
+      "Commits", "BCommits", "Tags", "BTags", "Marks", "History",
+      "Helptags", "Snippets", "Commands", "Filetypes", "Locate",
+    },
     config = function() require("plugin_settings.fzf") end,
   },
 
-  -- Lua port of FZF for neovim
-  -- (https://github.com/ibhagwan/fzf-lua)
-
+  -- Telescope is the default picker and is also reached through
+  -- `fuzzy_picker_selector`. `cmd = "Telescope"` handles direct invocation;
+  -- lazy.nvim additionally loads it on first `require("telescope")`. Its
+  -- three extensions are now declared as dependencies so they no longer
+  -- sit at top level eager.
   {
     'nvim-telescope/telescope.nvim',
-    dependencies = { 'nvim-lua/plenary.nvim' },
+    cmd = "Telescope",
     commit = "cb3f98d935842836cc115e8c9e4b38c1380fbb6b",
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-telescope/telescope-ui-select.nvim',
+      'nvim-telescope/telescope-live-grep-args.nvim',
+      {
+        'nvim-telescope/telescope-fzf-native.nvim',
+        build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && cmake --build build --config Release && cmake --install build --prefix build',
+      },
+    },
     config = function() require("plugin_settings.telescope") end,
-  },
-  "nvim-telescope/telescope-ui-select.nvim",
-  -- Enabled live grep in dir
-  "nvim-telescope/telescope-live-grep-args.nvim",
-
-  {
-    'nvim-telescope/telescope-fzf-native.nvim',
-    --build = 'make'
-    build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && cmake --build build --config Release && cmake --install build --prefix build'
   },
   -- An extension for telescope.nvim that allows you to import modules faster
   -- based on what you've already imported in your project.
@@ -172,9 +202,9 @@ require("lazy").setup({
   -- easily install and manage LSP servers, DAP servers, linters, and
   -- formatters.
   { "williamboman/mason.nvim", cmd = { "Mason", "MasonInstall", "MasonInstallAll", "MasonUpdate", "MasonUninstall", "MasonUninstallAll", "MasonLog" } },
-  -- mason-lspconfig bridges mason.nvim with the lspconfig plugin - making it
-  -- easier to use both plugins together.
-  "williamboman/mason-lspconfig.nvim",
+  -- mason-lspconfig bridges mason.nvim with the lspconfig plugin. It's a
+  -- dependency of nvim-lspconfig (declared below) and loads with it; no
+  -- top-level entry needed.
 
   -- Configs for the Nvim LSP client (:help lsp).(Quickstart configs for Nvim LSP )
   -- Lazy on first real buffer; mason + mason-lspconfig load as deps right
@@ -196,9 +226,13 @@ require("lazy").setup({
   --   }
   -- },
 
-  -- Autocomplte plugin
+  -- Autocomplete plugin. Completion is only needed in insert mode and the
+  -- `:` cmdline, so `InsertEnter` + `CmdlineEnter` cover every entry point
+  -- without delaying the first popup. LuaSnip and its cmp source are now
+  -- declared as deps so they defer together.
   {
     "hrsh7th/nvim-cmp",
+    event = { "InsertEnter", "CmdlineEnter" },
     dependencies = {
       "aznhe21/actions-preview.nvim",
       "hrsh7th/cmp-nvim-lsp",
@@ -206,6 +240,8 @@ require("lazy").setup({
       "hrsh7th/cmp-path",
       "hrsh7th/cmp-cmdline",
       "onsails/lspkind.nvim",
+      "L3MON4D3/LuaSnip",
+      "saadparwaiz1/cmp_luasnip",
     },
     config = function() require("plugin_settings.nvim_cmp") end,
   },
@@ -222,20 +258,27 @@ require("lazy").setup({
   -- "zbirenbaum/copilot-cmp",
   -- "ray-x/cmp-treesitter",
 
-  -- Utility functions for getting diagnostic status and progress messages from
-  -- LSP servers, for use in the Neovim statusline
-  "nvim-lua/lsp-status.nvim",
+  -- Utility functions for getting diagnostic status and progress messages
+  -- from LSP servers, for use in the Neovim statusline. Lazy on the same
+  -- buffer events as lspconfig — no real work to do at startup.
+  {
+    "nvim-lua/lsp-status.nvim",
+    event = { "BufReadPre", "BufNewFile" },
+  },
 
-  "ray-x/navigator.lua",
+  -- Code navigation via LSP. No callsites currently in this repo, so it
+  -- only loads if the user invokes its commands directly. `lazy = true`
+  -- means lazy.nvim won't pull it in until `require("navigator")` runs.
+  { "ray-x/navigator.lua", lazy = true },
 
-  -- Old and broken
-  -- Snippets
-  -- "MarcWeber/vim-addon-mw-utils",
+  -- LuaSnip + cmp source live as deps of nvim-cmp above (load on
+  -- InsertEnter). Keep the config here so plugin_settings/luasnip.lua
+  -- still runs when LuaSnip is loaded.
   {
     "L3MON4D3/LuaSnip",
+    lazy = true,
     config = function() require("plugin_settings.luasnip") end,
   },
-  'saadparwaiz1/cmp_luasnip',
   -- "rafamadriz/friendly-snippets",
 
   -- VSCode bulb bulb for neovim's built-in LSP.
@@ -253,7 +296,12 @@ require("lazy").setup({
   -- Treesitter
   -- ============================================================
 
-  "JoosepAlviste/nvim-ts-context-commentstring",
+  -- Treesitter-aware commentstring. Only matters when commenting inside a
+  -- real buffer; defer until one is open.
+  {
+    "JoosepAlviste/nvim-ts-context-commentstring",
+    event = { "BufReadPre", "BufNewFile" },
+  },
 
   {
     "nvim-treesitter/nvim-treesitter",
@@ -392,16 +440,25 @@ require("lazy").setup({
   -- Alternative plugin:
   -- "preservim/nerdcommenter",
   -- At the time of installing (2024) only tpope/vim-commentary
-  -- works correcly for commenting erb files
-  "tpope/vim-commentary",
+  -- works correcly for commenting erb files. `gc`/`gcc` are the only
+  -- triggers; lazy.nvim loads the plugin when one fires.
+  {
+    "tpope/vim-commentary",
+    keys = {
+      { "gc", mode = { "n", "x", "o" } },
+      { "gcc", mode = "n" },
+    },
+  },
 
-  -- Enable repeating supported plugin maps with '.'
-  "tpope/vim-repeat",
+  -- Enable repeating supported plugin maps with '.'. Hooks `.` only after
+  -- another plugin map fires, so post-startup is fine.
+  { "tpope/vim-repeat", event = "VeryLazy" },
 
   -- 'alvan/vim-closetag',
 
-  -- Create your own text objects
-  "kana/vim-textobj-user",
+  -- Create your own text objects. Framework lib — only matters when a
+  -- consumer plugin defines a textobj; safe to defer past startup.
+  { "kana/vim-textobj-user", event = "VeryLazy" },
 
   -- Make text objects with various ruby block structures.
   -- TODO: replace with NEOVIM equvivalent
@@ -416,7 +473,17 @@ require("lazy").setup({
     }
   },
 
-  "michaeljsmith/vim-indent-object",
+  -- Provides `ai`/`ii`/`aI`/`iI` indent-scoped textobjs; the keys are the
+  -- entry point.
+  {
+    "michaeljsmith/vim-indent-object",
+    keys = {
+      { "ai", mode = { "x", "o" } },
+      { "ii", mode = { "x", "o" } },
+      { "aI", mode = { "x", "o" } },
+      { "iI", mode = { "x", "o" } },
+    },
+  },
 
   -- Automaticaly add end in ruby scrips
   { "tpope/vim-endwise", ft = { "ruby", "lua", "vim", "sh", "zsh", "elixir", "crystal" } },
@@ -436,8 +503,10 @@ require("lazy").setup({
   -- TODO: Replace of NEOVIM equvivalent
   -- "Raimondi/delimitMate",
 
-  -- Multiple cursors
-  "mg979/vim-visual-multi",
+  -- Multiple cursors. Defaults bind many leader-prefixed keys (\\a, \\\\,
+  -- etc.) so enumerating them in `keys` is brittle — deferring past
+  -- startup via VeryLazy is the safe trade-off.
+  { "mg979/vim-visual-multi", event = "VeryLazy" },
 
   -- Auto close quotes, parenthesiz, etc
   {
@@ -483,8 +552,16 @@ require("lazy").setup({
   -- TODO: check how good is performance
   -- 'leafOfTree/vim-matchtag',
 
+  -- Subword-aware w/e/b/ge motions. The plugin_settings file maps these
+  -- four keys to spider's motion; lazy.nvim load on first press.
   {
     "chrisgrieser/nvim-spider",
+    keys = {
+      { "w", mode = { "n", "o", "x" } },
+      { "e", mode = { "n", "o", "x" } },
+      { "b", mode = { "n", "o", "x" } },
+      { "ge", mode = { "n", "o", "x" } },
+    },
     config = function() require("plugin_settings.nvim_spider") end,
   },
 
@@ -516,7 +593,9 @@ require("lazy").setup({
   "nvim-tree/nvim-web-devicons",
 
   "echasnovski/mini.icons",
-  { "echasnovski/mini.extra", version = "*" },
+  -- mini.extra is a grab-bag helper collection; nothing on the critical
+  -- path needs it at startup.
+  { "echasnovski/mini.extra", version = "*", event = "VeryLazy" },
 
   -- Base16 color schemes
   -- "Mofiqul/dracula.nvim",
@@ -665,8 +744,18 @@ require("lazy").setup({
     config = function() require("plugin_settings.vim_test") end,
   },
 
-  -- Allows vim to communicate and run commands in tmux
-  "benmills/vimux",
+  -- Allows vim to communicate and run commands in tmux. Used as a
+  -- strategy by vim-test (which is itself cmd-lazy) and via its own
+  -- :Vimux* commands. cmd-trigger covers both.
+  {
+    "benmills/vimux",
+    cmd = {
+      "VimuxRunCommand", "VimuxPromptCommand", "VimuxOpenRunner",
+      "VimuxCloseRunner", "VimuxInspectRunner", "VimuxScrollUpInspect",
+      "VimuxScrollDownInspect", "VimuxRunLastCommand",
+      "VimuxInterruptRunner", "VimuxZoomRunner",
+    },
+  },
 
   -- Make terminal vim and tmux work better together.
   { "tmux-plugins/vim-tmux-focus-events", event = "VeryLazy" },
