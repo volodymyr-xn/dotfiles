@@ -1,8 +1,7 @@
--- Ruby component toggle loader — the module has no configurable surface;
--- it exports pure navigation helpers (`navigate_to_extension`,
--- `navigate_to_style`) used by the `s1`–`s4` keymaps in
--- `keymappings/files.lua`. Lives in plugin_settings/ for symmetry with
--- the rest of `my_plugins/`; if real knobs appear later (e.g. configurable
--- extension list), add them as a `setup({...})` call here.
-
-require("my_plugins.ruby_component_toggle")
+-- Ruby component toggle — lazy by virtue of its consumers.
+--
+-- All `s1`–`s4` keymaps in `keymappings/files.lua` invoke the module via
+-- `<cmd>lua require("my_plugins.ruby_component_toggle").<fn>()<CR>` —
+-- that require runs only on first keypress, not at startup. No
+-- configurable surface and nothing to set up here, so this file is
+-- header-only for symmetry with the rest of `plugin_settings/`.

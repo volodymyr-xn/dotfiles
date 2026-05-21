@@ -133,8 +133,7 @@ function GitDiffCurrentFilePopup()
   vim.keymap.set("n", "q", close_popup, { buffer = buf, silent = true })
 end
 
-vim.api.nvim_create_user_command("GitDiffPopup", GitDiffCurrentFilePopup, {})
-
--- Show git diff in popup
-vim.keymap.set('n', 'sd', ':GitDiffPopup<CR>', { noremap = true, silent = true, desc = "Show git diff popup" })
+-- `:GitDiffPopup` user command and the `sd` keymap are wired in
+-- `plugin_settings/git_diff_popup.lua` so they can be registered as
+-- lazy-loading stubs. This module just defines the global function.
 -- vim.keymap.set('n', '<c-i>', '<ESC>', { noremap = true, silent = true, desc = "Show git diff popup" })
