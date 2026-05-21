@@ -35,6 +35,14 @@ vim.opt.winborder = "rounded"
 
 -- For auto indent filetype plugin indent on
 vim.cmd("syntax on")
+-- Pretend matchit is loaded BEFORE filetype plugins fire so built-in
+-- ftplugins (e.g. $VIMRUNTIME/ftplugin/ruby.vim) populate `b:match_words`
+-- with def/end/if/do/case patterns. vim-matchup itself sets this flag in
+-- its `plugin/matchup.vim`, but it's lazy-loaded on BufReadPost — too
+-- late, because FileType has already fired and the ftplugin skipped the
+-- match_words block. Without this, `%`, `ci%`, `ca%` don't see ruby
+-- `def...end`/`if...end`/etc.
+vim.g.loaded_matchit = 1
 vim.cmd("filetype plugin on")
 
 -- Use vim, not vi api

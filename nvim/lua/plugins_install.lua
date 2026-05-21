@@ -289,6 +289,15 @@ require("lazy").setup({
 
   {
     "nvim-treesitter/nvim-treesitter",
+    dependencies = {
+      -- Ships the `queries/<lang>/textobjects.scm` files (incl. ruby's
+      -- @function.outer/@function.inner mapped to `method` /
+      -- `singleton_method`, and @class.outer/@class.inner mapped to
+      -- `class` / `module`). mini.ai's gen_spec.treesitter reads these
+      -- queries to power af/if/ac/ic. The plugin's own keymap module is
+      -- intentionally NOT configured — mini.ai owns the mappings.
+      "nvim-treesitter/nvim-treesitter-textobjects",
+    },
     config = function() require("plugin_settings.treesitter") end,
   },
 
@@ -415,6 +424,20 @@ require("lazy").setup({
   -- Editing (motions, textobjs, pairs, surround, comments)
   -- ============================================================
 
+  -- Core text-object engine. Defaults give a/i variants for brackets,
+  -- quotes, args, plus next/last (`an`/`in`, `al`/`il`). `f`/`c` are
+  -- overridden in plugin_settings/mini_ai.lua to use treesitter queries.
+  -- Examples (c = change, d = delete, v = visual-select; swap freely):
+  --   cif / daf       - inner / around function body (def...end)
+  --   cic / dac       - inner / around class/module body
+  --   ci( ci[ ci{ ci< - inside specific bracket pair
+  --   ca( da{         - around specific bracket pair
+  --   cib / dab       - inside / around any bracket (b = brace-ish)
+  --   ci' ci" ci`     - inside specific quote
+  --   ciq             - inside any quote
+  --   ci, ca,         - inside / around function argument
+  --   ci? - then "x" <CR> "y" <CR> - inside user-prompted x..y range
+  --   cin( / cal{     - next paren / around last brace
   {
     "echasnovski/mini.ai",
     version = "*",
@@ -457,8 +480,13 @@ require("lazy").setup({
   --   }
   -- },
 
-  -- Provides `ai`/`ii`/`aI`/`iI` indent-scoped textobjs; the keys are the
-  -- entry point.
+  -- Indent-scoped text objects. Useful for YAML, Python, deeply-nested
+  -- blocks, and HAML/Slim where braces don't exist.
+  -- Examples:
+  --   vii / dii / cii - inner indent level (lines at >= current indent)
+  --   vai / dai / cai - same + one line above (block "header")
+  --   viI / vaI       - same + line below (full block incl. footer)
+  --   >ii / <ii       - shift indent block right / left
   {
     "michaeljsmith/vim-indent-object",
     keys = {
@@ -496,13 +524,24 @@ require("lazy").setup({
   -- startup via VeryLazy is the safe trade-off.
   { "mg979/vim-visual-multi", event = "VeryLazy" },
 
-  -- Auto close quotes, parenthesiz, etc
+  -- Auto close quotes, parenthesis, etc
   {
     "windwp/nvim-autopairs",
     event = "InsertEnter",
     config = function() require("plugin_settings.nvim_autopairs") end,
   },
 
+  -- Extends `%` to match `def`/`end`, `if`/`end`, `do`/`end`, html tags,
+  -- erb/haml blocks, etc. Also adds `i%`/`a%` text objects spanning the
+  -- whole matched construct.
+  -- Examples:
+  --   %               - jump to matching open/close keyword
+  --   g%              - jump to previous match
+  --   [% / ]%         - jump to outer open / close of current block
+  --   ci% / da%       - inner / around matched block (def...end body)
+  --   vi% / va%       - visual-select inner / around matched block
+  --   z%              - jump inside next/previous nested block
+  --   I use this plugin to show matchin parenies
   {
     "andymass/vim-matchup",
     event = { "BufReadPost", "BufNewFile" },

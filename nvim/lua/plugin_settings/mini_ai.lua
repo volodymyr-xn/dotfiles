@@ -10,6 +10,10 @@ ai.setup({
   custom_textobjects = {
     f = ts_spec({ a = "@function.outer", i = "@function.inner" }),
     c = ts_spec({ a = "@class.outer", i = "@class.inner" }),
+    -- Yield `i%`/`a%` to vim-matchup. Without this, mini.ai's generic
+    -- any-char handler treats `%` as a paired delimiter, scans for it,
+    -- finds nothing, and aborts before vim-matchup's mapping can fire.
+    ["%"] = false,
   },
 })
 
