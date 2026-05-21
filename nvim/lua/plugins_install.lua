@@ -115,15 +115,14 @@ require("lazy").setup({
 
   { "ibhagwan/fzf-lua", lazy = true, cmd = "FzfLua" },
 
-  -- FZF integration
+  -- FZF integration. Eager on purpose: the custom commands defined in
+  -- `custom_file_selectors/fzf_vim.lua` (CustomFullTextSearch,
+  -- CustomFullTextSearchRg, FZFLines, SearchChangedFilesFZF, …) call
+  -- `fzf#run()` / `fzf#vim#grep()` vimscript functions which lazy.nvim
+  -- can't intercept, so fzf.vim must be loaded when those commands fire.
   {
     "junegunn/fzf.vim",
     dependencies = { 'junegunn/fzf' },
-    cmd = {
-      "Files", "Buffers", "GFiles", "Rg", "Ag", "BLines", "Lines",
-      "Commits", "BCommits", "Tags", "BTags", "Marks", "History",
-      "Helptags", "Snippets", "Commands", "Filetypes", "Locate",
-    },
     config = function() require("plugin_settings.fzf") end,
   },
 
