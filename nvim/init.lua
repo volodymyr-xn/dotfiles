@@ -11,8 +11,9 @@ vim.g.maplocalleader = ","
 -- functions.utils defines globals (LightenColor, etc) used by plugin config
 -- callbacks. It must run before lazy.setup() since plugin specs without lazy
 -- triggers execute their `config = function()` during plugins_install.
--- Other functions/ modules that themselves depend on lazy plugins (e.g.
--- functions.tmux requires telescope) must load AFTER plugins_install.
+-- Other functions/ modules can load in any order — modules that talk to
+-- lazy plugins (e.g. functions.tmux uses telescope) defer their requires
+-- into function bodies so they don't pull lazy plugins in at startup.
 require("functions.utils")
 
 require("plugins_install")

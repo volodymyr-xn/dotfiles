@@ -1,8 +1,7 @@
-local pickers = require("telescope.pickers")
-local finders = require("telescope.finders")
-local actions = require("telescope.actions")
-local action_state = require("telescope.actions.state")
-local themes = require("telescope.themes")
+-- Telescope modules used by with_ai_pane() below. Required lazily inside
+-- the function so this file can load at startup without forcing
+-- telescope to load too (it's `cmd = "Telescope"` lazy in
+-- plugins_install.lua; a module-top require would defeat that gate).
 
 local AI_PROCESS_NAMES = { "claude", "agent" }
 local PROCESS_TREE_DEPTH = 3
@@ -91,6 +90,14 @@ local function with_ai_pane(callback)
     callback(panes[1])
     return
   end
+
+  -- Lazy telescope load: only reached when we actually need to render
+  -- the picker (2+ AI panes). Keeps telescope off the startup path.
+  local pickers = require("telescope.pickers")
+  local finders = require("telescope.finders")
+  local actions = require("telescope.actions")
+  local action_state = require("telescope.actions.state")
+  local themes = require("telescope.themes")
 
   local function select_by_number(prompt_bufnr, index)
     actions.close(prompt_bufnr)
