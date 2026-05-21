@@ -245,13 +245,11 @@ require("lazy").setup({
   -- "zbirenbaum/copilot-cmp",
   -- "ray-x/cmp-treesitter",
 
-  -- Utility functions for getting diagnostic status and progress messages
-  -- from LSP servers, for use in the Neovim statusline. Lazy on the same
-  -- buffer events as lspconfig — no real work to do at startup.
-  {
-    "nvim-lua/lsp-status.nvim",
-    event = { "BufReadPre", "BufNewFile" },
-  },
+  -- LSP diagnostic/progress helpers for the statusline. Loaded as a dep
+  -- of lualine (see UI section below) because lualine's `get_lsp_status`
+  -- component does `require("lsp-status").status()` on every redraw —
+  -- the previous `event = BufReadPre` gate was dead code.
+  { "nvim-lua/lsp-status.nvim", lazy = true },
 
   -- Code navigation via LSP. No callsites currently in this repo, so it
   -- only loads if the user invokes its commands directly. `lazy = true`
@@ -539,13 +537,13 @@ require("lazy").setup({
   -- TODO: check how good is performance
   -- 'leafOfTree/vim-matchtag',
 
-  -- Subword-aware w/e/b/ge motions. The plugin_settings file maps these
-  -- four keys to spider's motion; lazy.nvim load on first press.
+  -- Subword-aware w/b/ge motions. `e` is intentionally NOT a trigger
+  -- (and not remapped in plugin_settings.nvim_spider) because
+  -- keymappings/navigation.lua owns `e → E` for move-to-end-of-WORD.
   {
     "chrisgrieser/nvim-spider",
     keys = {
       { "w", mode = { "n", "o", "x" } },
-      { "e", mode = { "n", "o", "x" } },
       { "b", mode = { "n", "o", "x" } },
       { "ge", mode = { "n", "o", "x" } },
     },
@@ -607,6 +605,7 @@ require("lazy").setup({
   -- Statusline
   {
     "nvim-lualine/lualine.nvim",
+    dependencies = { "nvim-lua/lsp-status.nvim" },
     config = function() require("plugin_settings.lualine") end,
   },
   -- Alternative statusline
@@ -724,16 +723,20 @@ require("lazy").setup({
   -- Test / terminal
   -- ============================================================
 
-  -- Run various tests from vim
+  -- Run various tests from vim. Vimux is the configured strategy (see
+  -- plugin_settings/vim_test.lua: test#strategy = 'vimux') and is
+  -- invoked via vimscript function calls — which lazy.nvim's `cmd`
+  -- trigger does NOT catch — so vimux must load with vim-test, hence
+  -- the dependency edge.
   {
     "janko-m/vim-test",
     cmd = { "TestNearest", "TestFile", "TestSuite", "TestLast", "TestVisit" },
+    dependencies = { "benmills/vimux" },
     config = function() require("plugin_settings.vim_test") end,
   },
 
-  -- Allows vim to communicate and run commands in tmux. Used as a
-  -- strategy by vim-test (which is itself cmd-lazy) and via its own
-  -- :Vimux* commands. cmd-trigger covers both.
+  -- Vimux: still cmd-lazy for direct :Vimux* user invocation. When
+  -- vim-test fires, it pulls vimux in as a dependency (above).
   {
     "benmills/vimux",
     cmd = {
