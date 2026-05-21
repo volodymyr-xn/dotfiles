@@ -8,22 +8,29 @@ local M = {}
 
 -- ============================================================================
 -- Config (mutate via require("my_plugins.memory_cleaner").config.<key>)
+--
+-- Timing/threshold knobs (unload_buffer_after_idle_minutes,
+-- rss_warn_threshold_mb, rss_warn_notify_debounce_seconds,
+-- prune_tick_interval_seconds, rss_reading_cache_seconds,
+-- rss_history_sample_interval_seconds) are overridden from
+-- `plugin_settings/memory_cleaner.lua` — change them there, not here.
+-- Values below are kept as standalone-fallback defaults.
 -- ============================================================================
 
 M.config = {
-  idle_minutes = 250,
-  rss_warn_mb = 80,
-  notify_debounce_seconds = 600,
-  timer_interval_ms = 10 * 60 * 1000,
-  rss_cache_seconds = 5,
+  unload_buffer_after_idle_minutes = 250,
+  rss_warn_threshold_mb = 80,
+  rss_warn_notify_debounce_seconds = 600,
+  prune_tick_interval_seconds = 10 * 60,
+  rss_reading_cache_seconds = 5,
   -- LSP clients that must never auto-stop even when their last buffer unloads.
-  never_stop_lsp = { "eslint", "copilot" },
+  lsp_clients_never_auto_stop = { "eslint", "copilot" },
   -- RSS sparkline ring buffer: 72 samples × 20 minutes = 24h window.
-  rss_sample_interval_ms = 20 * 60 * 1000,
-  rss_history_max = 72,
-  rss_history_path = fn.stdpath("state") .. "/memory_manager/rss_history.json",
+  rss_history_sample_interval_seconds = 20 * 60,
+  rss_history_max_samples = 72,
+  rss_history_state_path = fn.stdpath("state") .. "/memory_manager/rss_history.json",
   -- Parser memory estimate in KB by filetype (rough order-of-magnitude).
-  parser_estimate_kb = {
+  parser_memory_estimate_kb_by_filetype = {
     ruby = 400, typescript = 400, javascript = 400, tsx = 450, jsx = 450,
     lua = 250, python = 300, go = 300, rust = 350, c = 250, cpp = 300,
     html = 200, css = 150, scss = 150, json = 100, yaml = 100, markdown = 150,
@@ -43,7 +50,7 @@ M.config = {
 
 -- Per-buffer "last left" monotonic timestamp in seconds (BufLeave timestamp).
 M.last_left_at = {}
--- RSS sampler cache (window in config.rss_cache_seconds).
+-- RSS sampler cache (window in config.rss_reading_cache_seconds).
 M.rss_cache = { value = nil, at = 0 }
 -- Threshold notify debounce: last fire time + breach window flag.
 M.notify_state = { last_fire = 0, in_breach = false }

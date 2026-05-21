@@ -1,0 +1,171 @@
+#!/usr/bin/env bash
+
+# Write an ISO image to a USB block device, with strong safety checks.
+# Supports macOS and Linux.
+
+set -euo pipefail
+
+# Print usage and exit with the given status (default 2 — "misuse").
+usage () {
+  cat >&2 <<EOF
+Usage: $(basename "$0") <iso-path> <disk-device>
+
+Examples:
+  macOS:  $(basename "$0") ~/Downloads/ubuntu.iso /dev/disk4
+  Linux:  $(basename "$0") ~/Downloads/ubuntu.iso /dev/sdb
+
+The disk device must be a whole-disk USB drive — NOT the system disk and
+NOT a partition (e.g. /dev/disk4s1, /dev/sdb1).
+EOF
+  exit "${1:-2}"
+}
+
+# Print an error message to stderr and exit non-zero.
+die () {
+  printf 'error: %s\n' "$*" >&2
+  exit 1
+}
+
+[[ $# -eq 2 ]] || usage
+[[ "$1" == "-h" || "$1" == "--help" ]] && usage 0
+
+iso="$1"
+disk="$2"
+
+os="$(uname -s)"
+
+# Validate the ISO is a readable regular file.
+[[ -f "$iso" ]] || die "ISO not found or not a regular file: $iso"
+[[ -r "$iso" ]] || die "ISO is not readable: $iso"
+
+# Validate the disk path looks like a whole-disk block device for this OS,
+# and reject obvious partition forms.
+case "$os" in
+  Darwin)
+    [[ "$disk" =~ ^/dev/r?disk[0-9]+$ ]] \
+      || die "expected /dev/diskN (macOS), got: $disk"
+    [[ "$disk" =~ s[0-9]+$ ]] \
+      && die "refusing to write to a partition: $disk"
+    ;;
+  Linux)
+    [[ "$disk" =~ ^/dev/(sd[a-z]+|nvme[0-9]+n[0-9]+|mmcblk[0-9]+)$ ]] \
+      || die "expected /dev/sdX, /dev/nvmeXnY, or /dev/mmcblkN (Linux), got: $disk"
+    ;;
+  *)
+    die "unsupported OS: $os"
+    ;;
+esac
+
+[[ -b "$disk" || -c "$disk" ]] || die "not a block/character device: $disk"
+
+# Resolve the device that backs the root filesystem so we can refuse to
+# write to it. Stored as the whole-disk identifier (no partition suffix).
+boot_disk () {
+  case "$os" in
+    Darwin)
+      # diskutil info -plist / has the parent whole-disk under
+      # ParentWholeDisk; fall back to DeviceIdentifier stripped of slice.
+      local parent
+      parent="$(diskutil info -plist / 2>/dev/null \
+        | /usr/libexec/PlistBuddy -c 'Print :ParentWholeDisk' /dev/stdin \
+        2>/dev/null || true)"
+
+      if [[ -z "$parent" ]]; then
+        parent="$(diskutil info -plist / 2>/dev/null \
+          | /usr/libexec/PlistBuddy -c 'Print :DeviceIdentifier' /dev/stdin \
+          2>/dev/null | sed -E 's/s[0-9]+$//')"
+      fi
+
+      [[ -n "$parent" ]] && printf '/dev/%s\n' "$parent"
+      ;;
+    Linux)
+      local src
+      src="$(findmnt -no SOURCE / 2>/dev/null || true)"
+      [[ -z "$src" ]] && return 0
+
+      # lsblk prints the parent disk name (e.g. sda) for a partition source.
+      local pkname
+      pkname="$(lsblk -no PKNAME "$src" 2>/dev/null | head -n1 || true)"
+      if [[ -n "$pkname" ]]; then
+        printf '/dev/%s\n' "$pkname"
+      else
+        printf '%s\n' "$src"
+      fi
+      ;;
+  esac
+}
+
+# Normalize macOS raw device (/dev/rdiskN) to its buffered form (/dev/diskN)
+# for the boot-disk comparison; we will rewrite to raw later for speed.
+target_whole_disk="$disk"
+if [[ "$os" == "Darwin" ]]; then
+  target_whole_disk="${disk/\/dev\/rdisk/\/dev\/disk}"
+fi
+
+boot="$(boot_disk || true)"
+
+if [[ -n "$boot" && "$boot" == "$target_whole_disk" ]]; then
+  die "refusing to write to the system/boot disk ($boot)"
+fi
+
+# Show the target device so the user can sanity-check before confirming.
+echo "Target device:"
+case "$os" in
+  Darwin) diskutil info "$target_whole_disk" \
+    | grep -E 'Device / Media Name|Disk Size|Protocol|Removable Media|Mount Point|Device Node' \
+    || true
+    ;;
+  Linux)
+    lsblk -o NAME,SIZE,TYPE,TRAN,MOUNTPOINT,MODEL,VENDOR "$target_whole_disk" || true
+    ;;
+esac
+echo
+
+echo "About to write:"
+echo "  ISO:  $iso ($(du -h "$iso" | awk '{print $1}'))"
+echo "  Disk: $target_whole_disk"
+echo
+echo "This will DESTROY all data on $target_whole_disk."
+read -r -p "Type the disk path exactly to confirm: " confirm
+[[ "$confirm" == "$target_whole_disk" ]] \
+  || die "confirmation did not match — aborted"
+
+# Unmount the disk so dd is not blocked by mounted filesystems.
+echo "Unmounting $target_whole_disk..."
+case "$os" in
+  Darwin)
+    sudo diskutil unmountDisk "$target_whole_disk"
+    ;;
+  Linux)
+    # Unmount every partition currently mounted from this disk.
+    while read -r mountpoint; do
+      [[ -n "$mountpoint" ]] && sudo umount "$mountpoint" || true
+    done < <(lsblk -no MOUNTPOINT "$target_whole_disk" 2>/dev/null | grep -v '^$' || true)
+    ;;
+esac
+
+# Choose the fastest write device + correct block-size flag per OS.
+write_target="$target_whole_disk"
+bs_flag="bs=1M"
+if [[ "$os" == "Darwin" ]]; then
+  write_target="${target_whole_disk/\/dev\/disk/\/dev\/rdisk}"
+  bs_flag="bs=1m"
+fi
+
+echo "Writing $iso to $write_target ..."
+sudo dd if="$iso" of="$write_target" "$bs_flag" status=progress conv=fsync
+
+echo "Flushing kernel buffers..."
+sync
+
+# Eject (macOS) or re-probe (Linux) so the USB is safe to remove.
+case "$os" in
+  Darwin)
+    sudo diskutil eject "$target_whole_disk" || true
+    ;;
+  Linux)
+    sudo partprobe "$target_whole_disk" 2>/dev/null || true
+    ;;
+esac
+
+echo "Done. You may now remove $target_whole_disk."

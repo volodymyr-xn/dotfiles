@@ -208,7 +208,8 @@ local function render_view_model(view, width)
 
   -- ------- Header banner (ASCII-table card with bg-tinted rows) -------
   local rss_now = stats.rss_mb() or 0
-  local rss_hl = rss_now > cleaner.config.rss_warn_mb and "MemDashRSSWarn" or "MemDashRSS"
+  local rss_hl = rss_now > cleaner.config.rss_warn_threshold_mb
+    and "MemDashRSSWarn" or "MemDashRSS"
 
   -- Peak + trend over the 24h ring buffer; replaces the sparkline.
   local peak_mb, trend_glyph, trend_hl = nil, "—", "MemDashSummary"
@@ -242,8 +243,8 @@ local function render_view_model(view, width)
   -- Format-duration helper used by the timings row.
   local cfg = cleaner.config
   local now_epoch = os.time()
-  local prune_period = math.floor(cfg.timer_interval_ms / 1000)
-  local rss_period = math.floor(cfg.rss_sample_interval_ms / 1000)
+  local prune_period = cfg.prune_tick_interval_seconds
+  local rss_period = cfg.rss_history_sample_interval_seconds
   local next_prune = math.max(0,
     (cleaner.timer_state.last_prune_at + prune_period) - now_epoch)
   local next_sample = math.max(0,
@@ -373,7 +374,7 @@ local function render_view_model(view, width)
   push_rule("╭", "┬", "╮")
 
   -- Row 1: instant state.
-  local total_hl = total_rss > cleaner.config.rss_warn_mb * 4
+  local total_hl = total_rss > cleaner.config.rss_warn_threshold_mb * 4
     and "MemDashMetricWarn" or "MemDashMetric"
   push_data_row({
     { "RSS",        string.format("%dM", rss_now), rss_hl },
@@ -394,10 +395,10 @@ local function render_view_model(view, width)
 
   -- Row 3: timings.
   push_data_row({
-    { "Idle ≥",     fmt_dur(cfg.idle_minutes * 60),                       "MemDashMetric" },
+    { "Idle ≥",     fmt_dur(cfg.unload_buffer_after_idle_minutes * 60),                   "MemDashMetric" },
     { "Prune",      string.format("%s / %s", fmt_dur(prune_period), fmt_dur(next_prune)),  "MemDashMetric" },
     { "Sample",     string.format("%s / %s", fmt_dur(rss_period), fmt_dur(next_sample)),   "MemDashMetric" },
-    { "Warn cooldown", fmt_dur(cfg.notify_debounce_seconds),              "MemDashMetric" },
+    { "Warn cooldown", fmt_dur(cfg.rss_warn_notify_debounce_seconds),                      "MemDashMetric" },
   })
 
   push_rule("╰", "┴", "╯")
@@ -414,7 +415,7 @@ local function render_view_model(view, width)
 
     -- Right side metrics, right-aligned to width.
     local rss_text = string.format("%4sM", tostring(p.rss_mb or "?"))
-    local rss_metric_hl = (p.rss_mb and p.rss_mb > cleaner.config.rss_warn_mb)
+    local rss_metric_hl = (p.rss_mb and p.rss_mb > cleaner.config.rss_warn_threshold_mb)
       and "MemDashMetricWarn" or "MemDashMetric"
     local loaded_text = string.format("%3dL", p.loaded or 0)
     local parser_text = string.format("%3dP", p.parsers or 0)

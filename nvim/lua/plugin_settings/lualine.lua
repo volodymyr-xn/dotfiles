@@ -186,6 +186,16 @@ require('lualine').setup {
       }
     },
     lualine_x = {
+      {
+        -- Native LSP progress (Neovim 0.12+); empty when no work in progress.
+        function()
+          if vim.ui and vim.ui.progress_status then
+            return vim.ui.progress_status() or ""
+          end
+          return ""
+        end,
+        color = { fg = "#a0aec0" },
+      },
       'diff',
       {
         function()

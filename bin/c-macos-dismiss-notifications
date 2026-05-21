@@ -1,9 +1,25 @@
 #!/usr/bin/env osascript -l JavaScript
 
+// Dismiss every visible macOS notification (banners + alert stacks) by walking
+// the NotificationCenter accessibility tree and firing each alert's "Clear All"
+// (preferred, dismisses a stack in one call) or "Close" action.
+//
+// NOT WIRED INTO HAMMERSPOON — superseded by `hammerspoon/dismiss_notifications.lua`,
+// which does the same thing natively via `hs.axuielement`. The Lua version is
+// faster on two axes: (1) no `osascript` cold start (~200–400ms saved per call)
+// since it runs inside the already-loaded Hammerspoon process, and (2) it talks
+// to the AX API directly instead of routing through System Events' AppleScript
+// bridge. Cmd+I in `hammerspoon/init.lua` now invokes the Lua module.
+//
+// Kept around as a standalone fallback: this script works even when Hammerspoon
+// is not running (or its IPC port is unavailable), so it can still be invoked
+// from a plain shell when needed.
+
 const nc = Application('System Events').processes.byName('NotificationCenter');
 if (nc.windows.length > 0) {
   const SUBROLES = ['AXNotificationCenterAlert', 'AXNotificationCenterAlertStack'];
   const alerts = [];
+  // Recursive AX descent — skip containers, collect alert/stack subroles.
   (function find(els) {
     for (const el of els) try {
       if (SUBROLES.includes(el.subrole())) alerts.push(el);

@@ -21,12 +21,17 @@ vim.g.maplocalleader = ","
 -- Autocomplete word spelling
 -- set spell "kpelllang=en_us
 vim.o.complete = vim.o.complete .. ",kspell"
-vim.o.completeopt = vim.o.completeopt .. ",preview,menuone"
+-- ',popup' shows LSP resolveSupport documentation inline in the completion
+-- popup as items are selected (replaces noice's LSP doc preview behavior).
+vim.o.completeopt = vim.o.completeopt .. ",preview,menuone,popup"
 -- Don't pass messages to |ins-completion-menu|.
 vim.o.shortmess = vim.o.shortmess .. "c"
 
 -- set termguicolors to enable highlight groups
 vim.opt.termguicolors = true
+
+-- Default border style for floating windows (LSP hover, diagnostics, pager).
+vim.opt.winborder = "rounded"
 
 -- For auto indent filetype plugin indent on
 vim.cmd("syntax on")

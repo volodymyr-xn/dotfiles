@@ -36,7 +36,7 @@ local function stop_orphan_lsp_clients()
   local allow = {}
   local stopped = 0
 
-  for _, name in ipairs(shared.config.never_stop_lsp) do
+  for _, name in ipairs(shared.config.lsp_clients_never_auto_stop) do
     allow[name] = true
   end
 
@@ -62,7 +62,8 @@ end
 -- can surface a meaningful "what got reclaimed" message.
 function M.prune(opts)
   opts = opts or {}
-  local threshold_minutes = opts.force_minutes or shared.config.idle_minutes
+  local threshold_minutes = opts.force_minutes
+    or shared.config.unload_buffer_after_idle_minutes
   local now_seconds = uv.hrtime() / 1e9
   local unloaded = 0
   local freed_kb = 0
@@ -116,7 +117,7 @@ function M.estimate_buf_kb(buf)
   end
 
   local ft = vim.bo[buf].filetype
-  local parser_kb = shared.config.parser_estimate_kb[ft] or 0
+  local parser_kb = shared.config.parser_memory_estimate_kb_by_filetype[ft] or 0
 
   return math.floor(bytes / 1024) + parser_kb
 end

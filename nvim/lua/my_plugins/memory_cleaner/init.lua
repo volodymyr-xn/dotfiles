@@ -53,15 +53,16 @@ local function on_timer_tick()
     return
   end
 
-  if mb > shared.config.rss_warn_mb then
+  if mb > shared.config.rss_warn_threshold_mb then
     local now = os.time()
     local since = now - shared.notify_state.last_fire
+    local debounce = shared.config.rss_warn_notify_debounce_seconds
 
-    if (not shared.notify_state.in_breach) or since >= shared.config.notify_debounce_seconds then
+    if (not shared.notify_state.in_breach) or since >= debounce then
       shared.notify_state.in_breach = true
       shared.notify_state.last_fire = now
       vim.notify(string.format("[mem] RSS %dM > %dM (%s)",
-        mb, shared.config.rss_warn_mb, stats.stats_string()), vim.log.levels.WARN)
+        mb, shared.config.rss_warn_threshold_mb, stats.stats_string()), vim.log.levels.WARN)
     end
   else
     shared.notify_state.in_breach = false
@@ -122,9 +123,10 @@ function M.setup()
     vim.notify(prune.format_result(result), vim.log.levels.INFO)
   end, { nargs = "?" })
 
-  -- 60s timer drives prune + RSS-threshold notify in one tick.
+  -- Main worker tick drives prune + RSS-threshold notify in one go.
+  local prune_interval_ms = shared.config.prune_tick_interval_seconds * 1000
   local prune_timer = uv.new_timer()
-  prune_timer:start(shared.config.timer_interval_ms, shared.config.timer_interval_ms,
+  prune_timer:start(prune_interval_ms, prune_interval_ms,
     vim.schedule_wrap(on_timer_tick))
 
   -- 20-min sampler feeds the RSS sparkline ring buffer; stamp tick time so
@@ -136,9 +138,9 @@ function M.setup()
 
   stats.load_history()
   on_rss_tick() -- seed with a sample at startup
+  local rss_interval_ms = shared.config.rss_history_sample_interval_seconds * 1000
   local rss_timer = uv.new_timer()
-  rss_timer:start(shared.config.rss_sample_interval_ms, shared.config.rss_sample_interval_ms,
-    vim.schedule_wrap(on_rss_tick))
+  rss_timer:start(rss_interval_ms, rss_interval_ms, vim.schedule_wrap(on_rss_tick))
 end
 
 return M

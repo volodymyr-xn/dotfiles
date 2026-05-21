@@ -187,6 +187,15 @@ local function applyTmux(loc)
   hs.execute(TMUX_RESTORE_CMD .. " " .. shellQuote(loc), true)
 end
 
+-- True when a back-path snapshot exists on disk (still consumable by restoreFull).
+function M.hasSnapshot()
+  local f = io.open(FULL_PATH, "r")
+  if not f then return false end
+
+  f:close()
+  return true
+end
+
 -- Cmd+k: return to the pre-jump app (+ tmux if Ghostty). macOS's `activate`
 -- handles the Space switch implicitly by surfacing the app's window.
 function M.restoreFull()

@@ -16,7 +16,9 @@ require('plugin_settings/markdown_html_preview')
 
 -- Memory cleaner is the schedule-driven cleanup engine; it owns the autocmds,
 -- 60s prune timer, 20-min RSS sampler, and :MemPrune. Loaded eagerly so the
--- timers start ticking even when the dashboard is never opened.
+-- timers start ticking even when the dashboard is never opened. The settings
+-- file overrides timing knobs on `.config` and must run before `.setup()`.
+require('plugin_settings/memory_cleaner')
 require("my_plugins.memory_cleaner").setup()
 
 -- Memory manager is the cross-process dashboard. Lazy-loaded on first

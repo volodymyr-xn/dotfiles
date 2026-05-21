@@ -123,6 +123,11 @@ function M.open()
   activate(nil)
 end
 
+-- True when at least one alert/banner/stack is currently in NotificationCenter.
+function M.hasAny()
+  return #findAlerts() > 0
+end
+
 -- Activate a named action button on the topmost notification (e.g. "Join").
 function M.action(name)
   activate(name)

@@ -41,12 +41,13 @@ local function read_rss_kb_for_pid(pid)
   return nil
 end
 
--- Current process RSS in MB or nil on failure; cached for config.rss_cache_seconds.
+-- Current process RSS in MB or nil on failure; cached for
+-- config.rss_reading_cache_seconds.
 function M.rss_mb()
   local now = os.time()
   local cache = shared.rss_cache
 
-  if cache.value ~= nil and (now - cache.at) < shared.config.rss_cache_seconds then
+  if cache.value ~= nil and (now - cache.at) < shared.config.rss_reading_cache_seconds then
     return cache.value
   end
 
@@ -121,7 +122,7 @@ end
 
 -- Load persisted ring buffer from disk at setup time; silent on missing/bad file.
 function M.load_history()
-  local f = io.open(shared.config.rss_history_path, "r")
+  local f = io.open(shared.config.rss_history_state_path, "r")
 
   if not f then
     return
@@ -138,9 +139,9 @@ end
 
 -- Persist the ring buffer; silent on failure (cache, not source of truth).
 local function save_history()
-  local dir = vim.fs.dirname(shared.config.rss_history_path)
+  local dir = vim.fs.dirname(shared.config.rss_history_state_path)
   pcall(fn.mkdir, dir, "p")
-  local f = io.open(shared.config.rss_history_path, "w")
+  local f = io.open(shared.config.rss_history_state_path, "w")
 
   if not f then
     return
@@ -160,7 +161,7 @@ function M.sample_history()
 
   table.insert(shared.rss_history, mb)
 
-  while #shared.rss_history > shared.config.rss_history_max do
+  while #shared.rss_history > shared.config.rss_history_max_samples do
     table.remove(shared.rss_history, 1)
   end
 
