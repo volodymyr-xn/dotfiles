@@ -358,27 +358,30 @@ set background=dark
 
 " colorscheme base16-horizon-dark
 
+" Access colors present in 256 colorspace
+let base16colorspace=256
+set t_Co=256
+
+" Use 24bit(True color) GUI colors. Must be set BEFORE :colorscheme so the
+" guifg/guibg hex values in the scheme (and in after/colors/*.vim overrides)
+" actually render.
+set termguicolors
+
+let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+
 " Use pywal colorscheme
 " colorscheme wal
 " colorscheme dracula
-colorscheme catppuccin
+" Catppuccin Macchiato. Palette/base overrides live in
+" after/colors/catppuccin_macchiato.vim so they survive :colorscheme reloads.
+colorscheme catppuccin_macchiato
 
 " colorscheme one
 
 " colorscheme tender
 
 let g:custom_color_character = '#98c379'
-
-" Access colors present in 256 colorspace
-let base16colorspace=256
-set t_Co=256
-
-" Use 24bit(True color) GUI colors
-" VIM syntax highlight will work in gui mode(guifg, guibg)
-set termguicolors
-
-let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
-let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
 
 " Always show statusline
 set laststatus=2

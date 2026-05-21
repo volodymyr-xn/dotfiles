@@ -415,11 +415,11 @@ require("lazy").setup({
   -- Editing (motions, textobjs, pairs, surround, comments)
   -- ============================================================
 
-  -- {
-  --   "echasnovski/mini.ai",
-  --   version = "*",
-  --   config = function() require("plugin_settings.mini_ai") end,
-  -- },
+  {
+    "echasnovski/mini.ai",
+    version = "*",
+    config = function() require("plugin_settings.mini_ai") end,
+  },
 
   -- Alternative plugin:
   -- "preservim/nerdcommenter",
@@ -447,15 +447,15 @@ require("lazy").setup({
   -- Make text objects with various ruby block structures.
   -- TODO: replace with NEOVIM equvivalent
   -- "rhysd/vim-textobj-ruby",
-  {
-    "chrisgrieser/nvim-various-textobjs",
-    event = "VeryLazy",
-    opts = {
-      keymaps = {
-        useDefaults = true
-      }
-    }
-  },
+  -- {
+  --   "chrisgrieser/nvim-various-textobjs",
+  --   event = "VeryLazy",
+  --   opts = {
+  --     keymaps = {
+  --       useDefaults = true
+  --     }
+  --   }
+  -- },
 
   -- Provides `ai`/`ii`/`aI`/`iI` indent-scoped textobjs; the keys are the
   -- entry point.
