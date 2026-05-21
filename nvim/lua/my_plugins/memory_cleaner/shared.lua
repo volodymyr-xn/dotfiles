@@ -7,14 +7,11 @@ local fn = vim.fn
 local M = {}
 
 -- ============================================================================
--- Config (mutate via require("my_plugins.memory_cleaner").config.<key>)
---
--- Timing/threshold knobs (unload_buffer_after_idle_minutes,
--- rss_warn_threshold_mb, rss_warn_notify_debounce_seconds,
--- prune_tick_interval_seconds, rss_reading_cache_seconds,
--- rss_history_sample_interval_seconds) are overridden from
+-- Config defaults — override by passing an opts table to
+-- `require("my_plugins.memory_cleaner").setup({ key = value, ... })`.
+-- Only the keys you supply are replaced; the rest fall through to the
+-- values below. The project's tuned values live in
 -- `plugin_settings/memory_cleaner.lua` — change them there, not here.
--- Values below are kept as standalone-fallback defaults.
 -- ============================================================================
 
 M.config = {

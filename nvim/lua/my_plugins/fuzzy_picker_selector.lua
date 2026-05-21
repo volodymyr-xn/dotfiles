@@ -1,20 +1,35 @@
 local M = {}
 
-M.PICKERS = { "telescope", "fzf_lua", "fzf_vim", "fff" }
-
-local state_file = vim.fn.stdpath("data") .. "/ultraselect_picker"
+local config = {
+  pickers = { "telescope", "fzf_lua", "fzf_vim", "fff" },
+  state_file = vim.fn.stdpath("data") .. "/ultraselect_picker",
+  default_picker = "telescope",
+}
 
 local function read_state()
-  local ok, lines = pcall(vim.fn.readfile, state_file)
+  local ok, lines = pcall(vim.fn.readfile, config.state_file)
   if ok and lines and lines[1] and lines[1] ~= "" then return lines[1] end
   return nil
 end
 
 local function write_state(name)
-  vim.fn.writefile({ name }, state_file)
+  vim.fn.writefile({ name }, config.state_file)
 end
 
-M.active = vim.g.active_picker or read_state() or "telescope"
+-- Public surface, seeded from current config so callers can read these
+-- even if setup() never ran. Re-seeded by setup() when opts change them.
+M.PICKERS = config.pickers
+M.active = vim.g.active_picker or read_state() or config.default_picker
+
+function M.setup(opts)
+  if opts == nil then
+    return
+  end
+
+  config = vim.tbl_deep_extend("force", config, opts)
+  M.PICKERS = config.pickers
+  M.active = vim.g.active_picker or read_state() or config.default_picker
+end
 
 local function load_picker(name)
   local ok, mod = pcall(require, "custom_file_selectors." .. name)

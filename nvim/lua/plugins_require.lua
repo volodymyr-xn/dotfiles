@@ -14,20 +14,16 @@ require('plugin_settings/onediff')
 require('plugin_settings/markdown_preview')
 require('plugin_settings/markdown_html_preview')
 
--- Memory cleaner is the schedule-driven cleanup engine; it owns the autocmds,
--- 60s prune timer, 20-min RSS sampler, and :MemPrune. Loaded eagerly so the
--- timers start ticking even when the dashboard is never opened. The settings
--- file overrides timing knobs on `.config` and must run before `.setup()`.
+-- my_plugins/ settings. Order matters: fuzzy_picker_selector must run
+-- before `keymappings/finders.lua` reads `.active`; memory_cleaner is
+-- eager so its timers start regardless of dashboard use; memory_manager
+-- registers a lazy `:MemDashboard` stub that loads the heavy dashboard on
+-- first call.
+require('plugin_settings/fuzzy_picker_selector')
 require('plugin_settings/memory_cleaner')
-require("my_plugins.memory_cleaner").setup()
-
--- Memory manager is the cross-process dashboard. Lazy-loaded on first
--- :MemDashboard call: the stub below requires the real module (whose setup()
--- replaces this stub with the real command), then re-dispatches.
-vim.api.nvim_create_user_command("MemDashboard", function()
-  require("my_plugins.memory_manager").setup()
-  vim.cmd("MemDashboard")
-end, {})
+require('plugin_settings/memory_manager')
+require('plugin_settings/git_diff_popup')
+require('plugin_settings/ruby_component_toggle')
 
 -- ====================== Vim highlight tag settings ======================
 vim.cmd('highlight link matchTagError Todo')

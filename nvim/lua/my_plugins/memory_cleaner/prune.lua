@@ -58,15 +58,20 @@ local function stop_orphan_lsp_clients()
 end
 
 -- Unload all non-exempt buffers idle for >= force_minutes (0 = ignore idle).
--- Returns `{ unloaded, lsp_stopped, freed_kb, threshold_minutes }` so callers
--- can surface a meaningful "what got reclaimed" message.
+-- Returns `{ unloaded, parsers_stopped, lsp_stopped, freed_kb,
+-- threshold_minutes }` so callers can surface a per-category "what got
+-- reclaimed" message.
 function M.prune(opts)
   opts = opts or {}
   local threshold_minutes = opts.force_minutes
     or shared.config.unload_buffer_after_idle_minutes
   local now_seconds = uv.hrtime() / 1e9
   local unloaded = 0
+  local parsers_stopped = 0
   local freed_kb = 0
+  -- Snapshot active treesitter highlighters so we can count parsers that
+  -- actually existed *before* the unload (post-unload the registry is empty).
+  local ts_active = (vim.treesitter.highlighter and vim.treesitter.highlighter.active) or {}
 
   for _, buf in ipairs(api.nvim_list_bufs()) do
     if not M.is_exempt(buf) then
@@ -77,6 +82,7 @@ function M.prune(opts)
         -- Estimate reclaimable bytes BEFORE unload (after unload the buffer
         -- text is gone and our estimator returns 0).
         local est_kb = M.estimate_buf_kb(buf)
+        local had_parser = ts_active[buf] ~= nil
         pcall(vim.treesitter.stop, buf)
         local ok = pcall(api.nvim_buf_delete, buf, { unload = true })
 
@@ -85,6 +91,10 @@ function M.prune(opts)
           shared.buf_bytes_cache[buf] = nil
           unloaded = unloaded + 1
           freed_kb = freed_kb + est_kb
+
+          if had_parser then
+            parsers_stopped = parsers_stopped + 1
+          end
         end
       end
     end
@@ -94,6 +104,7 @@ function M.prune(opts)
 
   return {
     unloaded = unloaded,
+    parsers_stopped = parsers_stopped,
     lsp_stopped = lsp_stopped,
     freed_kb = freed_kb,
     threshold_minutes = threshold_minutes,
@@ -122,31 +133,32 @@ function M.estimate_buf_kb(buf)
   return math.floor(bytes / 1024) + parser_kb
 end
 
+-- Format the bytes freed in the most readable unit (K below 1M).
+local function format_freed(freed_kb)
+  if freed_kb >= 1024 then
+    return string.format("~%.1fM freed", freed_kb / 1024)
+  end
+
+  return string.format("~%dK freed", freed_kb)
+end
+
 -- Human-readable summary of a prune result; used by manual + auto callers.
+-- Compact per-category line: counts each category (buffers, parsers, LSP),
+-- the total freed, and the idle threshold used for this sweep.
 function M.format_result(result)
   if result.unloaded == 0 and result.lsp_stopped == 0 then
-    return string.format("[mem] prune: nothing to reclaim (threshold %dm)",
+    return string.format("[mem] prune → nothing to reclaim (idle ≥ %dm)",
       result.threshold_minutes)
   end
 
-  local pieces = {}
+  local pieces = {
+    string.format("%d buf", result.unloaded),
+    string.format("%d parsers", result.parsers_stopped or 0),
+    string.format("%d LSP", result.lsp_stopped),
+    format_freed(result.freed_kb),
+  }
 
-  if result.unloaded > 0 then
-    if result.freed_kb >= 1024 then
-      pieces[#pieces + 1] = string.format("%d buffers (~%.1fM freed)",
-        result.unloaded, result.freed_kb / 1024)
-    else
-      pieces[#pieces + 1] = string.format("%d buffers (~%dK freed)",
-        result.unloaded, result.freed_kb)
-    end
-  end
-
-  if result.lsp_stopped > 0 then
-    pieces[#pieces + 1] = string.format("%d LSP client%s stopped",
-      result.lsp_stopped, result.lsp_stopped == 1 and "" or "s")
-  end
-
-  return string.format("[mem] prune: %s (threshold %dm)",
+  return string.format("[mem] prune → %s (idle ≥ %dm)",
     table.concat(pieces, ", "), result.threshold_minutes)
 end
 

@@ -37,15 +37,13 @@ M.is_exempt = prune.is_exempt
 M.estimate_buf_kb = prune.estimate_buf_kb
 M.format_prune_result = prune.format_result
 
--- Periodic tick: run prune, surface a notify only when something was actually
--- reclaimed (otherwise the auto-prune would spam every interval).
+-- Periodic tick: run prune and always announce the result, so the user has
+-- a heartbeat for what the cleaner is doing (or not doing).
 local function on_timer_tick()
   shared.timer_state.last_prune_at = os.time()
   local result = prune.prune({})
 
-  if result.unloaded > 0 or result.lsp_stopped > 0 then
-    vim.notify(prune.format_result(result), vim.log.levels.INFO)
-  end
+  vim.notify(prune.format_result(result), vim.log.levels.INFO)
 
   local mb = stats.rss_mb()
 
@@ -69,8 +67,15 @@ local function on_timer_tick()
   end
 end
 
--- One-time wiring. Idempotent via the augroup `clear = true`.
-function M.setup()
+-- One-time wiring. Idempotent via the augroup `clear = true`. `opts` is a
+-- partial config table merged on top of the defaults from shared.lua —
+-- callers pass any subset of the keys documented there.
+function M.setup(opts)
+  if opts ~= nil then
+    shared.config = vim.tbl_deep_extend("force", shared.config, opts)
+    M.config = shared.config
+  end
+
   -- Seed BufLeave timestamps for already-open buffers so the first sweep
   -- doesn't immediately unload everything in a freshly-loaded session.
   local now_seconds = uv.hrtime() / 1e9
@@ -102,7 +107,11 @@ function M.setup()
     group = group,
     callback = function(args)
       if vim.bo[args.buf].filetype == "fugitiveblame" then
-        pcall(api.nvim_buf_delete, args.buf, { force = true })
+        local ok = pcall(api.nvim_buf_delete, args.buf, { force = true })
+
+        if ok then
+          vim.notify("[mem] wiped fugitive blame buffer", vim.log.levels.INFO)
+        end
       end
     end,
   })
