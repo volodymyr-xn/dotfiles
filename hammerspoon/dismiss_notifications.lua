@@ -8,10 +8,18 @@ local SUBROLE_STACK = "AXNotificationCenterAlertStack"
 -- NotificationCenter's localized name has a space; look it up by bundle id.
 local NC_BUNDLE = "com.apple.notificationcenterui"
 
+-- Cached AX root for NotificationCenter; the process never restarts in
+-- practice, so we skip the ~0.2 ms hs.application.get() lookup per call.
+-- Self-heals: M.dismiss() clears this if AXWindows ever returns nil.
+local cachedRoot = nil
+
 -- Get the AX root for NotificationCenter, or nil if it isn't running.
 local function notificationCenter()
+  if cachedRoot then return cachedRoot end
   local app = hs.application.get(NC_BUNDLE)
-  return app and ax.applicationElement(app) or nil
+  if not app then return nil end
+  cachedRoot = ax.applicationElement(app)
+  return cachedRoot
 end
 
 -- Walk descendants of `element`, appending alert/stack subroles into `found`.
@@ -51,7 +59,13 @@ function M.dismiss()
 
   local windows = root:attributeValue("AXWindows")
 
-  if not windows or #windows == 0 then return end
+  if not windows then
+    -- Cached root went stale (NC restarted); drop it so the next call refetches.
+    cachedRoot = nil
+    return
+  end
+
+  if #windows == 0 then return end
 
   local alerts = {}
   collectAlerts(windows[1], alerts)
