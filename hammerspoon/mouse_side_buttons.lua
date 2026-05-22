@@ -16,14 +16,14 @@ local function handle(event)
   local button = event:getProperty(hs.eventtap.event.properties.mouseEventButtonNumber)
   local flags = event:getFlags()
 
-  if button == TOP_MOUSE_BUTTON then
+  if button == BOTTOM_MOUSE_BUTTON then
     if flags.cmd then
       notifyReturn.restoreFull()
     else
       hs.spaces.toggleMissionControl()
     end
     return true
-  elseif button == BOTTOM_MOUSE_BUTTON then
+  elseif button == TOP_MOUSE_BUTTON then
     smartNav.navigate()
     return true
   end

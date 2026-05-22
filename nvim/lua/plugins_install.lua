@@ -62,6 +62,8 @@ require("lazy").setup({
 
   {
     "nvim-neo-tree/neo-tree.nvim",
+    -- README pins `v3.x` so a future v4 release doesn't roll over silently.
+    branch = "v3.x",
     cmd = { "Neotree" },
     dependencies = {
       "nvim-lua/plenary.nvim",
@@ -110,6 +112,9 @@ require("lazy").setup({
   {
     "dmtrKovalenko/fff.nvim",
     lazy = true,
+    -- Without `opts`/`config`, fff's `setup()` never runs and any
+    -- non-default option is ignored.
+    opts = {},
     build = ':lua require("fff.download").download_or_build_binary()',
   },
 
@@ -134,14 +139,21 @@ require("lazy").setup({
   {
     'nvim-telescope/telescope.nvim',
     cmd = "Telescope",
-    commit = "cb3f98d935842836cc115e8c9e4b38c1380fbb6b",
+    -- Previous commit pin `cb3f98d...` (Sep 2024) was removed: no comment
+    -- documented what it pinned around, and 8 months of upstream fixes
+    -- (grep_string pipe-escape, vim.F deprecation stub, etc.) were
+    -- inaccessible. If a regression on master recurs, re-pin WITH a
+    -- comment naming the specific bug.
     dependencies = {
       'nvim-lua/plenary.nvim',
       'nvim-telescope/telescope-ui-select.nvim',
       'nvim-telescope/telescope-live-grep-args.nvim',
       {
         'nvim-telescope/telescope-fzf-native.nvim',
-        build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && cmake --build build --config Release && cmake --install build --prefix build',
+        -- Upstream bumped its own cmake_minimum_required to 3.5 in
+        -- PR #158, so the previous `-DCMAKE_POLICY_VERSION_MINIMUM=3.5`
+        -- workaround is no longer needed.
+        build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release --target install',
       },
     },
     config = function() require("plugin_settings.telescope") end,
@@ -162,7 +174,7 @@ require("lazy").setup({
   -- Git integration
   {
     "tpope/vim-fugitive",
-    cmd = { "G", "Git", "Gdiffsplit", "Gread", "Gwrite", "Ggrep", "Glgrep", "Gclog", "Gllog", "Gedit", "Gsplit", "Gvsplit", "Gtabedit", "Gpedit", "GBrowse" },
+    cmd = { "G", "Git", "Gdiffsplit", "Gvdiffsplit", "Gread", "Gwrite", "Ggrep", "Glgrep", "Gclog", "Gllog", "Gedit", "Gsplit", "Gvsplit", "Gtabedit", "Gpedit", "GBrowse", "Gmove", "Grename", "Gdelete", "Gremove" },
     config = function() require("plugin_settings.fugitive") end,
   },
   -- {
@@ -172,7 +184,9 @@ require("lazy").setup({
   -- },
   {
     "lewis6991/gitsigns.nvim",
-    event = { "BufReadPre", "BufNewFile" },
+    -- Include BufWritePost so signs attach when you `:w` a new file
+    -- into a git tree (the .git entry only appears after the write).
+    event = { "BufReadPre", "BufNewFile", "BufWritePost" },
     config = function() require("plugin_settings.gitsigns") end,
   },
 
@@ -184,11 +198,12 @@ require("lazy").setup({
   -- LSP & completion
   -- ============================================================
 
-  -- Portable package manager for Neovim that runs everywhere Neovim runs.
-  -- easily install and manage LSP servers, DAP servers, linters, and
-  -- formatters.
-  { "williamboman/mason.nvim", cmd = { "Mason", "MasonInstall", "MasonInstallAll", "MasonUpdate", "MasonUninstall", "MasonUninstallAll", "MasonLog" } },
-  -- mason-lspconfig bridges mason.nvim with the lspconfig plugin. It's a
+  -- Mason is loaded as a dependency of nvim-lspconfig (declared below);
+  -- no top-level entry. Per mason's README: "Lazy-loading the plugin, or
+  -- somehow deferring the setup, is not recommended." The lspconfig dep
+  -- arrangement loads mason eagerly with lspconfig on BufReadPre, which
+  -- is the closest acceptable approximation.
+  -- mason-lspconfig bridges mason.nvim with the lspconfig plugin. Also a
   -- dependency of nvim-lspconfig (declared below) and loads with it; no
   -- top-level entry needed.
 
@@ -199,7 +214,9 @@ require("lazy").setup({
   {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
-    dependencies = { "williamboman/mason.nvim", "williamboman/mason-lspconfig.nvim" },
+    -- Org moved from `williamboman` to `mason-org` (the old URLs 301-redirect
+    -- today but every current README/issue points to mason-org).
+    dependencies = { "mason-org/mason.nvim", "mason-org/mason-lspconfig.nvim" },
     config = function() require("plugin_settings.lsp_config") end,
   },
 
@@ -281,14 +298,26 @@ require("lazy").setup({
   -- ============================================================
 
   -- Treesitter-aware commentstring. Only matters when commenting inside a
-  -- real buffer; defer until one is open.
+  -- real buffer; defer until one is open. `init` sets the skip-flag
+  -- before nvim-treesitter loads to silence the deprecated-module warning
+  -- and avoid double-registration; `config` runs the new setup() entry
+  -- (the old `require("nvim-treesitter.configs").setup{ context_commentstring = ... }`
+  -- module path is deprecated). See JoosepAlviste/nvim-ts-context-commentstring#91.
   {
     "JoosepAlviste/nvim-ts-context-commentstring",
     event = { "BufReadPre", "BufNewFile" },
+    init = function() vim.g.skip_ts_context_commentstring_module = true end,
+    config = function() require("ts_context_commentstring").setup({}) end,
   },
 
   {
     "nvim-treesitter/nvim-treesitter",
+    -- Pin to the legacy `master` branch. Upstream was archived 2026-04-03
+    -- and the new `main` branch is an incompatible rewrite (no
+    -- `require("nvim-treesitter.configs").setup{}` API). `version = false`
+    -- tells lazy to ignore tags and track the branch head.
+    branch = "master",
+    version = false,
     dependencies = {
       -- Ships the `queries/<lang>/textobjects.scm` files (incl. ruby's
       -- @function.outer/@function.inner mapped to `method` /
@@ -296,7 +325,7 @@ require("lazy").setup({
       -- `class` / `module`). mini.ai's gen_spec.treesitter reads these
       -- queries to power af/if/ac/ic. The plugin's own keymap module is
       -- intentionally NOT configured — mini.ai owns the mappings.
-      "nvim-treesitter/nvim-treesitter-textobjects",
+      { "nvim-treesitter/nvim-treesitter-textobjects", branch = "master" },
     },
     config = function() require("plugin_settings.treesitter") end,
   },
@@ -312,7 +341,9 @@ require("lazy").setup({
   -- Syntax / filetype
   -- ============================================================
 
-  { "tpope/vim-haml", ft = { "haml" } },
+  -- (removed `tpope/vim-haml` — nvim ships haml ftplugin/syntax/indent
+  -- vendored from this same upstream. Re-add and scope to `ft = { "haml",
+  -- "sass", "scss" }` only if you need a newer upstream Sass parser.)
 
   -- Ruby on Rails power tool
   -- This is a massive (in a good way) Vim plugin for editing Ruby on Rails applications.
@@ -323,15 +354,19 @@ require("lazy").setup({
   -- :help rails-:Extract
   {
     "tpope/vim-rails",
-    ft = { "ruby", "eruby", "haml", "yaml" },
+    -- `yaml` was dead config: vim-rails ships only ftplugin/railslog.vim
+    -- and detects Rails via autoload on ruby/eruby/haml buffers.
+    ft = { "ruby", "eruby", "haml" },
     config = function() require("plugin_settings.vim_rails") end,
   },
 
   -- Better rspec syntax highlighting for Vim
   { "keith/rspec.vim", ft = "ruby" },
 
-  -- Ruby syntax highlighting
-  { "vim-ruby/vim-ruby", ft = "ruby" },
+  -- (removed `vim-ruby/vim-ruby` — nvim's runtime already vendors it:
+  -- runtime/ftplugin/ruby.vim, syntax/ruby.vim, indent/ruby.vim are all
+  -- credited to vim-ruby. Installing it again loaded the same code twice
+  -- per ruby buffer.)
 
   -- Vim highlighting & completion for MiniTest
   { "sunaku/vim-ruby-minitest", ft = "ruby" },
@@ -339,14 +374,18 @@ require("lazy").setup({
   -- "weizheheng/ror.nvim",
   -- "jonsmithers/vim-html-template-literals",
 
-  -- CSS3 syntax support
-  { "hail2u/vim-css3-syntax", ft = { "css", "scss" } },
+  -- CSS3 syntax support. `scss` was dead config: plugin only extends
+  -- syntax/css.vim and ships no after/syntax/scss.vim.
+  { "hail2u/vim-css3-syntax", ft = "css" },
 
   -- Crystal syntax support
   { "vim-crystal/vim-crystal", ft = "crystal" },
 
-  -- Improved JavaScript syntax
-  { "pangloss/vim-javascript", ft = { "javascript", "javascriptreact" } },
+  -- Improved JavaScript syntax. `javascriptreact` was dead — the plugin's
+  -- ftdetect only sets `filetype=javascript`. (Note: nvim's built-in
+  -- ftplugin/syntax + treesitter already cover JS; consider removing
+  -- this entry entirely if you don't rely on its specific overrides.)
+  { "pangloss/vim-javascript", ft = "javascript" },
 
   -- JSX syntax support
   -- "mxw/vim-jsx",
@@ -383,8 +422,9 @@ require("lazy").setup({
   -- JSON highlight
   -- "elzr/vim-json",
 
-  -- Syntax highlighting and filetype detection for systemd unit files
-  { "wgwoods/vim-systemd-syntax", ft = "systemd" },
+  -- (removed `wgwoods/vim-systemd-syntax` — nvim 0.10+ ships
+  -- ftplugin/systemd.vim, syntax/systemd.vim, and ~40 systemd filename
+  -- patterns in filetype.lua. Upstream is also unmaintained since 2011.)
 
   --- Syntax highlighting for Nix configs
   -- "LnL7/vim-nix",
@@ -395,11 +435,14 @@ require("lazy").setup({
   -- GTK Blueprint syntax
   -- "thetek42/vim-blueprint-syntax",
 
-  -- Emmet
+  -- Emmet. The previous commit pin (2024 AVIF-support commit) was
+  -- removed — upstream master since gained a shellescape command-injection
+  -- fix, parseIntoTree/mergeConfig bug fixes, and treesitter deprecation
+  -- handling. If the "bug on main" mentioned in the old TODO recurs, pin
+  -- to the specific known-good commit again WITH a comment explaining
+  -- what bug it pins around.
   {
     "mattn/emmet-vim",
-    -- TODO: write issue on github regarding bug on main
-    commit = "3fb2f63799e1922f7647ed9ff3b32154031a76ee",
     ft = { "html", "css", "scss", "sass", "javascriptreact", "typescriptreact", "vue", "eruby", "haml", "xml" },
     config = function() require("plugin_settings.emmet") end,
   },
@@ -416,8 +459,22 @@ require("lazy").setup({
   {
     "iamcco/markdown-preview.nvim",
     cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
-    ft = { "markdown" },
-    build = function() vim.fn["mkdp#util#install"]() end,
+    -- Include `markdown.mdx` so `.mdx` files trigger the ft load.
+    -- `g:mkdp_filetypes` must be set BEFORE the plugin loads (it's read
+    -- once at plugin init), hence `init`, not `config`.
+    ft = { "markdown", "markdown.mdx" },
+    init = function()
+      vim.g.mkdp_filetypes = { "markdown", "markdown.mdx" }
+    end,
+    -- Force-load the plugin before running its build hook so the
+    -- `mkdp#util#install` vim function is on rtp. Bare
+    -- `vim.fn["mkdp#util#install"]()` errors on fresh install
+    -- because lazy hasn't added the plugin source yet.
+    -- See iamcco/markdown-preview.nvim#690.
+    build = function()
+      require("lazy").load({ plugins = { "markdown-preview.nvim" } })
+      vim.fn["mkdp#util#install"]()
+    end,
   },
 
   -- ============================================================
@@ -542,9 +599,14 @@ require("lazy").setup({
   --   vi% / va%       - visual-select inner / around matched block
   --   z%              - jump inside next/previous nested block
   --   I use this plugin to show matchin parenies
+  --
+  -- No `event` deferral: upstream README explicitly recommends against
+  -- it ("if you run into issues, remove the event key as a first
+  -- debugging step"). `g:loaded_matchit = 1` is set in
+  -- general_settings.lua before `filetype plugin on`, so built-in
+  -- ftplugins populate `b:match_words` on the first FileType event.
   {
     "andymass/vim-matchup",
-    event = { "BufReadPost", "BufNewFile" },
     config = function() require("plugin_settings.vim_matchup") end,
   },
   -- Alternative plugin
@@ -617,7 +679,7 @@ require("lazy").setup({
 
   -- Provides devicons
   -- Requires nerdfont: (https://www.nerdfonts.com/)
-  "nvim-tree/nvim-web-devicons",
+  -- "nvim-tree/nvim-web-devicons",
 
   "echasnovski/mini.icons",
   -- mini.extra is a grab-bag helper collection; nothing on the critical
@@ -629,7 +691,14 @@ require("lazy").setup({
   -- "folke/tokyonight.nvim",
   -- "rose-pine/neovim",
   -- "EdenEast/nightfox.nvim",
-  "catppuccin/nvim",
+  -- Colorscheme. `name = "catppuccin"` overrides lazy's default folder
+  -- name (the repo is `catppuccin/nvim`, so without `name` it installs
+  -- under `~/.local/share/nvim/lazy/nvim/`, confusing the :Lazy UI).
+  -- `priority = 1000` + `lazy = false` ensures it loads before any
+  -- plugin that calls `vim.cmd.colorscheme("catppuccin")` on a deferred
+  -- event (lualine, bufferline) — otherwise the first paint briefly
+  -- shows the default scheme before the theme kicks in.
+  { "catppuccin/nvim", name = "catppuccin", priority = 1000, lazy = false },
   -- "tinted-theming/base16-vim",
   -- "ellisonleao/gruvbox.nvim",
   -- "rebelot/kanagawa.nvim",
@@ -644,9 +713,12 @@ require("lazy").setup({
   -- Alternative to vim-illuminate
   -- "tzachar/local-highlight.nvim",
 
-  -- Statusline
+  -- Statusline. `VeryLazy` (matches LazyVim default) — every component
+  -- source (LSP status, git branch, filetype) initializes only after
+  -- startup is otherwise complete, saving startup time.
   {
     "nvim-lualine/lualine.nvim",
+    event = "VeryLazy",
     dependencies = { "nvim-lua/lsp-status.nvim" },
     config = function() require("plugin_settings.lualine") end,
   },
@@ -655,12 +727,11 @@ require("lazy").setup({
 
   -- Highligh color codes
   -- "lilydjwg/colorizer", -- Old plugin, works OK
-  -- Declared before nvim-highlight-colors so lazy.nvim adds it to rtp first when
-  -- both fire on BufReadPost; the require("colorizer") inside the shared config
-  -- file then resolves to this fork.
+  -- BufReadPre per the catgoose README — fires before FileType syntax
+  -- setup, so colors render on the first paint without flicker.
   {
     'catgoose/nvim-colorizer.lua',
-    event = { "BufReadPost", "BufNewFile" },
+    event = { "BufReadPre", "BufNewFile" },
     config = function() require("plugin_settings.colorizer") end,
   },
   -- Kept installed for easy fallback; never auto-loaded.
@@ -674,10 +745,13 @@ require("lazy").setup({
   -- external dependencies! Written in performant Luajit.
   -- "norcalli/nvim-colorizer.lua",
 
-  -- Tabline
+  -- Tabline. Switched off VeryLazy: VeryLazy fires AFTER BufAdd events
+  -- from CLI args (`nvim file1 file2`) and session restore, so the
+  -- tabline missed those buffers. BufReadPost+BufNewFile loads earlier
+  -- and catches every buffer. See akinsho/bufferline.nvim#899.
   {
     "akinsho/bufferline.nvim",
-    event = "VeryLazy",
+    event = { "BufReadPost", "BufNewFile" },
     config = function() require("plugin_settings.tabline_bufferline") end,
   },
 
@@ -727,8 +801,12 @@ require("lazy").setup({
   -- Delete entries from quickfix
   -- "stefandtw/quickfix-reflector.vim",
 
-  -- Delete entries from quickfix (alt)
-  { "itchyny/vim-qfedit", ft = "qf" },
+  -- Delete entries from quickfix (alt). `ft = "qf"` would load on
+  -- FileType qf, which fires AFTER the plugin's `BufReadPost quickfix`
+  -- autocmd — so its qfedit#new() never runs for the current buffer.
+  -- `event = "QuickFixCmdPost"` loads on the same event the plugin's
+  -- own autocmd listens for.
+  { "itchyny/vim-qfedit", event = "QuickFixCmdPost" },
 
   -- Linting
   -- "w0rp/ale",
@@ -770,7 +848,9 @@ require("lazy").setup({
   {
     "janko-m/vim-test",
     cmd = { "TestNearest", "TestFile", "TestSuite", "TestLast", "TestVisit" },
-    dependencies = { "benmills/vimux" },
+    -- `dependencies = { "benmills/vimux" }` was dead config: vimux is
+    -- declared as an eager top-level entry below, so it's always loaded
+    -- before vim-test's cmd fires.
     config = function() require("plugin_settings.vim_test") end,
   },
 
@@ -831,6 +911,10 @@ require("lazy").setup({
     event = "VeryLazy",
     opts = {
       triggers = {
+        -- Restore v3 auto-detection. Without this entry, the custom
+        -- list below REPLACES the default and silently disables popups
+        -- for g-prefix, z-folds, [/] pairs, operator-pending, etc.
+        { "<auto>", mode = "nixsotc" },
         { "<leader>", mode = { "n", "v" } },
         { "s", mode = { "n" } },
         { "<C-w>", mode = { "n" } },

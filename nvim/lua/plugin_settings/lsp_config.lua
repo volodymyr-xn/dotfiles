@@ -9,7 +9,15 @@ require("mason-lspconfig").setup({
   automatic_installation = false
 })
 
+-- lsp-status drives the `get_lsp_status()` component in lualine. Needs
+-- three hooks to actually report anything: register_progress() once,
+-- capabilities merge so the server advertises progress support, and
+-- on_attach to start listening on each new client.
+local lsp_status = require("lsp-status")
+lsp_status.register_progress()
+
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
+capabilities = vim.tbl_extend("keep", capabilities, lsp_status.capabilities)
 
 -- See `:help vim.lsp.*` for documentation on any of the below functions
 local bufopts = { noremap=true, silent=true, buffer=bufnr }
@@ -41,6 +49,8 @@ vim.keymap.set('n', 'ga', vim.lsp.buf.code_action, { desc = "Code actions" })
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
 local on_attach = function(client, bufnr)
+  -- Subscribe this client to lsp-status' progress/diagnostic streams.
+  lsp_status.on_attach(client)
   -- vim.lsp.codelens.refresh()
 end
 
@@ -76,7 +86,7 @@ vim.lsp.config('cssls', {
 })
 
 vim.lsp.config('ts_ls', {
-  -- on_attach = on_attach,
+  on_attach = on_attach,
   flags = lsp_flags,
   capabilities = capabilities
 })

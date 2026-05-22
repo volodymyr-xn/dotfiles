@@ -86,7 +86,6 @@ vim.cmd [[
 MiniIcons.mock_nvim_web_devicons()
 
 
-
 -- Not used currently
 -- MiniDeps.later(MiniIcons.tweak_lsp_kind)
 

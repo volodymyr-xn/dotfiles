@@ -1,4 +1,16 @@
 local telescope_global = require("telescope")
+local telescope_actions = require("telescope.actions")
+
+-- Send results to quickfix in one keystroke. Default <C-q> populates the
+-- qflist but leaves the picker focused on top of it, so the qflist is
+-- invisible until a second key closes telescope — feels like <C-q> "needs
+-- two presses". Chain close → smart-send → open so a single press lands in
+-- the qflist window.
+local function send_to_qflist_and_focus(prompt_bufnr)
+  telescope_actions.smart_send_to_qflist(prompt_bufnr)
+  telescope_actions.close(prompt_bufnr)
+  vim.cmd("copen")
+end
 
 require('telescope').setup{
   defaults = {
@@ -66,9 +78,13 @@ require('telescope').setup{
     -- Developer configurations: Not meant for general override
     buffer_previewer_maker = require("telescope.previewers").buffer_previewer_maker,
     mappings = {
-      n = { ["q"] = require("telescope.actions").close },
+      n = {
+        ["q"] = telescope_actions.close,
+        ["<C-q>"] = send_to_qflist_and_focus,
+      },
       i = {
-        ["<esc>"] = require("telescope.actions").close,
+        ["<esc>"] = telescope_actions.close,
+        ["<C-q>"] = send_to_qflist_and_focus,
         -- readline-style navigation in the prompt
         ["<C-a>"] = function()
           vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Home>", true, false, true), "i", false)
@@ -150,6 +166,7 @@ require('telescope').setup{
 -- telescope_global.load_extension('import')
 telescope_global.load_extension('fzf')
 telescope_global.load_extension("ui-select")
+telescope_global.load_extension("live_grep_args")
 
 
 

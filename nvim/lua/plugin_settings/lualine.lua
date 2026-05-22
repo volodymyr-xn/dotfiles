@@ -233,6 +233,10 @@ require('lualine').setup {
         end
       },
       'diagnostics',
+      -- lsp-status: shows current symbol, progress messages, and any
+      -- diagnostics the LSP reported beyond what nvim aggregates into
+      -- the `diagnostics` component above. Empty when no LSP attached.
+      { get_lsp_status, color = { fg = "#a0aec0" } },
       -- { get_attached_clients, color = { gui = "bold" } },
       -- 'fileformat',
       {'filetype', color = { fg = "none", bg = "none"}}
