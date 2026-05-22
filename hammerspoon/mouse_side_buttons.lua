@@ -1,3 +1,4 @@
+local canvasBanner = require("canvas_banner")
 local notifyReturn = require("notify_return")
 local smartNav = require("smart_nav")
 
@@ -10,9 +11,15 @@ local smartNav = require("smart_nav")
 local TOP_MOUSE_BUTTON = 4
 local BOTTOM_MOUSE_BUTTON = 3
 
+-- Module-level enable flag; when false, handle() returns early and lets the
+-- OS receive the raw button event (so games using mouse 3/4 keep working).
+local enabled = true
+
 -- Dispatch one otherMouseDown event to the matching action; true swallows
 -- the event so the OS does not also receive it, false lets it pass through.
 local function handle(event)
+  if not enabled then return false end
+
   local button = event:getProperty(hs.eventtap.event.properties.mouseEventButtonNumber)
   local flags = event:getFlags()
 
@@ -36,4 +43,21 @@ end
 local tap = hs.eventtap.new({ hs.eventtap.event.types.otherMouseDown }, handle)
 tap:start()
 
-return tap
+-- Flip the enable flag and surface the new state via the canvas banner.
+local function toggle()
+  enabled = not enabled
+
+  canvasBanner.show({
+    title = enabled and "Side buttons: ON" or "Side buttons: OFF",
+    subtitle = enabled
+      and "Hammerspoon mappings active"
+      or "Passing through to apps",
+    state = enabled and "on" or "off",
+  })
+end
+
+return {
+  tap = tap,
+  toggle = toggle,
+  isEnabled = function() return enabled end,
+}

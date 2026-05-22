@@ -15,9 +15,9 @@ local cycleAppWindows = require("cycle_app_windows")
 local dismissNotifications = require("dismiss_notifications").dismiss
 local mediaKeys = require("media_keys")
 local notifyReturn = require("notify_return")
--- Side-effect require: starts the side-button eventtap. The returned tap is
--- kept alive by `package.loaded`, so no local binding is needed here.
-require("mouse_side_buttons")
+-- Starts the side-button eventtap and exposes a toggle to mute its
+-- mappings (so games binding mouse 3/4 keep receiving the raw clicks).
+local mouseSideButtons = require("mouse_side_buttons")
 
 -- Volume control: F10 up, F9 down
 -- For keychron mechanic low profile keyboard
@@ -51,3 +51,6 @@ hs.hotkey.bind({"cmd"}, "`", cycleAppWindows.cycle)
 hs.hotkey.bind({"cmd"}, "e", function()
   hs.spaces.toggleAppExpose()
 end)
+
+-- Cmd+- → toggle mouse side-button mappings (off = pass through to games)
+hs.hotkey.bind({"cmd"}, "n", mouseSideButtons.toggle)
