@@ -742,8 +742,9 @@ local function open_help_float()
   local hns = api.nvim_create_namespace("MemDashboardHelp")
 
   for i = 4, 3 + #rows do
+    local line_len = #body[i]
     api.nvim_buf_set_extmark(buf, hns, i - 1, 4, { end_col = 13, hl_group = "MemDashHintKey" })
-    api.nvim_buf_set_extmark(buf, hns, i - 1, 15, { end_col = -1, hl_group = "MemDashHint" })
+    api.nvim_buf_set_extmark(buf, hns, i - 1, 15, { end_col = line_len, hl_group = "MemDashHint" })
   end
 
   local function close_help()
