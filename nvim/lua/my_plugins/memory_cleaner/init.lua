@@ -37,13 +37,16 @@ M.is_exempt = prune.is_exempt
 M.estimate_buf_kb = prune.estimate_buf_kb
 M.format_prune_result = prune.format_result
 
--- Periodic tick: run prune and always announce the result, so the user has
--- a heartbeat for what the cleaner is doing (or not doing).
+-- Periodic tick: run prune; only announce when something was actually
+-- reclaimed, and route the RSS-over warning through nvim_echo so a
+-- sustained breach overwrites in the cmdline instead of stacking in :messages.
 local function on_timer_tick()
   shared.timer_state.last_prune_at = os.time()
   local result = prune.prune({})
 
-  vim.notify(prune.format_result(result), vim.log.levels.INFO)
+  if result.unloaded > 0 or result.lsp_stopped > 0 then
+    vim.notify(prune.format_result(result), vim.log.levels.INFO)
+  end
 
   local mb = stats.rss_mb()
 
@@ -59,8 +62,12 @@ local function on_timer_tick()
     if (not shared.notify_state.in_breach) or since >= debounce then
       shared.notify_state.in_breach = true
       shared.notify_state.last_fire = now
-      vim.notify(string.format("[mem] RSS %dM > %dM (%s)",
-        mb, shared.config.rss_warn_threshold_mb, stats.stats_string()), vim.log.levels.WARN)
+      -- history=false: do not push into :messages; lets the next tick overwrite
+      api.nvim_echo({{
+        string.format("[mem] RSS %dM > %dM (%s)",
+          mb, shared.config.rss_warn_threshold_mb, stats.stats_string()),
+        "WarningMsg",
+      }}, false, {})
     end
   else
     shared.notify_state.in_breach = false

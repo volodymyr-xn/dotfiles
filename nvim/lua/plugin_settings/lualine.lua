@@ -10,10 +10,6 @@ function is_curent_window_zoomed()
   end
 end
 
-function get_lsp_status()
-  return require("lsp-status").status()
-end
-
 local function get_attached_clients()
 	local buf_clients = vim.lsp.get_clients({ bufnr = 0 })
 	if #buf_clients == 0 then
@@ -233,10 +229,6 @@ require('lualine').setup {
         end
       },
       'diagnostics',
-      -- lsp-status: shows current symbol, progress messages, and any
-      -- diagnostics the LSP reported beyond what nvim aggregates into
-      -- the `diagnostics` component above. Empty when no LSP attached.
-      { get_lsp_status, color = { fg = "#a0aec0" } },
       -- { get_attached_clients, color = { gui = "bold" } },
       -- 'fileformat',
       {'filetype', color = { fg = "none", bg = "none"}}

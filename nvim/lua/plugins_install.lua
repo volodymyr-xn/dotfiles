@@ -261,12 +261,6 @@ require("lazy").setup({
   -- "zbirenbaum/copilot-cmp",
   -- "ray-x/cmp-treesitter",
 
-  -- LSP diagnostic/progress helpers for the statusline. Loaded as a dep
-  -- of lualine (see UI section below) because lualine's `get_lsp_status`
-  -- component does `require("lsp-status").status()` on every redraw —
-  -- the previous `event = BufReadPre` gate was dead code.
-  { "nvim-lua/lsp-status.nvim", lazy = true },
-
   -- Code navigation via LSP. No callsites currently in this repo, so it
   -- only loads if the user invokes its commands directly. `lazy = true`
   -- means lazy.nvim won't pull it in until `require("navigator")` runs.
@@ -719,7 +713,6 @@ require("lazy").setup({
   {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
-    dependencies = { "nvim-lua/lsp-status.nvim" },
     config = function() require("plugin_settings.lualine") end,
   },
   -- Alternative statusline
