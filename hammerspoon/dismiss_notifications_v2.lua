@@ -20,16 +20,6 @@ local DISMISSIBLE_SUBROLES = {
   [SUBROLE_BANNER] = true,
 }
 
--- Dismiss-action label exposed by each subrole. Stacks expose "Clear All"
--- which closes every alert grouped under them in one call; singles only
--- expose "Close". Looking the wanted label up by subrole removes the
--- per-alert fallback ladder findDismissAction used to run.
-local DISMISS_LABEL = {
-  [SUBROLE_STACK]  = "Clear All",
-  [SUBROLE_ALERT]  = "Close",
-  [SUBROLE_BANNER] = "Close",
-}
-
 -- NotificationCenter's localized name has a space; look it up by bundle id.
 local NC_BUNDLE = "com.apple.notificationcenterui"
 
@@ -47,51 +37,37 @@ local function notificationCenter()
   return cachedRoot
 end
 
--- Walk `children`, appending dismissible entries {element, subrole} into
--- `found`. Returns true the moment a stack is captured: "Clear All" on a
--- stack dismisses every alert beneath it, so the caller can stop walking
--- entirely — the unwalked branches would only surface alerts that the
--- stack's Clear All is about to remove anyway. Carrying the subrole forward
--- means dismiss() doesn't re-query AXSubrole when picking the action.
-local function collectAlerts(children, found)
+-- Walk descendants of `element`, appending dismissible alert subroles into `found`.
+local function collectAlerts(element, found)
+  local children = element:attributeValue("AXChildren")
+
+  if not children then return end
+
   for _, child in ipairs(children) do
-    local sub = child:attributeValue("AXSubrole")
-
-    if sub == SUBROLE_STACK then
-      found[#found + 1] = {element = child, subrole = sub}
-      return true
-    end
-
-    if DISMISSIBLE_SUBROLES[sub] then
-      found[#found + 1] = {element = child, subrole = sub}
+    if DISMISSIBLE_SUBROLES[child:attributeValue("AXSubrole")] then
+      table.insert(found, child)
     else
-      local grandchildren = child:attributeValue("AXChildren")
-      if grandchildren and collectAlerts(grandchildren, found) then
-        return true
-      end
+      collectAlerts(child, found)
     end
   end
-
-  return false
 end
 
--- Pick the dismiss action name for `alert` given its known `subrole`. Action
--- names embed a per-element target ("Name:Close\nTarget:0x...") so the full
--- name can't be cached across alerts — but DISMISS_LABEL fixes which label
--- to match per subrole, so we scan for exactly one label instead of running
--- the original Clear-All-then-Close fallback ladder.
-local function findDismissAction(alert, subrole)
-  local wanted = DISMISS_LABEL[subrole]
-  if not wanted then return nil end
-
-  local names = alert:actionNames()
-  if not names then return nil end
+-- Pick the best dismiss action for an alert: prefer "Clear All" (stacks),
+-- fall back to "Close" (single alert/banner). Matches the "Name:<label>"
+-- line embedded in each AX action name (e.g. "Name:Close\nTarget:0x0...")
+-- so we make a single :actionNames() call instead of N :actionDescription()
+-- round trips per alert.
+local function findDismissAction(alert)
+  local names = alert:actionNames() or {}
+  local close
 
   for _, name in ipairs(names) do
-    if name:match("^Name:([^\n]+)") == wanted then return name end
+    local label = name:match("^Name:([^\n]+)")
+    if label == "Clear All" then return name end
+    if label == "Close" then close = name end
   end
 
-  return nil
+  return close
 end
 
 -- Dismiss every notification: prefer "Clear All" on stacks, else "Close".
@@ -117,17 +93,13 @@ function M.dismiss()
   local ncWindow = windows[1]
   if ncWindow:attributeValue("AXSubrole") ~= SUBROLE_NC_WINDOW then return end
 
-  local children = ncWindow:attributeValue("AXChildren")
-  if not children then return end
-
   local alerts = {}
-  collectAlerts(children, alerts)
+  collectAlerts(ncWindow, alerts)
 
-  for _, entry in ipairs(alerts) do
-    local element = entry.element
-    local action = findDismissAction(element, entry.subrole)
+  for _, alert in ipairs(alerts) do
+    local action = findDismissAction(alert)
     if action then
-      element:performAction(action)
+      pcall(function() alert:performAction(action) end)
     end
   end
 end
