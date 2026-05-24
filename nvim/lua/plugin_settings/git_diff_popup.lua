@@ -18,7 +18,7 @@ end
 
 vim.api.nvim_create_user_command("GitDiffPopup", function()
   ensure_loaded()
-  vim.cmd("GitDiffPopup")
+  GitDiffCurrentFilePopup()
 end, {})
 
 vim.keymap.set("n", "sd", ":GitDiffPopup<CR>", {

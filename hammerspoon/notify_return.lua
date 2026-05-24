@@ -248,17 +248,17 @@ function M.restoreFull()
     applyTmux(snap.tmux)
   end
 
-  local appLabel = snap.app_name or snap.app_bundle or "?"
-  local title = "Return to " .. appLabel
-  local subtitle
-
-  if snap.is_ghostty and isTmuxLoc(snap.tmux) then
-    subtitle = tmuxLocLabel(snap.tmux)
-  else
-    subtitle = "-"
-  end
-
-  notify(title, subtitle)
+  -- local appLabel = snap.app_name or snap.app_bundle or "?"
+  -- local title = "Return to " .. appLabel
+  -- local subtitle
+  --
+  -- if snap.is_ghostty and isTmuxLoc(snap.tmux) then
+  --   subtitle = tmuxLocLabel(snap.tmux)
+  -- else
+  --   subtitle = "-"
+  -- end
+  --
+  -- notify(title, subtitle)
 end
 
 return M
