@@ -13,7 +13,7 @@ require("nvim-treesitter.configs").setup({
   ensure_installed = {
     "bash",
     "javascript",
-    "json",
+    -- "json",
     "lua",
     "regex",
     "go",
@@ -28,7 +28,7 @@ require("nvim-treesitter.configs").setup({
     "markdown",
     "markdown_inline",
   },
-  ignore_install = { "lua" },
+  ignore_install = { "lua", "json" },
 
   -- TODO: not sure what this used for
   -- illuminate = {

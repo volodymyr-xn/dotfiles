@@ -4,6 +4,7 @@ local uv = vim.uv or vim.loop
 local api = vim.api
 local fn = vim.fn
 local shared = require("my_plugins.memory_cleaner.shared")
+local utils = require("my_plugins.my_utils")
 
 local M = {}
 
@@ -107,7 +108,7 @@ end
 function M.stats_string()
   local s = M.stats()
   local i = shared.config.icons
-  local rss = s.rss_mb and (s.rss_mb .. "M") or "?M"
+  local rss = utils.fmt_mb(s.rss_mb) or "?"
 
   if vim.env.MEM_MANAGER_NO_NERD == "1" then
     return string.format("B:%d · T:%d · M:%s", s.loaded, s.parsers, rss)

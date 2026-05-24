@@ -141,7 +141,7 @@ hi jsThis gui=italic cterm=italic guifg=#e5c07b
 
 augroup html_in_js
   autocmd!
-  autocmd FileType javascript syn region jsTemplateString matchgroup=jsStringDelimiter start=+`\ze[^\n]*` end=+`\ze[^\n]*` contains=htmlTag,htmlString
+  autocmd FileType javascript syn region jsTemplateString matchgroup=jsStringDelimiter start=+`\ze[^\n]*`+ end=+`\ze[^\n]*`+ contains=htmlTag,htmlString
   autocmd FileType javascript syn region htmlTag contained matchgroup=htmlDelimiter start=+<+ end=+>+
   autocmd FileType javascript syn region htmlString contained matchgroup=htmlStringDelimiter start=+"+ end=+"+ contains=htmlTag
 augroup END

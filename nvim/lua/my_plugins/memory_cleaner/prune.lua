@@ -4,6 +4,7 @@ local uv = vim.uv or vim.loop
 local api = vim.api
 local fn = vim.fn
 local shared = require("my_plugins.memory_cleaner.shared")
+local utils = require("my_plugins.my_utils")
 
 local M = {}
 
@@ -133,13 +134,9 @@ function M.estimate_buf_kb(buf)
   return math.floor(bytes / 1024) + parser_kb
 end
 
--- Format the bytes freed in the most readable unit (K below 1M).
+-- Format the bytes freed in the most readable unit (KB / MB / GB).
 local function format_freed(freed_kb)
-  if freed_kb >= 1024 then
-    return string.format("~%.1fM freed", freed_kb / 1024)
-  end
-
-  return string.format("~%dK freed", freed_kb)
+  return utils.fmt_kb(freed_kb) .. " freed"
 end
 
 -- Human-readable summary of a prune result; used by manual + auto callers.

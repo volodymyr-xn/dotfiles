@@ -4,13 +4,12 @@ local telescope_actions = require("telescope.actions")
 -- Send results to quickfix in one keystroke. Default <C-q> populates the
 -- qflist but leaves the picker focused on top of it, so the qflist is
 -- invisible until a second key closes telescope — feels like <C-q> "needs
--- two presses". Chain close → smart-send → open so a single press lands in
--- the qflist window.
-local function send_to_qflist_and_focus(prompt_bufnr)
-  telescope_actions.smart_send_to_qflist(prompt_bufnr)
-  telescope_actions.close(prompt_bufnr)
-  vim.cmd("copen")
-end
+-- two presses". smart_send_to_qflist already closes the picker internally,
+-- so just open the qflist after it runs to land focus there in one press.
+-- local function send_to_qflist_and_focus(prompt_bufnr)
+--   telescope_actions.smart_send_to_qflist(prompt_bufnr)
+--   vim.cmd("copen")
+-- end
 
 require('telescope').setup{
   defaults = {
@@ -80,11 +79,11 @@ require('telescope').setup{
     mappings = {
       n = {
         ["q"] = telescope_actions.close,
-        ["<C-q>"] = send_to_qflist_and_focus,
+        -- ["<C-q>"] = send_to_qflist_and_focus,
       },
       i = {
         ["<esc>"] = telescope_actions.close,
-        ["<C-q>"] = send_to_qflist_and_focus,
+        -- ["<C-q>"] = send_to_qflist_and_focus,
         -- readline-style navigation in the prompt
         ["<C-a>"] = function()
           vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Home>", true, false, true), "i", false)

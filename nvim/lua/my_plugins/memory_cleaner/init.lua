@@ -20,6 +20,7 @@ local api = vim.api
 local shared = require("my_plugins.memory_cleaner.shared")
 local stats = require("my_plugins.memory_cleaner.stats")
 local prune = require("my_plugins.memory_cleaner.prune")
+local utils = require("my_plugins.my_utils")
 
 local M = {}
 
@@ -64,8 +65,8 @@ local function on_timer_tick()
       shared.notify_state.last_fire = now
       -- history=false: do not push into :messages; lets the next tick overwrite
       api.nvim_echo({{
-        string.format("[mem] RSS %dM > %dM (%s)",
-          mb, shared.config.rss_warn_threshold_mb, stats.stats_string()),
+        string.format("[mem] RSS %s > %s (%s)",
+          utils.fmt_mb(mb), utils.fmt_mb(shared.config.rss_warn_threshold_mb), stats.stats_string()),
         "WarningMsg",
       }}, false, {})
     end
@@ -138,6 +139,18 @@ function M.setup(opts)
     local result = prune.prune({ force_minutes = mins })
     vim.notify(prune.format_result(result), vim.log.levels.INFO)
   end, { nargs = "?" })
+
+  -- :MemStats — print buffers / parsers / RSS in one line.
+  api.nvim_create_user_command("MemStats", function()
+    vim.notify("[mem] " .. stats.stats_string(), vim.log.levels.INFO)
+  end, {})
+
+  -- :MemRSS — print current RSS, bypassing the cleaner cache for a fresh sample.
+  api.nvim_create_user_command("MemRSS", function()
+    shared.rss_cache.value = nil
+    local mb = stats.rss_mb()
+    vim.notify("[mem] RSS " .. (utils.fmt_mb(mb) or "?"), vim.log.levels.INFO)
+  end, {})
 
   -- Main worker tick drives prune + RSS-threshold notify in one go.
   local prune_interval_ms = shared.config.prune_tick_interval_seconds * 1000

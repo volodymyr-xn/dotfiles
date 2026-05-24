@@ -40,15 +40,11 @@ require("my_plugins.memory_monitor").setup({
   -- space; widen for extra breathing room or set "" to butt them together.
   icon_separator = " ",
 
-  -- Suffix appended to the numeric MB value. Default is "M" (compact);
-  -- swap for " MB" if you prefer a spaced unit label.
-  value_suffix = "mb",
-
   -- String shown in place of the RSS value before the first sample lands.
   -- Kept short to avoid layout jitter once the real number appears.
   initial_placeholder = "…",
 
   -- String shown when the RSS read fails (rare; usually a broken `ps` or
   -- `memory_cleaner` not yet loaded).
-  unknown_placeholder = "?mb",
+  unknown_placeholder = "?",
 })

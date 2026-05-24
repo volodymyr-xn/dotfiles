@@ -7,6 +7,9 @@ local FULL_PATH = CACHE_DIR .. "/restore_full.json"
 local GHOSTTY_BUNDLE = "com.mitchellh.ghostty"
 -- Shared tmux-restore helper, on PATH via ~/dotfiles/bin (see bin/c-tmux-restore).
 local TMUX_RESTORE_CMD = "c-tmux-restore"
+-- Snapshots older than this are stale: Cmd+K within 3 min "returns to where
+-- you were"; after that, the user has moved on and the snapshot is noise.
+local MAX_AGE_SECONDS = 180
 
 -- True when `loc` is a usable tmux target: a pane id (%N, preferred) or a
 -- session:window.pane string (the C_TMUX_BACK fallback shape).
@@ -112,6 +115,25 @@ local function readJSON(path)
   return hs.json.decode(contents)
 end
 
+-- Read the snapshot, returning nil (and deleting the file) when it is missing
+-- or older than MAX_AGE_SECONDS. Lazy expiry — no background timer; freshness
+-- is enforced at read time, so reloads and crashes never leave stale snapshots
+-- consumable.
+local function readFreshSnapshot()
+  local snap = readJSON(FULL_PATH)
+  if not snap then return nil end
+
+  local captured_at = tonumber(snap.captured_at)
+  if not captured_at or os.time() - captured_at > MAX_AGE_SECONDS then
+    os.remove(FULL_PATH)
+    log(string.format("expired snapshot discarded (captured_at=%s)",
+      tostring(snap.captured_at)))
+    return nil
+  end
+
+  return snap
+end
+
 -- Capture the user's pre-jump location before agent_notify forwards focus.
 -- `tmuxLoc`   = the user's current tmux pane id (%N), "" / nil if not in tmux.
 -- `agentPane` = the agent's pane id (the forward jump's target).
@@ -147,6 +169,7 @@ function M.capture(tmuxLoc, agentPane)
     is_ghostty = isGhostty,
     -- tmux loc only when captured in Ghostty AND it is a real (non-self) loc
     tmux = (isGhostty and goodTmux) and tmuxLoc or nil,
+    captured_at = os.time(),
   }
   writeJSON(FULL_PATH, full)
 
@@ -189,17 +212,13 @@ end
 
 -- True when a back-path snapshot exists on disk (still consumable by restoreFull).
 function M.hasSnapshot()
-  local f = io.open(FULL_PATH, "r")
-  if not f then return false end
-
-  f:close()
-  return true
+  return readFreshSnapshot() ~= nil
 end
 
 -- Cmd+k: return to the pre-jump app (+ tmux if Ghostty). macOS's `activate`
 -- handles the Space switch implicitly by surfacing the app's window.
 function M.restoreFull()
-  local snap = readJSON(FULL_PATH)
+  local snap = readFreshSnapshot()
 
   if not snap then
     log("restoreFull: no snapshot")

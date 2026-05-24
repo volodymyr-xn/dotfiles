@@ -18,6 +18,7 @@ local cleaner = require("my_plugins.memory_cleaner.shared")
 local stats = require("my_plugins.memory_cleaner.stats")
 local prune = require("my_plugins.memory_cleaner.prune")
 local rpc = require("my_plugins.memory_manager.rpc")
+local utils = require("my_plugins.my_utils")
 
 local M = {}
 
@@ -377,10 +378,10 @@ local function render_view_model(view, width)
   local total_hl = total_rss > cleaner.config.rss_warn_threshold_mb * 4
     and "MemDashMetricWarn" or "MemDashMetric"
   push_data_row({
-    { "RSS",        string.format("%dM", rss_now), rss_hl },
-    { "Peak 24h",   peak_mb and string.format("%dM", peak_mb) or "—", "MemDashMetric" },
+    { "RSS",        utils.fmt_mb(rss_now) or "—", rss_hl },
+    { "Peak 24h",   utils.fmt_mb(peak_mb) or "—", "MemDashMetric" },
     { "Trend",      trend_glyph, trend_hl },
-    { "Total",      string.format("%dM (%d nvim)", total_rss, #view), total_hl },
+    { "Total",      string.format("%s (%d nvim)", utils.fmt_mb(total_rss) or "—", #view), total_hl },
   })
   push_rule("├", "┼", "┤")
 
@@ -414,7 +415,7 @@ local function render_view_model(view, width)
     local cwd_text = shorten_path(p.cwd, cwd_max)
 
     -- Right side metrics, right-aligned to width.
-    local rss_text = string.format("%4sM", tostring(p.rss_mb or "?"))
+    local rss_text = string.format("%7s", utils.fmt_mb(p.rss_mb) or "?")
     local rss_metric_hl = (p.rss_mb and p.rss_mb > cleaner.config.rss_warn_threshold_mb)
       and "MemDashMetricWarn" or "MemDashMetric"
     local loaded_text = string.format("%3dL", p.loaded or 0)
@@ -505,7 +506,7 @@ local function render_view_model(view, width)
             else
               idle_text = "   – idle"
             end
-            local est_text = string.format("~%4dK", b.est_kb or 0)
+            local est_text = string.format("%7s", utils.fmt_kb(b.est_kb))
 
             local left_segs = {
               { "          ", nil },

@@ -12,6 +12,7 @@
 
 local uv = vim.uv or vim.loop
 local api = vim.api
+local utils = require("my_plugins.my_utils")
 
 local M = {}
 
@@ -45,9 +46,7 @@ M.config = {
   initial_placeholder = "…",
   -- Placeholder shown when the RSS read fails (rare; usually a broken `ps`
   -- or memory_cleaner not yet loaded).
-  unknown_placeholder = "?M",
-  -- Suffix appended to the numeric MB value (e.g. " MB" for a spaced unit).
-  value_suffix = "M",
+  unknown_placeholder = "?",
 }
 
 -- ============================================================================
@@ -79,7 +78,7 @@ function M.refresh()
   end
 
   local mb = stats.rss_mb()
-  cached_str = format_str(mb and (mb .. M.config.value_suffix) or M.config.unknown_placeholder)
+  cached_str = format_str(utils.fmt_mb(mb) or M.config.unknown_placeholder)
 end
 
 -- Lualine accessor; returns the cached string (never shells out).
@@ -95,6 +94,24 @@ function M.setup(opts)
   end
 
   cached_str = format_str(M.config.initial_placeholder)
+
+  -- :MemStatusRefresh — force a fresh RSS sample and redraw the statusline.
+  api.nvim_create_user_command("MemStatusRefresh", function()
+    -- Bypass memory_cleaner's RSS cache so the readout reflects this instant.
+    local ok, cleaner_shared = pcall(require, "my_plugins.memory_cleaner.shared")
+
+    if ok then
+      cleaner_shared.rss_cache.value = nil
+    end
+
+    M.refresh()
+    vim.cmd("redrawstatus!")
+  end, {})
+
+  -- :MemStatus — echo the current cached statusline reading.
+  api.nvim_create_user_command("MemStatus", function()
+    vim.notify(M.get_string(), vim.log.levels.INFO)
+  end, {})
 
   -- Find the latest warm-up delay so the periodic timer starts exactly one
   -- `refresh_interval_seconds` after it (avoids a near-duplicate fire when
