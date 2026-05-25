@@ -122,7 +122,7 @@ function M.init()
   vim.api.nvim_set_hl(0, "OneDiffPanelCount", { fg = "#6c7086", default = true })
   vim.api.nvim_set_hl(0, "OneDiffPanelPath", { fg = "#6c7086", italic = true, default = true })
   vim.api.nvim_set_hl(0, "OneDiffPanelFileName", { link = "Normal", default = true })
-  vim.api.nvim_set_hl(0, "OneDiffPanelSelected", { link = "Type", default = true })
+  vim.api.nvim_set_hl(0, "OneDiffPanelSelected", { fg = "#f9e2af", bold = true, default = true })
   vim.api.nvim_set_hl(0, "OneDiffPanelInsertions", { fg = "#a6e3a1", default = true })
   vim.api.nvim_set_hl(0, "OneDiffPanelDeletions", { fg = "#f38ba8", default = true })
   vim.api.nvim_set_hl(0, "OneDiffFolderName", { link = "Directory", default = true })
@@ -187,6 +187,12 @@ function M.show()
   vim.wo[win].cursorline = true
   vim.wo[win].winfixwidth = true
   vim.wo[win].winhighlight = "CursorLine:OneDiffCursorLine"
+
+  -- Mirror the diff window's statusline so the OneDiff path stays visible when focus is in the sidebar.
+  local current_file = session.get_current_file()
+  if current_file then
+    vim.wo[win].statusline = " %#OneDiffNonText#[OneDiff] %#OneDiffStatusLinePath#" .. current_file.path
+  end
 
   vim.cmd("wincmd p")
 end

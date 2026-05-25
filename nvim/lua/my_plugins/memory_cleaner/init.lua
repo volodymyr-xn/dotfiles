@@ -3,7 +3,8 @@
 -- Owns all schedule-based memory reclaim: BufLeave timestamping, fugitive
 -- blame auto-wipe, BufUnload/BufWipeout state cleanup, the 60-second prune +
 -- RSS-notify timer, and the 20-minute sparkline sampler. Also registers the
--- :MemPrune manual escape hatch.
+-- :MemClear family of manual escape hatches (and the per-subsystem
+-- :MemClearTreesitter / :MemClearFugitive / :MemClearLsp variants).
 --
 -- Public surface:
 --   require("my_plugins.memory_cleaner").setup()
@@ -20,6 +21,7 @@ local api = vim.api
 local shared = require("my_plugins.memory_cleaner.shared")
 local stats = require("my_plugins.memory_cleaner.stats")
 local prune = require("my_plugins.memory_cleaner.prune")
+local subsystems = require("my_plugins.memory_cleaner.subsystems")
 local utils = require("my_plugins.my_utils")
 
 local M = {}
@@ -37,10 +39,20 @@ M.prune = prune.prune
 M.is_exempt = prune.is_exempt
 M.estimate_buf_kb = prune.estimate_buf_kb
 M.format_prune_result = prune.format_result
+M.clear_treesitter = subsystems.clear_treesitter
+M.clear_fugitive = subsystems.clear_fugitive
+M.clear_lsp = subsystems.clear_lsp
+M.clear_all = subsystems.clear_all
+M.gc = subsystems.gc
 
--- Periodic tick: run prune; only announce when something was actually
--- reclaimed, and route the RSS-over warning through nvim_echo so a
--- sustained breach overwrites in the cmdline instead of stacking in :messages.
+-- Periodic tick: run prune; announce reclaims, and warn once per RSS
+-- threshold *crossing* (not once per tick while sustained). The legacy code
+-- re-fired every tick and relied on `nvim_echo(history=false)` overwriting
+-- the cmdline in place — that assumption broke under nvim 0.12's ui2
+-- cmdline/messages, which stacks ephemeral messages until the height cap
+-- and then shows a `[+N](total)` overflow indicator. Current RSS is always
+-- visible on the statusline via memory_monitor, so a periodic reminder is
+-- pure noise once the user has been told the threshold was crossed.
 local function on_timer_tick()
   shared.timer_state.last_prune_at = os.time()
   local result = prune.prune({})
@@ -55,33 +67,51 @@ local function on_timer_tick()
     return
   end
 
-  if mb > shared.config.rss_warn_threshold_mb then
-    local now = os.time()
-    local since = now - shared.notify_state.last_fire
-    local debounce = shared.config.rss_warn_notify_debounce_seconds
+  local cfg = shared.config
+  local nstate = shared.notify_state
+  local threshold = cfg.rss_warn_threshold_mb
 
-    if (not shared.notify_state.in_breach) or since >= debounce then
-      shared.notify_state.in_breach = true
-      shared.notify_state.last_fire = now
-      -- history=false: do not push into :messages; lets the next tick overwrite
-      api.nvim_echo({{
-        string.format("[mem] RSS %s > %s (%s)",
-          utils.fmt_mb(mb), utils.fmt_mb(shared.config.rss_warn_threshold_mb), stats.stats_string()),
-        "WarningMsg",
-      }}, false, {})
-    end
-  else
-    shared.notify_state.in_breach = false
+  if mb <= threshold then
+    nstate.in_breach = false
+    return
   end
+
+  if nstate.in_breach then
+    return
+  end
+
+  -- Anti-flap: if RSS oscillates around the threshold, don't re-fire until
+  -- `rss_warn_notify_debounce_seconds` has elapsed since the last warning.
+  local now = os.time()
+  nstate.in_breach = true
+
+  if (now - nstate.last_fire) < cfg.rss_warn_notify_debounce_seconds then
+    return
+  end
+
+  nstate.last_fire = now
+  api.nvim_echo({{
+    string.format("[mem] RSS %s > %s (%s)",
+      utils.fmt_mb(mb), utils.fmt_mb(threshold), stats.stats_string()),
+    "WarningMsg",
+  }}, true, {})
 end
 
--- One-time wiring. Idempotent via the augroup `clear = true`. `opts` is a
--- partial config table merged on top of the defaults from shared.lua —
--- callers pass any subset of the keys documented there.
+-- One-time wiring. Idempotent: the augroup is recreated with `clear = true`,
+-- user commands re-register with `force = true`, and the timer block is
+-- guarded by `M._setup_done` — without that guard, a second `setup()` call
+-- (e.g. via `<Leader>vr` :source $MYVIMRC) starts a second prune timer and
+-- a second RSS sampler with no handle to stop the orphaned originals.
+-- `opts` is a partial config table merged on top of the defaults from
+-- shared.lua — callers pass any subset of the keys documented there.
 function M.setup(opts)
   if opts ~= nil then
     shared.config = vim.tbl_deep_extend("force", shared.config, opts)
     M.config = shared.config
+  end
+
+  if M._setup_done then
+    return
   end
 
   -- Seed BufLeave timestamps for already-open buffers so the first sweep
@@ -133,12 +163,46 @@ function M.setup(opts)
     end,
   })
 
-  -- :MemPrune [minutes] — manual escape hatch; 0 == ignore idle time entirely.
-  api.nvim_create_user_command("MemPrune", function(opts)
+  -- :MemClear [minutes] — manual escape hatch; 0 == ignore idle time entirely.
+  -- Runs the idle-buffer prune + orphan-LSP stop, then two GC passes so the
+  -- Lua heap (which can sit at ~70 MB after a long session) collapses too.
+  api.nvim_create_user_command("MemClear", function(opts)
     local mins = tonumber(opts.args) or 0
     local result = prune.prune({ force_minutes = mins })
-    vim.notify(prune.format_result(result), vim.log.levels.INFO)
+    subsystems.gc()
+    vim.notify(prune.format_result(result) .. " · gc", vim.log.levels.INFO)
   end, { nargs = "?" })
+
+  -- :MemClearAll — aggressive sweep: every treesitter parser, every fugitive
+  -- buffer, every LSP client (attached or not), plus GC. Use when RSS is
+  -- climbing and you want to reset the editor's internal state without
+  -- restarting nvim.
+  api.nvim_create_user_command("MemClearAll", function()
+    local r = subsystems.clear_all()
+    vim.notify(string.format("[mem] cleared → %d parsers, %d fugitive, %d LSP · gc",
+      r.treesitter, r.fugitive, r.lsp), vim.log.levels.INFO)
+  end, {})
+
+  -- :MemClearTreesitter — stop every active treesitter parser/highlighter.
+  api.nvim_create_user_command("MemClearTreesitter", function()
+    local n = subsystems.clear_treesitter()
+    subsystems.gc()
+    vim.notify(string.format("[mem] cleared → %d parsers · gc", n), vim.log.levels.INFO)
+  end, {})
+
+  -- :MemClearFugitive — wipe every fugitive blame/diff/URI buffer.
+  api.nvim_create_user_command("MemClearFugitive", function()
+    local n = subsystems.clear_fugitive()
+    subsystems.gc()
+    vim.notify(string.format("[mem] cleared → %d fugitive · gc", n), vim.log.levels.INFO)
+  end, {})
+
+  -- :MemClearLsp — stop every LSP client unconditionally.
+  api.nvim_create_user_command("MemClearLsp", function()
+    local n = subsystems.clear_lsp()
+    subsystems.gc()
+    vim.notify(string.format("[mem] cleared → %d LSP · gc", n), vim.log.levels.INFO)
+  end, {})
 
   -- :MemStats — print buffers / parsers / RSS in one line.
   api.nvim_create_user_command("MemStats", function()
@@ -170,6 +234,8 @@ function M.setup(opts)
   local rss_interval_ms = shared.config.rss_history_sample_interval_seconds * 1000
   local rss_timer = uv.new_timer()
   rss_timer:start(rss_interval_ms, rss_interval_ms, vim.schedule_wrap(on_rss_tick))
+
+  M._setup_done = true
 end
 
 return M

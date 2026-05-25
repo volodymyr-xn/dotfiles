@@ -82,20 +82,56 @@ function M.lstart_for(pid)
   return "?"
 end
 
+-- Elapsed time since process start in seconds; parses `ps -o etime=` which
+-- emits `[[DD-]HH:]MM:SS` on both macOS and Linux. Returns nil on failure.
+function M.etime_seconds_for(pid)
+  local ok, out = pcall(fn.system, { "ps", "-o", "etime=", "-p", tostring(pid) })
+
+  if not ok or not out then
+    return nil
+  end
+
+  local etime = out:gsub("^%s+", ""):gsub("%s+$", "")
+
+  local d, h, m, s = etime:match("^(%d+)-(%d+):(%d+):(%d+)$")
+
+  if d then
+    return tonumber(d) * 86400 + tonumber(h) * 3600 + tonumber(m) * 60 + tonumber(s)
+  end
+
+  local h2, m2, s2 = etime:match("^(%d+):(%d+):(%d+)$")
+
+  if h2 then
+    return tonumber(h2) * 3600 + tonumber(m2) * 60 + tonumber(s2)
+  end
+
+  local m3, s3 = etime:match("^(%d+):(%d+)$")
+
+  if m3 then
+    return tonumber(m3) * 60 + tonumber(s3)
+  end
+
+  return nil
+end
+
 -- ============================================================================
 -- Lualine stats
 -- ============================================================================
 
 -- Loaded-buffer + live-parser counts (cheap; lualine calls this often).
+-- Parser detection uses highlighter.active so the count matches what
+-- :MemClearTreesitter would stop; the previous `pcall(get_parser)` check
+-- counted custom buftypes (cmd/dialog/msg) that have no registered grammar.
 function M.stats()
   local loaded = 0
   local parsers = 0
+  local ts_active = (vim.treesitter.highlighter and vim.treesitter.highlighter.active) or {}
 
   for _, buf in ipairs(api.nvim_list_bufs()) do
     if api.nvim_buf_is_loaded(buf) then
       loaded = loaded + 1
 
-      if pcall(vim.treesitter.get_parser, buf) then
+      if ts_active[buf] then
         parsers = parsers + 1
       end
     end

@@ -86,11 +86,19 @@ function M.get_string()
   return cached_str or format_str(M.config.initial_placeholder)
 end
 
--- One-time wiring. `opts` is a partial config table merged on top of the
--- defaults above — callers pass any subset of the keys documented there.
+-- One-time wiring. Idempotent: `M._setup_done` guards the VimEnter autocmd
+-- and timer wiring against double-`setup()` (e.g. via `<Leader>vr` :source
+-- $MYVIMRC, which would otherwise stack a second periodic timer with no
+-- handle to stop the first). `opts` is a partial config table merged on
+-- top of the defaults above — callers pass any subset of the keys documented
+-- there.
 function M.setup(opts)
   if opts ~= nil then
     M.config = vim.tbl_deep_extend("force", M.config, opts)
+  end
+
+  if M._setup_done then
+    return
   end
 
   cached_str = format_str(M.config.initial_placeholder)
@@ -147,6 +155,8 @@ function M.setup(opts)
       end
     end,
   })
+
+  M._setup_done = true
 end
 
 return M

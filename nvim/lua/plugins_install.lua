@@ -13,8 +13,19 @@ end
 
 vim.opt.rtp:prepend(lazypath)
 
-require("lazy").setup({
-   performance = {
+-- lazy.nvim options. MUST be passed as the second argument to lazy.setup()
+-- — the single-argument form `lazy.setup({mixed})` treats the whole table as
+-- a plugin spec, so any sibling `performance = {...}` keys are SILENTLY
+-- IGNORED. We hit that footgun in this config: `disabled_plugins` looked
+-- active for years but never disabled anything, and `cache.enabled = false`
+-- got dropped on the floor, letting `vim.loader` keep serving stale
+-- bytecode (the root cause of the recurring git_diff_popup bug).
+local lazy_opts = {
+  performance = {
+    -- Disable lazy's bytecode cache (which is `vim.loader` under the hood).
+    -- See the long-form rationale in init.lua. Without this, lazy re-enables
+    -- `vim.loader` automatically, undoing our deliberate skip in init.lua.
+    cache = { enabled = false },
     rtp = {
       disabled_plugins = {
         "2html_plugin",
@@ -47,7 +58,9 @@ require("lazy").setup({
       },
     },
   },
+}
 
+require("lazy").setup({
   -- ============================================================
   -- Filetree & navigation
   -- ============================================================
@@ -977,4 +990,4 @@ require("lazy").setup({
   -- 'phaazon/hop.nvim/'
   -- folke/noice.nvim
   -- 'm-demare/hlargs.nvim'
-})
+}, lazy_opts)

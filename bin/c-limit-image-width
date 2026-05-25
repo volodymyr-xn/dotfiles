@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+
+# Shrink image to fit max width using ImageMagick (never upscales).
+# Usage: c-limit-image-width [--max-width=PX] FILE [FILE...]
+
+set -euo pipefail
+
+max_width=""
+files=()
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --max-width=*)
+      max_width="${1#--max-width=}"
+      max_width="${max_width%px}"
+      shift
+      ;;
+    --max-width)
+      max_width="${2:-}"
+      max_width="${max_width%px}"
+      shift 2
+      ;;
+    -h|--help)
+      echo "Usage: c-limit-image-width [--max-width=PX] FILE [FILE...]"
+      echo "  --max-width=PX   Shrink to fit width (e.g. 2000 or 2000px); never upscale"
+      echo "                   Prompted if omitted"
+      exit 0
+      ;;
+    *)
+      files+=("$1")
+      shift
+      ;;
+  esac
+done
+
+if [[ -z "$max_width" ]]; then
+  read -r -p "Max width in px: " max_width
+  max_width="${max_width%px}"
+fi
+
+if ! [[ "$max_width" =~ ^[0-9]+$ ]] || (( max_width < 1 )); then
+  echo "Error: --max-width must be a positive integer (got '$max_width')" >&2
+  exit 1
+fi
+
+if [[ ${#files[@]} -eq 0 ]]; then
+  echo "Error: no input files" >&2
+  echo "Usage: c-limit-image-width [--max-width=PX] FILE [FILE...]" >&2
+  exit 1
+fi
+
+# Prefer modern `magick` CLI; fall back to legacy `convert`
+if command -v magick >/dev/null 2>&1; then
+  im_cmd=(magick)
+elif command -v convert >/dev/null 2>&1; then
+  im_cmd=(convert)
+else
+  echo "Error: ImageMagick (magick or convert) not found in PATH" >&2
+  exit 1
+fi
+
+# Format byte count as human-readable KB / MB / GB (1 decimal place)
+human_size() {
+  local bytes="$1"
+
+  awk -v b="$bytes" 'BEGIN {
+    if (b >= 1024*1024*1024) printf "%.1f GB", b/1024/1024/1024;
+    else if (b >= 1024*1024) printf "%.1f MB", b/1024/1024;
+    else if (b >= 1024)      printf "%.1f KB", b/1024;
+    else                     printf "%d B", b;
+  }'
+}
+
+# ANSI colors (only when stdout is a TTY, so pipes/logs stay clean)
+if [[ -t 1 ]]; then
+  C_RESET=$'\033[0m'
+  C_GREEN=$'\033[32m'
+  C_RED=$'\033[31m'
+  C_YELLOW=$'\033[33m'
+  C_DIM=$'\033[2m'
+else
+  C_RESET=""; C_GREEN=""; C_RED=""; C_YELLOW=""; C_DIM=""
+fi
+
+# Pick a color for size delta: smaller = green, larger = red, same = yellow
+size_color() {
+  local in_b="$1" out_b="$2"
+
+  if (( out_b < in_b )); then
+    printf '%s' "$C_GREEN"
+  elif (( out_b > in_b )); then
+    printf '%s' "$C_RED"
+  else
+    printf '%s' "$C_YELLOW"
+  fi
+}
+
+resize_one() {
+  local input="$1"
+  local w="$2"
+
+  if [[ ! -f "$input" ]]; then
+    echo "Skip: '$input' is not a file" >&2
+    return 1
+  fi
+
+  local dir base name ext output
+  dir="$(dirname "$input")"
+  base="$(basename "$input")"
+  name="${base%.*}"
+  ext="${base##*.}"
+
+  output="${dir}/${name}.w${w}.${ext}"
+
+  "${im_cmd[@]}" "$input" -resize "${w}x>" "$output"
+
+  local in_size out_size color pct
+  in_size=$(stat -f%z "$input" 2>/dev/null || stat -c%s "$input")
+  out_size=$(stat -f%z "$output" 2>/dev/null || stat -c%s "$output")
+  color=$(size_color "$in_size" "$out_size")
+  pct=$(awk -v a="$in_size" -v b="$out_size" 'BEGIN { if (a > 0) printf "%+.1f", (b-a)*100.0/a; else print "0.0" }')
+  printf '%s -> %s  (%s -> %s, %s)\n' \
+    "$input" "$output" \
+    "${C_DIM}$(human_size "$in_size")${C_RESET}" \
+    "${color}$(human_size "$out_size")${C_RESET}" \
+    "${color}${pct}%${C_RESET}"
+}
+
+status=0
+for f in "${files[@]}"; do
+  resize_one "$f" "$max_width" || status=$?
+done
+
+exit "$status"

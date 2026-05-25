@@ -1,6 +1,19 @@
--- Enable the bytecode cache for Lua modules (20-30% startup speedup);
--- must run before any require() so cached modules are picked up.
-vim.loader.enable()
+-- `vim.loader.enable()` is intentionally NOT called.
+--
+-- The bytecode cache (~/.cache/nvim/luac/) gives a ~20–30% startup speedup
+-- but desyncs with source files in this config's setup: the symlink chain
+-- ~/.config/nvim → ~/dotfiles/nvim → ~/Meta/.../nvim and atomic editor
+-- writes can leave the loader serving stale `.luac` after a source-file
+-- fix. That was the root cause of the recurring git_diff_popup recursion
+-- bug that "kept coming back" across three separate fixes — the fixes
+-- were correct; the bytecode wasn't.
+--
+-- 100ms of cold startup is a fine trade for never debugging phantom-cache
+-- bugs again. If startup time ever becomes the bottleneck, re-enable here
+-- AND pair it with a `BufWritePost` autocmd that calls `vim.loader.reset`
+-- on saved config files (see git history of autocommands.lua for the
+-- pattern), plus a `:Reload` command that wipes the cache before
+-- re-sourcing.
 
 -- mapleader must be set BEFORE lazy.setup(), otherwise lazy resolves
 -- `<Leader>X` triggers with the default `\` mapleader and registers wrong

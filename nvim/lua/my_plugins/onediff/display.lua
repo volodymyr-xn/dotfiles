@@ -159,10 +159,29 @@ local function acquire_diff_buf(session, settings)
   return buf
 end
 
+-- Build the OneDiff statusline string for a file path so diff + sidebar windows share one source of truth.
+local function onediff_statusline(path)
+  return " %#OneDiffNonText#[OneDiff] %#OneDiffStatusLinePath#" .. path
+end
+
+-- Apply the OneDiff statusline to the diff window and (if open) the sidebar window,
+-- so the path stays visible even when the cursor is in the sidebar.
+local function apply_onediff_statusline(target_win, path)
+  local statusline = onediff_statusline(path)
+  if target_win and vim.api.nvim_win_is_valid(target_win) then
+    vim.wo[target_win].statusline = statusline
+  end
+
+  local sidebar_win = require("my_plugins.onediff.session").get_sidebar_win()
+  if sidebar_win and vim.api.nvim_win_is_valid(sidebar_win) then
+    vim.wo[sidebar_win].statusline = statusline
+  end
+end
+
 local function configure_diff_buf(buf, target_win, file)
   vim.b[buf].is_onediff_buffer = true
   vim.b[buf].onediff_file_path = file.path
-  vim.wo[target_win].statusline = " %#OneDiffNonText#[OneDiff] %#OneDiffStatusLinePath#" .. file.path
+  apply_onediff_statusline(target_win, file.path)
   vim.keymap.set("n", '"', "<Nop>", { buffer = buf, silent = true })
   vim.keymap.set("n", "m", function() require("my_plugins.onediff").toggle_zoom() end, { buffer = buf, silent = true })
 end
@@ -397,7 +416,7 @@ function M.setup_buffer_keymaps(buf)
       vim.wo[win].signcolumn = "yes"
       local path = vim.b[buf].onediff_file_path
       if path then
-        vim.wo[win].statusline = " %#OneDiffNonText#[OneDiff] %#OneDiffStatusLinePath#" .. path
+        apply_onediff_statusline(win, path)
       end
     end,
   })

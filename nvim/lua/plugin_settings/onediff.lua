@@ -1,13 +1,21 @@
+-- Lazy-load OneDiff on first keypress. Lua's `require` is itself memoized,
+-- so the early-return branch is just to skip the one-time `setup()` call —
+-- not to avoid re-requiring. The flag is set BEFORE `setup()` runs so that
+-- if setup throws partway, the next keypress doesn't re-run side effects
+-- like duplicate `OneDiff*` command registration. Recovery from a broken
+-- setup needs a full nvim restart, which is acceptable for a config-error.
 local onediff_loaded = false
 
 local function load_onediff()
-  if onediff_loaded then
-    return require("my_plugins.onediff")
-  end
-  
   local onediff = require("my_plugins.onediff")
-  local onediff_debug = require("my_plugins.onediff.debug_helper")
-  
+
+  if onediff_loaded then
+    return onediff
+  end
+
+  onediff_loaded = true
+  require("my_plugins.onediff.debug_helper")
+
   onediff.setup({
     base_ref = "HEAD",
     picker = "telescope",
@@ -16,8 +24,7 @@ local function load_onediff()
       position = "left",
     },
   })
-  
-  onediff_loaded = true
+
   return onediff
 end
 

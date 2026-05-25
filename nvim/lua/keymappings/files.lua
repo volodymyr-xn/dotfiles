@@ -1,10 +1,11 @@
-local ruby_toggle = require('my_plugins.ruby_component_toggle')
-
 -- Save current buffer
 vim.api.nvim_set_keymap('n', '<Leader>w', ':w<CR>', { silent = true, noremap = true, desc = "Save current file" })
 
--- Re-source the entire Neovim config
-vim.api.nvim_set_keymap('n', '<Leader>vr', ':source $MYVIMRC<CR>', { noremap = true, desc = "Reload vim config" })
+-- Re-source the entire Neovim config (with bytecode cache wipe).
+-- `:Reload` is defined in `commands.lua` — it clears `vim.loader`'s luac
+-- entries for user-config paths first, so a fix never gets shadowed by
+-- stale bytecode (the root cause of the recurring git_diff_popup bug).
+vim.api.nvim_set_keymap('n', '<Leader>vr', ':Reload<CR>', { noremap = true, desc = "Reload vim config" })
 
 -- Alternate/related file navigation (vim-projectionist)
 vim.api.nvim_set_keymap('n', 'sa', ':A<CR>', { noremap = true, desc = "Go to alternate file" })
@@ -19,6 +20,12 @@ vim.api.nvim_set_hl(0, "ReloadedFilename", { fg = "#a6e3a1", bold = true })
 
 -- Reload file from disk with a brief status echo, highlighting the file name in green
 local function reload_file_with_message()
+  -- Skip [No Name] buffers; :edit! errors with E32 when there's no file on disk
+  if vim.api.nvim_buf_get_name(0) == '' then
+    vim.api.nvim_echo({ { "No file to reload", "WarningMsg" } }, false, {})
+    return
+  end
+
   vim.cmd('edit!')
   local filename = vim.fn.expand('%:t')
   vim.api.nvim_echo({
@@ -43,7 +50,7 @@ vim.api.nvim_set_keymap('n', 's3', '<cmd>lua require("my_plugins.ruby_component_
 vim.api.nvim_set_keymap('n', 's4', '<cmd>lua require("my_plugins.ruby_component_toggle").navigate_to_extension(".js")<CR>',
   { noremap = true, silent = true, desc = "Navigate to .js file" })
 -- Toggle between .rb and .html.erb for Ruby view components
-vim.keymap.set('n', 'gr', function() ruby_toggle.toggle_alternate() end,
+vim.keymap.set('n', 'gr', function() require('my_plugins.ruby_component_toggle').toggle_alternate() end,
   { noremap = true, silent = true, desc = "Toggle between .rb and .html.erb" })
 
 -- Neo-tree: defined here (not inside plugin_settings/neo_tree.lua) so that

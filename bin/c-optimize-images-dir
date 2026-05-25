@@ -1,0 +1,218 @@
+#!/usr/bin/env bash
+
+# Recursively optimize all images in a directory: resize to max width and
+# compress quality, in-place. Optionally convert to .webp.
+# Usage: c-optimize-images-dir [-q PERCENT] [--max-width=PX] [--webp] DIR
+
+set -euo pipefail
+
+quality=""
+max_width=""
+to_webp=0
+dir=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -q)            quality="${2:-}"; shift 2 ;;
+    -q=*)          quality="${1#-q=}"; shift ;;
+    --max-width=*) max_width="${1#--max-width=}"; max_width="${max_width%px}"; shift ;;
+    --max-width)   max_width="${2:-}"; max_width="${max_width%px}"; shift 2 ;;
+    --webp)        to_webp=1; shift ;;
+    -h|--help)
+      cat <<'EOF'
+Usage: c-optimize-images-dir [-q PERCENT] [--max-width=PX] [--webp] DIR
+
+  -q PERCENT       Quality 1-100 (prompted if omitted)
+  --max-width=PX   Shrink to fit width (e.g. 2000 or 2000px); never upscale
+                   (prompted if omitted)
+  --webp           Convert each image to .webp (original file is removed)
+
+Recursively processes jpg/jpeg/png/webp/tif/tiff/gif/heic/heif/avif/bmp.
+Files are overwritten in place.
+EOF
+      exit 0
+      ;;
+    -*)
+      echo "Error: unknown option '$1'" >&2
+      exit 1
+      ;;
+    *)
+      if [[ -z "$dir" ]]; then
+        dir="$1"
+      else
+        echo "Error: only one directory argument is supported (got '$dir' and '$1')" >&2
+        exit 1
+      fi
+      shift
+      ;;
+  esac
+done
+
+if [[ -z "$dir" ]]; then
+  echo "Error: missing DIR argument" >&2
+  echo "Usage: c-optimize-images-dir [-q PERCENT] [--max-width=PX] [--webp] DIR" >&2
+  exit 1
+fi
+
+if [[ ! -d "$dir" ]]; then
+  echo "Error: '$dir' is not a directory" >&2
+  exit 1
+fi
+
+if [[ -z "$quality" ]]; then
+  read -r -p "Quality (1-100): " quality
+fi
+
+if ! [[ "$quality" =~ ^[0-9]+$ ]] || (( quality < 1 || quality > 100 )); then
+  echo "Error: quality must be an integer between 1 and 100" >&2
+  exit 1
+fi
+
+if [[ -z "$max_width" ]]; then
+  read -r -p "Max width in px: " max_width
+  max_width="${max_width%px}"
+fi
+
+if ! [[ "$max_width" =~ ^[0-9]+$ ]] || (( max_width < 1 )); then
+  echo "Error: --max-width must be a positive integer (got '$max_width')" >&2
+  exit 1
+fi
+
+# Prefer modern `magick` CLI; fall back to legacy `convert`
+if command -v magick >/dev/null 2>&1; then
+  im_cmd=(magick)
+elif command -v convert >/dev/null 2>&1; then
+  im_cmd=(convert)
+else
+  echo "Error: ImageMagick (magick or convert) not found in PATH" >&2
+  exit 1
+fi
+
+# Format byte count as human-readable KB / MB / GB (1 decimal place)
+human_size() {
+  local bytes="$1"
+
+  awk -v b="$bytes" 'BEGIN {
+    if (b >= 1024*1024*1024) printf "%.1f GB", b/1024/1024/1024;
+    else if (b >= 1024*1024) printf "%.1f MB", b/1024/1024;
+    else if (b >= 1024)      printf "%.1f KB", b/1024;
+    else                     printf "%d B", b;
+  }'
+}
+
+# ANSI colors (only when stdout is a TTY, so pipes/logs stay clean)
+if [[ -t 1 ]]; then
+  C_RESET=$'\033[0m'
+  C_GREEN=$'\033[32m'
+  C_RED=$'\033[31m'
+  C_YELLOW=$'\033[33m'
+  C_DIM=$'\033[2m'
+  C_BOLD=$'\033[1m'
+else
+  C_RESET=""; C_GREEN=""; C_RED=""; C_YELLOW=""; C_DIM=""; C_BOLD=""
+fi
+
+# Pick a color for size delta: smaller = green, larger = red, same = yellow
+size_color() {
+  local in_b="$1" out_b="$2"
+
+  if (( out_b < in_b )); then
+    printf '%s' "$C_GREEN"
+  elif (( out_b > in_b )); then
+    printf '%s' "$C_RED"
+  else
+    printf '%s' "$C_YELLOW"
+  fi
+}
+
+stat_size() {
+  stat -f%z "$1" 2>/dev/null || stat -c%s "$1"
+}
+
+# Process one image: resize + recompress, in place. If --webp, replace ext.
+optimize_one() {
+  local input="$1"
+  local q="$2"
+  local w="$3"
+
+  local in_size out_size color pct target tmp
+  in_size=$(stat_size "$input")
+
+  if (( to_webp )); then
+    target="${input%.*}.webp"
+  else
+    target="$input"
+  fi
+
+  tmp="${target}.tmp.$$"
+
+  if ! "${im_cmd[@]}" "$input" -resize "${w}x>" -quality "$q" "$tmp"; then
+    echo "${C_RED}FAIL${C_RESET}: '$input'" >&2
+    rm -f "$tmp"
+    return 1
+  fi
+
+  # Replace original atomically; remove the source if extension changed
+  if [[ "$target" != "$input" ]]; then
+    mv -f "$tmp" "$target"
+    rm -f "$input"
+  else
+    mv -f "$tmp" "$input"
+  fi
+
+  out_size=$(stat_size "$target")
+  color=$(size_color "$in_size" "$out_size")
+  pct=$(awk -v a="$in_size" -v b="$out_size" 'BEGIN { if (a > 0) printf "%+.1f", (b-a)*100.0/a; else print "0.0" }')
+
+  printf '%s%s%s  (%s -> %s, %s)\n' \
+    "$input" \
+    "$( [[ "$target" != "$input" ]] && printf ' -> %s' "$target" )" \
+    "" \
+    "${C_DIM}$(human_size "$in_size")${C_RESET}" \
+    "${color}$(human_size "$out_size")${C_RESET}" \
+    "${color}${pct}%${C_RESET}"
+
+  total_in=$(( total_in + in_size ))
+  total_out=$(( total_out + out_size ))
+  processed=$(( processed + 1 ))
+}
+
+processed=0
+failed=0
+total_in=0
+total_out=0
+
+# NUL-delimited find to handle spaces/newlines in filenames
+while IFS= read -r -d '' file; do
+  if ! optimize_one "$file" "$quality" "$max_width"; then
+    failed=$(( failed + 1 ))
+  fi
+done < <(
+  find "$dir" -type f \( \
+    -iname '*.jpg'  -o -iname '*.jpeg' -o \
+    -iname '*.png'  -o -iname '*.webp' -o \
+    -iname '*.tif'  -o -iname '*.tiff' -o \
+    -iname '*.gif'  -o -iname '*.bmp'  -o \
+    -iname '*.heic' -o -iname '*.heif' -o -iname '*.avif' \
+  \) -print0
+)
+
+if (( processed == 0 && failed == 0 )); then
+  echo "No images found in '$dir'."
+  exit 0
+fi
+
+total_color=$(size_color "$total_in" "$total_out")
+total_pct=$(awk -v a="$total_in" -v b="$total_out" 'BEGIN { if (a > 0) printf "%+.1f", (b-a)*100.0/a; else print "0.0" }')
+
+echo
+printf '%sProcessed%s: %d file(s)' "$C_BOLD" "$C_RESET" "$processed"
+(( failed > 0 )) && printf ', %sfailed%s: %d' "$C_RED" "$C_RESET" "$failed"
+printf '\n'
+printf '%sTotal%s: %s -> %s (%s)\n' \
+  "$C_BOLD" "$C_RESET" \
+  "${C_DIM}$(human_size "$total_in")${C_RESET}" \
+  "${total_color}$(human_size "$total_out")${C_RESET}" \
+  "${total_color}${total_pct}%${C_RESET}"
+
+(( failed > 0 )) && exit 1 || exit 0

@@ -48,3 +48,10 @@ require("my_plugins.memory_monitor").setup({
   -- `memory_cleaner` not yet loaded).
   unknown_placeholder = "?",
 })
+
+-- `sb` — force a fresh RSS sample + statusline redraw on demand.
+vim.keymap.set("n", "sb", ":MemStatusRefresh<CR>", {
+  noremap = true,
+  silent = true,
+  desc = "Refresh memory statusline",
+})

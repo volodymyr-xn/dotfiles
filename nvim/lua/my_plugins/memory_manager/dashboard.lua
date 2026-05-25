@@ -461,10 +461,81 @@ local function render_view_model(view, width)
         { kind = "proc_error", pid = p.pid, proc = p })
     end
 
-    -- Uptime sub-row (dim) — adds context without crowding the main row.
-    if p.uptime and p.uptime ~= "?" then
-      local up_line = string.format("           started %s", p.uptime)
+    -- Uptime sub-row (dim) — relative time first for quick scan, absolute
+    -- start date in parens for precision; falls back to one or the other
+    -- when only one is available.
+    if (p.uptime and p.uptime ~= "?") or p.uptime_seconds then
+      local rel = utils.fmt_uptime(p.uptime_seconds)
+      local up_line
+
+      if rel and p.uptime and p.uptime ~= "?" then
+        up_line = string.format("           started %s (%s)", rel, p.uptime)
+      elseif rel then
+        up_line = string.format("           started %s", rel)
+      else
+        up_line = string.format("           started %s", p.uptime)
+      end
+
       push(up_line, { { col = 0, end_col = #up_line, hl = "MemDashUptime" } },
+        { kind = "proc_meta", pid = p.pid, proc = p })
+    end
+
+    -- Subsystem sub-row: per-subsystem RSS breakdown.
+    --   • LSP: real child-process RSS (sum + server names)
+    --   • TS:  ~estimate (source bytes × 3) + active languages
+    --   • Fugitive: real bytes from open fugitive buffers
+    --   • Lua: real heap from collectgarbage("count")
+    -- Each segment shown only when it has data. The languages list is
+    -- truncated to keep the row within window width.
+    local segments = {}
+    local lsp_names = p.lsp_names or {}
+    local lsp_procs = p.lsp_procs or { items = {}, total_kb = 0 }
+    local ts_langs = p.ts_langs or {}
+    local ts_bytes = p.ts_bytes or 0
+    local fug_count = p.fug_count or 0
+    local fug_bytes = p.fug_bytes or 0
+
+    if lsp_procs.total_kb > 0 then
+      local names = {}
+
+      for _, item in ipairs(lsp_procs.items) do
+        table.insert(names, item.name)
+      end
+
+      table.insert(segments, string.format("LSP %s (%s)",
+        utils.fmt_kb(lsp_procs.total_kb), table.concat(names, ", ")))
+    elseif #lsp_names > 0 then
+      table.insert(segments, string.format("LSP %d (%s)",
+        #lsp_names, table.concat(lsp_names, ", ")))
+    elseif p.is_current or p.lsp_names ~= nil then
+      table.insert(segments, "LSP 0")
+    end
+
+    if ts_bytes > 0 then
+      local ts_text = string.format("TS ~%s (%s)",
+        utils.fmt_kb(math.floor(ts_bytes * 3 / 1024)),
+        table.concat(ts_langs, ", "))
+      local budget = math.max(20, width - 12 - 50)
+
+      if #ts_text > budget then
+        ts_text = ts_text:sub(1, budget - 1) .. "…"
+      end
+
+      table.insert(segments, ts_text)
+    end
+
+    if fug_count > 0 then
+      table.insert(segments, string.format("Fugitive %d buf %s",
+        fug_count, utils.fmt_kb(math.floor(fug_bytes / 1024))))
+    end
+
+    if p.lua_heap_kb then
+      table.insert(segments, "Lua " .. utils.fmt_kb(p.lua_heap_kb))
+    end
+
+    if #segments > 0 then
+      local sub_line = "           " .. table.concat(segments, " · ")
+      push(sub_line, { { col = 0, end_col = #sub_line, hl = "MemDashUptime" } },
         { kind = "proc_meta", pid = p.pid, proc = p })
     end
 
@@ -572,7 +643,7 @@ local function build_footer()
     { "?", "MemDashHintKey" }, { " help · ", "MemDashHint" },
     { "⇥", "MemDashHintKey" }, { " fold · ", "MemDashHint" },
     { "s", "MemDashHintKey" }, { " sort · ", "MemDashHint" },
-    { "u/w", "MemDashHintKey" }, { " unload/wipe · ", "MemDashHint" },
+    { "u/w/W", "MemDashHintKey" }, { " unload/wipe/force-wipe · ", "MemDashHint" },
     { "U", "MemDashHintKey" }, { " section · ", "MemDashHint" },
     { "X", "MemDashHintKey" }, { " all · ", "MemDashHint" },
     { "x", "MemDashHintKey" }, { " kill · ", "MemDashHint" },
@@ -637,6 +708,31 @@ local function rerender()
   local view = shared.dashboard_state.view or {}
   local lines, marks, row_index = render_view_model(view, inner_width())
   paint(shared.dashboard_state.buf, lines, marks, row_index)
+end
+
+-- Paint a placeholder "loading" state while the synchronous discovery +
+-- per-process snapshots run. The full refresh blocks for ~200–500ms while
+-- shelling out to pgrep/ps/lsof and rpc-querying each sibling nvim; this
+-- gives the user immediate visual feedback that the popup is alive.
+local function paint_loading()
+  local buf = shared.dashboard_state.buf
+
+  if not buf or not api.nvim_buf_is_valid(buf) then
+    return
+  end
+
+  local lines = {
+    "",
+    "      ⏳  Discovering nvim processes and gathering memory stats…",
+    "",
+    "      This usually takes under a second.",
+    "",
+  }
+  local marks = {
+    { line = 1, col = 0, end_col = #lines[2], hl = "MemDashTitle" },
+    { line = 3, col = 0, end_col = #lines[4], hl = "MemDashSummary" },
+  }
+  paint(buf, lines, marks, {})
 end
 
 -- Re-discover sibling sockets, fetch stats, then paint (called by `r`).
@@ -712,8 +808,9 @@ local function open_help_float()
     { "?", "this help" },
     { "<Tab>", "toggle fold under cursor" },
     { "s", "cycle sort key (size → idle → name)" },
-    { "u", "unload buffer under cursor" },
-    { "w", "wipe buffer under cursor" },
+    { "u", "unload buffer under cursor (keeps listed)" },
+    { "w", "wipe buffer under cursor (full remove; refuses if modified)" },
+    { "W", "force-wipe buffer under cursor (full remove; ignores modified)" },
     { "U", "unload all in section under cursor" },
     { "X", "prune everywhere (confirm)" },
     { "x", "kill remote nvim (y/n confirm)" },
@@ -772,12 +869,20 @@ end
 -- Create / paint the fixed bottom hint floating window overlay.
 -- (Hint is now rendered as the floating window's footer; no overlay needed.)
 
--- u/w: unload (default) or wipe buffer under cursor (local or remote).
+-- u/w/W: unload, wipe, or force-wipe buffer under cursor (local or remote).
+-- "wipe" honors the modified flag; "force_wipe" overrides it (:bwipeout!).
 local function action_buffer(verb)
   local row = row_at_cursor()
   if not row or row.kind ~= "buffer" then return end
   local b, proc = row.buffer, row.proc
-  local opts = (verb == "unload") and { unload = true } or { force = false }
+  local opts
+  if verb == "unload" then
+    opts = { unload = true }
+  elseif verb == "force_wipe" then
+    opts = { force = true }
+  else
+    opts = { force = false }
+  end
 
   if proc.is_current then
     pcall(api.nvim_buf_delete, b.bufnr, opts)
@@ -788,7 +893,7 @@ local function action_buffer(verb)
   refresh()
 end
 
--- U: prune the section under cursor (local pass or remote `:MemPrune 0`).
+-- U: prune the section under cursor (local pass or remote `:MemClear 0`).
 local function action_section_unload()
   local row = row_at_cursor()
   if not row or row.kind ~= "section" then return end
@@ -797,13 +902,13 @@ local function action_section_unload()
   if proc.is_current then
     prune.prune({ force_minutes = 0 })
   else
-    rpc.remote_exec(proc.socket, "MemPrune 0")
+    rpc.remote_exec(proc.socket, "MemClear 0")
   end
 
   refresh()
 end
 
--- X: prune everywhere after a confirm; sends `MemPrune 0` to every process.
+-- X: prune everywhere after a confirm; sends `MemClear 0` to every process.
 local function action_prune_all()
   local choice = fn.confirm("Prune all nvim processes?", "&Yes\n&No", 2)
   if choice ~= 1 then return end
@@ -811,7 +916,7 @@ local function action_prune_all()
 
   for _, p in ipairs(shared.dashboard_state.view or {}) do
     if not p.is_current and p.socket then
-      rpc.remote_exec(p.socket, "MemPrune 0")
+      rpc.remote_exec(p.socket, "MemClear 0")
     end
   end
 
@@ -887,6 +992,7 @@ local function bind_keys(buf)
   vim.keymap.set("n", "s", action_cycle_sort, opts)
   vim.keymap.set("n", "u", function() action_buffer("unload") end, opts)
   vim.keymap.set("n", "w", function() action_buffer("wipe") end, opts)
+  vim.keymap.set("n", "W", function() action_buffer("force_wipe") end, opts)
   vim.keymap.set("n", "U", action_section_unload, opts)
   vim.keymap.set("n", "X", action_prune_all, opts)
   vim.keymap.set("n", "x", action_kill_remote, opts)
@@ -940,7 +1046,12 @@ function M.open()
     end,
   })
 
-  refresh()
+  -- Paint a "Loading…" placeholder immediately, then defer the (slow)
+  -- discovery + RPC sweep to the next event-loop tick so the float renders
+  -- before we block on subprocess calls. From the user's perspective the
+  -- popup pops, then fills in.
+  paint_loading()
+  vim.schedule(refresh)
 end
 
 return M

@@ -4,6 +4,14 @@
 -- Toggles current window zoom
 vim.cmd("command! ToggleCurrentWindowZoom lua ToggleCurrentWindowZoom()")
 
+-- `:Reload` — re-source $MYVIMRC. `vim.loader` is disabled in init.lua, so
+-- there's no bytecode cache to invalidate; this is just a friendlier name
+-- for `:source $MYVIMRC` (and a place to add cleanup hooks later if needed).
+vim.api.nvim_create_user_command("Reload", function()
+  vim.cmd("source $MYVIMRC")
+  vim.notify("[reload] sourced $MYVIMRC", vim.log.levels.INFO)
+end, { desc = "Re-source nvim config" })
+
 -- CopyCurrentFileRelativePathToClipboard
 
 -- Fix save file typos

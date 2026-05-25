@@ -28,7 +28,9 @@ local function find_diff_line_for_source_line(diff, target_line)
   return nil
 end
 
-function GitDiffCurrentFilePopup()
+local M = {}
+
+function M.open()
   local file = vim.api.nvim_buf_get_name(0)
   if file == "" then
     vim.notify("No file associated with this buffer", vim.log.levels.WARN)
@@ -46,13 +48,12 @@ function GitDiffCurrentFilePopup()
 
   -- Scratch buffer
   local buf = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
-  vim.api.nvim_buf_set_option(buf, 'filetype', 'diff')
-  vim.api.nvim_buf_set_option(buf, 'modifiable', false)
+  vim.api.nvim_set_option_value('bufhidden', 'wipe', { buf = buf })
+  vim.api.nvim_set_option_value('filetype', 'diff', { buf = buf })
 
-  vim.api.nvim_buf_set_option(buf, 'modifiable', true)
+  vim.api.nvim_set_option_value('modifiable', true, { buf = buf })
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, diff)
-  vim.api.nvim_buf_set_option(buf, 'modifiable', false)
+  vim.api.nvim_set_option_value('modifiable', false, { buf = buf })
 
   -- vim.api.nvim_set_option_value("filetype", "diff", { buf = buf })
 
@@ -135,5 +136,7 @@ end
 
 -- `:GitDiffPopup` user command and the `sd` keymap are wired in
 -- `plugin_settings/git_diff_popup.lua` so they can be registered as
--- lazy-loading stubs. This module just defines the global function.
+-- lazy-loading stubs. This module returns `M.open` as the entry point.
 -- vim.keymap.set('n', '<c-i>', '<ESC>', { noremap = true, silent = true, desc = "Show git diff popup" })
+
+return M

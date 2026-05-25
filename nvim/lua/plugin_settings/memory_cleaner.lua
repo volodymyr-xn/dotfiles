@@ -6,8 +6,8 @@
 -- override.
 --
 -- Wired in `plugins_require.lua` (must run after Neovim startup so timers
--- begin ticking; the autocmds, prune timer, RSS sampler, and :MemPrune
--- command are all installed by this call).
+-- begin ticking; the autocmds, prune timer, RSS sampler, and :MemClear
+-- family of commands are all installed by this call).
 
 require("my_plugins.memory_cleaner").setup({
   -- How long a buffer must sit unfocused (no BufLeave activity) before the
@@ -15,8 +15,10 @@ require("my_plugins.memory_cleaner").setup({
   -- RAM held; lower = aggressive reclaim, more re-reads when revisiting.
   unload_buffer_after_idle_minutes = 250,
 
-  -- Minimum gap between two RSS-over-threshold warning notifications, so a
-  -- sustained breach doesn't spam the notify stack on every timer tick.
+  -- Anti-flap guard: after a threshold-crossing warning fires, suppress the
+  -- next one for this many seconds even if RSS dips below and crosses back.
+  -- Sustained breaches are NOT re-announced (current RSS is on the
+  -- statusline); this only matters when memory bounces around the limit.
   rss_warn_notify_debounce_seconds = 600,
 
   -- Period of the main worker tick. One tick runs the idle-buffer prune
@@ -34,4 +36,12 @@ require("my_plugins.memory_cleaner").setup({
   -- dashboard window. Change alongside `rss_history_max_samples` for a
   -- different span.
   rss_history_sample_interval_seconds = 20 * 60,
+})
+
+-- `sm` — aggressive reclaim: stop all treesitter parsers, wipe all fugitive
+-- buffers, stop all LSP clients, then GC.
+vim.keymap.set("n", "sm", ":MemClearAll<CR>", {
+  noremap = true,
+  silent = true,
+  desc = "Run MemClearAll (treesitter + fugitive + LSP + GC)",
 })

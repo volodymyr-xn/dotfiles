@@ -18,8 +18,15 @@ local M = {}
 local DEFAULT_TIMEOUT_MS = 1500
 
 -- One-line lua snippet to evaluate on a remote nvim. Wrapped in an IIFE so
--- luaeval() sees it as a single expression. Returns a JSON string.
-local REMOTE_SNAPSHOT_EXPR = [[luaeval("(function() local p=0 for _,b in ipairs(vim.api.nvim_list_bufs()) do if vim.api.nvim_buf_is_loaded(b) and pcall(vim.treesitter.get_parser,b) then p=p+1 end end return vim.fn.json_encode({cwd=vim.fn.getcwd(),bufs=vim.fn.getbufinfo(),parsers=p}) end)()")]]
+-- luaeval() sees it as a single expression. Returns a JSON string carrying
+-- buffer/parser counts plus extras for the dashboard sub-row (LSP names,
+-- Lua heap, treesitter language list + byte estimate, fugitive count + bytes).
+-- Parser detection uses `highlighter.active[buf]` (matches what
+-- :MemClearTreesitter would actually stop) instead of `pcall(get_parser)`,
+-- which falsely counts custom buftypes that have no registered grammar.
+-- ts_bytes counts source-text bytes of buffers with an active parser; the
+-- dashboard renders ts_bytes × 3 as a rough parser-tree memory estimate.
+local REMOTE_SNAPSHOT_EXPR = [[luaeval("(function() local p=0 local langs={} local ts_bytes=0 local fug_count=0 local fug_bytes=0 local ts=(vim.treesitter.highlighter and vim.treesitter.highlighter.active) or {} for _,b in ipairs(vim.api.nvim_list_bufs()) do if vim.api.nvim_buf_is_valid(b) then local loaded=vim.api.nvim_buf_is_loaded(b) local ft=loaded and vim.bo[b].filetype or '' local name=vim.api.nvim_buf_get_name(b) or '' local is_fug=(ft:match('^fugitive') or name:match('^fugitive://') or name:match('fugitiveblame')) and true or false if is_fug then fug_count=fug_count+1 end if loaded and ts[b] then p=p+1 if ft and ft~='' then langs[ft]=true end end if loaded and (ts[b] or is_fug) then local ok,info=pcall(vim.api.nvim_buf_call,b,function() return vim.fn.wordcount().bytes end) if ok and info then if ts[b] then ts_bytes=ts_bytes+info end if is_fug then fug_bytes=fug_bytes+info end end end end end local langs_list={} for k in pairs(langs) do table.insert(langs_list,k) end table.sort(langs_list) local lsp_names={} local gc=vim.lsp.get_clients or vim.lsp.get_active_clients for _,c in ipairs(gc()) do table.insert(lsp_names,c.name) end table.sort(lsp_names) return vim.fn.json_encode({cwd=vim.fn.getcwd(),bufs=vim.fn.getbufinfo(),parsers=p,ts_langs=langs_list,ts_bytes=ts_bytes,fug_count=fug_count,fug_bytes=fug_bytes,lsp_names=lsp_names,lua_heap_kb=math.floor(collectgarbage('count'))}) end)()")]]
 
 -- Run a vim expression on the remote nvim; returns stdout (string) or nil+err.
 local function run_remote_expr(socket, expr, timeout_ms)
@@ -52,6 +59,110 @@ function M.remote_buf_delete(socket, bufnr, opts)
     bufnr, force, unload)
 
   return run_remote_expr(socket, expr, 2000)
+end
+
+-- LSP servers we recognize by binary/comm name. The matcher is forgiving:
+-- it accepts the full name OR a prefix. Add new servers freely — anything
+-- not on the list still shows up in the "other" bucket when its name
+-- contains "language-server".
+local LSP_SERVER_HINTS = {
+  "language%-server",
+  "tsserver",
+  "typescript%-language",
+  "pyright",
+  "pylsp",
+  "ruby%-lsp",
+  "solargraph",
+  "lua%-language%-server",
+  "lua%-ls",
+  "rust%-analyzer",
+  "gopls",
+  "clangd",
+  "eslint",
+  "stylelint",
+  "vscode%-",
+}
+
+local function looks_like_lsp(comm)
+  if not comm or comm == "" then return false end
+  for _, pat in ipairs(LSP_SERVER_HINTS) do
+    if comm:lower():match(pat) then return true end
+  end
+  return false
+end
+
+-- Scan a full `ps args` line and return a short display name iff any token
+-- in the command line looks like an LSP server binary. Examples:
+--   "node /…/mason/bin/vscode-json-language-server --stdio"
+--     → "vscode-json-language-server"
+--   "/…/lua-language-server -E /…/main.lua"
+--     → "lua-language-server"
+-- Returns nil when nothing matches (the process is some other nvim child).
+local function lsp_name_from_args(args_line)
+  for word in args_line:gmatch("(%S+)") do
+    local basename = word:match("([^/]+)$") or word
+
+    if looks_like_lsp(basename) then
+      return basename
+    end
+  end
+
+  return nil
+end
+
+-- Enumerate child processes of `pid` that look like LSP servers, returning
+-- `{ items = {{pid=, kb=, name=}, ...}, total_kb = N }`. Names come from the
+-- full ps args (not comm) because language servers are typically launched
+-- via `node /path/to/<server>` and would otherwise all show as "node".
+local function lsp_processes_for(pid)
+  -- macOS pgrep requires a pattern arg; "." matches every command line so
+  -- the `-P` filter alone decides what's returned. Works on Linux pgrep too.
+  local r = vim.system({ "pgrep", "-P", tostring(pid), "." },
+    { text = true, timeout = 500 }):wait()
+
+  if r.code ~= 0 or not r.stdout or r.stdout == "" then
+    return { items = {}, total_kb = 0 }
+  end
+
+  local pids = {}
+
+  for line in r.stdout:gmatch("[^\n]+") do
+    local p = tonumber(line)
+
+    if p then
+      table.insert(pids, tostring(p))
+    end
+  end
+
+  if #pids == 0 then
+    return { items = {}, total_kb = 0 }
+  end
+
+  local r2 = vim.system({ "ps", "-o", "pid=,rss=,args=", "-p", table.concat(pids, ",") },
+    { text = true, timeout = 800 }):wait()
+
+  if r2.code ~= 0 or not r2.stdout then
+    return { items = {}, total_kb = 0 }
+  end
+
+  local items = {}
+  local total_kb = 0
+
+  for line in r2.stdout:gmatch("[^\n]+") do
+    local cp, kb, args = line:match("^%s*(%d+)%s+(%d+)%s+(.+)$")
+
+    if cp and kb and args then
+      local name = lsp_name_from_args(args)
+
+      if name then
+        local kb_n = tonumber(kb)
+        table.insert(items, { pid = tonumber(cp), kb = kb_n, name = name })
+        total_kb = total_kb + kb_n
+      end
+    end
+  end
+
+  return { items = items, total_kb = total_kb }
 end
 
 -- Best-effort cwd lookup for a foreign pid (no RPC; works on stuck nvims too).
@@ -110,18 +221,103 @@ function M.discover_processes()
       if pid and pid_alive(pid) then
         table.insert(processes, {
           pid = pid, cwd = pid_cwd(pid), socket = path,
-          is_current = false, uptime = stats.lstart_for(pid),
+          is_current = false,
+          uptime = stats.lstart_for(pid),
+          uptime_seconds = stats.etime_seconds_for(pid),
         })
       end
     end
   end
 
+  local self_pid = fn.getpid()
   table.insert(processes, 1, {
-    pid = fn.getpid(), cwd = fn.getcwd(), socket = self_sock,
-    is_current = true, uptime = stats.lstart_for(fn.getpid()),
+    pid = self_pid, cwd = fn.getcwd(), socket = self_sock,
+    is_current = true,
+    uptime = stats.lstart_for(self_pid),
+    uptime_seconds = stats.etime_seconds_for(self_pid),
   })
 
   return processes
+end
+
+-- Gather LSP names, Lua heap, and distinct treesitter languages for the
+-- current process. Mirrors what REMOTE_SNAPSHOT_EXPR collects on remote
+-- nvims so the dashboard sub-row renders identically for both.
+-- Heuristic: is this buffer a fugitive buffer? Matches blames, fugitive://
+-- URIs, and the per-file fugitiveblame swap-buffer naming.
+local function is_fugitive_buf(buf)
+  local ft = vim.bo[buf].filetype or ""
+  local name = api.nvim_buf_get_name(buf) or ""
+  return ft:match("^fugitive") ~= nil
+    or name:match("^fugitive://") ~= nil
+    or name:match("fugitiveblame") ~= nil
+end
+
+local function buf_bytes(buf)
+  local ok, info = pcall(api.nvim_buf_call, buf, function()
+    return fn.wordcount().bytes
+  end)
+  return (ok and info) or 0
+end
+
+local function local_extras()
+  local langs_set = {}
+  local ts_active = (vim.treesitter.highlighter and vim.treesitter.highlighter.active) or {}
+  local ts_bytes = 0
+  local fug_count = 0
+  local fug_bytes = 0
+
+  for _, b in ipairs(api.nvim_list_bufs()) do
+    if api.nvim_buf_is_valid(b) then
+      local is_fug = is_fugitive_buf(b)
+
+      if is_fug then
+        fug_count = fug_count + 1
+      end
+
+      if api.nvim_buf_is_loaded(b) then
+        if ts_active[b] then
+          local ft = vim.bo[b].filetype
+
+          if ft and ft ~= "" then
+            langs_set[ft] = true
+          end
+
+          ts_bytes = ts_bytes + buf_bytes(b)
+        end
+
+        if is_fug then
+          fug_bytes = fug_bytes + buf_bytes(b)
+        end
+      end
+    end
+  end
+
+  local ts_langs = {}
+
+  for k in pairs(langs_set) do
+    table.insert(ts_langs, k)
+  end
+
+  table.sort(ts_langs)
+
+  local get_clients = vim.lsp.get_clients or vim.lsp.get_active_clients
+  local lsp_names = {}
+
+  for _, c in ipairs(get_clients()) do
+    table.insert(lsp_names, c.name)
+  end
+
+  table.sort(lsp_names)
+
+  return {
+    ts_langs = ts_langs,
+    ts_bytes = ts_bytes,
+    fug_count = fug_count,
+    fug_bytes = fug_bytes,
+    lsp_names = lsp_names,
+    lua_heap_kb = math.floor(collectgarbage("count")),
+  }
 end
 
 -- Local buffer snapshot (no RPC).
@@ -201,6 +397,14 @@ local function decode_snapshot(json_str, proc)
     parsers = payload.parsers or 0,
     rss_mb = stats.rss_mb_for(proc.pid),
     uptime = proc.uptime,
+    uptime_seconds = proc.uptime_seconds,
+    ts_langs = payload.ts_langs or {},
+    ts_bytes = payload.ts_bytes or 0,
+    fug_count = payload.fug_count or 0,
+    fug_bytes = payload.fug_bytes or 0,
+    lsp_names = payload.lsp_names or {},
+    lsp_procs = lsp_processes_for(proc.pid),
+    lua_heap_kb = payload.lua_heap_kb,
     error = nil,
   }, nil
 end
@@ -209,10 +413,20 @@ end
 function M.stats_remote(proc)
   if proc.is_current then
     local s = stats.stats()
+    local extras = local_extras()
+    local lsp_procs = lsp_processes_for(fn.getpid())
     return {
       pid = fn.getpid(), cwd = fn.getcwd(), buffers = local_buffers(),
       loaded = s.loaded, parsers = s.parsers, rss_mb = s.rss_mb,
-      uptime = proc.uptime, error = nil,
+      uptime = proc.uptime, uptime_seconds = proc.uptime_seconds,
+      ts_langs = extras.ts_langs,
+      ts_bytes = extras.ts_bytes,
+      fug_count = extras.fug_count,
+      fug_bytes = extras.fug_bytes,
+      lsp_names = extras.lsp_names,
+      lsp_procs = lsp_procs,
+      lua_heap_kb = extras.lua_heap_kb,
+      error = nil,
     }
   end
 
@@ -222,7 +436,8 @@ function M.stats_remote(proc)
     return {
       pid = proc.pid, cwd = proc.cwd, buffers = {},
       loaded = 0, parsers = 0, rss_mb = stats.rss_mb_for(proc.pid),
-      uptime = proc.uptime, error = err or "remote unreachable",
+      uptime = proc.uptime, uptime_seconds = proc.uptime_seconds,
+      error = err or "remote unreachable",
     }
   end
 
@@ -232,7 +447,8 @@ function M.stats_remote(proc)
     return {
       pid = proc.pid, cwd = proc.cwd, buffers = {},
       loaded = 0, parsers = 0, rss_mb = stats.rss_mb_for(proc.pid),
-      uptime = proc.uptime, error = derr or "decode failed",
+      uptime = proc.uptime, uptime_seconds = proc.uptime_seconds,
+      error = derr or "decode failed",
     }
   end
 
