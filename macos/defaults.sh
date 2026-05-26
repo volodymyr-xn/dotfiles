@@ -50,6 +50,11 @@ defaults write com.googlecode.iterm2 EnableProxyIcon -bool false
 note "Skip automatic update checks at launch"
 defaults write com.googlecode.iterm2 SUEnableAutomaticChecks -bool false
 
+section "Power management (battery only — AC unaffected)"
+
+note "Disable Power Nap on battery (no hourly wakeups for Mail / iCloud sync)"
+sudo pmset -b powernap 0
+
 killall Finder >/dev/null 2>&1 || true
 
 printf '\n%s✓ macOS defaults applied.%s\n' "$C_BOLD$C_GREEN" "$C_RESET"

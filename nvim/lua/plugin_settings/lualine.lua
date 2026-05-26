@@ -181,7 +181,18 @@ require('lualine').setup {
       {
         "filename",
         path = relative_path_flag,
+        -- For OneDiff sidebar buffers show the session's current file path instead of "OneDiffPanel",
+        -- so the [OneDiff] <path> label stays visible when focus is in the sidebar.
         fmt = function(str)
+          if vim.bo.filetype == "OneDiffPanel" then
+            local ok, session = pcall(require, "my_plugins.onediff.session")
+            if ok then
+              local file = session.get_current_file()
+              if file then
+                return "[OneDiff] " .. file.path
+              end
+            end
+          end
           return str
         end
       }

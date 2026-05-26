@@ -188,12 +188,6 @@ function M.show()
   vim.wo[win].winfixwidth = true
   vim.wo[win].winhighlight = "CursorLine:OneDiffCursorLine"
 
-  -- Mirror the diff window's statusline so the OneDiff path stays visible when focus is in the sidebar.
-  local current_file = session.get_current_file()
-  if current_file then
-    vim.wo[win].statusline = " %#OneDiffNonText#[OneDiff] %#OneDiffStatusLinePath#" .. current_file.path
-  end
-
   vim.cmd("wincmd p")
 end
 
