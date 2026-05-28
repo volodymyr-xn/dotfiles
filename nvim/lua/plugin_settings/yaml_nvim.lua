@@ -23,5 +23,6 @@ local function CopyYamlKeyToClipboard()
     print("Copied: " .. cleared_yaml_key)
 end
 
--- vim.keymap.set('n', '<Leader>`', ':YAMLYankKey +<CR>', {})
-vim.keymap.set('n', '<Leader>`', CopyYamlKeyToClipboard, {})
+-- <Leader>` is owned by keymappings/terminal.lua (tmux.send_file); use a
+-- dedicated key here so it does not override the tmux send mapping.
+vim.keymap.set('n', '<Leader>yk', CopyYamlKeyToClipboard, { desc = "Copy YAML key to clipboard" })

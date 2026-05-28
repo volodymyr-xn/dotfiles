@@ -207,9 +207,22 @@ cmp.setup({
       cmp.abort()
       fallback()
     end,
-    ['<CR>'] = cmp.mapping.confirm({
-      select = true,
-    }),
+    -- Confirm a completion when the menu is open; otherwise run autopairs'
+    -- brace-on-newline expansion ourselves (map_cr is off, so it is not in
+    -- the <CR> chain) and then chain vim-endwise to append `end`/`fi`/etc.
+    ['<CR>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.confirm({ select = true })
+      else
+        local autopairs = require("nvim-autopairs")
+        local endwise_keys = vim.api.nvim_replace_termcodes(
+          "<Plug>DiscretionaryEnd", true, true, true
+        )
+
+        vim.api.nvim_feedkeys(autopairs.autopairs_cr(), "n", false)
+        vim.api.nvim_feedkeys(endwise_keys, "m", false)
+      end
+    end, { "i", "s" }),
     -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
     -- ['<Tab>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
     ["<Tab>"] = function(fallback)

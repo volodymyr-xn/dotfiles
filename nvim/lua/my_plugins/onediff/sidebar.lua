@@ -218,6 +218,24 @@ function M.hide()
   session.set_sidebar_buf(nil)
 end
 
+-- True when the sidebar window currently exists in the active tabpage.
+function M.is_visible()
+  local session = require("my_plugins.onediff.session")
+
+  local win = session.get_sidebar_win()
+  if not (win and api.nvim_win_is_valid(win)) then
+    return false
+  end
+
+  for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if w == win then
+      return true
+    end
+  end
+
+  return false
+end
+
 function M.toggle()
   local session = require("my_plugins.onediff.session")
 

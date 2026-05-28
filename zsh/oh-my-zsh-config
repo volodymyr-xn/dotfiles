@@ -11,7 +11,11 @@ ZSH_THEME="avit_custom"
 # ZSH_THEME="jispwoso"
 
 # plugins=(git vi-mode)
-plugins=(vi-mode)
+# OMZ's vi-mode disabled: with tmux `focus-events on` + `escape-time 0`, the
+# focus-in/out bytes (ESC[I / ESC[O) flip the line editor into NORMAL mode
+# and the pane appears "frozen". If a vi keymap is wanted later, prefer
+# jeffreytse/zsh-vi-mode — it claims focus + bracketed-paste sequences.
+plugins=()
 # plugins=(git vi-mode asdf gitfast)
 
 source $ZSH/oh-my-zsh.sh

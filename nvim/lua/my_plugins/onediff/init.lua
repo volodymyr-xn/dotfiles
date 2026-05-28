@@ -122,8 +122,12 @@ function M.refresh()
   end
 
   session.reload_files()
-  sidebar.show()
-  sidebar.refresh()
+
+  -- Preserve the sidebar's open/closed state across a refresh.
+  if sidebar.is_visible() then
+    sidebar.refresh()
+  end
+
   display.render_current()
 end
 

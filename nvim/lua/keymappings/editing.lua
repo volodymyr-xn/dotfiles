@@ -31,3 +31,6 @@ vim.keymap.set('i', '<C-a>', '<Home>', { noremap = true, desc = "Go to beginning
 vim.keymap.set('i', '<C-e>', '<End>', { noremap = true, desc = "Go to end of line" })
 vim.keymap.set('i', '<C-f>', '<C-Left>', { noremap = true, desc = "Move backward one word" })
 vim.keymap.set('i', '<C-b>', '<C-Right>', { noremap = true, desc = "Move forward one word" })
+
+-- Run the :R command
+vim.keymap.set('n', '<Leader>r', ':R<CR>', { noremap = true, silent = true, desc = "Run :R command" })
