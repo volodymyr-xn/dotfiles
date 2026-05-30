@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# Fuzzy-switch to any tmux pane across every session. Lists panes as
+# "session_name window_name#pane_index" and shows a live preview of the
+# highlighted pane's content on the right. Bound to prefix+m.
+
+set -euo pipefail
+
+# pane_id (e.g. "%5") is emitted first as a stable, space-free key; fzf hides
+# it from the list (--with-nth=2..) but still uses it for the preview ({1}).
+selection=$(
+  tmux list-panes -a -F '#{pane_id} #{session_name} #{window_name}###{pane_index}' \
+    | fzf --with-nth=2.. \
+          --prompt='Pane > ' \
+          --height=100% \
+          --reverse \
+          --preview='tmux capture-pane -ep -t {1}' \
+          --preview-window='right:60%'
+) || exit 0
+
+[ -z "$selection" ] && exit 0
+
+# Everything before the first space is the pane id.
+pane_id=${selection%% *}
+
+# Move the invoking client to the chosen pane's session, then to its window
+# and pane (window/pane targets resolve a pane id to its window/pane).
+target_session=$(tmux display-message -p -t "$pane_id" '#{session_name}')
+tmux switch-client -t "$target_session"
+tmux select-window -t "$pane_id"
+tmux select-pane -t "$pane_id"
