@@ -215,12 +215,18 @@ cmp.setup({
         cmp.confirm({ select = true })
       else
         local autopairs = require("nvim-autopairs")
-        local endwise_keys = vim.api.nvim_replace_termcodes(
-          "<Plug>DiscretionaryEnd", true, true, true
-        )
 
         vim.api.nvim_feedkeys(autopairs.autopairs_cr(), "n", false)
-        vim.api.nvim_feedkeys(endwise_keys, "m", false)
+
+        -- endwise is lazy-loaded by filetype; only feed its <Plug> when it's
+        -- mapped, otherwise the keys are typed literally as text.
+        if vim.fn.maparg("<Plug>DiscretionaryEnd", "i") ~= "" then
+          local endwise_keys = vim.api.nvim_replace_termcodes(
+            "<Plug>DiscretionaryEnd", true, true, true
+          )
+
+          vim.api.nvim_feedkeys(endwise_keys, "m", false)
+        end
       end
     end, { "i", "s" }),
     -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
