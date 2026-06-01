@@ -53,4 +53,4 @@ hs.hotkey.bind({"cmd"}, "e", function()
 end)
 
 -- Cmd+- → toggle mouse side-button mappings (off = pass through to games)
-hs.hotkey.bind({"cmd"}, "n", mouseSideButtons.toggle)
+hs.hotkey.bind({"cmd"}, "m", mouseSideButtons.toggle)
