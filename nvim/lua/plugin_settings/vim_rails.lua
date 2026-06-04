@@ -21,6 +21,11 @@ vim.g.rails_projections = {
   ['app/components/*.scss'] = {
     alternate = 'app/components/{}.rb',
   },
+  -- Models in custom/ overlay dirs are NOT namespaced (Consul autoload
+  -- overlay), so strip "custom/" before deriving the schema table anchor.
+  ['app/models/custom/*.rb'] = {
+    related = 'db/schema.rb#{underscore|plural}',
+  },
   ['app/*.rb'] = {
     alternate = 'spec/{}_spec.rb',
   },

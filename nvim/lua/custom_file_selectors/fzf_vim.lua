@@ -286,6 +286,28 @@ function M.custom_full_text_search_rg()
   vim.cmd("CustomFullTextSearchRg")
 end
 
+-- Like live_grep (Ag) but with a bat-backed preview window via fzf#vim#with_preview.
+-- match:none stops the catch-all `.` pattern from highlighting every line; fzf
+-- highlights the typed query instead.
+function M.live_grep_with_preview()
+  vim.fn["fzf#vim#grep"](
+    "rg --column --line-number --no-heading --color=always --smart-case --colors 'match:none' .",
+    1,
+    vim.fn["fzf#vim#with_preview"]({ options = { "--prompt", "Live Grep (preview)> " } }),
+    0
+  )
+end
+
+-- Like custom_full_text_search (--follow symlinks) but with a bat-backed preview window
+function M.custom_full_text_search_with_preview()
+  vim.fn["fzf#vim#grep"](
+    "rg --column --line-number --no-heading --color=always --smart-case --follow --colors 'match:none' .",
+    1,
+    vim.fn["fzf#vim#with_preview"]({ options = { "--prompt", "Full Text (preview)> " } }),
+    0
+  )
+end
+
 function M.live_grep_changed_files()
   local lines = vim.fn.systemlist("git diff --name-only --diff-filter=ACMR HEAD && git ls-files --others --exclude-standard")
   local files = vim.tbl_filter(function(f) return f ~= "" and vim.fn.filereadable(f) == 1 end, lines)

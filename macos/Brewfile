@@ -18,6 +18,8 @@ brew "fd"
 brew "ripgrep"
 # Code-search similar to ack
 brew "the_silver_searcher"
+# Cat clone with syntax highlighting (powers fzf.vim preview)
+brew "bat"
 
 brew "tree"
 

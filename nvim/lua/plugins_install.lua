@@ -777,14 +777,6 @@ require("lazy").setup({
   -- Indent line guides
   -- "lukas-reineke/indent-blankline.nvim",
 
-  -- Visual glow feedback for undo, redo, yank, paste, and search
-  {
-    "y3owk1n/undo-glow.nvim",
-    version = "*",
-    event = "VeryLazy",
-    config = function() require("plugin_settings.undo_glow") end,
-  },
-
   -- {
   --   "folke/snacks.nvim",
   --   lazy = false,

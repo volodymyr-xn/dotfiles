@@ -18,6 +18,11 @@ vim.keymap.set("n", "g*", [[g*<Cmd>lua require("hlslens").start()<CR>]], kopts)
 -- Like `#` but without word boundaries.
 vim.keymap.set("n", "g#", [[g#<Cmd>lua require("hlslens").start()<CR>]], kopts)
 
--- Clears highlighting and stops the lens; `n`/`N` mappings live in undo_glow.lua
--- (they call hlslens.start() after the glow to avoid clobbering each other).
+-- Search forward + refresh lens (match index/total + scrollbar marks).
+vim.keymap.set("n", "n", [[<Cmd>execute('normal! ' . v:count1 . 'n')<CR><Cmd>lua require('hlslens').start()<CR>]], kopts)
+
+-- Search backward + refresh lens.
+vim.keymap.set("n", "N", [[<Cmd>execute('normal! ' . v:count1 . 'N')<CR><Cmd>lua require('hlslens').start()<CR>]], kopts)
+
+-- Clears highlighting and stops the lens.
 vim.keymap.set("n", "<Leader>l", "<Cmd>noh<CR><Cmd>lua require('hlslens').stop()<CR>", kopts)
