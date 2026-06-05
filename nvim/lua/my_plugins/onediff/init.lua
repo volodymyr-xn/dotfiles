@@ -21,6 +21,7 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("OneDiffStageHunk", M.stage_hunk, { desc = "Stage current hunk" })
   vim.api.nvim_create_user_command("OneDiffUnstageHunk", M.unstage_hunk, { desc = "Unstage current hunk" })
   vim.api.nvim_create_user_command("OneDiffToggleTreesitter", M.toggle_treesitter, { desc = "Toggle treesitter highlighting" })
+  vim.api.nvim_create_user_command("OneDiffCommitPicker", M.open_commit_picker, { desc = "Pick a commit to diff in OneDiff" })
 end
 
 -- Flip treesitter highlighting on/off for the current session and re-render the active file.
@@ -250,6 +251,108 @@ local function fzf_lua_picker()
       end,
     },
   })
+end
+
+-- Switch the live session to show the selected commit's diff, then re-render sidebar + view.
+local function enter_commit_mode(commit_hash)
+  if not commit_hash or commit_hash == "" then
+    return
+  end
+
+  local session = require("my_plugins.onediff.session")
+  local sidebar = require("my_plugins.onediff.sidebar")
+  local display = require("my_plugins.onediff.display")
+  local git_ops = require("my_plugins.onediff.git_ops")
+
+  local info = git_ops.get_commit_info(commit_hash)
+  if not info then
+    vim.notify("OneDiff: Could not resolve commit " .. commit_hash, vim.log.levels.ERROR)
+    return
+  end
+
+  session.set_commit_mode(info)
+  session.reload_files()
+  session.set_current_index(1)
+
+  sidebar.show()
+  sidebar.render()
+  display.render_current()
+
+  local subject = info.subject and info.subject ~= "" and (" — " .. info.subject) or ""
+  vim.notify("OneDiff: Showing commit " .. info.short .. subject)
+end
+
+local function telescope_commit_picker()
+  local ok, builtin = pcall(require, "telescope.builtin")
+  if not ok then
+    vim.notify("OneDiff: Telescope not available", vim.log.levels.ERROR)
+    return
+  end
+
+  builtin.git_commits({
+    attach_mappings = function(_, map)
+      local actions = require("telescope.actions")
+      local action_state = require("telescope.actions.state")
+
+      local function pick(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
+        actions.close(prompt_bufnr)
+        if selection then
+          enter_commit_mode(selection.value)
+        end
+      end
+
+      map("i", "<CR>", pick)
+      map("n", "<CR>", pick)
+      return true
+    end,
+  })
+end
+
+local function fzf_lua_commit_picker()
+  local ok, fzf_lua = pcall(require, "fzf-lua")
+  if not ok then
+    vim.notify("OneDiff: fzf-lua not available", vim.log.levels.ERROR)
+    return
+  end
+
+  fzf_lua.git_commits({
+    actions = {
+      ["default"] = function(selected)
+        if selected and #selected > 0 then
+          -- fzf-lua strips ANSI from the returned line; the first token is the short hash.
+          local hash = selected[1]:match("^%S+")
+          enter_commit_mode(hash)
+        end
+      end,
+    },
+  })
+end
+
+-- Open a commit picker; the chosen commit's diff replaces the current OneDiff contents.
+function M.open_commit_picker()
+  local session = require("my_plugins.onediff.session")
+  local git_ops = require("my_plugins.onediff.git_ops")
+  local settings = require("my_plugins.onediff.settings")
+
+  if not session.is_open() then
+    M.open()
+  end
+
+  if not git_ops.get_root() then
+    vim.notify("OneDiff: Not in a git repository", vim.log.levels.WARN)
+    return
+  end
+
+  local picker = settings.get("picker") or "telescope"
+
+  if picker == "fzf-lua" or picker == "fzf_lua" then
+    fzf_lua_commit_picker()
+  elseif picker == "telescope" then
+    telescope_commit_picker()
+  else
+    vim.notify("OneDiff: Unknown picker '" .. picker .. "'. Use 'telescope' or 'fzf-lua'", vim.log.levels.ERROR)
+  end
 end
 
 function M.open_file_picker()

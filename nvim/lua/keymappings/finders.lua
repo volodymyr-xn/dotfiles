@@ -31,26 +31,6 @@ map("q",
   function() R.call("find_changed_files") end,
   "Find changed files")
 
-map("<leader>q1",
-  function() R.call("find_changed_files_by_extension", "%.js") end,
-  "Find changed JS files")
-
-map("<leader>qj",
-  function() R.call("find_changed_files_by_extension", "%.js") end,
-  "Find changed JS files")
-
-map("<leader>q2",
-  function() R.call("find_changed_files_by_extension", "%.rb") end,
-  "Find changed RB files")
-
-map("<leader>q3",
-  function() R.call("find_changed_files_by_extension", "%.html%.erb") end,
-  "Find changed ERB files")
-
-map("<leader>q4",
-  function() R.call("find_changed_files_by_extension", "%.s?css") end,
-  "Find changed CSS files")
-
 map("<Leader>f",
   function() R.call("find_resource_in_dir", components_dir) end,
   "Find view components")
@@ -79,10 +59,6 @@ map("<Leader>b",
   function() R.call("find_resource_in_dir", "config/locales") end,
   "Find i18n files")
 
-
-map("<Leader>qq",
-  function() R.call("find_files_in_dirs", task_dirs) end,
-  "Find files in task dirs")
 
 map("si",
   function() R.call("buffer_fuzzy_find") end,

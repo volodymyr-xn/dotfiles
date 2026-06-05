@@ -29,6 +29,27 @@ local function split_lines(data)
   return lines
 end
 
+-- Build the diff window's statusline ("bottombar"). In commit mode it leads with a bright
+-- amber COMMIT badge (dark text on colored bg) so the alternate base is impossible to miss.
+local function build_statusline(file)
+  local session = require("my_plugins.onediff.session")
+  local commit = session.get_commit()
+  if not commit then
+    return " %#OneDiffNonText#[OneDiff] %#OneDiffStatusLinePath#" .. file.path
+  end
+
+  local short = session.get_commit_short() or commit:sub(1, 7)
+  local subject = session.get_commit_subject() or ""
+  -- Escape % so a subject like "fix 50% bug" isn't read as a statusline format item.
+  subject = subject:gsub("%%", "%%%%")
+  local badge = " 󰜘 COMMIT " .. short
+  if subject ~= "" then
+    badge = badge .. "  " .. subject
+  end
+  badge = badge .. " "
+  return "%#OneDiffCommitMode#" .. badge .. "%* %#OneDiffStatusLinePath#" .. file.path
+end
+
 -- Pre-read working-copy content so render_current can call this between diff dispatch and wait,
 -- letting the file IO overlap with the git subprocesses.
 local function read_working_copy_content(full_path)
@@ -101,10 +122,16 @@ function M.render_current()
   end
 
   local base_ref = session.get_base_ref()
+  local commit = session.get_commit()
 
   if git_ops.is_binary_file(file.path, base_ref, file.full_path) then
     session.set_hunks({})
     M.open_binary_placeholder(file)
+    return
+  end
+
+  if commit then
+    M.render_commit_file(file, base_ref, commit)
     return
   end
 
@@ -140,6 +167,33 @@ function M.render_current()
   vim.schedule(prefetch_neighbors)
 end
 
+-- Render one file as it changed in the selected commit: diff is parent..commit and the buffer
+-- body is the file *at* the commit (via `git show`), not the working copy. There is no staging
+-- in this mode, so staged_hunks is always empty.
+function M.render_commit_file(file, base_ref, commit)
+  local session = require("my_plugins.onediff.session")
+  local git_ops = require("my_plugins.onediff.git_ops")
+  local diff_parse = require("my_plugins.onediff.diff_parse")
+
+  -- base_ref is the commit's parent, so the existing deleted-file path (which reads base content)
+  -- already shows the version that this commit removed.
+  if file.status == "deleted" then
+    session.set_hunks({})
+    session.set_staged_hunks({})
+    M.open_file_with_diff(file, {}, base_ref, {}, nil)
+    return
+  end
+
+  local diff_text = git_ops.get_commit_file_diff(base_ref, commit, file.path)
+  local hunks = diff_parse.parse_hunks(diff_text)
+  session.set_hunks(hunks)
+  session.set_staged_hunks({})
+
+  local content = git_ops.get_commit_content(commit, file.path) or ""
+  local prefetched = { oversize = false, lines = split_lines(content) }
+  M.open_file_with_diff(file, hunks, base_ref, {}, prefetched)
+end
+
 -- Acquire the one reusable scratch buffer; create on first use, otherwise wipe its contents.
 local function acquire_diff_buf(session, settings)
   local buf = session.get_diff_buf()
@@ -162,7 +216,7 @@ end
 local function configure_diff_buf(buf, target_win, file)
   vim.b[buf].is_onediff_buffer = true
   vim.b[buf].onediff_file_path = file.path
-  vim.wo[target_win].statusline = " %#OneDiffNonText#[OneDiff] %#OneDiffStatusLinePath#" .. file.path
+  vim.wo[target_win].statusline = build_statusline(file)
   vim.keymap.set("n", '"', "<Nop>", { buffer = buf, silent = true })
   vim.keymap.set("n", "m", function() require("my_plugins.onediff").toggle_zoom() end, { buffer = buf, silent = true })
 end
@@ -371,6 +425,8 @@ function M.setup_buffer_keymaps(buf)
   vim.keymap.set("n", "<Esc>", onediff.close, opts)
   vim.keymap.set("n", "<Leader>e", onediff.refresh, opts)
   vim.keymap.set("n", "sf", onediff.open_or_focus_and_refresh, opts)
+  -- Pick a commit and load its diff into this OneDiff view (commit mode).
+  vim.keymap.set("n", "<Leader>t", onediff.open_commit_picker, opts)
   vim.keymap.set("n", "o", onediff.open_current_file_in_new_tab, opts)
   vim.keymap.set("n", "i", onediff.open_current_file_in_new_tab, opts)
   vim.keymap.set("n", "sn", onediff.stage_hunk, opts)
@@ -397,7 +453,7 @@ function M.setup_buffer_keymaps(buf)
       vim.wo[win].signcolumn = "yes"
       local path = vim.b[buf].onediff_file_path
       if path then
-        vim.wo[win].statusline = " %#OneDiffNonText#[OneDiff] %#OneDiffStatusLinePath#" .. path
+        vim.wo[win].statusline = build_statusline({ path = path })
       end
     end,
   })

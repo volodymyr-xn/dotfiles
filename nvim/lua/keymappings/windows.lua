@@ -19,9 +19,6 @@ vim.api.nvim_set_keymap('n', '_', '<C-w>5-', { noremap = true, desc = "Decrease 
 -- Open new tab
 vim.api.nvim_set_keymap('n', '<c-t>', '<esc>:tabnew<CR>', { silent = true, noremap = true, desc = "Open new tab" })
 
--- Close all tabs except current
-vim.api.nvim_set_keymap('n', '<Leader>qa', ':tabonly<CR>', { noremap = true, desc = "Close all other tabs" })
-
 -- Tab navigation
 vim.api.nvim_set_keymap('n', '<C-e>', ':tabnext<CR>', { noremap = true, silent = true, desc = "Next tab" })
 vim.api.nvim_set_keymap('n', '<M-j>', ':tabnext<CR>', { noremap = true, silent = true, desc = "Next tab" })

@@ -97,6 +97,8 @@ function M.setup_highlights()
   vim.api.nvim_set_hl(0, "OneDiffSidebarDeleted", { fg = "#f38ba8", default = true })
   vim.api.nvim_set_hl(0, "OneDiffSidebarModified", { fg = "#f9e2af", default = true })
   vim.api.nvim_set_hl(0, "OneDiffSidebarSelected", { bg = "#45475a", bold = true, default = true })
+  -- High-contrast badge marking "commit diff" mode in the statusline / sidebar (dark text on amber).
+  vim.api.nvim_set_hl(0, "OneDiffCommitMode", { fg = "#11111b", bg = "#fab387", bold = true })
 end
 
 function M.get(key)

@@ -24,6 +24,8 @@ end
 
 local function persist_current(state)
   if not state then return end
+  -- Commit mode is transient; its parent base_ref must not clobber the saved working-tree selection.
+  if state.commit then return end
   local file = state.changed_files and state.changed_files[state.current_index]
   if not file then return end
   local all = read_persisted()
@@ -51,6 +53,10 @@ local function create_instance()
     id = id,
     active = false,
     base_ref = nil,
+    -- When set, the instance shows a single commit (parent..commit) instead of the working tree.
+    commit = nil,
+    commit_short = nil,
+    commit_subject = nil,
     changed_files = {},
     current_index = 0,
     current_hunks = {},
@@ -201,6 +207,45 @@ function M.set_base_ref(ref)
   state.base_ref = ref
 end
 
+-- Switch the active instance into commit mode: base_ref becomes the commit's parent so all
+-- existing parent-vs-X git ops (diffs, deleted-file content) point at the right "before" side.
+-- Pass nil to leave commit mode and return to the working-tree diff.
+function M.set_commit_mode(info)
+  local state = get_current_instance()
+  if not state then return end
+
+  if info then
+    state.commit = info.hash
+    state.commit_short = info.short
+    state.commit_subject = info.subject
+    state.base_ref = info.parent
+  else
+    state.commit = nil
+    state.commit_short = nil
+    state.commit_subject = nil
+    state.base_ref = require("my_plugins.onediff.settings").get("base_ref")
+  end
+
+  -- Invalidate any memoized working-tree hunks so stale fills don't bleed into the new view.
+  state.diff_cache = {}
+  state.diff_cache_version = state.diff_cache_version + 1
+end
+
+function M.get_commit()
+  local state = get_current_instance()
+  return state and state.commit or nil
+end
+
+function M.get_commit_short()
+  local state = get_current_instance()
+  return state and state.commit_short or nil
+end
+
+function M.get_commit_subject()
+  local state = get_current_instance()
+  return state and state.commit_subject or nil
+end
+
 function M.reload_files()
   local git_ops = require("my_plugins.onediff.git_ops")
   local state = get_current_instance()
@@ -211,7 +256,11 @@ function M.reload_files()
   state.diff_cache_version = state.diff_cache_version + 1
 
   local current_file = M.get_current_file()
-  state.changed_files = git_ops.list_changed_files(state.base_ref)
+  if state.commit then
+    state.changed_files = git_ops.list_commit_files(state.base_ref, state.commit)
+  else
+    state.changed_files = git_ops.list_changed_files(state.base_ref)
+  end
 
   if current_file then
     for i, f in ipairs(state.changed_files) do

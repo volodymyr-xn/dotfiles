@@ -305,18 +305,34 @@ function M.render()
   table.insert(lines, root_display)
   table.insert(hl_marks, { line = 0, col = 0, end_col = #root_display, hl = "OneDiffPanelPath" })
 
+  -- In commit mode, lead the panel with the same amber COMMIT badge as the diff statusline.
+  local commit = session.get_commit()
+  if commit then
+    local short = session.get_commit_short() or commit:sub(1, 7)
+    local subject = session.get_commit_subject() or ""
+    local banner = " 󰜘 COMMIT " .. short
+    if subject ~= "" then
+      banner = banner .. "  " .. subject
+    end
+    local banner_line = #lines
+    table.insert(lines, banner)
+    table.insert(hl_marks, { line = banner_line, col = 0, end_col = #banner, hl = "OneDiffCommitMode", priority = 200 })
+  end
+
   table.insert(lines, "")
 
+  local changes_line = #lines
   local changes_title = "Changes"
   local changes_count = "(" .. #files .. ")"
   local mode_label = M.flat_mode and "  ≡" or ""
   table.insert(lines, changes_title .. " " .. changes_count .. mode_label)
-  table.insert(hl_marks, { line = 2, col = 0, end_col = #changes_title, hl = "OneDiffPanelTitle" })
-  table.insert(hl_marks, { line = 2, col = #changes_title + 1, end_col = #changes_title + 1 + #changes_count, hl = "OneDiffPanelCount" })
+  table.insert(hl_marks, { line = changes_line, col = 0, end_col = #changes_title, hl = "OneDiffPanelTitle" })
+  table.insert(hl_marks, { line = changes_line, col = #changes_title + 1, end_col = #changes_title + 1 + #changes_count, hl = "OneDiffPanelCount" })
 
   if #files == 0 then
+    local nochanges_line = #lines
     table.insert(lines, "  No changes")
-    table.insert(hl_marks, { line = 3, col = 0, end_col = 12, hl = "OneDiffPanelCount" })
+    table.insert(hl_marks, { line = nochanges_line, col = 0, end_col = 12, hl = "OneDiffPanelCount" })
   else
     M.file_line_map = {}
     M.folder_line_map = {}
@@ -940,6 +956,8 @@ function M.setup_keymaps(buf)
   vim.keymap.set("n", "<Leader>e", onediff.refresh, opts)
   vim.keymap.set("n", "sf", onediff.open_or_focus_and_refresh, opts)
   vim.keymap.set("n", "st", M.toggle_flat_mode, opts)
+  -- Pick a commit and load its diff into this OneDiff view (commit mode).
+  vim.keymap.set("n", "<Leader>t", onediff.open_commit_picker, opts)
 
   vim.keymap.set("n", "`", function()
     local session = require("my_plugins.onediff.session")

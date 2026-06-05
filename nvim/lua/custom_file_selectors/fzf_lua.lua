@@ -3,7 +3,9 @@ local M = {}
 local root = require("custom_file_selectors.root")
 
 local defaults = {
-  winopts = { height = 0.99, width = 0.96 },
+  -- preview.vertical: when flex layout flips to vertical (narrow window),
+  -- keep preview on top so the search prompt/results stay at the bottom
+  winopts = { height = 0.99, width = 0.96, preview = { vertical = "up:45%" } },
   fzf_opts = { ["--layout"] = "default" },
 }
 

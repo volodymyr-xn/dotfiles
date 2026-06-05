@@ -35,6 +35,61 @@ function M.invalidate_root()
   binary_cache = {}
 end
 
+-- Accumulate per-path insertion/deletion counts from `git diff --numstat` output into `stats`.
+-- Binary files (numstat "-\t-\t<path>") are recorded in the module-level binary_cache.
+local function parse_numstat_into(output, stats)
+  if not output then
+    return
+  end
+  for line in output:gmatch("[^\n]+") do
+    local adds, dels, path = line:match("^(%S+)%s+(%S+)%s+(.+)$")
+    if path then
+      if adds == "-" and dels == "-" then
+        binary_cache[path] = true
+      end
+
+      local insertions = tonumber(adds) or 0
+      local deletions = tonumber(dels) or 0
+      if not stats[path] then
+        stats[path] = { insertions = insertions, deletions = deletions }
+      else
+        stats[path].insertions = stats[path].insertions + insertions
+        stats[path].deletions = stats[path].deletions + deletions
+      end
+    end
+  end
+end
+
+-- Turn `git diff --name-status` output into file entries, skipping paths already in `seen`.
+local function parse_status_into(output, files, stats, seen, root)
+  if not output then
+    return
+  end
+  for line in output:gmatch("[^\n]+") do
+    local status, path = line:match("^(%S+)%s+(.+)$")
+    if status and path and not seen[path] then
+      seen[path] = true
+      local file_status = "modified"
+      if status == "A" then
+        file_status = "added"
+      elseif status == "D" then
+        file_status = "deleted"
+      elseif status:match("^R") then
+        file_status = "renamed"
+      end
+      local file_stats = stats[path] or { insertions = 0, deletions = 0 }
+      table.insert(files, {
+        path = path,
+        full_path = root .. "/" .. path,
+        status = file_status,
+        insertions = file_stats.insertions,
+        deletions = file_stats.deletions,
+        is_binary = binary_cache[path] == true,
+      })
+    end
+  end
+end
+
 function M.list_changed_files(base_ref)
   local files = {}
   local root = get_git_root()
@@ -52,65 +107,12 @@ function M.list_changed_files(base_ref)
   local numstat_unstaged = run_argv({ "git", "diff", "--numstat", base_ref })
 
   local stats = {}
-  local function parse_numstat(output)
-    if not output then
-      return
-    end
-    for line in output:gmatch("[^\n]+") do
-      -- numstat marks binary files as "-\t-\t<path>"; tonumber will return nil for "-".
-      local adds, dels, path = line:match("^(%S+)%s+(%S+)%s+(.+)$")
-      if path then
-        if adds == "-" and dels == "-" then
-          binary_cache[path] = true
-        end
-
-        local insertions = tonumber(adds) or 0
-        local deletions = tonumber(dels) or 0
-        if not stats[path] then
-          stats[path] = { insertions = insertions, deletions = deletions }
-        else
-          stats[path].insertions = stats[path].insertions + insertions
-          stats[path].deletions = stats[path].deletions + deletions
-        end
-      end
-    end
-  end
-
-  parse_numstat(numstat_staged)
-  parse_numstat(numstat_unstaged)
+  parse_numstat_into(numstat_staged, stats)
+  parse_numstat_into(numstat_unstaged, stats)
 
   local seen = {}
-  local function parse_status(output)
-    if not output then
-      return
-    end
-    for line in output:gmatch("[^\n]+") do
-      local status, path = line:match("^(%S+)%s+(.+)$")
-      if status and path and not seen[path] then
-        seen[path] = true
-        local file_status = "modified"
-        if status == "A" then
-          file_status = "added"
-        elseif status == "D" then
-          file_status = "deleted"
-        elseif status:match("^R") then
-          file_status = "renamed"
-        end
-        local file_stats = stats[path] or { insertions = 0, deletions = 0 }
-        table.insert(files, {
-          path = path,
-          full_path = root .. "/" .. path,
-          status = file_status,
-          insertions = file_stats.insertions,
-          deletions = file_stats.deletions,
-          is_binary = binary_cache[path] == true,
-        })
-      end
-    end
-  end
-
-  parse_status(staged)
-  parse_status(unstaged)
+  parse_status_into(staged, files, stats, seen, root)
+  parse_status_into(unstaged, files, stats, seen, root)
 
   local untracked = run_argv({ "git", "status", "--porcelain", "--untracked-files=all" })
   if untracked then
@@ -305,6 +307,58 @@ end
 
 function M.get_root()
   return get_git_root()
+end
+
+-- Git's well-known empty-tree object; used as the "parent" of a root commit so its
+-- diff shows every file as an addition instead of failing on a missing `<commit>^`.
+local EMPTY_TREE = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+
+-- Resolve a commit to { hash, short, parent, subject }. `parent` is the first-parent ref
+-- (falling back to the empty tree for a root commit) so callers can diff parent..commit.
+function M.get_commit_info(commit)
+  local out = run_argv({ "git", "show", "-s", "--format=%H%x1f%h%x1f%P%x1f%s", commit })
+  if not out then
+    return nil
+  end
+  local parts = vim.split(vim.trim(out), "\31", { plain = true })
+  if #parts < 4 then
+    return nil
+  end
+  local parent = parts[3]:match("^(%S+)") or EMPTY_TREE
+  return { hash = parts[1], short = parts[2], parent = parent, subject = parts[4] }
+end
+
+-- List files touched by a single commit (parent..commit). Renames are split into delete+add
+-- via --no-renames so every reported path is valid for `git show commit:path`.
+function M.list_commit_files(parent, commit)
+  local files = {}
+  local root = get_git_root()
+  if not root then
+    return files
+  end
+
+  binary_cache = {}
+  local stats = {}
+  parse_numstat_into(run_argv({ "git", "diff", "--no-renames", "--numstat", parent, commit }), stats)
+
+  local seen = {}
+  parse_status_into(run_argv({ "git", "diff", "--no-renames", "--name-status", parent, commit }), files, stats, seen, root)
+
+  table.sort(files, function(a, b)
+    return a.path < b.path
+  end)
+
+  return files
+end
+
+-- Unified diff for one file introduced by a commit (parent..commit side of the change).
+function M.get_commit_file_diff(parent, commit, file_path)
+  return run_argv({ "git", "diff", "--no-renames", parent, commit, "--", file_path })
+end
+
+-- The file's contents as they exist *at* the commit (the "after" side rendered in the buffer).
+function M.get_commit_content(commit, file_path)
+  return run_argv({ "git", "show", commit .. ":" .. file_path })
 end
 
 return M
