@@ -313,19 +313,20 @@ end
 -- diff shows every file as an addition instead of failing on a missing `<commit>^`.
 local EMPTY_TREE = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
 
--- Resolve a commit to { hash, short, parent, subject }. `parent` is the first-parent ref
+-- Resolve a commit to { hash, short, parent, date, subject }. `parent` is the first-parent ref
 -- (falling back to the empty tree for a root commit) so callers can diff parent..commit.
+-- `date` is the author date in short YYYY-MM-DD form (%as).
 function M.get_commit_info(commit)
-  local out = run_argv({ "git", "show", "-s", "--format=%H%x1f%h%x1f%P%x1f%s", commit })
+  local out = run_argv({ "git", "show", "-s", "--format=%H%x1f%h%x1f%P%x1f%as%x1f%s", commit })
   if not out then
     return nil
   end
   local parts = vim.split(vim.trim(out), "\31", { plain = true })
-  if #parts < 4 then
+  if #parts < 5 then
     return nil
   end
   local parent = parts[3]:match("^(%S+)") or EMPTY_TREE
-  return { hash = parts[1], short = parts[2], parent = parent, subject = parts[4] }
+  return { hash = parts[1], short = parts[2], parent = parent, date = parts[4], subject = parts[5] }
 end
 
 -- List files touched by a single commit (parent..commit). Renames are split into delete+add

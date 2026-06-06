@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -e
+
+# Restore terminal cursor visibility after a program leaked \e[?25l
+# (fzf/editor/spinner killed before re-showing the cursor).
+# Usage:
+#   c-restore-shell-cursor               restore cursor in current terminal
+#   c-restore-shell-cursor <tmux-pane>   restore in a tmux pane, e.g. consul:8.2
+
+target="$1"
+
+if [ -z "$target" ]; then
+  printf '\033[?25h'
+  exit 0
+fi
+
+# Write the show-cursor sequence to the pane's tty: tmux parses it as
+# pane output and flips the pane's cursor_flag back on.
+pane_tty=$(tmux display-message -p -t "$target" '#{pane_tty}')
+printf '\033[?25h' > "$pane_tty"
+
+tmux display-message -p -t "$target" "cursor_flag: #{cursor_flag} (1 = visible)"

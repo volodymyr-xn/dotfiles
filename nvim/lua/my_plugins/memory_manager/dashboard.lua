@@ -999,6 +999,31 @@ local function bind_keys(buf)
   vim.keymap.set("n", "<CR>", action_jump, opts)
 end
 
+-- Geometry for the centered float: 85% of the editor grid.
+local function float_geometry()
+  local width = math.floor(vim.o.columns * 0.85)
+  local height = math.floor(vim.o.lines * 0.85)
+
+  return {
+    relative = "editor", width = width, height = height,
+    row = math.floor((vim.o.lines - height) / 2),
+    col = math.floor((vim.o.columns - width) / 2),
+  }
+end
+
+-- Re-fit the float to the resized editor grid, then re-render (inner width
+-- changed, so wrapped/truncated rows must be recomputed).
+local function resize_to_editor()
+  local win = shared.dashboard_state.win
+
+  if not win or not api.nvim_win_is_valid(win) then
+    return
+  end
+
+  api.nvim_win_set_config(win, float_geometry())
+  rerender()
+end
+
 -- Open the dashboard float (idempotent: focuses + refreshes if already open).
 function M.open()
   ensure_highlights()
@@ -1014,19 +1039,15 @@ function M.open()
   vim.bo[buf].bufhidden = "wipe"
   vim.bo[buf].swapfile = false
   vim.bo[buf].filetype = "MemDashboard"
-  local width = math.floor(vim.o.columns * 0.85)
-  local height = math.floor(vim.o.lines * 0.85)
-  local row = math.floor((vim.o.lines - height) / 2)
-  local col = math.floor((vim.o.columns - width) / 2)
-  local win = api.nvim_open_win(buf, true, {
-    relative = "editor", width = width, height = height,
-    row = row, col = col,
-    border = "rounded",
-    title = "  Memory Manager  ", title_pos = "center",
-    -- Footer renders inside the bottom border of the float — always pinned
-    -- to the very bottom of the window regardless of scroll.
-    footer = build_footer(), footer_pos = "center",
-  })
+  local geometry = float_geometry()
+  geometry.border = "rounded"
+  geometry.title = "  Memory Manager  "
+  geometry.title_pos = "center"
+  -- Footer renders inside the bottom border of the float — always pinned
+  -- to the very bottom of the window regardless of scroll.
+  geometry.footer = build_footer()
+  geometry.footer_pos = "center"
+  local win = api.nvim_open_win(buf, true, geometry)
   vim.wo[win].cursorline = true
   vim.wo[win].wrap = false
   vim.wo[win].signcolumn = "no"
@@ -1038,9 +1059,19 @@ function M.open()
   shared.dashboard_state.win = win
   bind_keys(buf)
 
+  -- Keep the centered float fitted to the editor when the terminal/UI grid
+  -- changes size; cleared on close so the global autocmd doesn't leak.
+  local resize_group = api.nvim_create_augroup("MemDashboardResize", { clear = true })
+
+  api.nvim_create_autocmd("VimResized", {
+    group = resize_group,
+    callback = resize_to_editor,
+  })
+
   api.nvim_create_autocmd("BufWipeout", {
     buffer = buf,
     callback = function()
+      api.nvim_del_augroup_by_id(resize_group)
       shared.dashboard_state.win = nil
       shared.dashboard_state.buf = nil
     end,

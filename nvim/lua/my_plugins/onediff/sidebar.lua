@@ -309,8 +309,12 @@ function M.render()
   local commit = session.get_commit()
   if commit then
     local short = session.get_commit_short() or commit:sub(1, 7)
+    local date = session.get_commit_date() or ""
     local subject = session.get_commit_subject() or ""
     local banner = " 󰜘 COMMIT " .. short
+    if date ~= "" then
+      banner = banner .. "  󰥔 " .. date
+    end
     if subject ~= "" then
       banner = banner .. "  " .. subject
     end
@@ -933,6 +937,33 @@ local function scroll_diff_win(keys)
   end
 end
 
+-- Left-click in the sidebar: open the clicked file but keep focus here. A
+-- click that lands in another window must still switch focus there — without
+-- this branch the custom map swallows the default focus move, so focusing
+-- another split needed a second click.
+local function handle_sidebar_left_click()
+  local mouse_pos = vim.fn.getmousepos()
+  local current_win = api.nvim_get_current_win()
+
+  if mouse_pos.winid ~= current_win then
+    if mouse_pos.winid ~= 0 and api.nvim_win_is_valid(mouse_pos.winid) then
+      api.nvim_set_current_win(mouse_pos.winid)
+      pcall(api.nvim_win_set_cursor, mouse_pos.winid,
+        { mouse_pos.line, math.max(0, mouse_pos.column - 1) })
+    end
+
+    return
+  end
+
+  local buf = api.nvim_get_current_buf()
+  local line_count = api.nvim_buf_line_count(buf)
+
+  if mouse_pos.line >= 1 and mouse_pos.line <= line_count then
+    api.nvim_win_set_cursor(0, { mouse_pos.line, 0 })
+    M.open_file_keep_focus()
+  end
+end
+
 function M.setup_keymaps(buf)
   local settings = require("my_plugins.onediff.settings")
   local keymaps = settings.get("keymaps.sidebar")
@@ -1016,17 +1047,7 @@ function M.setup_keymaps(buf)
   vim.keymap.set("n", "<C-d>", function() scroll_diff_win("<C-d>") end, opts)
   vim.keymap.set("n", "<C-u>", function() scroll_diff_win("<C-u>") end, opts)
 
-  vim.keymap.set("n", "<LeftMouse>", function()
-    local mouse_pos = vim.fn.getmousepos()
-    if mouse_pos.winid == api.nvim_get_current_win() then
-      local buf = api.nvim_get_current_buf()
-      local line_count = api.nvim_buf_line_count(buf)
-      if mouse_pos.line >= 1 and mouse_pos.line <= line_count then
-        api.nvim_win_set_cursor(0, { mouse_pos.line, 0 })
-        M.open_file_keep_focus()
-      end
-    end
-  end, opts)
+  vim.keymap.set("n", "<LeftMouse>", handle_sidebar_left_click, opts)
 
   vim.keymap.set("n", "sr", function()
     vim.g.onediff_live_nav = not vim.g.onediff_live_nav

@@ -39,10 +39,14 @@ local function build_statusline(file)
   end
 
   local short = session.get_commit_short() or commit:sub(1, 7)
+  local date = session.get_commit_date() or ""
   local subject = session.get_commit_subject() or ""
   -- Escape % so a subject like "fix 50% bug" isn't read as a statusline format item.
   subject = subject:gsub("%%", "%%%%")
   local badge = " 󰜘 COMMIT " .. short
+  if date ~= "" then
+    badge = badge .. "  󰥔 " .. date
+  end
   if subject ~= "" then
     badge = badge .. "  " .. subject
   end

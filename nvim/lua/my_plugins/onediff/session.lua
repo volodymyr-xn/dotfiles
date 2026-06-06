@@ -57,6 +57,7 @@ local function create_instance()
     commit = nil,
     commit_short = nil,
     commit_subject = nil,
+    commit_date = nil,
     changed_files = {},
     current_index = 0,
     current_hunks = {},
@@ -218,11 +219,13 @@ function M.set_commit_mode(info)
     state.commit = info.hash
     state.commit_short = info.short
     state.commit_subject = info.subject
+    state.commit_date = info.date
     state.base_ref = info.parent
   else
     state.commit = nil
     state.commit_short = nil
     state.commit_subject = nil
+    state.commit_date = nil
     state.base_ref = require("my_plugins.onediff.settings").get("base_ref")
   end
 
@@ -244,6 +247,11 @@ end
 function M.get_commit_subject()
   local state = get_current_instance()
   return state and state.commit_subject or nil
+end
+
+function M.get_commit_date()
+  local state = get_current_instance()
+  return state and state.commit_date or nil
 end
 
 function M.reload_files()

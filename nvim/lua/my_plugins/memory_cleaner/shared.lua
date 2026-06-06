@@ -16,7 +16,7 @@ local M = {}
 
 M.config = {
   unload_buffer_after_idle_minutes = 250,
-  rss_warn_threshold_mb = 80,
+  rss_warn_threshold_mb = 150,
   rss_warn_notify_debounce_seconds = 600,
   prune_tick_interval_seconds = 10 * 60,
   rss_reading_cache_seconds = 5,

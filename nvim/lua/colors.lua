@@ -21,6 +21,10 @@ require("catppuccin").setup {
           return {
             CmpItemMenu = { fg = "#eceaff" },
             CmpItemAbbr = { fg = "#eceaff" },
+            -- vim-matchup tag/word pair highlight; no fg so syntax colors
+            -- show through, surface2 bg + bold to differ from Visual (surface1)
+            MatchWord = { bg = colors.surface2, style = { "bold" } },
+            MatchParen = { fg = colors.peach, bg = colors.surface2, style = { "bold" } },
             -- WinSeparator = { fg = "#eceaff" },
             -- CmpItemAbbrDefault = { fg = "#eceaff" },
             -- CmpItemAbbrDeprecated = { fg = "#eceaff" },

@@ -128,3 +128,19 @@ eval "$(c-fzf-bins --init)"
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+# TODO: enable after a trial period if hidden-cursor leaks keep happening.
+# Re-show terminal cursor before each prompt, in case a program exited
+# while the cursor was hidden (leaked \e[?25l — fzf/editor/spinner killed
+# before restoring it). Symptom: invisible cursor at the prompt / when
+# focusing a tmux window. Manual fix meanwhile: c-restore-shell-cursor.
+# To enable: uncomment the 3 lines below and reload (exec zsh).
+# add-zsh-hook appends to precmd_functions instead of clobbering any
+# framework precmd (oh-my-zsh/p10k/starship safe).
+# Explanation:
+# zsh runs precmd right before drawing each prompt — the exact moment to
+# reassert cursor visibility. \e[?25h (DECTCEM set / tput cnorm) is
+# zero-width and costs ~one syscall per prompt.
+# autoload -Uz add-zsh-hook
+# _restore_cursor() { printf '\e[?25h' }
+# add-zsh-hook precmd _restore_cursor
