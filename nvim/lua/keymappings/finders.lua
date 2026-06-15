@@ -60,7 +60,7 @@ map("<Leader>b",
   "Find i18n files")
 
 
-map("si",
+map("s[",
   function() R.call("buffer_fuzzy_find") end,
   "Fuzzy find in buffer")
 
@@ -86,15 +86,15 @@ map("s]",
   function() CustomFileSelectors.custom_full_text_search_with_preview() end,
   "Full text search with bat preview (fzf.vim)")
 
-map("s[",
+map("sp",
   function() CustomFileSelectors.custom_full_text_search_rg() end,
   "Custom full text search rg+reload (fzf.vim)")
 
-map("so",
+map("si",
   function() CustomFileSelectors.search_lines_in_all_buffers() end,
   "Search lines in all buffers")
 
-map("sp",
+map("so",
   function() CustomFileSelectors.live_grep_changed_files() end,
   "Full text search in changed files")
 

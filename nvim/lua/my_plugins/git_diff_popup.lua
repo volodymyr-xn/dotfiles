@@ -57,24 +57,46 @@ function M.open()
 
   -- vim.api.nvim_set_option_value("filetype", "diff", { buf = buf })
 
-  -- 90% screen size
-  local width  = math.floor(vim.o.columns * 0.9)
-  local height = math.floor(vim.o.lines * 0.9)
-  local row    = math.floor((vim.o.lines - height) / 2)
-  local col    = math.floor((vim.o.columns - width) / 2)
+  -- Compute a centered 90%-of-screen geometry from the current editor size
+  local function popup_geometry()
+    local width  = math.floor(vim.o.columns * 0.9)
+    local height = math.floor(vim.o.lines * 0.9)
+    return {
+      relative = "editor",
+      width = width,
+      height = height,
+      row = math.floor((vim.o.lines - height) / 2),
+      col = math.floor((vim.o.columns - width) / 2),
+    }
+  end
+
+  local geom = popup_geometry()
 
   -- Floating window
   local win = vim.api.nvim_open_win(buf, true, {
-    relative = "editor",
-    width = width,
-    height = height,
-    row = row,
-    col = col,
+    relative = geom.relative,
+    width = geom.width,
+    height = geom.height,
+    row = geom.row,
+    col = geom.col,
     style = "minimal",
     border = "rounded",
     focusable = true,
     title = ' Git Diff ',
     title_pos = 'center'
+  })
+
+  -- Re-center and re-size the popup whenever the editor area changes size
+  local resize_group = vim.api.nvim_create_augroup("GitDiffPopupResize", { clear = true })
+  vim.api.nvim_create_autocmd("VimResized", {
+    group = resize_group,
+    callback = function()
+      if not vim.api.nvim_win_is_valid(win) then
+        vim.api.nvim_del_augroup_by_id(resize_group)
+        return
+      end
+      vim.api.nvim_win_set_config(win, popup_geometry())
+    end,
   })
 
   -- Position cursor at current line if it has changes
@@ -124,6 +146,8 @@ function M.open()
   vim.keymap.set({ "n", "v" }, "Q", "<Nop>", { buffer = buf, silent = true })
 
   local close_popup = function()
+    -- Stop tracking resizes before tearing the window down
+    pcall(vim.api.nvim_del_augroup_by_id, resize_group)
     if vim.api.nvim_win_is_valid(win) then
       vim.api.nvim_win_close(win, true)
     end

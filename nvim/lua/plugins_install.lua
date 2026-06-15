@@ -127,7 +127,14 @@ require("lazy").setup({
     lazy = true,
     -- Without `opts`/`config`, fff's `setup()` never runs and any
     -- non-default option is ignored.
-    opts = {},
+    -- Force a stacked (vertical) preview on top in every window: `flex = false`
+    -- disables the width-based swap so it never flips to a side-by-side layout.
+    opts = {
+      layout = {
+        preview_position = "top",
+        flex = false,
+      },
+    },
     build = ':lua require("fff.download").download_or_build_binary()',
   },
 

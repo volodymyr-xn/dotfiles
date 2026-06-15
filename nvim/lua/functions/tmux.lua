@@ -138,12 +138,25 @@ local function focus_pane(pane_id)
   vim.fn.system("tmux select-pane -t " .. pane_id)
 end
 
+-- Cancels tmux copy/selection mode on the pane so keys reach the running
+-- process; sending text while in copy mode is interpreted as copy-mode
+-- navigation and never reaches the AI prompt.
+local function exit_copy_mode(pane_id)
+  local in_mode = vim.fn.system("tmux display-message -p -t " .. pane_id .. " '#{pane_in_mode}'")
+
+  if in_mode:match("1") then
+    vim.fn.system("tmux send-keys -t " .. pane_id .. " -X cancel")
+  end
+end
+
 local function send_to_pane(pane_id, text)
+  exit_copy_mode(pane_id)
   vim.g.VimuxRunnerIndex = pane_id
   vim.fn.VimuxSendText(text)
 end
 
 local function send_multiline_text(pane_id, text, process_name)
+  exit_copy_mode(pane_id)
   vim.g.VimuxRunnerIndex = pane_id
   local newline_key = NEWLINE_KEYS[process_name] or "S-Enter"
   local lines = vim.split(text, "\n", { plain = true })

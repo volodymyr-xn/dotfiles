@@ -611,10 +611,10 @@ local function render_view_model(view, width)
 
     if proc_index < #view then
       -- Heavier divider after the current process to mark the boundary
-      -- between "this nvim" and the rest; thin dots between siblings.
+      -- between "this nvim" and the rest; thin solid line between siblings.
       local next_proc = view[proc_index + 1]
       local is_boundary = p.is_current and next_proc and not next_proc.is_current
-      local glyph = is_boundary and "═" or "·"
+      local glyph = is_boundary and "═" or "─"
       local divider = "  " .. string.rep(glyph, math.max(10, width - 4))
       local hl = is_boundary and "MemDashBoundary" or "MemDashSep"
       push(divider, { { col = 0, end_col = #divider, hl = hl } }, { kind = "divider" })
