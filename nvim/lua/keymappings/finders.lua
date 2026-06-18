@@ -72,7 +72,7 @@ map("<Leader>o",
   function() CustomFileSelectors.live_grep() end,
   "Live grep (Ag)")
 
-map("<Leader>p",
+map("sp",
   function() CustomFileSelectors.custom_full_text_search() end,
   "Custom full text search (fzf.vim)")
 
@@ -81,12 +81,12 @@ map("sg",
   function() CustomFileSelectors.live_grep_with_preview() end,
   "Live grep with bat preview (Ag)")
 
--- bat-preview variant of <Leader>p (full text search)
+-- bat-preview variant of sp (full text search)
 map("s]",
   function() CustomFileSelectors.custom_full_text_search_with_preview() end,
   "Full text search with bat preview (fzf.vim)")
 
-map("sp",
+map("<Leader>p",
   function() CustomFileSelectors.custom_full_text_search_rg() end,
   "Custom full text search rg+reload (fzf.vim)")
 

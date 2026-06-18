@@ -15,6 +15,10 @@ require("my_plugins.memory_cleaner").setup({
   -- RAM held; lower = aggressive reclaim, more re-reads when revisiting.
   unload_buffer_after_idle_minutes = 250,
 
+  -- RSS ceiling: when the process crosses above this many MB, fire a one-shot
+  -- WarningMsg on the cmdline (re-armed only after RSS drops back below).
+  rss_warn_threshold_mb = 220,
+
   -- Anti-flap guard: after a threshold-crossing warning fires, suppress the
   -- next one for this many seconds even if RSS dips below and crosses back.
   -- Sustained breaches are NOT re-announced (current RSS is on the
