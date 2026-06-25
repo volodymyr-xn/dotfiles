@@ -90,46 +90,15 @@ local function get_search_count()
   return result
 end
 
+-- Single statusline chip for the active search match index (glyph + current/total).
 local search_count_components = {
   {
     function()
-      return get_search_count() and "[" or ""
-    end,
-    color = { fg = "#6b7280" },
-    padding = 0,
-    separator = "",
-  },
-  {
-    function()
       local sc = get_search_count()
-      return sc and tostring(sc.current) or ""
+      if not sc then return "" end
+      return string.format("󰍉 %d/%d", sc.current, sc.total)
     end,
     color = { fg = "#ff9e64", gui = "bold" },
-    padding = 0,
-    separator = "",
-  },
-  {
-    function()
-      return get_search_count() and "/" or ""
-    end,
-    color = { fg = "#6b7280" },
-    padding = 0,
-    separator = "",
-  },
-  {
-    function()
-      local sc = get_search_count()
-      return sc and tostring(sc.total) or ""
-    end,
-    color = { fg = "#a0aec0" },
-    padding = 0,
-    separator = "",
-  },
-  {
-    function()
-      return get_search_count() and "]" or ""
-    end,
-    color = { fg = "#6b7280" },
     padding = { left = 0, right = 1 },
     separator = "",
   },

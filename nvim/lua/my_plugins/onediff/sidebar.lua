@@ -23,6 +23,34 @@ end
 do
   local prefs = load_prefs()
   M.flat_mode = prefs.flat_mode == true
+  -- Short (3-letter) directory names are the default; long form only when explicitly saved.
+  M.short_dir = prefs.short_dir ~= false
+end
+
+-- Abbreviate a single path component to its first 3 characters (no-op if already <= 3).
+local function shorten_dir_part(part)
+  if vim.fn.strchars(part) <= 3 then
+    return part
+  end
+  return vim.fn.strcharpart(part, 0, 3)
+end
+
+-- Shorten every directory component in a "/"-joined dir path (used for tree folder rows).
+local function shorten_dir_path(path)
+  local parts = vim.split(path, "/")
+  for i, p in ipairs(parts) do
+    parts[i] = shorten_dir_part(p)
+  end
+  return table.concat(parts, "/")
+end
+
+-- Shorten every directory in a file path, leaving the final basename untouched (flat rows).
+local function shorten_file_path(path)
+  local parts = vim.split(path, "/")
+  for i = 1, #parts - 1 do
+    parts[i] = shorten_dir_part(parts[i])
+  end
+  return table.concat(parts, "/")
 end
 
 local function get_file_icon(filename)
@@ -139,9 +167,18 @@ function M.init()
   vim.api.nvim_set_hl(0, "OneDiffStatusLinePath", { fg = "#a6e3a1", default = true })
 end
 
+-- Cap width for the sidebar; long (full) dir form gets 35% more room than the configured max.
+local function effective_max_width()
+  local settings = require("my_plugins.onediff.settings")
+  local max_width = settings.get("sidebar.max_width")
+  if not M.short_dir then
+    max_width = math.floor(max_width * 1.35)
+  end
+  return max_width
+end
+
 function M.show()
   local session = require("my_plugins.onediff.session")
-  local settings = require("my_plugins.onediff.settings")
 
   local existing_win = session.get_sidebar_win()
   local is_visible = false
@@ -163,7 +200,7 @@ function M.show()
   session.set_sidebar_win(nil)
   session.set_sidebar_buf(nil)
 
-  local max_width = settings.get("sidebar.max_width")
+  local max_width = effective_max_width()
 
   vim.cmd("topleft " .. max_width .. "vsplit")
   local win = api.nvim_get_current_win()
@@ -389,7 +426,7 @@ function M.resize_to_content(lines)
     return
   end
   
-  local max_width = settings.get("sidebar.max_width")
+  local max_width = effective_max_width()
   local min_width = settings.get("sidebar.min_width")
   
   local max_line_width = 0
@@ -495,6 +532,10 @@ function M.render_tree(node, lines, hl_marks, start_line, depth, current_idx, al
       display_name = table.concat(names, "/")
     else
       display_name = dir.name
+    end
+
+    if M.short_dir then
+      display_name = shorten_dir_path(display_name)
     end
 
     for _, n in ipairs(chain) do
@@ -616,9 +657,11 @@ function M.render_flat_list(files, lines, hl_marks, start_line, current_idx)
       stats_str = " " .. insertions .. ", " .. deletions
     end
 
+    local display_path = M.short_dir and shorten_file_path(file.path) or file.path
+
     local status_display_width = vim.fn.strdisplaywidth(status_icon)
     local status_padding = string.rep(" ", math.max(0, 3 - status_display_width))
-    local line = " " .. status_icon .. status_padding .. " " .. icon .. " " .. file.path .. stats_str
+    local line = " " .. status_icon .. status_padding .. " " .. icon .. " " .. display_path .. stats_str
 
     table.insert(lines, line)
     M.file_line_map[line_idx + 1] = i
@@ -637,10 +680,10 @@ function M.render_flat_list(files, lines, hl_marks, start_line, current_idx)
     end
 
     col = col + #icon + 1
-    table.insert(hl_marks, { line = line_idx, col = col, end_col = col + #file.path, hl = file_hl, priority = 150 })
+    table.insert(hl_marks, { line = line_idx, col = col, end_col = col + #display_path, hl = file_hl, priority = 150 })
 
     if #stats_str > 0 then
-      local stats_start = col + #file.path
+      local stats_start = col + #display_path
       local comma_pos = stats_str:find(",")
       if comma_pos then
         table.insert(hl_marks, { line = line_idx, col = stats_start, end_col = stats_start + comma_pos, hl = "OneDiffPanelInsertions", priority = 150 })
@@ -666,6 +709,16 @@ function M.toggle_flat_mode()
   save_prefs(prefs)
   M.render()
   vim.notify("OneDiff: " .. (M.flat_mode and "flat" or "tree") .. " mode")
+end
+
+-- Toggles directory names between short (3-letter) and long form, persisting the preference.
+function M.toggle_short_dir()
+  M.short_dir = not M.short_dir
+  local prefs = load_prefs()
+  prefs.short_dir = M.short_dir
+  save_prefs(prefs)
+  M.render()
+  vim.notify("OneDiff: " .. (M.short_dir and "short" or "long") .. " dir names")
 end
 
 function M.get_file_line(file_idx)
@@ -987,6 +1040,8 @@ function M.setup_keymaps(buf)
   vim.keymap.set("n", "<Leader>e", onediff.refresh, opts)
   vim.keymap.set("n", "sf", onediff.open_or_focus_and_refresh, opts)
   vim.keymap.set("n", "st", M.toggle_flat_mode, opts)
+  -- Toggle directory names between short (3-letter) and long (full) form.
+  vim.keymap.set("n", "sg", M.toggle_short_dir, opts)
   -- Pick a commit and load its diff into this OneDiff view (commit mode).
   vim.keymap.set("n", "<Leader>t", onediff.open_commit_picker, opts)
 

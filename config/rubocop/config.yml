@@ -39,9 +39,9 @@ Metrics/MethodLength:
   Exclude:
     - 'app/searches/**/*'
 
-Metrics/LineLength:
+Layout/LineLength:
   Max: 100
-  IgnoredPatterns: ['(\A|\s)#']
+  AllowedPatterns: ['(\A|\s)#']
 
 Metrics/AbcSize:
   Max: 30
@@ -57,8 +57,8 @@ Metrics/CyclomaticComplexity:
 Style/StringLiterals:
   Enabled: false
 
-Documentation:
-    Enabled: false
+Style/Documentation:
+  Enabled: false
 
 Style/CommentAnnotation:
   Enabled: false
@@ -88,8 +88,18 @@ Style/RedundantSelf:
   Enabled: false
 
 
+# Multi-line assignment: the value (incl. a method-chain receiver) goes on its
+# own line below `=`, never on the same line as `=`. send/csend extend the
+# stock SupportedTypes to cover method chains; MultilineMethodCallIndentation
+# then indents the chain under the receiver.
+Layout/MultilineAssignmentLayout:
+  Enabled: true
+  EnforcedStyle: new_line
+  SupportedTypes: [send, csend, block, case, class, if, kwbegin, module]
+
 Layout/MultilineMethodCallIndentation:
-  Enabled: false
+  Enabled: true
+  EnforcedStyle: 'indented_relative_to_receiver'
 
 Style/SafeNavigation:
   Enabled: false
@@ -100,7 +110,7 @@ Layout/HashAlignment:
 Style/IfUnlessModifier:
   Enabled: false
 
-Naming/PredicateName:
+Naming/PredicatePrefix:
   Enabled: false
 
 Style/AndOr:
@@ -115,7 +125,7 @@ Style/NegatedIf:
 Lint/UnusedBlockArgument:
  Enabled: false
 
-Lint/HandleExceptions:
+Lint/SuppressedException:
   Enabled: false
 
 Style/RedundantBegin:

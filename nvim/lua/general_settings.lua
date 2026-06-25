@@ -33,6 +33,12 @@ vim.opt.termguicolors = true
 -- Default border style for floating windows (LSP hover, diagnostics, pager).
 vim.opt.winborder = "rounded"
 
+-- Load per-projekt `.nvim.lua` from the cwd at startup (built-in exrc).
+-- Backs the nvim_for_projekts store (e.g. consul_nvim.lua symlinked as
+-- .nvim.lua). Run `:trust` once per projekt root the first time nvim is
+-- launched there, otherwise the file is ignored for safety.
+vim.opt.exrc = true
+
 -- For auto indent filetype plugin indent on
 vim.cmd("syntax on")
 -- Pretend matchit is loaded BEFORE filetype plugins fire so built-in

@@ -3,7 +3,7 @@
 -- calls get_node_text unconditionally, which calls get_range, which calls node:range(true)
 -- on a non-userdata value and crashes. Guard get_range so non-TSNodes return an empty range.
 local function apply_nvim_012_get_range_guard()
-  if not TempFixActive("nvim-0.12 get_range non-TSNode guard. check `apply_nvim_012_get_range_guard`", "2026-10-01") then return end
+  if not TempFixActive("nvim-0.12 get_range non-TSNode guard. check `apply_nvim_012_get_range_guard`", "2027-01-10") then return end
 
   local original = vim.treesitter.get_range
   vim.treesitter.get_range = function(node, source, metadata)
@@ -14,4 +14,4 @@ local function apply_nvim_012_get_range_guard()
   end
 end
 
--- apply_nvim_012_get_range_guard()
+apply_nvim_012_get_range_guard()
