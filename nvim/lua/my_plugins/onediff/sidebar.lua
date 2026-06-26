@@ -20,11 +20,25 @@ local function save_prefs(prefs)
   pcall(vim.fn.writefile, { vim.json.encode(prefs) }, PREFS_PATH)
 end
 
+-- Width the sidebar was last set to by us; used to tell our own resizes apart
+-- from a manual one in the WinResized handler.
+M.last_set_width = nil
+
 do
   local prefs = load_prefs()
   M.flat_mode = prefs.flat_mode == true
   -- Short (3-letter) directory names are the default; long form only when explicitly saved.
   M.short_dir = prefs.short_dir ~= false
+  -- A user-chosen width (manual resize) overrides content-fitting on every later open.
+  M.saved_width = tonumber(prefs.sidebar_width)
+end
+
+-- Persist a manually chosen sidebar width so it survives navigation and restarts.
+local function save_sidebar_width(width)
+  M.saved_width = width
+  local prefs = load_prefs()
+  prefs.sidebar_width = width
+  save_prefs(prefs)
 end
 
 -- Abbreviate a single path component to its first 3 characters (no-op if already <= 3).
@@ -200,10 +214,13 @@ function M.show()
   session.set_sidebar_win(nil)
   session.set_sidebar_buf(nil)
 
-  local max_width = effective_max_width()
+  -- Prefer a previously user-chosen width; otherwise start at the cap and let
+  -- the first render content-fit it.
+  local initial_width = M.saved_width or effective_max_width()
 
-  vim.cmd("topleft " .. max_width .. "vsplit")
+  vim.cmd("topleft " .. initial_width .. "vsplit")
   local win = api.nvim_get_current_win()
+  M.last_set_width = initial_width
   session.set_sidebar_win(win)
 
   local buf = M.create_buffer()
@@ -211,6 +228,10 @@ function M.show()
   api.nvim_win_set_buf(win, buf)
 
   M.render()
+  -- Only auto content-fit on the very first open; a saved manual width wins.
+  if not M.saved_width then
+    M.resize_to_content()
+  end
   M.setup_keymaps(buf)
   M.setup_autocmds(buf)
 
@@ -406,8 +427,8 @@ function M.render()
 
   local win = session.get_sidebar_win()
   if win and api.nvim_win_is_valid(win) then
-    M.resize_to_content(lines)
-    
+    -- Intentionally no auto-resize here: navigation must never change a width
+    -- the user picked manually. Content-fitting happens only on first open.
     if current_idx > 0 then
       local target_line = M.get_file_line(current_idx)
       if target_line then
@@ -417,18 +438,24 @@ function M.render()
   end
 end
 
-function M.resize_to_content(lines)
+function M.resize_to_content()
   local session = require("my_plugins.onediff.session")
   local settings = require("my_plugins.onediff.settings")
-  
+
   local win = session.get_sidebar_win()
   if not win or not api.nvim_win_is_valid(win) then
     return
   end
-  
+
+  local buf = session.get_sidebar_buf()
+  if not buf or not api.nvim_buf_is_valid(buf) then
+    return
+  end
+  local lines = api.nvim_buf_get_lines(buf, 0, -1, false)
+
   local max_width = effective_max_width()
   local min_width = settings.get("sidebar.min_width")
-  
+
   local max_line_width = 0
   for _, line in ipairs(lines) do
     local display_width = vim.fn.strdisplaywidth(line)
@@ -436,11 +463,13 @@ function M.resize_to_content(lines)
       max_line_width = display_width
     end
   end
-  
+
   local padding = 2
   local target_width = max_line_width + padding
   target_width = math.max(min_width, math.min(target_width, max_width))
-  
+
+  -- Record before applying so the WinResized handler sees this as our own change.
+  M.last_set_width = target_width
   api.nvim_win_set_width(win, target_width)
 end
 
@@ -1136,6 +1165,24 @@ function M.setup_autocmds(buf)
     group = group,
     buffer = buf,
     callback = live_nav_preview,
+  })
+
+  -- Persist the width whenever the user resizes the sidebar by hand. We compare
+  -- against the last width we set ourselves so programmatic resizes are ignored.
+  api.nvim_create_autocmd("WinResized", {
+    group = group,
+    callback = function()
+      local session = require("my_plugins.onediff.session")
+      local win = session.get_sidebar_win()
+      if not (win and api.nvim_win_is_valid(win)) then
+        return
+      end
+      local width = api.nvim_win_get_width(win)
+      if width ~= M.last_set_width then
+        M.last_set_width = width
+        save_sidebar_width(width)
+      end
+    end,
   })
 
   api.nvim_create_autocmd("BufWipeout", {

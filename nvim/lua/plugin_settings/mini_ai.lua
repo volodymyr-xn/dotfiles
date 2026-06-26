@@ -20,6 +20,13 @@ ai.setup({
     -- any-char handler treats `%` as a paired delimiter, scans for it,
     -- finds nothing, and aborts before vim-matchup's mapping can fire.
     ["%"] = false,
+    -- Yield `it`/`at` to Neovim's built-in tag text object. mini.ai's
+    -- pattern-based tag object picks the nested CHILD when the cursor
+    -- sits on a parent's opening tag (e.g. on `<div id=...>` it selects
+    -- the first inner `<div>`), so `cat`/`dat`/`cit` and nvim-surround's
+    -- `cst`/`dst` (which run `g@at` through mini.ai) target the wrong tag.
+    -- The built-in `at`/`it` correctly take the tag under the cursor.
+    t = false,
   },
 })
 
