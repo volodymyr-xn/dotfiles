@@ -82,28 +82,6 @@ local relative_path_flag = 1
 -- `plugin_settings/memory_monitor.lua`.
 local memory_monitor = require("my_plugins.memory_monitor")
 
--- Returns searchcount table only when a search is active
-local function get_search_count()
-  if vim.v.hlsearch == 0 then return nil end
-  local ok, result = pcall(vim.fn.searchcount, { recompute = false, maxcount = 999 })
-  if not ok or result.current == nil then return nil end
-  return result
-end
-
--- Single statusline chip for the active search match index (glyph + current/total).
-local search_count_components = {
-  {
-    function()
-      local sc = get_search_count()
-      if not sc then return "" end
-      return string.format("󰍉 %d/%d", sc.current, sc.total)
-    end,
-    color = { fg = "#ff9e64", gui = "bold" },
-    padding = { left = 0, right = 1 },
-    separator = "",
-  },
-}
-
 -- local function is_yaml()
 --   return vim.bo.filetype == "yaml"
 -- end
@@ -146,7 +124,6 @@ require('lualine').setup {
     lualine_a = {'mode'},
     lualine_b = {''},
     lualine_c = {
-      unpack(search_count_components),
       {
         "filename",
         path = relative_path_flag,

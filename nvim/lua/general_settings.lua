@@ -106,7 +106,7 @@ vim.o.incsearch = true
 -- Highlight search matches
 vim.o.hlsearch = true
 
--- Show search match count in bottom bar (e.g. [1/5])
+-- Show the native search match count in the bottom bar (e.g. [1/5])
 vim.opt.shortmess:remove("S")
 
 -- Ignore case in search if term(s) are lowercase
@@ -114,6 +114,9 @@ vim.opt.shortmess:remove("S")
 
 -- Search with case sensitivity if term(s) are upper or mixed case
 vim.o.smartcase = true
+
+-- Keep syntax highlighting on long lines (max column before it stops)
+vim.o.synmaxcol = 500
 
 -- Turn word wrap off
 vim.o.wrap = false
@@ -197,6 +200,11 @@ vim.cmd('autocmd BufNewFile,BufRead crontab,anacrontab set syntax=crontab')
 
 -- Highlight ActiveAdmin rails administation framework templates
 vim.cmd('autocmd BufRead,BufNewFile *.arb setfiletype ruby')
+
+-- Map Ren'Py script extensions so the ft-lazy renpy-syntax.nvim trigger fires
+-- (the plugin's own detection can't run until it loads). `.rpym` = Ren'Py
+-- module files.
+vim.filetype.add({ extension = { rpy = "renpy", rpym = "renpy" } })
 
 -- Highlight a matching [{()}?P] when cursor is placed on start/end character
 vim.o.showmatch=true

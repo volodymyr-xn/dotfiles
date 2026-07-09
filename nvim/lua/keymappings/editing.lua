@@ -32,5 +32,8 @@ vim.keymap.set('i', '<C-e>', '<End>', { noremap = true, desc = "Go to end of lin
 vim.keymap.set('i', '<C-f>', '<C-Left>', { noremap = true, desc = "Move backward one word" })
 vim.keymap.set('i', '<C-b>', '<C-Right>', { noremap = true, desc = "Move forward one word" })
 
+-- Delete to first non-blank char (where I lands) and enter insert mode
+vim.keymap.set('n', 'K', 'c^', { noremap = true, desc = "Change to start of line" })
+
 -- Run the :R command
 vim.keymap.set('n', '<Leader>r', ':R<CR>', { noremap = true, silent = true, desc = "Run :R command" })

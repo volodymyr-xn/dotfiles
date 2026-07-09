@@ -11,11 +11,10 @@ set -euo pipefail
 selection=$(
   tmux list-panes -a -F '#{pane_id} #{session_name} #{window_name}###{pane_index}' \
     | fzf --with-nth=2.. \
-          --prompt='Pane > ' \
+          --prompt='Switch to tmux pane > ' \
           --height=100% \
-          --reverse \
           --preview='tmux capture-pane -ep -t {1}' \
-          --preview-window='right:60%'
+          --preview-window='right:65%'
 ) || exit 0
 
 [ -z "$selection" ] && exit 0

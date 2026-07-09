@@ -395,6 +395,20 @@ require("lazy").setup({
   -- Crystal syntax support
   { "vim-crystal/vim-crystal", ft = "crystal" },
 
+  -- Ren'Py (visual-novel engine) support: regex syntax for labels/menus,
+  -- screen language, ATL and embedded `python:` blocks, indent rules, and an
+  -- optional nvim-cmp source (wired per-filetype in plugin_settings/nvim_cmp).
+  -- No Tree-sitter grammar exists for Ren'Py, so this regex syntax is the
+  -- state of the art. `ft = "renpy"` fires because general_settings.lua maps
+  -- the `.rpy`/`.rpym` extensions via `vim.filetype.add` — the plugin's own
+  -- detection lives inside setup(), which can't run until the plugin loads,
+  -- so the ft trigger needs the extension mapping registered first.
+  {
+    "inzoiniac/renpy-syntax.nvim",
+    ft = "renpy",
+    config = function() require("plugin_settings.renpy_syntax") end,
+  },
+
   -- Improved JavaScript syntax. `javascriptreact` was dead — the plugin's
   -- ftdetect only sets `filetype=javascript`. (Note: nvim's built-in
   -- ftplugin/syntax + treesitter already cover JS; consider removing
@@ -463,33 +477,33 @@ require("lazy").setup({
   -- LSP for emmet
   -- "olrtg/nvim-emmet",
 
-  -- {
-  --   "OXY2DEV/markview.nvim",
-  --   ft = { "markdown", "Avante", "codecompanion" },
-  --   dependencies = { "nvim-tree/nvim-web-devicons" },
-  --   config = function() require("plugin_settings.markview") end,
-  -- },
-
   {
-    "iamcco/markdown-preview.nvim",
-    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
-    -- Include `markdown.mdx` so `.mdx` files trigger the ft load.
-    -- `g:mkdp_filetypes` must be set BEFORE the plugin loads (it's read
-    -- once at plugin init), hence `init`, not `config`.
-    ft = { "markdown", "markdown.mdx" },
-    init = function()
-      vim.g.mkdp_filetypes = { "markdown", "markdown.mdx" }
-    end,
-    -- Force-load the plugin before running its build hook so the
-    -- `mkdp#util#install` vim function is on rtp. Bare
-    -- `vim.fn["mkdp#util#install"]()` errors on fresh install
-    -- because lazy hasn't added the plugin source yet.
-    -- See iamcco/markdown-preview.nvim#690.
-    build = function()
-      require("lazy").load({ plugins = { "markdown-preview.nvim" } })
-      vim.fn["mkdp#util#install"]()
-    end,
+    "OXY2DEV/markview.nvim",
+    ft = { "markdown", "Avante", "codecompanion" },
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function() require("plugin_settings.markview") end,
   },
+
+  -- {
+  --   "iamcco/markdown-preview.nvim",
+  --   cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+  --   -- Include `markdown.mdx` so `.mdx` files trigger the ft load.
+  --   -- `g:mkdp_filetypes` must be set BEFORE the plugin loads (it's read
+  --   -- once at plugin init), hence `init`, not `config`.
+  --   ft = { "markdown", "markdown.mdx" },
+  --   init = function()
+  --     vim.g.mkdp_filetypes = { "markdown", "markdown.mdx" }
+  --   end,
+  --   -- Force-load the plugin before running its build hook so the
+  --   -- `mkdp#util#install` vim function is on rtp. Bare
+  --   -- `vim.fn["mkdp#util#install"]()` errors on fresh install
+  --   -- because lazy hasn't added the plugin source yet.
+  --   -- See iamcco/markdown-preview.nvim#690.
+  --   build = function()
+  --     require("lazy").load({ plugins = { "markdown-preview.nvim" } })
+  --     vim.fn["mkdp#util#install"]()
+  --   end,
+  -- },
 
   -- ============================================================
   -- Editing (motions, textobjs, pairs, surround, comments)
@@ -660,11 +674,21 @@ require("lazy").setup({
   -- keymappings/navigation.lua owns `e → E` for move-to-end-of-WORD.
   {
     "chrisgrieser/nvim-spider",
-    keys = {
-      { "w", mode = { "n", "o", "x" } },
-      { "b", mode = { "n", "o", "x" } },
-      { "ge", mode = { "n", "o", "x" } },
-    },
+    -- TEMPORARY (forced eager via `lazy = false`).
+    -- Goal: restore the subword `w`/`b`/`ge` motions that stopped working
+    -- after the lazy-loading refactor. With the `keys = {...}` trigger below,
+    -- spider only loaded on the FIRST press of one of those keys, so the very
+    -- first motion fell through to the built-in (non-subword) behavior and
+    -- felt "broken". Loading eagerly registers spider's keymaps at startup, so
+    -- the motions behave correctly from the first keystroke.
+    -- Revert to the `keys = {...}` lazy trigger if/when the first-press loss is
+    -- acceptable or fixed upstream.
+    lazy = false,
+    -- keys = {
+    --   { "w", mode = { "n", "o", "x" } },
+    --   { "b", mode = { "n", "o", "x" } },
+    --   { "ge", mode = { "n", "o", "x" } },
+    -- },
     config = function() require("plugin_settings.nvim_spider") end,
   },
 

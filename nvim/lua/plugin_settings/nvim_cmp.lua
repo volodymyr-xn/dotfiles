@@ -435,6 +435,20 @@ cmp.setup.filetype('scss', {
   },
 })
 
+-- Ren'Py: the renpy-syntax.nvim source (keywords, screen language, ATL) plus
+-- buffer words. No LSP entry — no usable Ren'Py language server exists. The
+-- `renpy` source is registered by the plugin on the first `FileType renpy`.
+cmp.setup.filetype('renpy', {
+  sources = cmp.config.sources({
+    { name = 'renpy' },
+    {
+      name = 'buffer',
+      keyword_length = 1,
+      option = { get_bufnrs = getAllBuffers },
+    },
+  }),
+})
+
 -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
 cmp.setup.cmdline(':', {
   mapping = cmp.mapping.preset.cmdline({

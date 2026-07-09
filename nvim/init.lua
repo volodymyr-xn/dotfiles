@@ -53,3 +53,7 @@ require("keymappings.debug")
 require("keymappings.finders")
 require("highlight")
 require("ui2")
+
+-- Ukrainian layout support. Loaded last so every eager keymap above is
+-- already registered when its initial mirror pass runs.
+require("my_plugins.ukrainian_layout")
