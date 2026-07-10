@@ -48,41 +48,8 @@ function M.setup()
     command! FuzzySearchSiblingFilesInCurrentDir call s:fzf_neighbouring_files()
 
     command! -nargs=1 FuzzySearchFileInDir FZF <args>
-
   ]])
 
-  -- Original Vimscript version:
-  -- function! s:ag_to_qf(line)
-  --   let parts = split(a:line, ':')
-  --   return {'filename': parts[0], 'lnum': parts[1], 'col': parts[2],
-  --         \ 'text': join(parts[3:], ':')}
-  -- endfunction
-  --
-  -- function! s:ag_handler(lines)
-  --   if len(a:lines) < 2 | return | endif
-  --   let cmd = get({'ctrl-x': 'split', 'ctrl-v': 'vertical split', 'ctrl-t': 'tabe'}, a:lines[0], 'e')
-  --   let list = map(a:lines[1:], 's:ag_to_qf(v:val)')
-  --   let first = list[0]
-  --   execute cmd escape(first.filename, ' %#\')
-  --   execute first.lnum
-  --   execute 'normal!' first.col.'|zz'
-  --   if len(list) > 1
-  --     call setqflist(list)
-  --     copen
-  --     wincmd p
-  --   endif
-  -- endfunction
-  --
-  -- " --follow: makes ag follow symlinks when searching
-  -- command! -nargs=* CustomFullTextSearch call fzf#run({
-  --       \ 'source':  printf('ag --nogroup --column --color --follow "%s"',
-  --       \                   escape(empty(<q-args>) ? '^(?=.)' : <q-args>, '"\')),
-  --       \ 'sink*':    function('<sid>ag_handler'),
-  --       \ 'options': '--ansi --expect=ctrl-t,ctrl-v,ctrl-x --delimiter : --nth 4.. '.
-  --       \            '--multi --bind=ctrl-a:select-all,ctrl-d:deselect-all '.
-  --       \            '--color hl:68,hl+:110',
-  --       \ 'down':    '50%'
-  --       \ })
   local function ag_to_qf(line)
     local parts = vim.split(line, ":")
     return {
@@ -95,9 +62,26 @@ function M.setup()
 
   local function ag_handler(lines)
     if #lines < 2 then return end
-    local cmd_map = { ["ctrl-x"] = "split", ["ctrl-v"] = "vertical split", ["ctrl-t"] = "tabe" }
-    local cmd = cmd_map[lines[1]] or "e"
+
+    local key = lines[1]
     local list = vim.tbl_map(ag_to_qf, vim.list_slice(lines, 2))
+
+    -- ctrl-q: force the whole selection into quickfix and focus its first item
+    -- inside the quickfix window (copen focuses that window; cursor to line 1).
+    if key == "ctrl-q" then
+      vim.fn.setqflist(list)
+      vim.cmd("copen")
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+
+      return
+    end
+
+    local cmd_map = {
+      ["ctrl-x"] = "split",
+      ["ctrl-v"] = "vertical split",
+      ["ctrl-t"] = "tabe"
+    }
+    local cmd = cmd_map[key] or "e"
     local first = list[1]
     vim.cmd(cmd .. " " .. vim.fn.escape(first.filename, " %#\\"))
     vim.cmd(tostring(first.lnum))
@@ -109,15 +93,19 @@ function M.setup()
     end
   end
 
+  -- Shared fzf options for the full-text searches; ctrl-q sends the selection
+  -- to the quickfix list (see ag_handler), Tab/ctrl-a/ctrl-d multi-select.
+  local SEARCH_OPTIONS = "--ansi --expect=ctrl-t,ctrl-v,ctrl-x,ctrl-q --delimiter : --nth 4.. "
+    .. "--multi --bind=ctrl-a:select-all,ctrl-d:deselect-all "
+    .. "--color hl:68,hl+:110"
+
   -- --follow: makes ag follow symlinks when searching
   vim.api.nvim_create_user_command("CustomFullTextSearch", function(opts)
     local query = opts.args ~= "" and opts.args or "^(?=.)"
     vim.fn["fzf#run"]({
       source = string.format('ag --nogroup --column --color --follow "%s"', query),
       ["sink*"] = ag_handler,
-      options = "--ansi --expect=ctrl-t,ctrl-v,ctrl-x --delimiter : --nth 4.. "
-        .. "--multi --bind=ctrl-a:select-all,ctrl-d:deselect-all "
-        .. "--color hl:68,hl+:110",
+      options = SEARCH_OPTIONS,
       down = "50%",
     })
   end, { nargs = "*" })
@@ -129,9 +117,7 @@ function M.setup()
     vim.fn["fzf#run"]({
       source = RG_CMD .. " " .. vim.fn.shellescape(query),
       ["sink*"] = ag_handler,
-      options = "--ansi --expect=ctrl-t,ctrl-v,ctrl-x --delimiter : --nth 4.. "
-        .. "--multi --bind=ctrl-a:select-all,ctrl-d:deselect-all "
-        .. "--color hl:68,hl+:110",
+      options = SEARCH_OPTIONS,
       down = "50%",
     })
   end, { nargs = "*" })

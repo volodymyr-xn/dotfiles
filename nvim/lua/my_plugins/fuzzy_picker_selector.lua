@@ -19,7 +19,19 @@ end
 -- Public surface, seeded from current config so callers can read these
 -- even if setup() never ran. Re-seeded by setup() when opts change them.
 M.PICKERS = config.pickers
-M.active = vim.g.active_picker or read_state() or config.default_picker
+M.active = read_state() or config.default_picker
+
+-- Persisted file is the single source of truth: with several nvim instances
+-- open at once, an instance's in-memory M.active goes stale the moment
+-- another instance switches picker. Re-read the file so cycling advances
+-- from the real current value and calls honour the latest saved choice
+-- everywhere, instead of clobbering it with a stale per-instance value.
+local function resolve_active()
+  local name = read_state() or M.active or config.default_picker
+  M.active = name
+  vim.g.active_picker = name
+  return name
+end
 
 function M.setup(opts)
   if opts == nil then
@@ -28,7 +40,15 @@ function M.setup(opts)
 
   config = vim.tbl_deep_extend("force", config, opts)
   M.PICKERS = config.pickers
-  M.active = vim.g.active_picker or read_state() or config.default_picker
+  M.active = read_state() or config.default_picker
+
+  -- Sync in-memory/display state from the file when this instance regains
+  -- focus, so a switch made in another instance is reflected here. Wrapped
+  -- so the truthy return of resolve_active never deletes the autocmd.
+  vim.api.nvim_create_autocmd("FocusGained", {
+    group = vim.api.nvim_create_augroup("UltraselectPickerSync", { clear = true }),
+    callback = function() resolve_active() end,
+  })
 end
 
 local function load_picker(name)
@@ -41,7 +61,7 @@ local function load_picker(name)
 end
 
 function M.call(action, ...)
-  local picker = load_picker(M.active)
+  local picker = load_picker(resolve_active())
   if not picker then return end
 
   local fn = picker[action]
@@ -53,9 +73,10 @@ function M.call(action, ...)
 end
 
 function M.cycle()
+  local active = resolve_active()
   local current_idx = 1
   for i, name in ipairs(M.PICKERS) do
-    if name == M.active then
+    if name == active then
       current_idx = i
       break
     end
