@@ -56,7 +56,7 @@ vim.o.compatible = false
 
 -- Redraw only when we need to (i.e. don't redraw when executing a macro)
 -- Don't redraw while executing macros or scrolling
--- Helps with removing content jumps when navigating between files in plugins(onediff and other)
+-- Helps with removing content jumps when navigating between files in plugins
 -- Also improves rendering performance
 -- Outdated wisdom. In modern Neovim it causes
 -- broken statusline/winbar with laststatus=3, random cursor movement, and unbounded RAM growth

@@ -118,7 +118,19 @@ fi
 
 export PATH="$PATH:$HOME/.local/bin"
 
-export FZF_DEFAULT_OPTS='--bind tab:toggle,shift-tab:toggle --color=fg:#f8f8f2,bg:#282a36,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4'
+# Dracula (previous theme):
+# export FZF_DEFAULT_OPTS='--bind tab:toggle,shift-tab:toggle --color=fg:#f8f8f2,bg:#282a36,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4'
+#
+# Full official Catppuccin Macchiato fzf theme (explicit fg/bg, no terminal
+# inheritance): https://github.com/catppuccin/fzf
+# fg is purple-tinted dim white (between #ffffff and Macchiato text #cad3f5)
+# so unselected items sit back; current line pops with white fg+ on bg+.
+# Tab-selected items use green text to differ from the list.
+# Each UI element gets its own Macchiato accent: red matches, mauve prompt,
+# rosewater query, peach pointer, yellow marker, teal spinner, blue counter,
+# sapphire header, lavender border, pink separator, flamingo scrollbar,
+# green + sky for tab-selected items.
+export FZF_DEFAULT_OPTS='--bind tab:toggle,shift-tab:toggle --color=bg+:#363a4f,bg:#24273a,spinner:#8bd5ca,hl:#ed8796 --color=fg:#e4e9fa,header:#7dc4e4,info:#8aadf4,pointer:#f5a97f --color=marker:#eed49f,fg+:#ffffff,prompt:#c6a0f6,hl+:#ed8796 --color=query:#f4dbd6,separator:#f5bde6,scrollbar:#f0c6c6 --color=selected-fg:#a6da95,selected-bg:#494d64,selected-hl:#91d7e3 --color=border:#b7bdf8,label:#cad3f5'
 
 eval "$(c-fzf-bins --init)"
 

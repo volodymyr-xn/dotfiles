@@ -3,8 +3,9 @@
 -- Design notes (after the round-1 UI review):
 --   * The floating window's title bar already says "Memory Manager"; no
 --     duplicated heading line inside the buffer.
---   * Per-process rows are single-line cards with right-aligned metrics so
---     pid / cwd / RSS / loaded / parsers line up vertically across rows.
+--   * Processes render as one bordered table with exactly one row per nvim
+--     process — no dividers or sub-rows between them. Buffer detail for an
+--     expanded process is listed below the table.
 --   * Remote processes start folded; the current process starts expanded.
 --   * Sort key is shown once in the top-right of the header — not on every
 --     section header.
@@ -88,6 +89,9 @@ local function ensure_highlights()
     MemDashHintKey = "Special",
     MemDashError = "ErrorMsg",
     MemDashUptime = "Comment",
+    MemDashUptimeWarn = "WarningMsg",
+    MemDashUptimeCritical = "ErrorMsg",
+    MemDashTmux = "DiagnosticOk",
   }
 
   for k, v in pairs(links) do
@@ -150,6 +154,39 @@ local function sort_buffers(buffers, key)
   end)
 end
 
+-- Same sort key applied to the process table: size → RSS, idle → uptime (the
+-- process-level analogue of idleness), name → cwd. This nvim stays pinned to
+-- the top whatever the key is. Ties break on pid so the order is stable.
+local function sort_processes(procs, key)
+  table.sort(procs, function(a, b)
+    if a.is_current ~= b.is_current then
+      return a.is_current
+    end
+
+    if key == "idle" then
+      local au, bu = a.uptime_seconds or 0, b.uptime_seconds or 0
+
+      if au ~= bu then
+        return au > bu
+      end
+    elseif key == "name" then
+      local an, bn = a.cwd or "", b.cwd or ""
+
+      if an ~= bn then
+        return an < bn
+      end
+    else
+      local ar, br = a.rss_mb or -1, b.rss_mb or -1
+
+      if ar ~= br then
+        return ar > br
+      end
+    end
+
+    return (a.pid or 0) < (b.pid or 0)
+  end)
+end
+
 -- Build a string + mark list builder so callers can stream rows by column.
 -- Each "segment" pair is { text, highlight_group }.
 local function build_line(segments)
@@ -173,6 +210,346 @@ local function build_line(segments)
 end
 
 -- ============================================================================
+-- Process table
+-- ============================================================================
+
+-- Left margin shared by the header box and the process table.
+local TABLE_INDENT = "   "
+
+-- Process table columns. Fixed-width columns keep the numeric metrics aligned;
+-- `flex` columns split whatever horizontal space is left over.
+local PROC_COLUMNS = {
+  { title = "",         width = 4 },
+  { title = "PID",      width = 8 },
+  { title = "CWD",      flex = 3 },
+  { title = "MEM(RSS)", width = 12, align = "right" },
+  { title = "SUBSYSTEMS", flex = 4 },
+  { title = "UPTIME",   width = 11 },
+  { title = "BUFS",     width = 7,  align = "right" },
+  { title = "PARSERS",  width = 9,  align = "right" },
+}
+
+-- Truncate keeping the head of the string ("long text…").
+local function truncate_tail(text, max_width)
+  if fn.strdisplaywidth(text) <= max_width then
+    return text
+  end
+
+  local out = ""
+
+  for _, char in ipairs(fn.split(text, "\\zs")) do
+    if fn.strdisplaywidth(out .. char) > max_width - 1 then
+      break
+    end
+
+    out = out .. char
+  end
+
+  return out .. "…"
+end
+
+-- Distribute the inner table width across fixed and flex columns.
+local function resolve_column_widths(width)
+  local inner = width - #TABLE_INDENT - (#PROC_COLUMNS + 1)
+  local fixed, flex_total = 0, 0
+
+  for _, col in ipairs(PROC_COLUMNS) do
+    if col.width then
+      fixed = fixed + col.width
+    else
+      flex_total = flex_total + col.flex
+    end
+  end
+
+  local flex_space = math.max(#PROC_COLUMNS * 6, inner - fixed)
+  local widths = {}
+  local assigned = 0
+  local last_flex
+
+  for i, col in ipairs(PROC_COLUMNS) do
+    if col.width then
+      widths[i] = col.width
+    else
+      widths[i] = math.max(8, math.floor(flex_space * col.flex / flex_total))
+      assigned = assigned + widths[i]
+      last_flex = i
+    end
+  end
+
+  -- The last flex column absorbs the rounding remainder so the right border
+  -- lines up with the rules above and below it.
+  if last_flex then
+    widths[last_flex] = widths[last_flex] + (flex_space - assigned)
+  end
+
+  return widths
+end
+
+-- Horizontal rule spanning the table with the given corner/cross glyphs.
+local function build_table_rule(widths, left, cross, right)
+  local parts = { TABLE_INDENT, left }
+
+  for i, w in ipairs(widths) do
+    parts[#parts + 1] = string.rep("─", w)
+    parts[#parts + 1] = (i < #widths) and cross or right
+  end
+
+  local line = table.concat(parts)
+
+  return line, { { col = #TABLE_INDENT, end_col = #line, hl = "MemDashHeaderBorder" } }
+end
+
+-- One table row. `cells` is a list aligned with PROC_COLUMNS; a cell is either
+-- a single `{ text, highlight }` pair or `{ segments = { {text, hl}, … } }` for
+-- cells that mix highlights. Each cell is padded to its column width.
+local function build_table_row(widths, cells)
+  local parts = { TABLE_INDENT }
+  local marks = {}
+  local col = #TABLE_INDENT
+
+  for i, w in ipairs(widths) do
+    parts[#parts + 1] = "│"
+    table.insert(marks, { col = col, end_col = col + #"│", hl = "MemDashHeaderBorder" })
+    col = col + #"│"
+
+    local cell = cells[i] or {}
+    local segments = cell.segments or { { cell[1] or "", cell[2] } }
+    local content_width = 0
+
+    for _, seg in ipairs(segments) do
+      seg[1] = truncate_tail(seg[1], math.max(1, w - 2 - content_width))
+      content_width = content_width + fn.strdisplaywidth(seg[1])
+    end
+
+    local pad = math.max(0, w - 2 - content_width)
+    local lead = (PROC_COLUMNS[i].align == "right") and pad + 1 or 1
+
+    parts[#parts + 1] = string.rep(" ", lead)
+    col = col + lead
+
+    for _, seg in ipairs(segments) do
+      parts[#parts + 1] = seg[1]
+
+      if seg[1] ~= "" and seg[2] then
+        table.insert(marks, { col = col, end_col = col + #seg[1], hl = seg[2] })
+      end
+
+      col = col + #seg[1]
+    end
+
+    local trail = w - lead - content_width
+    parts[#parts + 1] = string.rep(" ", math.max(0, trail))
+    col = col + math.max(0, trail)
+  end
+
+  parts[#parts + 1] = "│"
+  table.insert(marks, { col = col, end_col = col + #"│", hl = "MemDashHeaderBorder" })
+
+  return table.concat(parts), marks
+end
+
+-- tmux location of a process, e.g. "⧉ work:editor.2" (session : window name .
+-- pane index). nil when the process isn't running inside tmux.
+local function tmux_label(tmux)
+  if not tmux then
+    return nil
+  end
+
+  return string.format("⧉ %s:%s.%d", tmux.session, tmux.window_name, tmux.pane_index)
+end
+
+-- Width of a row that spans every column (column dividers become content).
+local function span_width(widths)
+  local total = #widths - 1
+
+  for _, w in ipairs(widths) do
+    total = total + w
+  end
+
+  return total
+end
+
+-- A full-width row inside the table, used for the buffer detail of an
+-- expanded process. `left`/`right` are `{ text, highlight }` segment lists;
+-- the gap between them is padded so the right group hugs the right border.
+local function build_span_row(widths, left, right)
+  local content_width = span_width(widths) - 2
+  local left_width, right_width = 0, 0
+
+  for _, seg in ipairs(left) do
+    left_width = left_width + fn.strdisplaywidth(seg[1])
+  end
+
+  for _, seg in ipairs(right) do
+    right_width = right_width + fn.strdisplaywidth(seg[1])
+  end
+
+  -- Overflow: shrink the last left segment (the name) rather than pushing the
+  -- right border out of alignment.
+  if left_width + right_width > content_width then
+    local last = left[#left]
+    local allowed = math.max(1,
+      fn.strdisplaywidth(last[1]) - (left_width + right_width - content_width))
+    left_width = left_width - fn.strdisplaywidth(last[1])
+    last[1] = truncate_tail(last[1], allowed)
+    left_width = left_width + fn.strdisplaywidth(last[1])
+  end
+
+  local parts = { TABLE_INDENT, "│", " " }
+  local marks = { { col = #TABLE_INDENT, end_col = #TABLE_INDENT + #"│", hl = "MemDashHeaderBorder" } }
+  local col = #TABLE_INDENT + #"│" + 1
+
+  local function append(segments)
+    for _, seg in ipairs(segments) do
+      parts[#parts + 1] = seg[1]
+
+      if seg[2] then
+        table.insert(marks, { col = col, end_col = col + #seg[1], hl = seg[2] })
+      end
+
+      col = col + #seg[1]
+    end
+  end
+
+  append(left)
+  local gap = math.max(1, content_width - left_width - right_width)
+  parts[#parts + 1] = string.rep(" ", gap)
+  col = col + gap
+  append(right)
+  parts[#parts + 1] = " │"
+  table.insert(marks, { col = col + 1, end_col = col + 1 + #"│", hl = "MemDashHeaderBorder" })
+
+  return table.concat(parts), marks
+end
+
+-- One borderless stats line, right-aligned so it ends flush with the table's
+-- table's left edge. `rows` is a list of rows, each a list of items
+-- `{ label, value, value_highlight }`. Labels and values are padded to the
+-- widest entry in their column, so both line up vertically across rows.
+-- Returns a list of `{ line, marks }`.
+local function build_stats_grid(rows)
+  local label_widths, value_widths = {}, {}
+
+  for _, items in ipairs(rows) do
+    for i, item in ipairs(items) do
+      label_widths[i] = math.max(label_widths[i] or 0, fn.strdisplaywidth(item[1]))
+      value_widths[i] = math.max(value_widths[i] or 0, fn.strdisplaywidth(item[2]))
+    end
+  end
+
+  local lines = {}
+
+  for _, items in ipairs(rows) do
+    local segments = { { TABLE_INDENT, nil } }
+
+    for i, item in ipairs(items) do
+      if i > 1 then
+        table.insert(segments, { " · ", "MemDashSep" })
+      end
+
+      local label_pad = label_widths[i] - fn.strdisplaywidth(item[1])
+      local value_pad = value_widths[i] - fn.strdisplaywidth(item[2])
+      table.insert(segments, { item[1], "MemDashSummary" })
+      table.insert(segments, { string.rep(" ", label_pad), nil })
+      table.insert(segments, { "  ", nil })
+      table.insert(segments, { item[2], item[3] or "MemDashMetric" })
+
+      if i < #items then
+        table.insert(segments, { string.rep(" ", value_pad), nil })
+      end
+    end
+
+    local line, marks = build_line(segments)
+    table.insert(lines, { line, marks })
+  end
+
+  return lines
+end
+
+-- Long-lived nvims accumulate memory, so the uptime column escalates:
+-- yellow from 5 days, red from 2 weeks.
+local UPTIME_WARN_SECONDS = 5 * 86400
+local UPTIME_CRITICAL_SECONDS = 14 * 86400
+
+local function uptime_hl(seconds)
+  if not seconds then
+    return "MemDashUptime"
+  end
+
+  if seconds >= UPTIME_CRITICAL_SECONDS then
+    return "MemDashUptimeCritical"
+  end
+
+  if seconds >= UPTIME_WARN_SECONDS then
+    return "MemDashUptimeWarn"
+  end
+
+  return "MemDashUptime"
+end
+
+-- Compact uptime for the table column ("3h 20m"); long form lives in the
+-- process's expanded detail block.
+local function fmt_uptime_short(seconds)
+  if not seconds then return "?" end
+
+  if seconds < 3600 then
+    return string.format("%dm", math.floor(seconds / 60))
+  end
+
+  if seconds < 86400 then
+    return string.format("%dh %dm", math.floor(seconds / 3600),
+      math.floor((seconds % 3600) / 60))
+  end
+
+  return string.format("%dd %dh", math.floor(seconds / 86400),
+    math.floor((seconds % 86400) / 3600))
+end
+
+-- Per-subsystem RSS breakdown rendered into one cell:
+--   • LSP: real child-process RSS (sum + server names)
+--   • TS:  ~estimate (source bytes × 3) + active languages
+--   • Fugitive: real bytes from open fugitive buffers
+--   • Lua: real heap from collectgarbage("count")
+local function subsystem_text(p)
+  local segments = {}
+  local lsp_names = p.lsp_names or {}
+  local lsp_procs = p.lsp_procs or { items = {}, total_kb = 0 }
+  local ts_bytes = p.ts_bytes or 0
+  local fug_count = p.fug_count or 0
+  local fug_bytes = p.fug_bytes or 0
+
+  if lsp_procs.total_kb > 0 then
+    local names = {}
+
+    for _, item in ipairs(lsp_procs.items) do
+      table.insert(names, item.name)
+    end
+
+    table.insert(segments, string.format("LSP %s (%s)",
+      utils.fmt_kb(lsp_procs.total_kb), table.concat(names, ", ")))
+  elseif #lsp_names > 0 then
+    table.insert(segments, string.format("LSP %d (%s)",
+      #lsp_names, table.concat(lsp_names, ", ")))
+  end
+
+  if ts_bytes > 0 then
+    table.insert(segments, string.format("TS ~%s",
+      utils.fmt_kb(math.floor(ts_bytes * 3 / 1024))))
+  end
+
+  if fug_count > 0 then
+    table.insert(segments, string.format("Fugitive %s",
+      utils.fmt_kb(math.floor(fug_bytes / 1024))))
+  end
+
+  if p.lua_heap_kb then
+    table.insert(segments, "Lua " .. utils.fmt_kb(p.lua_heap_kb))
+  end
+
+  return table.concat(segments, " · ")
+end
+
+-- ============================================================================
 -- Render
 -- ============================================================================
 
@@ -182,14 +559,24 @@ local function render_view_model(view, width)
   local marks = {}
   local row_index = {}
   local sort_key = shared.dashboard_state.sort
+  sort_processes(view, sort_key)
 
   -- Aggregate totals for the summary line.
   local total_loaded, total_parsers, total_rss = 0, 0, 0
+  local current_proc, heaviest_proc
 
   for _, p in ipairs(view) do
     total_loaded = total_loaded + (p.loaded or 0)
     total_parsers = total_parsers + (p.parsers or 0)
     total_rss = total_rss + (p.rss_mb or 0)
+
+    if p.is_current then
+      current_proc = p
+    end
+
+    if not heaviest_proc or (p.rss_mb or 0) > (heaviest_proc.rss_mb or 0) then
+      heaviest_proc = p
+    end
   end
 
   local function push(line, marks_for_line, kind)
@@ -261,365 +648,220 @@ local function render_view_model(view, width)
     return string.format("%dh%02dm", math.floor(s / 3600), math.floor((s % 3600) / 60))
   end
 
-  -- Box geometry: 4-column × 3-row grid.
-  local indent = "   "
-  local n_cols = 4
-  local box_w = math.max(60, width - #indent * 2)
-  -- Each column gets an equal slice of the inner width; the last column
-  -- absorbs any rounding remainder so dividers align perfectly.
-  local cell_w = math.floor((box_w - 2 - (n_cols - 1)) / n_cols)
-  local last_cell_w = (box_w - 2 - (n_cols - 1)) - cell_w * (n_cols - 1)
-
-  local function col_widths()
-    local ws = {}
-
-    for i = 1, n_cols do
-      ws[i] = (i == n_cols) and last_cell_w or cell_w
-    end
-
-    return ws
-  end
-
-  -- Build a horizontal box-rule line with given corners + cross.
-  local function rule(left, cross, right)
-    local parts = { left }
-    local ws = col_widths()
-
-    for i = 1, n_cols do
-      parts[#parts + 1] = string.rep("─", ws[i])
-
-      if i < n_cols then
-        parts[#parts + 1] = cross
-      end
-    end
-
-    parts[#parts + 1] = right
-    return indent .. table.concat(parts)
-  end
-
-  -- Push a rule line with FloatBorder highlight; no bg tint.
-  local function push_rule(left, cross, right)
-    local line = rule(left, cross, right)
-    push(line, {
-      { col = #indent, end_col = #line, hl = "MemDashHeaderBorder" },
-    }, { kind = "header" })
-  end
-
-  -- Render one data row of 4 cells. Each cell is `{label, value, value_hl}`.
-  -- Labels are dim; values use the caller-provided highlight.
-  local function push_data_row(cells)
-    local ws = col_widths()
-    local parts = { "│" }
-    local marks_for_line = {}
-    -- Byte offset of the *next* segment to push into `parts`.
-    local col = #indent + #"│"
-    -- Left │.
-    table.insert(marks_for_line, {
-      col = #indent, end_col = #indent + #"│", hl = "MemDashHeaderBorder",
-    })
-
-    for i = 1, n_cols do
-      local label = cells[i] and cells[i][1] or ""
-      local value = cells[i] and cells[i][2] or ""
-      local value_hl = cells[i] and cells[i][3] or "MemDashMetric"
-      local w = ws[i]
-      -- " label  value <pad> "
-      local pad_left = " "
-      local sep = "  "
-      local label_dw = vim.fn.strdisplaywidth(label)
-      local value_dw = vim.fn.strdisplaywidth(value)
-      local used = #pad_left + label_dw + #sep + value_dw + #" "
-      local pad_right = math.max(0, w - used)
-      -- Add the leading single-space inside the cell.
-      parts[#parts + 1] = pad_left
-      col = col + #pad_left
-      -- Label segment.
-      parts[#parts + 1] = label
-
-      if label ~= "" then
-        table.insert(marks_for_line, {
-          col = col, end_col = col + #label, hl = "MemDashSummary",
-        })
-      end
-
-      col = col + #label
-      -- "  " separator between label and value.
-      parts[#parts + 1] = sep
-      col = col + #sep
-      -- Value segment with its own highlight.
-      parts[#parts + 1] = value
-
-      if value ~= "" then
-        table.insert(marks_for_line, {
-          col = col, end_col = col + #value, hl = value_hl,
-        })
-      end
-
-      col = col + #value
-      -- Trailing pad + cell-end space.
-      parts[#parts + 1] = string.rep(" ", pad_right) .. " "
-      col = col + pad_right + 1
-      -- Divider │ between columns; right │ at the end.
-      parts[#parts + 1] = "│"
-      table.insert(marks_for_line, {
-        col = col, end_col = col + #"│", hl = "MemDashHeaderBorder",
-      })
-      col = col + #"│"
-    end
-
-    local line = indent .. table.concat(parts)
-    push(line, marks_for_line, { kind = "header" })
-  end
-
-  -- Top border.
-  push_rule("╭", "┬", "╮")
-
-  -- Row 1: instant state.
+  -- ------- Stats strip: borderless, left-aligned with the table -------
+  local widths = resolve_column_widths(width)
   local total_hl = total_rss > cleaner.config.rss_warn_threshold_mb * 4
     and "MemDashMetricWarn" or "MemDashMetric"
-  push_data_row({
-    { "RSS",        utils.fmt_mb(rss_now) or "—", rss_hl },
-    { "Peak 24h",   utils.fmt_mb(peak_mb) or "—", "MemDashMetric" },
-    { "Trend",      trend_glyph, trend_hl },
-    { "Total",      string.format("%s (%d nvim)", utils.fmt_mb(total_rss) or "—", #view), total_hl },
-  })
-  push_rule("├", "┼", "┤")
+  local last_prune_at = cleaner.timer_state.last_prune_at
+  local last_sample_at = cleaner.timer_state.last_rss_sample_at
+  local setup_at = cleaner.timer_state.setup_at
+  local parser_estimate_count = vim.tbl_count(cfg.parser_memory_estimate_kb_by_filetype)
 
-  -- Row 2: counts.
-  push_data_row({
-    { "Procs",      tostring(#view),                       "MemDashMetric" },
-    { "Buffers",    tostring(total_loaded),                "MemDashMetric" },
-    { "Parsers",    tostring(total_parsers),               "MemDashMetric" },
-    { "Sort",       string.format("%s ↻", sort_key),       "MemDashSortKey" },
-  })
-  push_rule("├", "┼", "┤")
+  -- "5m ago" for an epoch timestamp; "never" when the timer hasn't fired yet.
+  local function fmt_ago(epoch)
+    if not epoch or epoch == 0 then
+      return "never"
+    end
 
-  -- Row 3: timings.
-  push_data_row({
-    { "Idle ≥",     fmt_dur(cfg.unload_buffer_after_idle_minutes * 60),                   "MemDashMetric" },
-    { "Prune",      string.format("%s / %s", fmt_dur(prune_period), fmt_dur(next_prune)),  "MemDashMetric" },
-    { "Sample",     string.format("%s / %s", fmt_dur(rss_period), fmt_dur(next_sample)),   "MemDashMetric" },
-    { "Warn cooldown", fmt_dur(cfg.rss_warn_notify_debounce_seconds),                      "MemDashMetric" },
+    return fmt_dur(math.max(0, now_epoch - epoch)) .. " ago"
+  end
+
+  -- Section label, its stats grid, then a blank line separating sections.
+  local function push_section(label, rows)
+    local label_line, label_marks = build_line({
+      { TABLE_INDENT, nil },
+      { label, "MemDashSection" },
+    })
+    push(label_line, label_marks, { kind = "header" })
+
+    for _, stat_line in ipairs(build_stats_grid(rows)) do
+      push(stat_line[1], stat_line[2], { kind = "header" })
+    end
+
+    push("", nil, { kind = "blank" })
+  end
+
+  push_section("THIS NVIM", {
+    {
+      { "Mem(RSS)", utils.fmt_mb(rss_now) or "—", rss_hl },
+      { "Peak 24h", utils.fmt_mb(peak_mb) or "—", "MemDashMetric" },
+      { "Trend", trend_glyph, trend_hl },
+      { "Buffers", string.format("%d (%d parsers)",
+        current_proc and current_proc.loaded or 0,
+        current_proc and current_proc.parsers or 0), "MemDashMetric" },
+      { "Uptime", fmt_uptime_short(current_proc and current_proc.uptime_seconds),
+        uptime_hl(current_proc and current_proc.uptime_seconds) },
+    },
   })
 
-  push_rule("╰", "┴", "╯")
+  push_section("ALL NVIM PROCESSES", {
+    {
+      { "Total Mem(RSS)", utils.fmt_mb(total_rss) or "—", total_hl },
+      { "Processes", tostring(#view), "MemDashMetric" },
+      { "Buffers", tostring(total_loaded), "MemDashMetric" },
+      { "Parsers", tostring(total_parsers), "MemDashMetric" },
+    },
+    {
+      { "Average Mem(RSS)", utils.fmt_mb(#view > 0 and (total_rss / #view) or 0) or "—",
+        "MemDashMetric" },
+      { "Heaviest", heaviest_proc
+        and string.format("pid %d · %s", heaviest_proc.pid,
+          utils.fmt_mb(heaviest_proc.rss_mb) or "?")
+        or "—", "MemDashMetric" },
+      { "Sort", string.format("%s ↻", sort_key), "MemDashSortKey" },
+    },
+  })
+
+  push_section("MEMORY CLEANER", {
+    {
+      { "Unload buffer after idle", fmt_dur(cfg.unload_buffer_after_idle_minutes * 60), "MemDashMetric" },
+      { "Prune every", string.format("%s (next in %s)", fmt_dur(prune_period), fmt_dur(next_prune)), "MemDashMetric" },
+      { "Sample every", string.format("%s (next in %s)", fmt_dur(rss_period), fmt_dur(next_sample)), "MemDashMetric" },
+      { "Warn at", utils.fmt_mb(cfg.rss_warn_threshold_mb) or "—", "MemDashMetric" },
+    },
+    {
+      { "Last prune", fmt_ago(last_prune_at), "MemDashMetric" },
+      { "Last sample", fmt_ago(last_sample_at), "MemDashMetric" },
+      { "Warn cooldown", fmt_dur(cfg.rss_warn_notify_debounce_seconds), "MemDashMetric" },
+      { "In breach", cleaner.notify_state.in_breach and "yes" or "no",
+        cleaner.notify_state.in_breach and "MemDashMetricWarn" or "MemDashGood" },
+    },
+    {
+      { "Loaded", fmt_ago(setup_at), "MemDashMetric" },
+      { "RSS cache", fmt_dur(cfg.rss_reading_cache_seconds), "MemDashMetric" },
+      { "History", string.format("%d/%d samples (%s)", #cleaner.rss_history,
+        cfg.rss_history_max_samples,
+        fmt_dur(cfg.rss_history_max_samples * rss_period)), "MemDashMetric" },
+      { "Parser estimates", string.format("%d filetypes", parser_estimate_count), "MemDashMetric" },
+    },
+    {
+      { "Keep LSP", table.concat(cfg.lsp_clients_never_auto_stop, ", "), "MemDashMetric" },
+      { "History file", shorten_path(cfg.rss_history_state_path, 46), "MemDashMetricDim" },
+    },
+  })
+
   push("", nil, { kind = "blank" })
 
-  -- ------- Per-process rows -------
-  for proc_index, p in ipairs(view) do
-    local is_current = p.is_current
-    local marker = is_current and "★" or " "
-    local fold = fold_glyph(p.pid)
-    local pid_text = string.format("%-6s", tostring(p.pid))
-    local cwd_max = math.max(20, width - 50)
-    local cwd_text = shorten_path(p.cwd, cwd_max)
+  -- ------- Process table: exactly one row per nvim process -------
+  local cwd_width = widths[3] - 2
 
-    -- Right side metrics, right-aligned to width.
-    local rss_text = string.format("%7s", utils.fmt_mb(p.rss_mb) or "?")
-    local rss_metric_hl = (p.rss_mb and p.rss_mb > cleaner.config.rss_warn_threshold_mb)
-      and "MemDashMetricWarn" or "MemDashMetric"
-    local loaded_text = string.format("%3dL", p.loaded or 0)
-    local parser_text = string.format("%3dP", p.parsers or 0)
+  local function push_table_line(line, line_marks)
+    push(line, line_marks, { kind = "header" })
+  end
 
-    -- Left half segments.
-    local left = {
-      { "  ", nil },
-      { fold, "MemDashSep" },
-      { " ", nil },
-      { marker, is_current and "MemDashCurrent" or "MemDashRemote" },
-      { " ", nil },
-      { pid_text, "MemDashPid" },
-      { "  ", nil },
-      { cwd_text, is_current and "MemDashCurrent" or "MemDashCwd" },
-    }
-    local left_concat = ""
+  push_table_line(build_table_rule(widths, "╭", "┬", "╮"))
+  push_table_line(build_table_row(widths, {
+    {},
+    { "PID", "MemDashSummary" },
+    { "CWD", "MemDashSummary" },
+    { "MEM(RSS)", "MemDashSummary" },
+    { "SUBSYSTEMS", "MemDashSummary" },
+    { "UPTIME", "MemDashSummary" },
+    { "BUFS", "MemDashSummary" },
+    { "PARSERS", "MemDashSummary" },
+  }))
+  push_table_line(build_table_rule(widths, "├", "┼", "┤"))
 
-    for _, seg in ipairs(left) do
-      left_concat = left_concat .. (seg[1] or "")
+  -- Buffer rows of an expanded process, rendered as full-width rows nested
+  -- inside the table right below that process's row.
+  local function push_buffer_rows(p)
+    local by_section = { Visible = {}, ["Loaded-Hidden"] = {}, Unloaded = {}, Special = {} }
+
+    for _, b in ipairs(p.buffers or {}) do
+      table.insert(by_section[section_of(b)], b)
     end
 
-    -- Right half: rss / loaded / parsers, separated by two spaces.
-    local right_pieces = { rss_text, loaded_text, parser_text }
-    local right_concat = "   " .. rss_text .. "   " .. loaded_text .. "   " .. parser_text .. " "
-    local fill = math.max(1, width - #left_concat - #right_concat)
+    for _, sec_name in ipairs(SECTION_ORDER) do
+      local items = by_section[sec_name]
 
-    table.insert(left, { string.rep(" ", fill), nil })
-    table.insert(left, { "   ", nil })
-    table.insert(left, { rss_text, rss_metric_hl })
-    table.insert(left, { "   ", nil })
-    table.insert(left, { loaded_text, "MemDashMetric" })
-    table.insert(left, { "   ", nil })
-    table.insert(left, { parser_text, "MemDashMetricDim" })
+      if #items > 0 then
+        sort_buffers(items, sort_key)
+        local sec_line, sec_marks = build_span_row(widths, {
+          { "  ", nil },
+          { sec_name, "MemDashSection" },
+          { string.format(" · %d", #items), "MemDashSectionCount" },
+        }, {})
+        push(sec_line, sec_marks, { kind = "section", pid = p.pid, proc = p, section = sec_name })
 
-    local row_line, row_marks = build_line(left)
-    push(row_line, row_marks, { kind = "proc", pid = p.pid, proc = p })
+        for _, b in ipairs(items) do
+          local idle_text
 
-    -- Error band for failed RPC.
-    if p.error then
-      local err_line = "       ⚠ " .. tostring(p.error)
-      push(err_line, { { col = 0, end_col = #err_line, hl = "MemDashError" } },
-        { kind = "proc_error", pid = p.pid, proc = p })
-    end
-
-    -- Uptime sub-row (dim) — relative time first for quick scan, absolute
-    -- start date in parens for precision; falls back to one or the other
-    -- when only one is available.
-    if (p.uptime and p.uptime ~= "?") or p.uptime_seconds then
-      local rel = utils.fmt_uptime(p.uptime_seconds)
-      local up_line
-
-      if rel and p.uptime and p.uptime ~= "?" then
-        up_line = string.format("           started %s (%s)", rel, p.uptime)
-      elseif rel then
-        up_line = string.format("           started %s", rel)
-      else
-        up_line = string.format("           started %s", p.uptime)
-      end
-
-      push(up_line, { { col = 0, end_col = #up_line, hl = "MemDashUptime" } },
-        { kind = "proc_meta", pid = p.pid, proc = p })
-    end
-
-    -- Subsystem sub-row: per-subsystem RSS breakdown.
-    --   • LSP: real child-process RSS (sum + server names)
-    --   • TS:  ~estimate (source bytes × 3) + active languages
-    --   • Fugitive: real bytes from open fugitive buffers
-    --   • Lua: real heap from collectgarbage("count")
-    -- Each segment shown only when it has data. The languages list is
-    -- truncated to keep the row within window width.
-    local segments = {}
-    local lsp_names = p.lsp_names or {}
-    local lsp_procs = p.lsp_procs or { items = {}, total_kb = 0 }
-    local ts_langs = p.ts_langs or {}
-    local ts_bytes = p.ts_bytes or 0
-    local fug_count = p.fug_count or 0
-    local fug_bytes = p.fug_bytes or 0
-
-    if lsp_procs.total_kb > 0 then
-      local names = {}
-
-      for _, item in ipairs(lsp_procs.items) do
-        table.insert(names, item.name)
-      end
-
-      table.insert(segments, string.format("LSP %s (%s)",
-        utils.fmt_kb(lsp_procs.total_kb), table.concat(names, ", ")))
-    elseif #lsp_names > 0 then
-      table.insert(segments, string.format("LSP %d (%s)",
-        #lsp_names, table.concat(lsp_names, ", ")))
-    elseif p.is_current or p.lsp_names ~= nil then
-      table.insert(segments, "LSP 0")
-    end
-
-    if ts_bytes > 0 then
-      local ts_text = string.format("TS ~%s (%s)",
-        utils.fmt_kb(math.floor(ts_bytes * 3 / 1024)),
-        table.concat(ts_langs, ", "))
-      local budget = math.max(20, width - 12 - 50)
-
-      if #ts_text > budget then
-        ts_text = ts_text:sub(1, budget - 1) .. "…"
-      end
-
-      table.insert(segments, ts_text)
-    end
-
-    if fug_count > 0 then
-      table.insert(segments, string.format("Fugitive %d buf %s",
-        fug_count, utils.fmt_kb(math.floor(fug_bytes / 1024))))
-    end
-
-    if p.lua_heap_kb then
-      table.insert(segments, "Lua " .. utils.fmt_kb(p.lua_heap_kb))
-    end
-
-    if #segments > 0 then
-      local sub_line = "           " .. table.concat(segments, " · ")
-      push(sub_line, { { col = 0, end_col = #sub_line, hl = "MemDashUptime" } },
-        { kind = "proc_meta", pid = p.pid, proc = p })
-    end
-
-    if not shared.dashboard_state.folded[p.pid] and not p.error then
-      push("", nil, { kind = "blank" })
-      local by_section = { Visible = {}, ["Loaded-Hidden"] = {}, Unloaded = {}, Special = {} }
-
-      for _, b in ipairs(p.buffers or {}) do
-        local sec = section_of(b)
-        table.insert(by_section[sec], b)
-      end
-
-      for _, sec_name in ipairs(SECTION_ORDER) do
-        local items = by_section[sec_name]
-
-        if #items > 0 then
-          sort_buffers(items, sort_key)
-          local count = string.format(" · %d", #items)
-          local sec_line, sec_marks = build_line({
-            { "        ", nil },
-            { sec_name, "MemDashSection" },
-            { count, "MemDashSectionCount" },
-          })
-          push(sec_line, sec_marks, { kind = "section", pid = p.pid, proc = p, section = sec_name })
-
-          for _, b in ipairs(items) do
-            local glyph = status_glyph(b)
-            local name_max = math.max(18, width - 40)
-            local short = b.name:gsub(vim.env.HOME or "~", "~")
-
-            if #short > name_max then
-              short = "…" .. short:sub(-name_max + 1)
-            end
-
-            local lines_text = string.format("%4dL", b.line_count or 0)
-            local idle_text
-            if b.idle_min and b.idle_min > 0 then
-              idle_text = string.format("%4dm idle", b.idle_min)
-            else
-              idle_text = "   – idle"
-            end
-            local est_text = string.format("%7s", utils.fmt_kb(b.est_kb))
-
-            local left_segs = {
-              { "          ", nil },
-              { glyph, b.modified and "MemDashBufModified" or "MemDashSep" },
-              { "  ", nil },
-              { short, b.modified and "MemDashBufModified"
-                or (b.loaded and "MemDashBuf" or "MemDashBufDim") },
-            }
-            local left_text = ""
-
-            for _, seg in ipairs(left_segs) do
-              left_text = left_text .. (seg[1] or "")
-            end
-
-            local right_text = "   " .. lines_text .. "   " .. idle_text .. "   " .. est_text .. " "
-            local pad_n = math.max(1, width - #left_text - #right_text)
-            table.insert(left_segs, { string.rep(" ", pad_n), nil })
-            table.insert(left_segs, { "   ", nil })
-            table.insert(left_segs, { lines_text, "MemDashMetricDim" })
-            table.insert(left_segs, { "   ", nil })
-            table.insert(left_segs, { idle_text, "MemDashIdle" })
-            table.insert(left_segs, { "   ", nil })
-            table.insert(left_segs, { est_text, "MemDashEst" })
-
-            local row_l, row_m = build_line(left_segs)
-            push(row_l, row_m, { kind = "buffer", pid = p.pid, proc = p, buffer = b })
+          if b.idle_min and b.idle_min > 0 then
+            idle_text = string.format("%4dm idle", b.idle_min)
+          else
+            idle_text = "   – idle"
           end
+
+          local buf_hl = b.modified and "MemDashBufModified"
+            or (b.loaded and "MemDashBuf" or "MemDashBufDim")
+          local left_segs = {
+            { "    ", nil },
+            { status_glyph(b), b.modified and "MemDashBufModified" or "MemDashSep" },
+            { "  ", nil },
+            { (b.name:gsub(vim.env.HOME or "~", "~")), buf_hl },
+          }
+          local right_segs = {
+            { string.format("%6dL", b.line_count or 0), "MemDashMetricDim" },
+            { "   ", nil },
+            { idle_text, "MemDashIdle" },
+            { "   ", nil },
+            { string.format("%9s", utils.fmt_kb(b.est_kb)), "MemDashEst" },
+          }
+          local row_l, row_m = build_span_row(widths, left_segs, right_segs)
+          push(row_l, row_m, { kind = "buffer", pid = p.pid, proc = p, buffer = b })
         end
       end
     end
+  end
 
-    if proc_index < #view then
-      -- Heavier divider after the current process to mark the boundary
-      -- between "this nvim" and the rest; thin solid line between siblings.
-      local next_proc = view[proc_index + 1]
-      local is_boundary = p.is_current and next_proc and not next_proc.is_current
-      local glyph = is_boundary and "═" or "─"
-      local divider = "  " .. string.rep(glyph, math.max(10, width - 4))
-      local hl = is_boundary and "MemDashBoundary" or "MemDashSep"
-      push(divider, { { col = 0, end_col = #divider, hl = hl } }, { kind = "divider" })
-    else
-      push("", nil, { kind = "blank" })
+  for proc_index, p in ipairs(view) do
+    local is_current = p.is_current
+    local rss_hl_proc = (p.rss_mb and p.rss_mb > cleaner.config.rss_warn_threshold_mb)
+      and "MemDashMetricWarn" or "MemDashMetric"
+    local detail = p.error and ("⚠ " .. tostring(p.error)) or subsystem_text(p)
+    local detail_hl = p.error and "MemDashError" or "MemDashUptime"
+    local pane = tmux_label(p.tmux)
+    local cwd_segments = {
+      { shorten_path(p.cwd, pane and (cwd_width - #pane - 2) or cwd_width),
+        is_current and "MemDashCurrent" or "MemDashCwd" },
+    }
+
+    if pane then
+      table.insert(cwd_segments, { "  ", nil })
+      table.insert(cwd_segments, { pane, "MemDashTmux" })
+    end
+
+    local row_line, row_marks = build_table_row(widths, {
+      { fold_glyph(p.pid) .. (is_current and "★" or " "),
+        is_current and "MemDashCurrent" or "MemDashSep" },
+      { tostring(p.pid), "MemDashPid" },
+      { segments = cwd_segments },
+      { utils.fmt_mb(p.rss_mb) or "?", rss_hl_proc },
+      { detail, detail_hl },
+      { fmt_uptime_short(p.uptime_seconds), uptime_hl(p.uptime_seconds) },
+      { tostring(p.loaded or 0), "MemDashMetric" },
+      { tostring(p.parsers or 0), "MemDashMetricDim" },
+    })
+    push(row_line, row_marks, { kind = "proc", pid = p.pid, proc = p })
+
+    local expanded = not shared.dashboard_state.folded[p.pid]
+      and not p.error
+      and #(p.buffers or {}) > 0
+    local is_last = proc_index == #view
+
+    if expanded then
+      -- Merge the columns away for the detail block, then split them back for
+      -- the next process row (or close the table if this was the last one).
+      push_table_line(build_table_rule(widths, "├", "┴", "┤"))
+      push_buffer_rows(p)
+
+      if is_last then
+        push_table_line(build_table_rule(widths, "╰", "─", "╯"))
+      else
+        push_table_line(build_table_rule(widths, "├", "┬", "┤"))
+      end
+    elseif is_last then
+      push_table_line(build_table_rule(widths, "╰", "┴", "╯"))
     end
   end
 
@@ -700,7 +942,7 @@ local function inner_width()
     return api.nvim_win_get_width(shared.dashboard_state.win)
   end
 
-  return math.floor(vim.o.columns * 0.85)
+  return math.max(40, vim.o.columns - 2)
 end
 
 -- Re-render only (cheap: no RPC, no re-discovery; called by sort/fold).
@@ -760,22 +1002,6 @@ local function refresh()
     end
   end
 
-  -- Current process is always pinned to the top; remaining processes are
-  -- sorted by RSS desc (largest footprint first), ties broken by pid.
-  table.sort(view, function(a, b)
-    if a.is_current ~= b.is_current then
-      return a.is_current and not b.is_current
-    end
-
-    local ar, br = a.rss_mb or -1, b.rss_mb or -1
-
-    if ar == br then
-      return (a.pid or 0) < (b.pid or 0)
-    end
-
-    return ar > br
-  end)
-
   cleaner.buf_bytes_cache = {}
   shared.dashboard_state.view = view
   rerender()
@@ -799,34 +1025,111 @@ end
 -- Help float
 -- ============================================================================
 
--- Open a centered help float listing all keybinds; close on any key.
-local function open_help_float()
-  local rows = {
-    { "q", "close dashboard" },
-    { "<Esc>", "close dashboard" },
-    { "r", "refresh (re-discover + re-render)" },
+-- Help content: keybindings plus what every column / stat in the dashboard
+-- actually means. Each section is `{ title, { { term, explanation }, … } }`.
+local HELP_SECTIONS = {
+  { "KEYBINDINGS", {
+    { "q / <Esc>", "close dashboard" },
+    { "r", "refresh (re-discover processes + re-render)" },
     { "?", "this help" },
     { "<Tab>", "toggle fold under cursor" },
-    { "s", "cycle sort key (size → idle → name)" },
-    { "u", "unload buffer under cursor (keeps listed)" },
-    { "w", "wipe buffer under cursor (full remove; refuses if modified)" },
-    { "W", "force-wipe buffer under cursor (full remove; ignores modified)" },
-    { "U", "unload all in section under cursor" },
-    { "X", "prune everywhere (confirm)" },
-    { "x", "kill remote nvim (y/n confirm)" },
     { "<CR>", "toggle fold (proc row) or jump to buffer" },
-  }
-  local body = { "", "  Memory Manager — keybindings", "" }
+    { "s", "cycle sort key: size → idle → name (sorts processes and buffers)" },
+    { "u", "unload buffer under cursor (keeps it listed)" },
+    { "w", "wipe buffer under cursor (refuses if modified)" },
+    { "W", "force-wipe buffer under cursor (ignores modified)" },
+    { "U", "unload all buffers in the section under cursor" },
+    { "X", "prune every nvim process (confirm)" },
+    { "x", "kill the remote nvim under cursor (confirm)" },
+  } },
+  { "THIS NVIM", {
+    { "Mem(RSS)", "resident memory of this nvim process, right now" },
+    { "Peak 24h", "highest RSS in the 24h sample ring" },
+    { "Trend", "latest RSS vs the ring's median (±10% = steady)" },
+    { "Buffers", "loaded buffers / active treesitter parsers here" },
+    { "Uptime", "age of this process" },
+  } },
+  { "ALL NVIM PROCESSES", {
+    { "Total Mem(RSS)", "summed RSS of every discovered nvim process" },
+    { "Processes", "how many nvim processes were discovered" },
+    { "Buffers", "loaded buffers across all of them" },
+    { "Parsers", "active treesitter parsers across all of them" },
+    { "Average Mem(RSS)", "total RSS divided by process count" },
+    { "Heaviest", "pid and RSS of the largest nvim process" },
+    { "Sort", "sort key for the process table and buffer lists (cycle with s)" },
+  } },
+  { "WHAT A PRUNE CLEARS", {
+    { "Buffer text", "idle buffers are :bunloaded — text freed, buffer stays listed" },
+    { "TS parsers", "vim.treesitter.stop() on each buffer before it is unloaded" },
+    { "LSP clients", "a client is stopped once its last attached buffer is gone" },
+    { "Never touched", "visible buffers, modified buffers, special buftypes" },
+    { "Never stopped", "LSP clients listed in Keep LSP (eslint, copilot, …)" },
+    { "Reclaim estimate", "buffer bytes + a per-filetype parser estimate (see EST column)" },
+    { "Runs when", "the prune timer fires, or on X / U, or via :MemClear" },
+  } },
+  { "MEMORY CLEANER", {
+    { "Unload buffer after idle", "a buffer untouched this long is unloaded on the next prune" },
+    { "Prune every", "prune-timer period, and the countdown to its next run" },
+    { "Sample every", "how often RSS is appended to the history ring" },
+    { "Warn at", "RSS threshold that fires the warning notification" },
+    { "Warn cooldown", "minimum gap between two warning notifications" },
+    { "In breach", "yes while RSS sits above the warn threshold" },
+    { "Last prune", "time since the prune timer last fired" },
+    { "Last sample", "time since RSS was last appended to the ring" },
+    { "Loaded", "time since memory_cleaner.setup() ran" },
+    { "RSS cache", "how long one RSS reading is reused before re-shelling out" },
+    { "History", "samples stored / ring capacity (and the window it covers)" },
+    { "Parser estimates", "filetypes with a KB-per-parser memory estimate" },
+    { "Keep LSP", "clients never auto-stopped when their last buffer unloads" },
+  } },
+  { "PROCESS TABLE", {
+    { "CWD", "working directory, plus ⧉ session:window.pane when in tmux" },
+    { "SUBSYSTEMS", "LSP child-process RSS, TS ≈ source bytes × 3, fugitive, Lua heap" },
+    { "UPTIME", "process age — yellow from 5 days, red from 2 weeks" },
+    { "BUFS / PARSERS", "loaded buffers and active treesitter parsers" },
+    { "▾ / ▸", "expanded / folded; ★ marks this nvim" },
+  } },
+  { "BUFFER GLYPHS", {
+    { "●", "visible in a window" },
+    { "◐", "loaded but hidden" },
+    { "○", "listed but unloaded" },
+    { "!", "modified (wipe refuses; W forces)" },
+    { "*", "special buftype (terminal, quickfix, …)" },
+  } },
+}
 
-  for _, r in ipairs(rows) do
-    table.insert(body, string.format("    %-9s  %s", r[1], r[2]))
+-- Open a centered help float; close on any key.
+local function open_help_float()
+  local term_width = 26
+  local body = { "" }
+  local marks = {}
+
+  for section_index, section in ipairs(HELP_SECTIONS) do
+    if section_index > 1 then
+      table.insert(body, "")
+    end
+
+    table.insert(body, "  " .. section[1])
+    table.insert(marks, { line = #body - 1, col = 2, end_col = 2 + #section[1],
+      hl = "MemDashSection" })
+
+    for _, row in ipairs(section[2]) do
+      local pad = math.max(1, term_width - fn.strdisplaywidth(row[1]))
+      local line = "    " .. row[1] .. string.rep(" ", pad) .. row[2]
+      table.insert(body, line)
+      table.insert(marks, { line = #body - 1, col = 4, end_col = 4 + #row[1],
+        hl = "MemDashHintKey" })
+      table.insert(marks, { line = #body - 1, col = 4 + #row[1] + pad, end_col = #line,
+        hl = "MemDashHint" })
+    end
   end
 
   table.insert(body, "")
   table.insert(body, "  any key closes this help")
   table.insert(body, "")
-  local width = 56
-  local height = #body
+
+  local width = math.min(94, vim.o.columns - 6)
+  local height = math.min(#body, vim.o.lines - 6)
   local buf = api.nvim_create_buf(false, true)
   api.nvim_buf_set_lines(buf, 0, -1, false, body)
   vim.bo[buf].modifiable = false
@@ -834,23 +1137,23 @@ local function open_help_float()
     relative = "editor", width = width, height = height,
     row = math.floor((vim.o.lines - height) / 2),
     col = math.floor((vim.o.columns - width) / 2),
-    border = "rounded", title = " Help ", title_pos = "left",
+    border = "rounded", title = "  Memory Manager — help  ", title_pos = "center",
   })
-  -- Highlight key column in the help float.
+  vim.wo[win].wrap = false
+  vim.wo[win].cursorline = false
   local hns = api.nvim_create_namespace("MemDashboardHelp")
 
-  for i = 4, 3 + #rows do
-    local line_len = #body[i]
-    api.nvim_buf_set_extmark(buf, hns, i - 1, 4, { end_col = 13, hl_group = "MemDashHintKey" })
-    api.nvim_buf_set_extmark(buf, hns, i - 1, 15, { end_col = line_len, hl_group = "MemDashHint" })
+  for _, m in ipairs(marks) do
+    api.nvim_buf_set_extmark(buf, hns, m.line, m.col,
+      { end_col = m.end_col, hl_group = m.hl })
   end
 
   local function close_help()
     if api.nvim_win_is_valid(win) then api.nvim_win_close(win, true) end
   end
 
-  -- Any key closes the help float (we register the common ones explicitly).
-  for _, k in ipairs({ "q", "<Esc>", "<CR>", "?", "<Space>", "h", "j", "k", "l" }) do
+  -- Any key closes the help float, except the motions needed to scroll it.
+  for _, k in ipairs({ "q", "<Esc>", "?", "<CR>", "<Space>", "h", "l" }) do
     vim.keymap.set("n", k, close_help, { buffer = buf, nowait = true, silent = true })
   end
 end
@@ -999,9 +1302,10 @@ local function bind_keys(buf)
   vim.keymap.set("n", "<CR>", action_jump, opts)
 end
 
--- Geometry for the centered float: 85% of the editor grid.
+-- Geometry for the float: full editor width (minus the border cells),
+-- vertically centered at 85% height.
 local function float_geometry()
-  local width = math.floor(vim.o.columns * 0.85)
+  local width = math.max(40, vim.o.columns - 2)
   local height = math.floor(vim.o.lines * 0.85)
 
   return {

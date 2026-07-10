@@ -2,7 +2,7 @@
 
 # Fuzzy-switch to any tmux pane across every session. Lists panes as
 # "session_name window_name#pane_index" and shows a live preview of the
-# highlighted pane's content on the right. Bound to prefix+m.
+# highlighted pane's content on the right. Bound to prefix+n.
 
 set -euo pipefail
 

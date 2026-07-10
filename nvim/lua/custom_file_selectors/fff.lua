@@ -17,8 +17,8 @@ end
 
 function M.find_files()
   local ok, f = pcall(fff)
-  if ok and f.files then
-    f.files({ cwd = root.get() })
+  if ok and f.find_files then
+    f.find_files({ cwd = root.get() })
   else
     fallback("find_files")
   end
@@ -26,20 +26,14 @@ end
 
 function M.find_sibling_files()
   local ok, f = pcall(fff)
-  if ok and f.files then
-    f.files({ cwd = vim.fn.expand("%:h") })
+  if ok and f.find_files then
+    f.find_files({ cwd = vim.fn.expand("%:h") })
   else
     fallback("find_sibling_files")
   end
 end
 
 function M.find_changed_files()
-  local current_buf = vim.api.nvim_get_current_buf()
-  if vim.b[current_buf].is_onediff_buffer then
-    local onediff = require("my_plugins.onediff")
-    onediff.open_file_picker()
-    return
-  end
   vim.notify("fff: find_changed_files not supported, falling back", vim.log.levels.WARN)
   fallback("find_changed_files")
 end
@@ -51,8 +45,8 @@ end
 
 function M.find_resource_in_dir(dir)
   local ok, f = pcall(fff)
-  if ok and f.files then
-    f.files({ cwd = dir })
+  if ok and f.find_files then
+    f.find_files({ cwd = dir })
   else
     fallback("find_resource_in_dir", dir)
   end
@@ -74,12 +68,8 @@ function M.buffer_fuzzy_find()
 end
 
 function M.buffer_list()
-  local ok, f = pcall(fff)
-  if ok and f.buffers then
-    f.buffers()
-  else
-    fallback("buffer_list")
-  end
+  vim.notify("fff: buffer_list not supported, falling back", vim.log.levels.WARN)
+  fallback("buffer_list")
 end
 
 function M.oldfiles()
@@ -87,8 +77,12 @@ function M.oldfiles()
 end
 
 function M.live_grep()
-  vim.notify("fff: live_grep not supported, falling back", vim.log.levels.WARN)
-  fallback("live_grep")
+  local ok, f = pcall(fff)
+  if ok and f.live_grep then
+    f.live_grep({})
+  else
+    fallback("live_grep")
+  end
 end
 
 function M.live_grep_in_dirs(dirs)
@@ -98,8 +92,8 @@ end
 
 function M.open_picker_menu()
   local ok, f = pcall(fff)
-  if ok and f.files then
-    f.files()
+  if ok and f.find_files then
+    f.find_files()
   else
     fallback("find_files")
   end

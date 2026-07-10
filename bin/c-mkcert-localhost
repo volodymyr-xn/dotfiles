@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+# Generate a locally trusted TLS certificate for the given hostnames into
+# ~/.local/share/mkcert (override with MKCERT_CERT_DIR). Needed for cookie
+# features that only work over HTTPS, e.g. SameSite=None and Secure.
+#
+# Usage: c-mkcert-localhost web.localhost api.localhost auth.localhost
+
+set -euo pipefail
+
+script_name="$(basename "$0")"
+cert_dir="${MKCERT_CERT_DIR:-$HOME/.local/share/mkcert}"
+
+if [[ $# -eq 0 ]]; then
+  echo "Usage: $script_name <hostname> [hostname...]"
+  echo "Example: $script_name web.localhost api.localhost auth.localhost"
+  exit 1
+fi
+
+if ! command -v mkcert > /dev/null 2>&1; then
+  echo "mkcert is not installed."
+  echo "  macOS: brew install mkcert"
+  echo "  Linux: ~/dotfiles/install/mkcert.sh"
+  exit 1
+fi
+
+# The CA only needs to enter the trust stores once per machine; -install is
+# idempotent but may prompt for sudo, so skip it when the CA already exists.
+if [[ ! -f "$(mkcert -CAROOT)/rootCA.pem" ]]; then
+  mkcert -install
+fi
+
+mkdir -p "$cert_dir"
+
+# Name the pair after the first hostname so app configs can hardcode paths
+# regardless of how many extra SANs are added later.
+cert_file="$cert_dir/$1.pem"
+key_file="$cert_dir/$1-key.pem"
+
+mkcert -cert-file "$cert_file" -key-file "$key_file" "$@"
+
+echo
+echo "Certificate: $cert_file"
+echo "Private key: $key_file"

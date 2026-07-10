@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# Enable or disable lid-close (clamshell) sleep via `pmset disablesleep`.
+#
+# Power assertions (`caffeinate -d`, hs.caffeinate) only block IDLE sleep;
+# closing the lid is a forced sleep event that ignores them. The single
+# setting that suppresses it is `pmset -a disablesleep`, which needs root and
+# is global — it takes no -b/-c power-source scoping.
+#
+# Usage:
+#   c-macos-toggle-lid-sleep prevent   # lid close no longer sleeps (AC or battery)
+#   c-macos-toggle-lid-sleep allow     # restore normal lid-close sleep
+#   c-macos-toggle-lid-sleep status    # prints "prevented" or "allowed"
+#
+# `prevent` and `allow` require a passwordless sudo rule; without it they
+# exit 77 rather than blocking on a password prompt. Install it once with:
+#
+#   sudo install -m 440 -o root -g wheel \
+#     ~/dotfiles/macos/sudoers.d/pmset-disablesleep \
+#     /etc/sudoers.d/pmset-disablesleep
+#
+# WARNING: a closed MacBook on battery with sleep disabled runs until the
+# battery is empty and cannot shed heat. Apple gates native clamshell mode
+# behind AC + an external display for exactly these reasons.
+set -euo pipefail
+
+PMSET=/usr/bin/pmset
+
+usage() {
+  echo "usage: ${0##*/} {prevent|allow|status}" >&2
+  exit 64
+}
+
+# `pmset -g` only lists SleepDisabled when it has been set at least once, so
+# a missing key means lid-close sleep is allowed.
+current_state() {
+  if $PMSET -g | grep -qE 'SleepDisabled[[:space:]]+1'; then
+    echo prevented
+  else
+    echo allowed
+  fi
+}
+
+# Apply a disablesleep value through passwordless sudo, mapping a missing
+# sudoers rule onto exit 77 (EX_NOPERM) so callers can tell it apart from a
+# genuine pmset failure and surface the install hint.
+apply() {
+  local value="$1"
+
+  if ! sudo -n $PMSET -a disablesleep "$value" 2>/dev/null; then
+    echo "${0##*/}: passwordless sudo for pmset is not installed" >&2
+    echo "see the header of this script for the one-time install command" >&2
+    exit 77
+  fi
+}
+
+case "${1:-}" in
+  prevent) apply 1 ;;
+  allow) apply 0 ;;
+  status) current_state ;;
+  *) usage ;;
+esac

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- Keep-awake OFF: same cup, no steam, slashed and greyed out -->
+  <g fill="none" stroke="#8e8e93" stroke-width="2.6"
+     stroke-linecap="round" stroke-linejoin="round">
+    <!-- Cup body -->
+    <path d="M9 17h24v10a10 10 0 0 1-10 10h-4A10 10 0 0 1 9 27z"/>
+    <!-- Handle -->
+    <path d="M33 20h4a4.5 4.5 0 0 1 0 9h-4"/>
+    <!-- Saucer -->
+    <path d="M7 42h30"/>
+    <!-- Diagonal slash marks the disabled state -->
+    <path d="M6 6l36 36"/>
+  </g>
+</svg>

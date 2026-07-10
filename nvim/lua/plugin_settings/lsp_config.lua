@@ -69,10 +69,22 @@ local lsp_flags = {
 --   }
 -- }
 
+-- Tailwind v4 at-rules (@apply, @source, @plugin, @custom-variant) are unknown
+-- to vscode-css-language-server, so its unknownAtRules lint is disabled.
+local css_lint_settings = {
+  validate = true,
+  lint = { unknownAtRules = "ignore" }
+}
+
 vim.lsp.config('cssls', {
   on_attach = on_attach,
   flags = lsp_flags,
-  capabilities = capabilities
+  capabilities = capabilities,
+  settings = {
+    css = css_lint_settings,
+    scss = css_lint_settings,
+    less = css_lint_settings
+  }
 })
 
 vim.lsp.config('ts_ls', {

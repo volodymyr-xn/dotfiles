@@ -164,6 +164,7 @@ local function lsp_processes_for(pid)
 
   return { items = items, total_kb = total_kb }
 end
+M.lsp_processes_for = lsp_processes_for
 
 -- Best-effort cwd lookup for a foreign pid (no RPC; works on stuck nvims too).
 local function pid_cwd(pid)
@@ -192,6 +193,79 @@ local function pid_cwd(pid)
   return "?"
 end
 
+-- Map each tmux pane's root pid (the pane's shell) to where that pane lives.
+-- Empty table when tmux isn't running or the command fails.
+local function tmux_pane_index()
+  local r = vim.system({ "tmux", "list-panes", "-a", "-F",
+    "#{pane_pid} #{session_name} #{window_index} #{pane_index} #{window_name}" },
+    { text = true, timeout = 800 }):wait()
+
+  if r.code ~= 0 or not r.stdout then
+    return {}
+  end
+
+  local panes = {}
+
+  for line in r.stdout:gmatch("[^\n]+") do
+    local pane_pid, session, window_index, pane_index, window_name =
+      line:match("^(%d+)%s+(%S+)%s+(%d+)%s+(%d+)%s+(.*)$")
+
+    if pane_pid then
+      panes[tonumber(pane_pid)] = {
+        session = session,
+        window_index = tonumber(window_index),
+        pane_index = tonumber(pane_index),
+        window_name = window_name,
+      }
+    end
+  end
+
+  return panes
+end
+
+-- pid → ppid for every process, from a single `ps` call.
+local function parent_index()
+  local parents = {}
+  local r = vim.system({ "ps", "-eo", "pid=,ppid=" }, { text = true, timeout = 800 }):wait()
+
+  if r.code ~= 0 or not r.stdout then
+    return parents
+  end
+
+  for line in r.stdout:gmatch("[^\n]+") do
+    local pid, ppid = line:match("^%s*(%d+)%s+(%d+)")
+
+    if pid then
+      parents[tonumber(pid)] = tonumber(ppid)
+    end
+  end
+
+  return parents
+end
+
+-- Walk a pid's ancestors until one of them is a tmux pane's root process.
+-- nvim usually sits one level below the pane shell, but a wrapper script or
+-- `env` in between adds hops, hence the bounded walk.
+local function tmux_pane_for(pid, panes, parents)
+  local current = pid
+
+  for _ = 1, 8 do
+    if not current or current <= 1 then
+      return nil
+    end
+
+    local pane = panes[current]
+
+    if pane then
+      return pane
+    end
+
+    current = parents[current]
+  end
+
+  return nil
+end
+
 -- True when the pid is still alive.
 local function pid_alive(pid)
   local r = vim.system({ "kill", "-0", tostring(pid) },
@@ -213,6 +287,8 @@ function M.discover_processes()
   local paths = fn.glob(pattern, false, true) or {}
   local processes = {}
   local self_sock = vim.v.servername or ""
+  local panes = tmux_pane_index()
+  local parents = next(panes) and parent_index() or {}
 
   for _, path in ipairs(paths) do
     if path ~= self_sock then
@@ -224,6 +300,7 @@ function M.discover_processes()
           is_current = false,
           uptime = stats.lstart_for(pid),
           uptime_seconds = stats.etime_seconds_for(pid),
+          tmux = tmux_pane_for(pid, panes, parents),
         })
       end
     end
@@ -235,6 +312,7 @@ function M.discover_processes()
     is_current = true,
     uptime = stats.lstart_for(self_pid),
     uptime_seconds = stats.etime_seconds_for(self_pid),
+    tmux = tmux_pane_for(self_pid, panes, parents),
   })
 
   return processes
@@ -398,6 +476,7 @@ local function decode_snapshot(json_str, proc)
     rss_mb = stats.rss_mb_for(proc.pid),
     uptime = proc.uptime,
     uptime_seconds = proc.uptime_seconds,
+    tmux = proc.tmux,
     ts_langs = payload.ts_langs or {},
     ts_bytes = payload.ts_bytes or 0,
     fug_count = payload.fug_count or 0,
@@ -419,6 +498,7 @@ function M.stats_remote(proc)
       pid = fn.getpid(), cwd = fn.getcwd(), buffers = local_buffers(),
       loaded = s.loaded, parsers = s.parsers, rss_mb = s.rss_mb,
       uptime = proc.uptime, uptime_seconds = proc.uptime_seconds,
+      tmux = proc.tmux,
       ts_langs = extras.ts_langs,
       ts_bytes = extras.ts_bytes,
       fug_count = extras.fug_count,
@@ -437,6 +517,7 @@ function M.stats_remote(proc)
       pid = proc.pid, cwd = proc.cwd, buffers = {},
       loaded = 0, parsers = 0, rss_mb = stats.rss_mb_for(proc.pid),
       uptime = proc.uptime, uptime_seconds = proc.uptime_seconds,
+      tmux = proc.tmux,
       error = err or "remote unreachable",
     }
   end
@@ -448,6 +529,7 @@ function M.stats_remote(proc)
       pid = proc.pid, cwd = proc.cwd, buffers = {},
       loaded = 0, parsers = 0, rss_mb = stats.rss_mb_for(proc.pid),
       uptime = proc.uptime, uptime_seconds = proc.uptime_seconds,
+      tmux = proc.tmux,
       error = derr or "decode failed",
     }
   end

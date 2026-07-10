@@ -13,7 +13,7 @@ vim.cmd("runtime! indent/renpy.vim")
 -- Ren'Py blocks (label/menu/screen/python) are indentation-delimited, so fold
 -- by indent for `za` navigation in long scripts. `foldenable` stays off
 -- globally, so nothing folds until asked.
-vim.wo.foldmethod = "indent"
+vim.wo[0][0].foldmethod = "indent"
 
 -- Run / lint the current Ren'Py project in a Vimux pane (SDK + root auto-detected).
 local renpy = require("my_plugins.renpy_tools")

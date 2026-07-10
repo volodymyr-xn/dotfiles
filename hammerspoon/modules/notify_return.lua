@@ -1,3 +1,5 @@
+local navNotify = require("nav_notify")
+
 local M = {}
 
 -- Snapshots live next to the agent-notify watcher log so everything for this
@@ -26,19 +28,6 @@ local function log(line)
 
   f:write(os.date("%H:%M:%S") .. " notify_return " .. line .. "\n")
   f:close()
-end
-
--- Post a macOS Notification Center notification; optional `detail` becomes
--- the subtitle. Silent (no sound). Auto-withdraws after a few seconds.
-local function notify(title, detail)
-  local attrs = {
-    title = title,
-    withdrawAfter = 1,
-  }
-
-  if detail then attrs.subTitle = detail end
-
-  hs.notify.new(attrs):send()
 end
 
 -- Single-quote `s` for safe use as one shell argument.
@@ -188,9 +177,12 @@ local function tmuxLocLabel(loc)
     return session .. " " .. window .. "#" .. pane
   end
 
+  -- `###{pane_index}` is not a typo: tmux collapses `##` to a literal `#`,
+  -- and the remaining `#{pane_index}` then expands. Written as `##{...}` the
+  -- `#` escapes and the rest is emitted verbatim as "#{pane_index}".
   local out = hs.execute(
     "tmux display-message -t " .. shellQuote(loc) ..
-    " -p '#{session_name} #{window_name}##{pane_index}' 2>/dev/null", true)
+    " -p '#{session_name} #{window_name}###{pane_index}' 2>/dev/null", true)
 
   if out and out ~= "" then
     return out:gsub("%s+$", "")
@@ -222,7 +214,7 @@ function M.restoreFull()
 
   if not snap then
     log("restoreFull: no snapshot")
-    notify("Cmd+K · no snapshot", "Nothing to restore")
+    navNotify.show("Cmd+K · no snapshot", "Nothing to restore")
     return
   end
 
@@ -244,21 +236,18 @@ function M.restoreFull()
       tostring(snap.app_name), tostring(snap.app_bundle), tostring(ok)))
   end
 
-  if snap.is_ghostty and isTmuxLoc(snap.tmux) then
+  local restoredTmux = snap.is_ghostty and isTmuxLoc(snap.tmux)
+
+  if restoredTmux then
     applyTmux(snap.tmux)
   end
 
-  -- local appLabel = snap.app_name or snap.app_bundle or "?"
-  -- local title = "Return to " .. appLabel
-  -- local subtitle
-  --
-  -- if snap.is_ghostty and isTmuxLoc(snap.tmux) then
-  --   subtitle = tmuxLocLabel(snap.tmux)
-  -- else
-  --   subtitle = "-"
-  -- end
-  --
-  -- notify(title, subtitle)
+  -- Name the pane we landed on when there is one; otherwise the keypress is
+  -- the only context available, and an empty subtitle would demote the title.
+  local appLabel = snap.app_name or snap.app_bundle or "?"
+  local detail = restoredTmux and tmuxLocLabel(snap.tmux) or "Cmd+K"
+
+  navNotify.show("← Back to " .. appLabel, detail)
 end
 
 return M

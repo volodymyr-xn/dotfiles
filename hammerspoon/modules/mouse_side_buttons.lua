@@ -1,12 +1,11 @@
 local canvasBanner = require("canvas_banner")
-local notifyReturn = require("notify_return")
 local smartNav = require("smart_nav")
 
 -- otherMouseDown button numbers (0-indexed):
---   3 = bottom side button (closer to wrist)   → smart nav (open notification
+--   3 = bottom side button (closer to wrist)   → App Exposé (windows of the
+--       frontmost app); Cmd + bottom → Mission Control
+--   4 = top side button (closer to fingers)    → smart nav (open notification
 --       or restore previous app via the stored back path)
---   4 = top side button (closer to fingers)    → App Exposé / Mission Control
--- Cmd + top button → notify_return.restoreFull (mouse mirror of Cmd+K)
 -- Swap the button numbers below if your mouse maps them the other way.
 local TOP_MOUSE_BUTTON = 4
 local BOTTOM_MOUSE_BUTTON = 3
@@ -25,9 +24,9 @@ local function handle(event)
 
   if button == BOTTOM_MOUSE_BUTTON then
     if flags.cmd then
-      notifyReturn.restoreFull()
-    else
       hs.spaces.toggleMissionControl()
+    else
+      hs.spaces.toggleAppExpose()
     end
     return true
   elseif button == TOP_MOUSE_BUTTON then

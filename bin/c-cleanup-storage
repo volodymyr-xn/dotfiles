@@ -1,0 +1,186 @@
+#!/usr/bin/env bash
+#
+# c-cleanup-storage — reclaim disk space from regenerable caches on macOS.
+#
+# Frees three groups of safe-to-delete data that macOS lumps into
+# "System Data" in Storage settings:
+#
+#   1. Dev/tool caches   Homebrew, pip, npm, TypeScript, node-gyp, bun,
+#                        claude-cli — all rebuilt on demand by their tool.
+#   2. App media caches  Discord, Telegram, Spotify cached media. Logins,
+#                        chats, and settings are kept; only re-downloadable
+#                        media/GPU caches are removed.
+#   3. Aerial wallpapers Downloaded aerial/dynamic wallpaper videos. They
+#                        re-download the next time you pick one.
+#
+# Nothing here touches profiles, credentials, history, or documents.
+#
+# Flow: inspect every target, print a per-item summary with the reclaimable
+# total, then ask for a single confirmation before deleting anything.
+#
+# Usage:
+#   c-cleanup-storage            Inspect, show summary, confirm, then delete
+#   c-cleanup-storage -y|--yes   Skip the confirmation prompt
+#   c-cleanup-storage -n|--dry-run   Inspect and summarize only; delete nothing
+#   c-cleanup-storage -h|--help  Show this help
+#
+# macOS only — paths and aerial wallpapers are Apple-specific.
+
+set -o pipefail
+
+DRY_RUN=0
+ASSUME_YES=0
+
+CACHES="$HOME/Library/Caches"
+APPSUP="$HOME/Library/Application Support"
+
+# Parallel arrays describing the cleanup plan, filled by add_target().
+CATEGORIES=()
+LABELS=()
+SIZES=()    # size in KB
+PATHSETS=() # newline-joined path list (paths may contain spaces)
+
+# Print the usage/help block from this file's header comment.
+usage() {
+  sed -n '3,32p' "$0" | sed 's/^#\{1,2\} \{0,1\}//'
+}
+
+# Sum the on-disk size (KB) of the given paths; missing paths count as 0.
+size_kb() {
+  local total=0 path sz
+  for path in "$@"; do
+    [ -e "$path" ] || continue
+    sz=$(du -sk "$path" 2>/dev/null | awk '{ s += $1 } END { print s + 0 }')
+    total=$((total + sz))
+  done
+  printf '%s' "$total"
+}
+
+# Format a KB integer as a human-readable size (GB/MB/KB).
+human() {
+  awk -v kb="$1" 'BEGIN {
+    if (kb >= 1048576)   printf "%.1f GB", kb / 1048576;
+    else if (kb >= 1024) printf "%.0f MB", kb / 1024;
+    else                 printf "%d KB", kb;
+  }'
+}
+
+# Register a cleanup target (group, label, one or more paths). Targets that
+# are absent or already empty are skipped so they never clutter the summary.
+add_target() {
+  local group="$1" label="$2"; shift 2
+  local kb; kb=$(size_kb "$@")
+
+  [ "$kb" -eq 0 ] && return
+
+  CATEGORIES+=("$group")
+  LABELS+=("$label")
+  SIZES+=("$kb")
+  PATHSETS+=("$(printf '%s\n' "$@")")
+}
+
+# Build the plan by probing every known cache location.
+collect_targets() {
+  # 1. Dev/tool caches. Homebrew is measured via its own cache dir but
+  #    deleted with `brew cleanup -s` (also prunes stale Cellar versions).
+  if command -v brew >/dev/null 2>&1; then
+    add_target "Dev/tool caches" "Homebrew" "$(brew --cache)"
+  fi
+  add_target "Dev/tool caches" "pip"         "$CACHES/pip"
+  add_target "Dev/tool caches" "npm"         "$HOME/.npm/_cacache"
+  add_target "Dev/tool caches" "claude-cli"  "$CACHES/claude-cli-nodejs"
+  add_target "Dev/tool caches" "TypeScript"  "$CACHES/typescript"
+  add_target "Dev/tool caches" "node-gyp"    "$CACHES/node-gyp"
+  add_target "Dev/tool caches" "bun"         "$CACHES/bun"
+
+  # 2. App media caches — regenerable media/GPU caches only, logins kept.
+  add_target "App media caches" "Discord" \
+    "$APPSUP/discord/Cache" "$APPSUP/discord/Code Cache" "$APPSUP/discord/GPUCache"
+  add_target "App media caches" "Telegram" \
+    "$APPSUP/Telegram Desktop/tdata/user_data/cache" \
+    "$APPSUP/Telegram Desktop/tdata/user_data/media_cache"
+  add_target "App media caches" "Spotify" \
+    "$CACHES/com.spotify.client" "$APPSUP/Spotify/PersistentCache"
+
+  # 3. Aerial wallpaper videos (keep the sibling Store config folder).
+  add_target "Aerial wallpapers" "Aerial videos" "$APPSUP/com.apple.wallpaper/aerials"
+}
+
+# Print the inspection summary grouped by category, with the grand total.
+print_summary() {
+  local i total=0 group=""
+
+  printf '\nCleanup plan:\n'
+  for i in "${!LABELS[@]}"; do
+    if [ "${CATEGORIES[$i]}" != "$group" ]; then
+      group="${CATEGORIES[$i]}"
+      printf '\n  %s\n' "$group"
+    fi
+
+    printf '    %-16s %8s\n' "${LABELS[$i]}" "$(human "${SIZES[$i]}")"
+    total=$((total + SIZES[$i]))
+  done
+
+  printf '\n  Reclaimable total: %s\n' "$(human "$total")"
+}
+
+# Delete every registered target and report per-item and total freed space.
+delete_targets() {
+  local i freed_total=0 path
+
+  printf '\nDeleting:\n'
+  for i in "${!LABELS[@]}"; do
+    if [ "${LABELS[$i]}" = "Homebrew" ]; then
+      brew cleanup -s >/dev/null 2>&1
+    else
+      while IFS= read -r path; do
+        [ -n "$path" ] && rm -rf "$path"
+      done <<< "${PATHSETS[$i]}"
+    fi
+
+    freed_total=$((freed_total + SIZES[$i]))
+    printf '    %-16s freed %s\n' "${LABELS[$i]}" "$(human "${SIZES[$i]}")"
+  done
+
+  printf '\n  Total freed: %s\n' "$(human "$freed_total")"
+}
+
+# Ask for a single y/N confirmation; abort the whole run on anything else.
+confirm() {
+  local reply
+
+  printf '\nProceed with deletion? [y/N] '
+  read -r reply || reply=""
+
+  case "$reply" in
+    [yY] | [yY][eE][sS]) return 0 ;;
+    *) echo "Aborted — nothing deleted."; exit 0 ;;
+  esac
+}
+
+for arg in "$@"; do
+  case "$arg" in
+    -n | --dry-run) DRY_RUN=1 ;;
+    -y | --yes)     ASSUME_YES=1 ;;
+    -h | --help)    usage; exit 0 ;;
+    *) echo "Unknown option: $arg" >&2; usage >&2; exit 2 ;;
+  esac
+done
+
+collect_targets
+
+if [ "${#LABELS[@]}" -eq 0 ]; then
+  echo "Nothing to clean — all known caches are already empty."
+  exit 0
+fi
+
+print_summary
+
+if [ "$DRY_RUN" -eq 1 ]; then
+  printf '\nDry run — nothing deleted.\n'
+  exit 0
+fi
+
+[ "$ASSUME_YES" -eq 1 ] || confirm
+
+delete_targets

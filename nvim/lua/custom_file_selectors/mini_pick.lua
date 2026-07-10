@@ -27,13 +27,6 @@ function M.find_sibling_files()
 end
 
 function M.find_changed_files()
-  local current_buf = vim.api.nvim_get_current_buf()
-  if vim.b[current_buf].is_onediff_buffer then
-    local onediff = require("my_plugins.onediff")
-    onediff.open_file_picker()
-    return
-  end
-
   local git_lines = vim.fn.systemlist("git status --porcelain")
   local items = {}
   for _, line in ipairs(git_lines) do

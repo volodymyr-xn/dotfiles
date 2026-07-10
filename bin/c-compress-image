@@ -5,9 +5,22 @@
 set -euo pipefail
 
 quality=""
-to_webp=0
+# Empty means "auto": .webp inputs stay webp, everything else becomes .jpg
+forced_format=""
 max_width=""
 files=()
+
+# Reject a second output-format flag instead of silently letting one win
+set_forced_format() {
+  local format="$1"
+
+  if [[ -n "$forced_format" && "$forced_format" != "$format" ]]; then
+    echo "Error: --webp and --jpeg are mutually exclusive" >&2
+    exit 1
+  fi
+
+  forced_format="$format"
+}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -20,7 +33,11 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     --webp)
-      to_webp=1
+      set_forced_format webp
+      shift
+      ;;
+    --jpeg|--jpg)
+      set_forced_format jpg
       shift
       ;;
     --max-width=*)
@@ -34,10 +51,15 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     -h|--help)
-      echo "Usage: c-compress-image [-q PERCENT] [--webp] [--max-width=PX] FILE [FILE...]"
+      echo "Usage: c-compress-image [-q PERCENT] [--webp|--jpeg] [--max-width=PX] FILE [FILE...]"
       echo "  -q PERCENT       Quality 1-100 (prompted if omitted)"
-      echo "  --webp           Convert output to .webp"
+      echo "  --webp           Force .webp output for every input"
+      echo "  --jpeg           Force .jpg output, including for .webp inputs"
       echo "  --max-width=PX   Shrink to fit width (e.g. 2000 or 2000px); never upscale"
+      echo ""
+      echo "Default: .webp inputs are compressed in place; every other format"
+      echo "becomes .jpg (transparency flattened onto white) and the original"
+      echo "file is removed."
       exit 0
       ;;
     *)
@@ -125,20 +147,42 @@ compress_one() {
   local target tmp in_size out_size color pct
   in_size=$(stat -f%z "$input" 2>/dev/null || stat -c%s "$input")
 
-  if (( to_webp )); then
-    target="${input%.*}.webp"
+  # Compare extensions case-insensitively, with .jpeg treated as .jpg
+  local input_ext="${input##*.}"
+  input_ext=$(printf '%s' "$input_ext" | tr '[:upper:]' '[:lower:]')
+  [[ "$input_ext" == "jpeg" ]] && input_ext="jpg"
+
+  local out_ext
+  if [[ -n "$forced_format" ]]; then
+    out_ext="$forced_format"
+  elif [[ "$input_ext" == "webp" ]]; then
+    out_ext="webp"
   else
-    target="$input"
+    out_ext="jpg"
   fi
 
-  tmp="${target}.tmp.$$"
+  if [[ "$input_ext" == "$out_ext" ]]; then
+    target="$input"
+  else
+    target="${input%.*}.${out_ext}"
+  fi
+
+  # The extension must stay last: ImageMagick picks the encoder from it and
+  # silently falls back to the input's format when it looks unfamiliar
+  tmp="${target%.*}.tmp.$$.${out_ext}"
 
   local -a resize_args=()
   if [[ -n "$max_width" ]]; then
     resize_args=(-resize "${max_width}x>")
   fi
 
-  if ! "${im_cmd[@]}" "$input" "${resize_args[@]}" -quality "$q" "$tmp"; then
+  # JPEG has no alpha channel; without this transparency turns black
+  local -a flatten_args=()
+  if [[ "$out_ext" == "jpg" ]]; then
+    flatten_args=(-background white -flatten)
+  fi
+
+  if ! "${im_cmd[@]}" "$input" "${flatten_args[@]}" "${resize_args[@]}" -quality "$q" "$tmp"; then
     echo "${C_RED}FAIL${C_RESET}: '$input'" >&2
     rm -f "$tmp"
     return 1

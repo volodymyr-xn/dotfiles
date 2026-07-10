@@ -17,7 +17,7 @@ ch() {
 }
 
 # Fast branch picker sorted by recency, formatted as `branch_name  10h ago`.
-cf() {
+gcf() {
   local list branch target
   list=$(git for-each-ref --sort=-committerdate \
     --format='%(refname:short)%09%(committerdate:unix)' \

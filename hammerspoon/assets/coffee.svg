@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- Keep-awake ON: steaming coffee cup, orange to match the menubar glyph -->
+  <g fill="none" stroke="#ff9f0a" stroke-width="2.6"
+     stroke-linecap="round" stroke-linejoin="round">
+    <!-- Rising steam -->
+    <path d="M18 11c0-2 2-2.6 2-4.4S18 4 18 4"/>
+    <path d="M25 11c0-2.4 2.4-3.1 2.4-5.3S25 2.6 25 2.6"/>
+    <!-- Cup body -->
+    <path d="M9 17h24v10a10 10 0 0 1-10 10h-4A10 10 0 0 1 9 27z"/>
+    <!-- Handle -->
+    <path d="M33 20h4a4.5 4.5 0 0 1 0 9h-4"/>
+    <!-- Saucer -->
+    <path d="M7 42h30"/>
+  </g>
+  <!-- Warm fill hints the liquid without competing with the outline -->
+  <path d="M11.5 19.5h19v7.5a7.6 7.6 0 0 1-7.6 7.6h-3.8a7.6 7.6 0 0 1-7.6-7.6z"
+        fill="#ff9f0a" fill-opacity="0.18"/>
+</svg>

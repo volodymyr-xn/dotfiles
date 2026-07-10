@@ -5,6 +5,7 @@ Thumbs.db
 *~
 .project
 tags
+!tags/
 log/
 db/*.sqlite3
 .bundle
@@ -16,7 +17,6 @@ Session.vim
 .powenv
 node_modules/
 *.local
-tags
 .claude/
 .claude
 .cursor
@@ -35,6 +35,7 @@ C_TODO_OLD/
 C_BRIEF/
 C_ADVANCE/
 C_HTML/
+C_SCRIPTS/
 c_commands/
 .playwright-mcp/
 .ruby_lsp

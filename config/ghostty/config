@@ -20,7 +20,40 @@ adjust-cell-height = -2
 
 maximize = true
 
+# The titlebar is dead space: windows open maximized and tmux already draws a
+# status bar with the session/window context a titlebar would show.
+macos-titlebar-style = hidden
+
 desktop-notifications = true
+
+# Notify only when the window is unfocused and the command ran long enough to
+# be worth switching back for (long AI runs, test suites). Works through tmux
+# because tmux.conf sets `allow-passthrough all`, so OSC 133 reaches ghostty.
+notify-on-command-finish = unfocused
+notify-on-command-finish-after = 30s
+
+# Drop ghostty's `cursor` shell-integration feature: the cursor shape is owned
+# by nvim and zsh (through tmux), and ghostty re-asserting it after every
+# prompt fights them. `title` and `path` stay for window titles and OSC 7.
+shell-integration-features = no-cursor,title,path
+
+# Suppress the size popup on resize — tmux already reports pane geometry.
+resize-overlay = never
+
+# Hide the pointer while typing so it never covers the text under it.
+mouse-hide-while-typing = true
+
+# Sessions are restored by tmux, not by ghostty's surface restore. Leaving the
+# default on relaunches saved surfaces and duplicates the shells tmux revives.
+window-save-state = never
+
+# tmux's history-limit is the real scrollback here, so ghostty's default 50 MB
+# per surface is wasted resident memory.
+scrollback-limit-bytes = 5000000
+
+# Pin the update channel: this install tracks `tip`, and without an explicit
+# value an update can silently move it to `stable`, dropping tip-only options.
+auto-update-channel = tip
 
 
 
@@ -36,8 +69,19 @@ macos-option-as-alt = left
 # Used in applications which need newline insert with shitft-enter
 keybind = shift+enter=text:\x1b\r
 
-# Disable default ctrl+enter which expands/zooms ghostty window
-keybind = ctrl+enter=unbind
+# Send a plain carriage return for ctrl+enter, replacing ghostty's default
+# window zoom. It has to happen here: inside a tmux display-popup tmux's key
+# tables are bypassed, and fzf cannot bind ctrl+enter under any name
+# ("unsupported key"), so the AI pane picker only sees this chord if the
+# terminal hands it over as Enter. Side effect: ctrl+enter now acts as Enter
+# everywhere, where before it did nothing outside tmux's tree-mode.
+keybind = ctrl+enter=text:\r
+
+# Ctrl+, toggles the AI agent pane selector. Sent as ESC+comma so it lands as
+# M-, in tmux (which opens the popup) and as alt-, in fzf (which aborts it) —
+# fzf refuses to bind ctrl-, itself, and inside a tmux popup the tmux key
+# tables are bypassed, so the close half can only come from fzf.
+keybind = ctrl+comma=text:\x1b,
 
 # Disable split pane shortcut so cmd+d can be used for zsh word forward navigation
 keybind = cmd+d=unbind
@@ -63,6 +107,11 @@ keybind = ctrl+seven=text:\x01\x37
 keybind = ctrl+eight=text:\x01\x38
 keybind = ctrl+nine=text:\x01\x39
 
+# Ctrl+0 opens the AI agent pane selector. Same workaround as the numbers
+# above: sends the tmux prefix + `l`, reusing the `prefix l` binding, because
+# macOS eats Ctrl+0 before Ghostty can deliver it as a real key.
+keybind = ctrl+zero=text:\x01l
+
 # Make fonts bolder (works only on MacOS)
 font-thicken=true
 font-thicken-strength=1
@@ -83,7 +132,9 @@ palette = 12=#8aadf4
 palette = 13=#f5bde6
 palette = 14=#8bd5ca
 palette = 15=#a5adcb
-background = 252633
+# Kept in sync with tmux.conf's status-bar background so the bar blends into
+# the terminal background (see the cross-ref comment in tmux/tmux.conf).
+background = #252633
 foreground = ffffff
 cursor-color = f4dbd6
 selection-background = 3a3e53

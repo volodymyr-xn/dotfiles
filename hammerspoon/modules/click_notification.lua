@@ -1,6 +1,7 @@
 local M = {}
 
 local ax = require("hs.axuielement")
+local navNotify = require("nav_notify")
 
 local SUBROLE_ALERT = "AXNotificationCenterAlert"
 local SUBROLE_STACK = "AXNotificationCenterAlertStack"
@@ -105,17 +106,48 @@ local function findDefault(actions)
   return nil
 end
 
+-- Collect the alert's visible lines in display order by walking descendants:
+-- the AXStaticText nodes carrying them sit below the alert group, not on it.
+-- For an agent notification that is {"session [window]", "Claude finished"}.
+local function collectLines(element, lines)
+  local children = element:attributeValue("AXChildren")
+
+  if not children then return end
+
+  for _, child in ipairs(children) do
+    local value = child:attributeValue("AXValue")
+
+    if type(value) == "string" and value ~= "" then
+      table.insert(lines, value)
+    end
+
+    collectLines(child, lines)
+  end
+end
+
 -- Activate the topmost notification; `wanted` matches an action description.
 local function activate(wanted)
   local alerts = findAlerts()
 
-  if #alerts == 0 then return end
+  if #alerts == 0 then
+    navNotify.show("Cmd+L · no notification", "Nothing to open")
+    return
+  end
 
   local alert = preferBanner(alerts)
   local actions = readActions(alert)
   local target = wanted and findByDescription(actions, wanted) or findDefault(actions)
 
-  if target then alert:performAction(target.name) end
+  if not target then return end
+
+  -- Read before pressing: activating the alert tears it out of Notification
+  -- Center, after which its AX element has no text left to report.
+  local lines = {}
+  collectLines(alert, lines)
+
+  alert:performAction(target.name)
+
+  navNotify.show("→ " .. (lines[1] or "Notification"), lines[2] or "Opening")
 end
 
 -- Activate the topmost notification's default action (open it).

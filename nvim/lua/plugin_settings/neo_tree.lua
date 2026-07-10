@@ -1,4 +1,42 @@
 local tmux = require("functions.tmux")
+local fs_commands = require("neo-tree.sources.filesystem.commands")
+local renderer = require("neo-tree.ui.renderer")
+
+-- Single left click: move the cursor to the clicked row (with mousemodel=extend
+-- the cursor may still sit on the previous row when this fires), then open a
+-- file in a buffer and hand focus back to the tree, or toggle a directory in
+-- place. Mirrors the <Tab> mapping's open + `wincmd p` so browsing stays in the
+-- sidebar. The force-save records the clicked row so neo-tree's restore (run
+-- when focus re-enters the tree, or after a toggle re-render) keeps the cursor
+-- on the clicked row instead of snapping it back to the previous one.
+local function open_on_single_click(state)
+  local mouse = vim.fn.getmousepos()
+
+  if mouse.winid ~= state.winid or mouse.line < 1 then
+    return
+  end
+
+  local moved = pcall(vim.api.nvim_win_set_cursor, state.winid, { mouse.line, 0 })
+
+  if not moved then
+    return
+  end
+
+  local node = state.tree:get_node()
+
+  if not node then
+    return
+  end
+
+  renderer.position.save(state, true)
+
+  if node.type == "directory" then
+    fs_commands.toggle_node(state)
+  else
+    fs_commands.open(state)
+    vim.cmd("wincmd p")
+  end
+end
 
 require("neo-tree").setup({
   -- displays errors or warnings in the file, depending on the language server.
@@ -49,6 +87,8 @@ require("neo-tree").setup({
   window = {
     width = 35,
     mappings = {
+      -- Single left click: open file in a buffer, toggle a directory.
+      ["<LeftRelease>"] = open_on_single_click,
       ["x"] = "close_node",
       -- ['C'] = 'close_all_subnodes',
       --
@@ -92,8 +132,7 @@ require("neo-tree").setup({
       ["<Tab>"] = function(state)
         local node = state.tree:get_node()
         if node.type == "file" then
-          local commands = require("neo-tree.sources.filesystem.commands")
-          commands.open(state)
+          fs_commands.open(state)
           vim.cmd("wincmd p")
         end
       end,

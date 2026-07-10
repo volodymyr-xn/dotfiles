@@ -119,6 +119,9 @@ brew "siege"
 # Open-source AI agent for terminal access to Google Gemini
 brew "gemini-cli"
 
+# Simple tool to make locally trusted development certificates
+brew "mkcert"
+
 
 # Terminal Emulators
 # Terminal emulator that uses platform-native UI and GPU acceleration

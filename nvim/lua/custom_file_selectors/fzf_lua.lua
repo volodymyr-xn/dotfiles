@@ -22,25 +22,29 @@ local function fzf()
   return require("fzf-lua")
 end
 
+-- fzf-lua's cwd_prompt shows the full cwd path; this trims it to just the
+-- current directory name, e.g. "hilfekompass/ ".
+local function cwd_name_prompt(dir)
+  return vim.fn.fnamemodify(dir, ":t") .. "/ "
+end
+
 function M.find_files()
-  fzf().files(with_defaults({ hidden = true, cwd = root.get() }))
+  local cwd = root.get()
+  fzf().files(with_defaults({ hidden = true, cwd = cwd, cwd_prompt = false, prompt = cwd_name_prompt(cwd) }))
 end
 
 function M.find_sibling_files()
+  local cwd = vim.fn.expand("%:h")
   fzf().files(with_defaults({
-    cwd = vim.fn.expand("%:h"),
+    cwd = cwd,
+    cwd_prompt = false,
+    prompt = cwd_name_prompt(cwd),
     rg_opts = "--files --no-ignore --hidden -g '!.git' --max-depth 1",
   }))
 end
 
 function M.find_changed_files()
-  local current_buf = vim.api.nvim_get_current_buf()
-  if vim.b[current_buf].is_onediff_buffer then
-    local onediff = require("my_plugins.onediff")
-    onediff.open_file_picker()
-  else
-    fzf().git_status(with_defaults({}))
-  end
+  fzf().git_status(with_defaults({}))
 end
 
 function M.find_changed_files_by_extension(extension)
@@ -73,7 +77,7 @@ function M.find_changed_files_by_extension(extension)
 end
 
 function M.find_resource_in_dir(dir)
-  fzf().files(with_defaults({ cwd = dir }))
+  fzf().files(with_defaults({ cwd = dir, cwd_prompt = false, prompt = cwd_name_prompt(dir) }))
 end
 
 function M.find_files_in_dirs(dirs)

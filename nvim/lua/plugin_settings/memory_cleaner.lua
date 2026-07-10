@@ -42,9 +42,9 @@ require("my_plugins.memory_cleaner").setup({
   rss_history_sample_interval_seconds = 20 * 60,
 })
 
--- `sm` — aggressive reclaim: stop all treesitter parsers, wipe all fugitive
+-- `se` — aggressive reclaim: stop all treesitter parsers, wipe all fugitive
 -- buffers, stop all LSP clients, then GC.
-vim.keymap.set("n", "sm", ":MemClearAll<CR>", {
+vim.keymap.set("n", "se", ":MemClearAll<CR>", {
   noremap = true,
   silent = true,
   desc = "Run MemClearAll (treesitter + fugitive + LSP + GC)",

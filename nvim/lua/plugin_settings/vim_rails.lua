@@ -26,9 +26,11 @@ vim.g.rails_projections = {
   ['app/models/custom/*.rb'] = {
     related = 'db/schema.rb#{underscore|plural}',
   },
-  ['app/*.rb'] = {
-    alternate = 'spec/{}_spec.rb',
-  },
+  -- No 'app/*.rb' alternate on purpose: a projection short-circuits
+  -- rails.vim's own candidate list (autoload/rails.vim:3701), and that list
+  -- already tries test/{}_test.rb, the old test/unit|functional layout and
+  -- spec/{}_spec.rb, dropping whichever of test/ or spec/ the project does
+  -- not have. Hardcoding the spec path broke `:A` in minitest projects.
   ['app/admin/*.rb'] = {
     alternate = 'spec/controllers/admin/{}_controller_spec.rb',
   },

@@ -62,20 +62,13 @@ vim.keymap.set('n', 'gr', function() require('my_plugins.ruby_component_toggle')
 -- our mapping resolves.
 vim.api.nvim_set_keymap("n", "<C-\\>", "<NOP>", { noremap = true, silent = true })
 
--- Toggle sidebar: route to onediff in onediff buffers, otherwise Neotree.
+-- Toggle the Neotree sidebar.
 vim.keymap.set("n", "<C-\\>", function()
-  local current_buf = vim.api.nvim_get_current_buf()
-
-  if vim.b[current_buf].is_onediff_buffer or vim.b[current_buf].onediff_instance_id then
-    local ok, onediff = pcall(require, "my_plugins.onediff")
-    if ok then
-      onediff.toggle_sidebar()
-      return
-    end
-  end
-
   vim.cmd("Neotree toggle")
 end, { noremap = true, silent = true, desc = "Toggle sidebar" })
+
+-- Disable Vim's default Q (Ex mode) so it doesn't fire accidentally.
+vim.keymap.set("n", "Q", "<Nop>", { desc = "Disabled" })
 
 -- reveal_force_cwd: if file is outside cwd, silently change cwd to its
 -- directory instead of prompting "Change cwd to …? [Y]es, (N)o".

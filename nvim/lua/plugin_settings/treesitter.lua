@@ -17,6 +17,7 @@ require("nvim-treesitter.configs").setup({
     "lua",
     "regex",
     "go",
+    "d",
     "diff",
     "ruby",
     "python",
@@ -27,6 +28,10 @@ require("nvim-treesitter.configs").setup({
     "embedded_template",
     "markdown",
     "markdown_inline",
+    -- Vue SFC: `vue` parses the outer <template>/<script>/<style> blocks,
+    -- `css`/`scss` power the injected <style> block highlighting (<script>
+    -- injects the already-installed javascript/typescript).
+    "vue"
   },
   ignore_install = { "lua", "json" },
 

@@ -172,6 +172,9 @@ telescope_global.load_extension("live_grep_args")
 -- Define a new highlight group for the border color
 vim.cmd('highlight TelescopeBorder guifg=#efb993')
 vim.cmd('highlight link TelescopeBorder FloatBorder')
+-- Picker labels (prompt titles) share the border color instead of the default
+-- inverted title style.
+vim.cmd('highlight link TelescopePromptTitle TelescopeBorder')
 vim.cmd('highlight link Directory Conditional')
 -- Change highlith of match word
 --

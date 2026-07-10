@@ -8,10 +8,16 @@
 -- typed into the command line and don't require the module to be loaded).
 
 local ack_opts = {
-  ackprg = 'ag --vimgrep',
+  -- rg emits one entry per matching line (no quickfix duplicates when a
+  -- line matches multiple times); ag's --vimgrep is the only ag mode with
+  -- per-line filenames but emits one entry per match. Swap here to switch:
+  -- ackprg = 'ag --vimgrep',
+  ackprg = 'rg --column --no-heading --with-filename --color never --follow',
   highlight = false,
   autoclose = false,
   use_cword_for_empty_search = true,
+  -- remove_duplicates is auto-detected from ackprg in setup() (on for
+  -- `--vimgrep`, off for the per-line rg above); set it here to override.
 }
 
 -- 10 commands registered by the real ack.setup(). Each tuple is
@@ -62,3 +68,5 @@ vim.api.nvim_set_keymap('n', '!', ':Ack<SPACE>', {})
 vim.api.nvim_set_keymap('n', '@', '*N:Ack <C-R><C-W><CR>', {})
 vim.api.nvim_set_keymap('n', '<leader>]', ':cn<CR>', {})
 vim.api.nvim_set_keymap('n', '<leader>[', ':cp<CR>', {})
+vim.api.nvim_set_keymap('n', '}', ':cn<CR>', {})
+vim.api.nvim_set_keymap('n', '{', ':cp<CR>', {})

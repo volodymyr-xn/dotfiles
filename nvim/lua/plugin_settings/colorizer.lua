@@ -9,6 +9,21 @@
 -- Filetypes where color highlighting is useful enough to pay its per-keystroke cost.
 local colorizer_filetypes = { "css", "scss", "javascript", "ruby" }
 
+-- JSON is attached per-buffer instead (see autocmd below), gated on size:
+-- theme/token files are worth scanning, lockfiles and API dumps are not.
+local json_filetypes = { "json", "jsonc" }
+local json_max_lines = 1000
+
+-- Hex-only in JSON: there are no CSS functions to parse, and named-color
+-- matching would light up keys like "rainbow_red" or "warning".
+local json_color_options = {
+	RGB = true,
+	RRGGBB = true,
+	RRGGBBAA = true,
+	names = false,
+	mode = "background",
+}
+
 -- nvim-highlight-colors stays installed for easy fallback; do not call its setup.
 -- local highlight_colors_excluded_filetypes = {
 -- 	scss = true,
@@ -46,4 +61,16 @@ require("colorizer").setup({
 		tailwind = true,
 		mode = "background",
 	},
+})
+
+-- Attach colorizer to small JSON buffers only; large ones stay unhighlighted.
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = json_filetypes,
+	callback = function(args)
+		if vim.api.nvim_buf_line_count(args.buf) > json_max_lines then
+			return
+		end
+
+		require("colorizer").attach_to_buffer(args.buf, json_color_options)
+	end,
 })

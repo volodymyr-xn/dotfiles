@@ -1,0 +1,19 @@
+# Passwordless sudo for the two pmset invocations that toggle lid-close
+# (clamshell) sleep, used by bin/c-macos-toggle-lid-sleep and the Hammerspoon
+# keep-awake toggle (hammerspoon/caffeine.lua).
+#
+# Scoped to the exact argument vectors on purpose: `pmset` can change every
+# power setting on the machine, so a bare `NOPASSWD: /usr/bin/pmset` would
+# hand over far more than lid-close behavior.
+#
+# `${USER}` is a placeholder, not a shell expansion: macos/sudoers.sh
+# substitutes it with the invoking account before validating and installing,
+# so this file stays machine-independent. Install with:
+#
+#   bash ~/dotfiles/macos/sudoers.sh
+#
+# Verify afterwards:
+#   sudo visudo -cf /etc/sudoers.d/pmset-disablesleep
+#   sudo -n /usr/bin/pmset -a disablesleep 0 && echo ok
+${USER} ALL=(root) NOPASSWD: /usr/bin/pmset -a disablesleep 1
+${USER} ALL=(root) NOPASSWD: /usr/bin/pmset -a disablesleep 0

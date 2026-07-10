@@ -213,8 +213,14 @@ export DOCKER_CONFIG="$HOME/.config/docker"
 
 # Set default wineprefix
 
-# True color support in TMUX
-export TERM=xterm-256color
+# True color support in TMUX — obsolete pre-ghostty workaround. Ghostty sets
+# TERM=xterm-ghostty itself (terminfo is installed), and clobbering it here
+# made tmux.conf's `xterm-ghostty:` terminal-features pattern never match, so
+# sync/osc7/hyperlinks/usstyle were silently never enabled. Truecolor comes
+# from the terminal's own terminfo now, not from this.
+# If SSH to a host lacking xterm-ghostty terminfo breaks, enable ghostty's
+# ssh-terminfo shell integration rather than restoring this line.
+# export TERM=xterm-256color
 
 # Better less highlight
 export LESS_TERMCAP_mb=$'\E[1;31m'     # begin bold

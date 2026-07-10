@@ -12,3 +12,6 @@ vim.keymap.set("n", "<Leader>`", tmux.send_file, { noremap = true, silent = true
 
 -- Send file path + visual selection range to the active tmux pane
 vim.keymap.set("v", "<Leader>`", tmux.send_selection, { noremap = true, silent = true, desc = "Send file + selection to tmux" })
+
+-- Send the line under the cursor + its @file:line reference to the AI pane
+vim.keymap.set("n", "sm", tmux.send_line, { noremap = true, silent = true, desc = "Send current line to tmux AI pane" })

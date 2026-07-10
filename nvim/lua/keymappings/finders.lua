@@ -7,7 +7,6 @@ local js_dirs = { "app/javascript", "app/assets/javascripts" }
 local components_dir = CustomFindFirstAvailableDir({ "app/components", "app/view_components" })
 
 local task_dirs = { vim.env.C_PLANS, vim.env.C_DOCS, vim.env.C_DRAFT_DOCS }
-local notes_dirs = { vim.env.C_DOCS, vim.env.C_PLANS, vim.env.C_RESEARCH, vim.env.C_TEMP }
 
 -- Search files in multiple dirs, optionally showing relative paths
 local function search_in_dirs(dirs, show_relative)
@@ -70,9 +69,16 @@ map(",q",
 
 map("<Leader>o",
   function() CustomFileSelectors.live_grep() end,
-  "Live grep (Ag)")
+  "Live grep (Ag)"
+)
 
-map("sp",
+-- Much better performance that Live grep with (Ag)
+map("<Leader>p",
+  function() CustomFileSelectors.custom_full_text_search_rg() end,
+  "Custom full text search rg+reload (fzf.vim)"
+)
+
+map("si",
   function() CustomFileSelectors.custom_full_text_search() end,
   "Custom full text search (fzf.vim)")
 
@@ -86,25 +92,23 @@ map("s]",
   function() CustomFileSelectors.custom_full_text_search_with_preview() end,
   "Full text search with bat preview (fzf.vim)")
 
-map("<Leader>p",
-  function() CustomFileSelectors.custom_full_text_search_rg() end,
-  "Custom full text search rg+reload (fzf.vim)")
-
-map("si",
+map("so",
   function() CustomFileSelectors.search_lines_in_all_buffers() end,
   "Search lines in all buffers")
 
-map("so",
+map("sp",
   function() CustomFileSelectors.live_grep_changed_files() end,
   "Full text search in changed files")
 
-map("sk",
-  function() R.call("live_grep_in_dirs", notes_dirs) end,
-  "Search in notes dirs")
+-- Variant of sp that ignores file names, matching only line content
+map("sn",
+  function() CustomFileSelectors.live_grep_changed_files_content_only() end,
+  "Full text search in changed files (text only)")
 
+-- MRU picker: open buffers + v:oldfiles, deduped and limited to cwd
 map("sl",
   function() R.call("oldfiles") end,
-  "Recent files in cwd")
+  "Recently opened files (MRU, cwd only)")
 
 map("sj",
   function() R.call("buffer_list") end,

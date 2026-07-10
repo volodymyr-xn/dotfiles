@@ -9,6 +9,20 @@ local function builtin()
   return require("telescope.builtin")
 end
 
+-- Label a Telescope picker with a left-aligned title on its prompt border,
+-- mirroring the fzf backend's left-aligned --border-label. The {pos="NW"} title
+-- table is what plenary's border renderer left-aligns ("W"); a plain string
+-- would center. Merges into and returns `opts`.
+local function labeled(label, opts)
+  opts.prompt_title = { { text = label, pos = "NW" } }
+  return opts
+end
+
+-- Picker label built from directory basenames, e.g. "javascript, components".
+local function dirs_label(dirs)
+  return table.concat(vim.tbl_map(function(dir) return vim.fn.fnamemodify(dir, ":t") end, dirs), ", ")
+end
+
 -- Returns the 1-based line number of the first changed/added hunk in `path`,
 -- or nil if there are no tracked changes (e.g. untracked or unmodified files).
 local function git_first_change_line(path)
@@ -71,26 +85,19 @@ local function jump_to_first_change_on_select(_, _)
 end
 
 function M.find_files()
-  builtin().find_files({ previewer = false, cwd = root.get() })
+  builtin().find_files(labeled("Files", { previewer = false, cwd = root.get() }))
 end
 
 function M.find_sibling_files()
   local dir = vim.fn.expand("%:h")
-  builtin().find_files({
+  builtin().find_files(labeled("Sibling Files", {
     cwd = dir,
-    prompt_title = dir,
     find_command = { "rg", "--files", "--no-ignore", "--hidden", "-g", "!.git", "--max-depth", "1" },
-  })
+  }))
 end
 
 function M.find_changed_files()
-  local current_buf = vim.api.nvim_get_current_buf()
-  if vim.b[current_buf].is_onediff_buffer then
-    local onediff = require("my_plugins.onediff")
-    onediff.open_file_picker()
-  else
-    builtin().git_status({ attach_mappings = jump_to_first_change_on_select })
-  end
+  builtin().git_status(labeled("Changed Files", { attach_mappings = jump_to_first_change_on_select }))
 end
 
 function M.find_changed_files_by_extension(extension)
@@ -113,8 +120,10 @@ function M.find_changed_files_by_extension(extension)
     end
   end
 
+  local label = "Git Status (" .. extension .. ")"
+
   pickers.new({}, {
-    prompt_title = "Git Status (" .. extension .. ")",
+    prompt_title = { { text = label, pos = "NW" } },
     finder = finders.new_table({
       results = files,
       entry_maker = function(entry)
@@ -127,22 +136,21 @@ function M.find_changed_files_by_extension(extension)
 end
 
 function M.find_resource_in_dir(dir)
-  builtin().find_files({ cwd = dir, previewer = false, prompt_title = dir })
+  builtin().find_files(labeled(vim.fn.fnamemodify(dir, ":t"), { cwd = dir, previewer = false }))
 end
 
 function M.find_files_in_dirs(dirs)
   local available = vim.tbl_filter(function(d) return d and d ~= "" and vim.fn.isdirectory(d) == 1 end, dirs)
   if #available == 0 then return end
-  builtin().find_files({ search_dirs = available, previewer = false, prompt_title = table.concat(available, ", ") })
+  builtin().find_files(labeled(dirs_label(available), { search_dirs = available, previewer = false }))
 end
 
 function M.find_files_in_dirs_relative(dirs)
   local available = vim.tbl_filter(function(d) return d and d ~= "" and vim.fn.isdirectory(d) == 1 end, dirs)
   if #available == 0 then return end
-  builtin().find_files({
+  builtin().find_files(labeled(dirs_label(available), {
     search_dirs = available,
     previewer = false,
-    prompt_title = table.concat(available, ", "),
     path_display = function(_, path)
       for _, dir in ipairs(available) do
         local stripped = path:gsub("^" .. vim.pesc(dir) .. "/", "")
@@ -150,33 +158,33 @@ function M.find_files_in_dirs_relative(dirs)
       end
       return path
     end,
-  })
+  }))
 end
 
 function M.oldfiles()
-  builtin().oldfiles({ only_cwd = true })
+  builtin().oldfiles(labeled("MRU", { only_cwd = true }))
 end
 
 function M.buffer_fuzzy_find()
-  builtin().current_buffer_fuzzy_find()
+  builtin().current_buffer_fuzzy_find(labeled("Buffer Lines (text only)", {}))
 end
 
 function M.buffer_list()
-  builtin().buffers()
+  builtin().buffers(labeled("Buffers", {}))
 end
 
 function M.live_grep()
-  builtin().live_grep()
+  builtin().live_grep(labeled("Live Grep - rg (text only)", {}))
 end
 
 function M.live_grep_in_dirs(dirs)
   local available = vim.tbl_filter(function(d) return d and d ~= "" and vim.fn.isdirectory(d) == 1 end, dirs)
   if #available == 0 then return end
-  builtin().live_grep({ search_dirs = available, prompt_title = table.concat(available, ", ") })
+  builtin().live_grep(labeled(dirs_label(available), { search_dirs = available }))
 end
 
 function M.open_picker_menu()
-  builtin().builtin()
+  builtin().builtin(labeled("Pickers", {}))
 end
 
 return M

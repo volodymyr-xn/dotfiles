@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+
+# Fuzzy-switch to any tmux session. Lists sessions numbered from 1, with their
+# window count right-aligned against the popup edge. Bound to prefix+m.
+
+set -euo pipefail
+
+# fzf reserves 2 columns for the pointer ("> ") plus 1 for the scrollbar when
+# the list overflows; pad against the remainder so nothing wraps.
+FZF_GUTTER=3
+
+# stty, not tput: inside $(...) tput's stdout is a pipe, so it silently falls
+# back to the terminfo default of 80 and over-pads inside a narrow popup.
+terminal_width=$(stty size </dev/tty 2>/dev/null | cut -d' ' -f2)
+
+TARGET_WIDTH=$(( ${terminal_width:-50} - FZF_GUTTER ))
+export TARGET_WIDTH
+
+# Perl (not awk/column) because session names contain emoji: alignment needs
+# display width, not byte or codepoint count. macOS ships neither gawk nor
+# Text::CharWidth, so the wide/zero-width ranges are inlined below.
+pad_to_width() {
+  perl -CSD -ne '
+    sub display_width {
+      my $width = 0;
+
+      for my $codepoint (map { ord } split //, shift) {
+        # Combining marks and zero-width joiners occupy no cell.
+        next if $codepoint == 0x200D
+             || ($codepoint >= 0x0300 && $codepoint <= 0x036F)
+             || ($codepoint >= 0xFE00 && $codepoint <= 0xFE0E);
+
+        # VS16 promotes the preceding character to full emoji width.
+        if ($codepoint == 0xFE0F) { $width++; next }
+
+        $width += ($codepoint >= 0x1100 && $codepoint <= 0x115F)
+               || ($codepoint >= 0x2E80 && $codepoint <= 0xA4CF)
+               || ($codepoint >= 0xAC00 && $codepoint <= 0xD7A3)
+               || ($codepoint >= 0xF900 && $codepoint <= 0xFAFF)
+               || ($codepoint >= 0xFE30 && $codepoint <= 0xFE6F)
+               || ($codepoint >= 0xFF00 && $codepoint <= 0xFF60)
+               || ($codepoint >= 0xFFE0 && $codepoint <= 0xFFE6)
+               || ($codepoint >= 0x1F300 && $codepoint <= 0x1FAFF)
+               || ($codepoint >= 0x20000) ? 2 : 1;
+      }
+
+      return $width;
+    }
+
+    chomp;
+    my ($name, $count) = split /\t/, $_, 2;
+
+    # $. is the 1-based input line number, so numbering starts at 1.
+    my $index = sprintf q{(%*d) }, $ENV{INDEX_WIDTH}, $.;
+    my $gap = $ENV{TARGET_WIDTH} - length($index)
+            - display_width($name) - display_width($count);
+    $gap = 1 if $gap < 1;
+
+    # Field 1 is the padded display line; field 2 is the raw switch target.
+    print $index, $name, q{ } x $gap, $count, qq{\t}, $name, qq{\n};
+  '
+}
+
+sessions=$(tmux list-sessions -F '#{session_name}	#{session_windows} windows')
+
+session_count=$(printf '%s\n' "$sessions" | grep -c '')
+
+# Widest index, so single- and double-digit numbers keep the names aligned.
+INDEX_WIDTH=${#session_count}
+export INDEX_WIDTH
+
+# Digits 1-9 jump to that row and switch in one keystroke. Only bind digits
+# that exist: pos() clamps to the last row, so an unbound 7 with 3 sessions
+# would silently accept session 3. Trade-off: digits no longer type into the
+# query, and after filtering pos(n) counts visible rows, not printed numbers.
+digit_binds=''
+for index in $(seq 1 $(( session_count < 9 ? session_count : 9 ))); do
+  digit_binds="${digit_binds}${index}:pos(${index})+accept,"
+done
+digit_binds=${digit_binds%,}
+
+selection=$(
+  printf '%s\n' "$sessions" \
+    | pad_to_width \
+    | fzf --delimiter='\t' \
+          --with-nth=1 \
+          --prompt='Switch to tmux session > ' \
+          --bind="$digit_binds" \
+          --layout=reverse \
+          --height=100%
+) || exit 0
+
+[ -z "$selection" ] && exit 0
+
+# Everything after the first tab is the unpadded session name.
+target_session=${selection#*	}
+
+tmux switch-client -t "$target_session"

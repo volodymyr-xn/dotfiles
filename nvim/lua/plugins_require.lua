@@ -10,7 +10,7 @@ require('plugin_settings/vim_illuminate')
 require('plugin_settings/comment_nvim')
 require('plugin_settings/quickfix')
 require('plugin_settings/1_ror')
-require('plugin_settings/onediff')
+require('plugin_settings/onediff_qf')
 require('plugin_settings/markdown_preview')
 require('plugin_settings/markdown_html_preview')
 
@@ -25,6 +25,8 @@ require('plugin_settings/memory_manager')
 require('plugin_settings/memory_monitor')
 require('plugin_settings/git_diff_popup')
 require('plugin_settings/ruby_component_toggle')
+require('plugin_settings/lsp_card')
+require('plugin_settings/shortcuts')
 
 -- ====================== Vim highlight tag settings ======================
 vim.cmd('highlight link matchTagError Todo')

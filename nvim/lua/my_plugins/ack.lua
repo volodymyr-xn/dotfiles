@@ -17,6 +17,10 @@ local config = {
   autoclose = false,
   autofold_results = false,
   use_cword_for_empty_search = true,
+  -- Collapse per-match duplicates into one entry per file+line. Needed only
+  -- for per-match output (`--vimgrep`, ag or rg). Auto-detected from ackprg
+  -- in setup(); pass remove_duplicates explicitly to override.
+  remove_duplicates = false,
   mappings = {
     t = "<C-W><CR><C-W>T",
     T = "<C-W><CR><C-W>TgT<C-W>j",
@@ -155,6 +159,33 @@ local function search_with_dispatch(grepprg, grepargs, grepformat)
   end
 end
 
+-- Keep only the first match per file+line so multiple hits on one line
+-- don't produce duplicated quickfix entries. Relevant only for per-match
+-- output (`--vimgrep`); gated by config.remove_duplicates at the call site.
+local function dedupe_results()
+  local list = using_loclist() and vim.fn.getloclist(0) or vim.fn.getqflist()
+
+  local seen = {}
+  local unique = {}
+  for _, item in ipairs(list) do
+    local key = item.bufnr .. ':' .. item.lnum
+    if not seen[key] then
+      seen[key] = true
+      table.insert(unique, item)
+    end
+  end
+
+  if #unique == #list then
+    return
+  end
+
+  if using_loclist() then
+    vim.fn.setloclist(0, {}, 'r', {items = unique})
+  else
+    vim.fn.setqflist({}, 'r', {items = unique})
+  end
+end
+
 function M.show_results()
   local handler = using_loclist() and config.lhandler or config.qhandler
   vim.cmd(handler)
@@ -199,6 +230,10 @@ function M.ack(cmd, args)
     search_with_dispatch(grepprg, escaped_args, grepformat)
   else
     search_with_grep(cmd, grepprg, escaped_args, grepformat)
+
+    if config.remove_duplicates then
+      dedupe_results()
+    end
   end
 
   M.show_results()
@@ -273,6 +308,13 @@ function M.setup(opts)
   if opts.autoclose ~= nil then config.autoclose = opts.autoclose end
   if opts.autofold_results ~= nil then config.autofold_results = opts.autofold_results end
   if opts.use_cword_for_empty_search ~= nil then config.use_cword_for_empty_search = opts.use_cword_for_empty_search end
+  -- Per-match programs (`--vimgrep`) emit one entry per match, not per line;
+  -- auto-enable dedupe for them. An explicit opts.remove_duplicates overrides.
+  if opts.remove_duplicates ~= nil then
+    config.remove_duplicates = opts.remove_duplicates
+  else
+    config.remove_duplicates = config.ackprg:match('%-%-vimgrep') ~= nil
+  end
 
   if opts.mappings then
     config.mappings = vim.tbl_extend('force', config.mappings, opts.mappings)

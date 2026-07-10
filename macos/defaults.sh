@@ -5,25 +5,7 @@
 
 set -euo pipefail
 
-# Color helpers — only emit ANSI escapes when stdout is a TTY.
-if [[ -t 1 ]]; then
-  C_BOLD=$'\033[1m'
-  C_GREEN=$'\033[32m'
-  C_CYAN=$'\033[36m'
-  C_RESET=$'\033[0m'
-else
-  C_BOLD=""; C_GREEN=""; C_CYAN=""; C_RESET=""
-fi
-
-# Print a section header before a group of related defaults.
-section() {
-  printf '\n%s▌ %s%s\n' "$C_BOLD$C_CYAN" "$1" "$C_RESET"
-}
-
-# Print a green check mark and the reason for the default that was just set.
-note() {
-  printf '  %s✓%s %s\n' "$C_GREEN" "$C_RESET" "$1"
-}
+source "$HOME/dotfiles/macos/lib/output.sh"
 
 section "Finder"
 

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- Keep-awake OFF ("Will sleep..."): crescent moon with rising Zzz, grey
+       to match the muted off state of the banner -->
+  <g fill="none" stroke="#8e8e93" stroke-width="2.6"
+     stroke-linecap="round" stroke-linejoin="round">
+    <!-- Crescent: outer disc arc closed by a smaller arc biting into it,
+         so a single path draws the shape without a mask -->
+    <path d="M34.55 28.82A13.95 13.95 0 1 1 19.38 13.65a10.85 10.85 0 0 0 15.17 15.17z"/>
+    <!-- Zzz ascending to the top-right, drawn as open zig-zags -->
+    <path d="M32 18h6l-6 6h6"/>
+    <path d="M36.5 3H45l-8.5 9H45"/>
+  </g>
+</svg>

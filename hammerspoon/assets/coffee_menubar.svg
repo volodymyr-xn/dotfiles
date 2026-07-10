@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- Menubar-only variant: solid, fully saturated shapes with no outlines
+       or translucent fills. At 18pt the stroked banner artwork loses its
+       thin strokes, so the cup is drawn as a filled silhouette instead. -->
+  <g fill="#ff9f0a">
+    <!-- Cup body: straight shoulders tapering into a rounded base -->
+    <path d="M7 15h25v11a12.5 12.5 0 0 1-12.5 12.5h0A12.5 12.5 0 0 1 7 26z"/>
+    <!-- Saucer -->
+    <rect x="4" y="41" width="31" height="4" rx="2"/>
+  </g>
+  <!-- Handle drawn as a thick stroke: a filled ring would need two paths -->
+  <path d="M34 19h3.5a5.5 5.5 0 0 1 0 11H34"
+        fill="none" stroke="#ff9f0a" stroke-width="4.5"
+        stroke-linecap="round"/>
+  <!-- Steam: short thick wisps, the only detail that survives downscaling -->
+  <g fill="none" stroke="#ff9f0a" stroke-width="4" stroke-linecap="round">
+    <path d="M16 9.5c0-2.2 2-2.8 2-5S16 2 16 2"/>
+    <path d="M25 9.5c0-2.2 2-2.8 2-5S25 2 25 2"/>
+  </g>
+</svg>

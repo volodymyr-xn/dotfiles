@@ -15,3 +15,6 @@ brew bundle --file "$DOTFILES_DIR/macos/Brewfile"
 
 echo "▶ Applying macOS defaults"
 bash "$DOTFILES_DIR/macos/defaults.sh"
+
+echo "▶ Installing sudoers drop-ins"
+bash "$DOTFILES_DIR/macos/sudoers.sh"

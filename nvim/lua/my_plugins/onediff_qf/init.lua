@@ -1,0 +1,807 @@
+-- OneDiff v2 (quickfix edition): a lightweight git-diff review session built
+-- on gitsigns. Instead of v1's custom scratch-buffer view + sidebar
+-- (my_plugins/onediff/), it opens a quickfix list of changed files and
+-- highlights changed lines directly in the real buffers you edit.
+--
+-- Navigation during a session:
+--   * `:cnext` / `:cprev` walk the quickfix (one entry per file)
+--   * `<Tab>` / `<S-Tab>` walk hunks across ALL changed files
+--   * `(` / `)` (keymappings/git.lua) walk hunks within the current buffer
+--   * `<C-S-M>` toggles inline deleted-line virtual lines (off by default)
+--
+-- Deleted files are listed (with a red `-` tag) but are not navigation
+-- targets: they contribute no hunks, so `<Tab>` skips them, and `<CR>` over
+-- one is a no-op rather than opening an empty buffer at the removed path.
+
+local M = {}
+
+-- Safe to require at the top: this module is itself loaded lazily on the first
+-- `M` press (plugin_settings/onediff_qf.lua), by which point gitsigns has
+-- attached via its own BufReadPre event.
+local gitsigns = require("gitsigns")
+
+-- Diff every buffer against HEAD (not the index) while the session runs, so
+-- both staged and unstaged changes are highlighted -- matching v1's semantics.
+local BASE_REF = "HEAD"
+
+-- Namespace for the quickfix status-tag highlights.
+local qf_ns = vim.api.nvim_create_namespace("onediff_qf")
+
+-- Session state. `active` gates the toggle; `augroup` holds the write-refresh
+-- autocmd; `saved` snapshots gitsigns settings + `<Tab>` maps restored on
+-- close; `hunks`/`file_index` drive cross-file hunk navigation; `qf_id` pins
+-- our quickfix list so refresh and cursor sync never touch a list the user
+-- switched to mid-session.
+local session = {
+  active = false,
+  augroup = nil,
+  saved = {},
+  hunks = {},
+  file_index = {},
+  qf_id = nil,
+}
+
+-- Standalone changed-line highlight, toggled by `sf` independently of a review
+-- session. `active` gates it; `saved` snapshots the gitsigns settings it
+-- overrides so toggling off restores them. A full session owns the highlight
+-- itself, so this yields (and hands its snapshot over) while one is active.
+local highlight = {
+  active = false,
+  saved = {},
+}
+
+-- Colored status tags in the quickfix. New files link to the yellow change
+-- color; changed links to the green add color; deleted links to the red delete
+-- color. `default` yields to any user override.
+vim.api.nvim_set_hl(0, "OneDiffQfAdded", { link = "GitSignsChange", default = true })
+vim.api.nvim_set_hl(0, "OneDiffQfChanged", { link = "GitSignsAdd", default = true })
+vim.api.nvim_set_hl(0, "OneDiffQfDeleted", { link = "GitSignsDelete", default = true })
+
+-- Per status: the leading symbol and its highlight group. New shows a yellow
+-- `*`; changed shows a green `+`; deleted shows a red `-`.
+local STATUS = {
+  added = { sym = "*", hl = "OneDiffQfAdded" },
+  changed = { sym = "+", hl = "OneDiffQfChanged" },
+  deleted = { sym = "-", hl = "OneDiffQfDeleted" },
+}
+
+local normalize = vim.fs.normalize
+
+-- Return the git repository root for the current working directory, or nil
+-- when not inside a work tree.
+local function git_root()
+  local result = vim.system({ "git", "rev-parse", "--show-toplevel" }):wait()
+
+  if result.code ~= 0 then
+    return nil
+  end
+
+  return vim.trim(result.stdout)
+end
+
+-- Collapse a git porcelain XY status pair to one of the three tags the list
+-- shows: added (new/untracked), deleted, or changed (modified/renamed/…).
+local function status_label(xy)
+  if xy == "??" then
+    return "added"
+  end
+
+  local x, y = xy:sub(1, 1), xy:sub(2, 2)
+
+  if x == "D" or y == "D" then
+    return "deleted"
+  elseif x == "A" or y == "A" then
+    return "added"
+  end
+
+  return "changed"
+end
+
+-- Parse `git status -z` into an ordered list of { xy, path } records. -z gives
+-- NUL-separated fields so paths with spaces or unusual characters survive;
+-- rename/copy records carry the original path in the following field (skipped).
+local function status_records(root)
+  local result = vim.system({
+    "git", "-C", root, "-c", "core.quotePath=false",
+    "status", "--porcelain", "--untracked-files=all", "-z",
+  }):wait()
+
+  local records = {}
+  if result.code ~= 0 then
+    return records
+  end
+
+  local fields = vim.split(result.stdout, "\0", { plain = true })
+  local i = 1
+  while i <= #fields do
+    local field = fields[i]
+
+    if field == "" then
+      i = i + 1
+    else
+      local xy = field:sub(1, 2)
+      records[#records + 1] = { xy = xy, path = field:sub(4) }
+
+      if xy:sub(1, 1) == "R" or xy:sub(1, 1) == "C" then
+        i = i + 1
+      end
+
+      i = i + 1
+    end
+  end
+
+  return records
+end
+
+-- Map each tracked, changed path to the list of its hunk start lines (in the
+-- new file), parsed from a single unified=0 diff against HEAD. Untracked files
+-- are absent from `git diff`; deleted files contribute no hunks.
+local function diff_hunks(root)
+  local result = vim.system({
+    "git", "-C", root, "-c", "core.quotePath=false",
+    "diff", "--unified=0", "--no-color", "-M", "HEAD",
+  }):wait()
+
+  local map = {}
+  if result.code ~= 0 then
+    return map
+  end
+
+  local current
+  for line in vim.gsplit(result.stdout, "\n", { plain = true }) do
+    if line:match("^diff %-%-git ") then
+      current = nil
+    else
+      local newpath = line:match("^%+%+%+ b/(.+)$")
+
+      if newpath then
+        current = newpath
+        map[current] = map[current] or {}
+      elseif current then
+        local start = line:match("^@@ %-%d+.- %+(%d+)")
+
+        if start then
+          map[current][#map[current] + 1] = tonumber(start)
+        end
+      end
+    end
+  end
+
+  return map
+end
+
+-- Read a single line from a file on disk, or "" if unavailable.
+local function read_line(path, lnum)
+  local ok, lines = pcall(vim.fn.readfile, path, "", lnum)
+
+  if not ok or type(lines) ~= "table" then
+    return ""
+  end
+
+  return lines[lnum] or ""
+end
+
+-- Collect the review state from git in one pass: the quickfix items (one per
+-- changed file; the tag is carried in user_data and rendered by qf_textfunc)
+-- and the flat, ordered list of hunks used for cross-file `<Tab>` navigation
+-- (deleted files excluded).
+local function collect()
+  local root = git_root()
+  if not root then
+    return {}, {}, {}
+  end
+
+  local records = status_records(root)
+  local hunks_by_path = diff_hunks(root)
+
+  local items = {}
+  local hunks = {}
+  local file_index = {}
+
+  for i, record in ipairs(records) do
+    local label = status_label(record.xy)
+    local abs = root .. "/" .. record.path
+    file_index[normalize(abs)] = i
+
+    local file_hunks = hunks_by_path[record.path]
+    local first = (file_hunks and file_hunks[1]) or 1
+
+    -- Deleted files get a list entry but never a hunk, so `<Tab>` skips them.
+    -- The on-disk check backstops the label: a path git still reports as
+    -- changed while it is already gone must not become a navigation target.
+    -- lstat (not stat) so a changed file that is a symlink to a missing or
+    -- external target still counts as present and stays navigable.
+    if label == "deleted" or not vim.uv.fs_lstat(abs) then
+      items[#items + 1] = {
+        filename = abs, lnum = 1, text = "", user_data = { label = "deleted" },
+      }
+    else
+      items[#items + 1] = {
+        filename = abs,
+        lnum = first,
+        text = read_line(abs, first),
+        user_data = { label = label },
+      }
+
+      if file_hunks and #file_hunks > 0 then
+        for _, lnum in ipairs(file_hunks) do
+          hunks[#hunks + 1] = { file = abs, lnum = lnum, fidx = i }
+        end
+      else
+        -- Untracked/added file: treat the whole file as one hunk at line 1.
+        hunks[#hunks + 1] = { file = abs, lnum = first, fidx = i }
+      end
+    end
+  end
+
+  return items, hunks, file_index
+end
+
+-- Render each quickfix entry as `<sym> filepath|lnum| linetext`, leading with
+-- the status symbol (setqflist's default renders the file name first). Wired
+-- via the list's quickfixtextfunc; the path is shown relative to the working
+-- directory.
+local function qf_textfunc(info)
+  local items = vim.fn.getqflist({ id = info.id, items = 1 }).items
+  local out = {}
+
+  for i = info.start_idx, info.end_idx do
+    local item = items[i]
+    local label = item.user_data and item.user_data.label
+    local sym = (label and STATUS[label] and STATUS[label].sym) or " "
+    local fname = item.bufnr > 0 and vim.fn.fnamemodify(vim.fn.bufname(item.bufnr), ":.") or ""
+    local body = item.text ~= "" and (" " .. item.text) or ""
+
+    out[#out + 1] = string.format("%s %s|%d|%s", sym, fname, item.lnum, body)
+  end
+
+  return out
+end
+
+-- Return the loaded quickfix buffer number, or nil when there is no quickfix
+-- buffer yet or it is not loaded. Centralizes the guard shared by every
+-- routine that decorates or rebinds the quickfix buffer.
+local function qf_buffer()
+  local qf_buf = vim.fn.getqflist({ qfbufnr = 0 }).qfbufnr
+
+  if qf_buf == 0 or not vim.api.nvim_buf_is_loaded(qf_buf) then
+    return nil
+  end
+
+  return qf_buf
+end
+
+-- Whether OneDiff's own quickfix list is the one currently active (and thus
+-- shown in the quickfix window). Guards decoration and cursor sync from
+-- touching a different list the user switched to mid-session.
+local function onediff_list_active()
+  return session.qf_id ~= nil
+    and vim.fn.getqflist({ id = 0 }).id == session.qf_id
+end
+
+-- Color the leading status symbol via buffer extmarks. Extmarks layer above
+-- syntax (unlike `:syntax match`, which loses to the built-in qfFileName
+-- group); the label comes from each item's user_data, since `+` alone does not
+-- distinguish new from changed. Row order matches item order (one line each).
+local function color_qf()
+  local qf_buf = qf_buffer()
+
+  if not qf_buf
+    or vim.fn.getqflist({ winid = 0 }).winid == 0
+    or not onediff_list_active() then
+    return
+  end
+
+  vim.api.nvim_buf_clear_namespace(qf_buf, qf_ns, 0, -1)
+
+  for row, item in ipairs(vim.fn.getqflist({ items = 1 }).items) do
+    local label = item.user_data and item.user_data.label
+    local status = label and STATUS[label]
+
+    if status then
+      vim.api.nvim_buf_set_extmark(qf_buf, qf_ns, row - 1, 0, {
+        end_col = 1,
+        hl_group = status.hl,
+      })
+    end
+  end
+end
+
+-- Open the entry under the cursor, unless it is a deleted file -- those have
+-- no content on disk, so the native jump would land in an empty buffer named
+-- after the removed path. `:.cc` is what `<CR>` runs natively.
+local function open_qf_entry()
+  local item = vim.fn.getqflist({ items = 1 }).items[vim.fn.line(".")]
+
+  if not item then
+    return
+  end
+
+  if item.user_data and item.user_data.label == "deleted" then
+    vim.notify("OneDiff: file is deleted -- nothing to open", vim.log.levels.WARN)
+    return
+  end
+
+  vim.cmd(".cc")
+end
+
+-- Route `<CR>` and double-click in the quickfix buffer through the guarded
+-- open. Buffer-local, so the native behavior is untouched in other lists.
+local function guard_qf_keys()
+  local qf_buf = qf_buffer()
+
+  if not qf_buf then
+    return
+  end
+
+  local opts = { buffer = qf_buf, desc = "OneDiff v2: open entry (deleted files inert)" }
+  vim.keymap.set("n", "<CR>", open_qf_entry, opts)
+  vim.keymap.set("n", "<2-LeftMouse>", open_qf_entry, opts)
+end
+
+-- Drop the guarded maps on session close. Neovim reuses the quickfix buffer
+-- for later lists, so leaving them behind would shadow `<CR>` there too.
+local function unguard_qf_keys()
+  local qf_buf = qf_buffer()
+
+  if not qf_buf then
+    return
+  end
+
+  pcall(vim.keymap.del, "n", "<CR>", { buffer = qf_buf })
+  pcall(vim.keymap.del, "n", "<2-LeftMouse>", { buffer = qf_buf })
+end
+
+-- Re-apply everything that depends on the rendered quickfix buffer.
+local function decorate_qf()
+  color_qf()
+  guard_qf_keys()
+end
+
+-- Point the quickfix list, and its window when open, at `fidx` without stealing
+-- focus -- so the selected entry tracks `<Tab>` hunk navigation across files.
+local function sync_qf_cursor(fidx)
+  if not fidx or not session.qf_id then
+    return
+  end
+
+  vim.fn.setqflist({}, "r", { id = session.qf_id, idx = fidx })
+
+  -- Only move the visible cursor when our list is the one on screen; otherwise
+  -- we'd scroll an unrelated quickfix the user switched to.
+  if not onediff_list_active() then
+    return
+  end
+
+  local qf_win = vim.fn.getqflist({ winid = 0 }).winid
+
+  if qf_win ~= 0 then
+    pcall(vim.api.nvim_win_set_cursor, qf_win, { fidx, 0 })
+  end
+end
+
+-- Rebuild the quickfix list and hunk-navigation state. `open` opens the
+-- quickfix window; `keep_idx` restores the pre-rebuild cursor position (used on
+-- refresh so a save does not jump the list back to the top).
+local function populate(open, keep_idx)
+  local prev_idx = keep_idx and session.qf_id
+    and vim.fn.getqflist({ id = session.qf_id, idx = 0 }).idx or nil
+  local items, hunks, file_index = collect()
+
+  session.hunks = hunks
+  session.file_index = file_index
+
+  local what = { items = items, title = "OneDiff", quickfixtextfunc = qf_textfunc }
+  if prev_idx and #items > 0 then
+    what.idx = math.min(prev_idx, #items)
+  end
+
+  if keep_idx and session.qf_id then
+    -- Replace our own list by id on refresh so we never clobber a different
+    -- quickfix the user switched to mid-session.
+    what.id = session.qf_id
+    vim.fn.setqflist({}, "r", what)
+  else
+    -- Fresh list on open; remember its id so later refreshes and cursor syncs
+    -- target it rather than whatever list happens to be current.
+    vim.fn.setqflist({}, " ", what)
+    session.qf_id = vim.fn.getqflist({ id = 0 }).id
+  end
+
+  if open then
+    vim.cmd("copen")
+  end
+
+  -- Recolor and rebind after the quickfix buffer has re-rendered its lines.
+  vim.schedule(decorate_qf)
+end
+
+-- Return the first hunk ordered after (fidx, line), wrapping to the first.
+local function next_hunk_after(fidx, line)
+  for _, hunk in ipairs(session.hunks) do
+    if hunk.fidx > fidx or (hunk.fidx == fidx and hunk.lnum > line) then
+      return hunk
+    end
+  end
+
+  return session.hunks[1]
+end
+
+-- Return the last hunk ordered before (fidx, line), wrapping to the last.
+local function prev_hunk_before(fidx, line)
+  local prev
+  for _, hunk in ipairs(session.hunks) do
+    if hunk.fidx < fidx or (hunk.fidx == fidx and hunk.lnum < line) then
+      prev = hunk
+    else
+      break
+    end
+  end
+
+  return prev or session.hunks[#session.hunks]
+end
+
+-- Whether a window is showing one of this review's changed files (its buffer
+-- path is tracked in file_index). Lets file_window prefer reusing a review
+-- window over hijacking an unrelated buffer.
+local function shows_reviewed_file(win)
+  local name = vim.api.nvim_buf_get_name(vim.api.nvim_win_get_buf(win))
+
+  return session.file_index[normalize(name)] ~= nil
+end
+
+-- Return a window in the current tabpage to load a changed file into. Prefers a
+-- window already showing one of the review's changed files (so `<Tab>` reuses
+-- the review window instead of clobbering an unrelated buffer), then the
+-- previous window, then any normal window, then any non-quickfix window. nil
+-- when no usable window is open.
+local function file_window()
+  local previous = vim.fn.win_getid(vim.fn.winnr("#"))
+  local previous_ok = previous ~= 0
+    and vim.bo[vim.api.nvim_win_get_buf(previous)].buftype == ""
+
+  if previous_ok and shows_reviewed_file(previous) then
+    return previous
+  end
+
+  local review_win, first_normal, fallback
+
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    local buftype = vim.bo[vim.api.nvim_win_get_buf(win)].buftype
+
+    if buftype == "" then
+      first_normal = first_normal or win
+
+      if not review_win and shows_reviewed_file(win) then
+        review_win = win
+      end
+    elseif buftype ~= "quickfix" and not fallback then
+      fallback = win
+    end
+  end
+
+  return review_win or (previous_ok and previous) or first_normal or fallback
+end
+
+-- Jump to a hunk, opening its file if it is not the current buffer.
+local function jump_to(hunk)
+  if not hunk then
+    return
+  end
+
+  -- From the quickfix window `:edit` would load the file over the list itself.
+  -- Hop to a normal window first so the list survives and Tab keeps walking
+  -- hunks in the file rather than the quickfix buffer.
+  if vim.bo.buftype ~= "" then
+    local target = file_window()
+
+    if not target then
+      return
+    end
+
+    vim.api.nvim_set_current_win(target)
+  end
+
+  if normalize(vim.api.nvim_buf_get_name(0)) ~= normalize(hunk.file) then
+    vim.cmd("edit " .. vim.fn.fnameescape(hunk.file))
+  end
+
+  local last = vim.api.nvim_buf_line_count(0)
+  vim.api.nvim_win_set_cursor(0, { math.min(hunk.lnum, last), 0 })
+  vim.cmd("normal! zz")
+
+  sync_qf_cursor(hunk.fidx)
+end
+
+-- Whether a buffer is a normal, named file buffer (not a dashboard, quickfix,
+-- terminal, or empty start screen).
+local function is_real_file(buf)
+  return vim.bo[buf].buftype == "" and vim.api.nvim_buf_get_name(buf) ~= ""
+end
+
+-- Jump to the next hunk across all changed files (bound to `<Tab>`).
+function M.next_hunk()
+  if not session.active or #session.hunks == 0 then
+    return
+  end
+
+  local fidx = session.file_index[normalize(vim.api.nvim_buf_get_name(0))]
+  if not fidx then
+    jump_to(session.hunks[1])
+    return
+  end
+
+  jump_to(next_hunk_after(fidx, vim.api.nvim_win_get_cursor(0)[1]))
+end
+
+-- Jump to the previous hunk across all changed files (bound to `<S-Tab>`).
+function M.prev_hunk()
+  if not session.active or #session.hunks == 0 then
+    return
+  end
+
+  local fidx = session.file_index[normalize(vim.api.nvim_buf_get_name(0))]
+  if not fidx then
+    jump_to(session.hunks[#session.hunks])
+    return
+  end
+
+  jump_to(prev_hunk_before(fidx, vim.api.nvim_win_get_cursor(0)[1]))
+end
+
+-- Toggle inline deleted-line virtual lines for the session (bound to
+-- `<C-S-M>`). On at session start; refresh re-renders open buffers.
+function M.toggle_deleted()
+  if not session.active then
+    return
+  end
+
+  gitsigns.toggle_deleted()
+  gitsigns.refresh()
+end
+
+-- Bind the session keymaps (cross-file hunk nav + deleted-line toggle), saving
+-- any prior mapping so close() can restore it (default `<Tab>` is
+-- jumplist-forward; `<C-S-M>` is usually unmapped). Note: Ctrl+Shift+M is
+-- only distinct from `<CR>`/`<C-M>` when the terminal speaks the kitty
+-- keyboard protocol (kitty does; newer alacritty does too).
+local function install_session_keymaps()
+  session.saved.tab = vim.fn.maparg("<Tab>", "n", false, true)
+  session.saved.stab = vim.fn.maparg("<S-Tab>", "n", false, true)
+  session.saved.del = vim.fn.maparg("<C-S-M>", "n", false, true)
+
+  vim.keymap.set("n", "<Tab>", function() M.next_hunk() end,
+    { desc = "OneDiff v2: next hunk across all files" })
+  vim.keymap.set("n", "<S-Tab>", function() M.prev_hunk() end,
+    { desc = "OneDiff v2: prev hunk across all files" })
+  vim.keymap.set("n", "<C-S-M>", function() M.toggle_deleted() end,
+    { desc = "OneDiff v2: toggle deleted lines" })
+end
+
+-- Remove the session keymaps and restore any prior mapping.
+local function remove_session_keymaps()
+  pcall(vim.keymap.del, "n", "<Tab>")
+  pcall(vim.keymap.del, "n", "<S-Tab>")
+  pcall(vim.keymap.del, "n", "<C-S-M>")
+
+  for _, saved in ipairs({ session.saved.tab, session.saved.stab, session.saved.del }) do
+    if saved and not vim.tbl_isempty(saved) then
+      vim.fn.mapset("n", false, saved)
+    end
+  end
+end
+
+-- End the session when OneDiff's quickfix window is closed, so the changed-line
+-- highlights do not linger after the list is gone. Deferred: tearing windows
+-- down synchronously inside WinClosed hits textlock. close() also deletes this
+-- augroup before it runs cclose, so the teardown cannot re-trigger the event.
+local function on_qf_window_closed(args)
+  if not session.active then
+    return
+  end
+
+  local win = tonumber(args.match)
+
+  if not win or not vim.api.nvim_win_is_valid(win) then
+    return
+  end
+
+  if vim.bo[vim.api.nvim_win_get_buf(win)].buftype == "quickfix" then
+    vim.schedule(function()
+      M.close()
+    end)
+  end
+end
+
+-- Session autocmds: refresh the quickfix list after every write so it tracks
+-- edits and staging, and end the session when its window is closed. Both torn
+-- down in close().
+local function setup_autocmds()
+  session.augroup = vim.api.nvim_create_augroup("OneDiffQf", { clear = true })
+
+  vim.api.nvim_create_autocmd("BufWritePost", {
+    group = session.augroup,
+    desc = "Refresh OneDiff v2 quickfix on save",
+    callback = function()
+      M.refresh()
+    end,
+  })
+
+  vim.api.nvim_create_autocmd("WinClosed", {
+    group = session.augroup,
+    desc = "End OneDiff v2 session when its quickfix window closes",
+    callback = on_qf_window_closed,
+  })
+end
+
+-- Snapshot into `store` the gitsigns settings the highlight overrides, so they
+-- can later be restored to exactly what was there before (not just this
+-- config's defaults). Reads the live gitsigns config table directly -- there
+-- is no public getter.
+local function snapshot_gitsigns(store)
+  local config = require("gitsigns.config").config
+  store.linehl = config.linehl
+  store.show_deleted = config.show_deleted
+  store.base = config.base
+end
+
+-- Restore the gitsigns settings snapshotted in `store` and re-render open
+-- buffers.
+local function restore_gitsigns(store)
+  local config = require("gitsigns.config").config
+  config.linehl = store.linehl
+  config.show_deleted = store.show_deleted
+
+  -- change_base re-diffs buffers against the restored base; refresh re-renders
+  -- them with the restored line-highlight / deleted settings.
+  gitsigns.change_base(store.base, true)
+  gitsigns.refresh()
+end
+
+-- Turn on the full-line add/change highlight diffed against HEAD, then re-render
+-- so already-attached buffers (including the current one) pick it up -- the
+-- gitsigns toggle_* setters only mutate config, so without refresh() only
+-- buffers opened afterward would show it. Changed lines link to the add-line
+-- group so they render the same green as added lines. Shared by the review
+-- session (M.open) and the standalone toggle (`sf`); each sets its own
+-- show_deleted before calling, so this single refresh renders that too.
+local function enable_change_highlight()
+  vim.api.nvim_set_hl(0, "GitSignsChangeLn", { link = "GitSignsAddLn" })
+  gitsigns.toggle_linehl(true)
+  gitsigns.change_base(BASE_REF, true)
+  gitsigns.refresh()
+end
+
+-- Start a review session: highlight changed lines against HEAD in every real
+-- buffer and open the quickfix list of changed files. Re-invoking while active
+-- just refreshes.
+function M.open()
+  if session.active then
+    M.refresh()
+    return
+  end
+
+  -- Capture where the cursor starts so we can decide, after the list is built,
+  -- whether to keep it here or move it. Starting from a non-file buffer
+  -- (dashboard, empty start screen) auto-opens the first changed file so the
+  -- review has something to show.
+  local current_buf = vim.api.nvim_get_current_buf()
+  local current_name = normalize(vim.api.nvim_buf_get_name(current_buf))
+  local autonav = not is_real_file(current_buf)
+
+  session.active = true
+
+  -- Adopt an in-progress standalone highlight (`sf`): reuse its pre-highlight
+  -- snapshot so close() restores the true original state rather than the
+  -- already-highlighted one. Otherwise snapshot the live settings now.
+  if highlight.active then
+    session.saved = highlight.saved
+    highlight.active = false
+  else
+    session.saved = {}
+    snapshot_gitsigns(session.saved)
+  end
+
+  install_session_keymaps()
+
+  -- Hide deleted-line virtual lines by default (toggle on with `<C-S-M>`),
+  -- then enable the full-line add/change highlight, which re-renders open
+  -- buffers. All restored on close.
+  gitsigns.toggle_deleted(false)
+  enable_change_highlight()
+
+  populate(true, false)
+
+  local current_fidx = session.file_index[current_name]
+
+  if autonav and #session.hunks > 0 then
+    -- copen focused the quickfix; step back to the window it opened from and
+    -- load the first changed file there.
+    vim.cmd("wincmd p")
+    if vim.bo.buftype ~= "quickfix" then
+      jump_to(session.hunks[1])
+    end
+  elseif current_fidx then
+    -- The current buffer is one of the changed files: keep the cursor here (the
+    -- highlight is already applied) rather than leaving it in the list copen
+    -- focused, and point the list at the matching entry.
+    vim.cmd("wincmd p")
+
+    if vim.bo.buftype ~= "quickfix" then
+      sync_qf_cursor(current_fidx)
+    end
+  end
+
+  setup_autocmds()
+end
+
+-- Rebuild the quickfix list in place (on every write, or on a re-toggle while
+-- active) without stealing focus or losing the cursor position. The session
+-- base stays HEAD, so only the list contents are refreshed.
+function M.refresh()
+  if not session.active then
+    return
+  end
+
+  populate(false, true)
+end
+
+-- End the session: restore the snapshotted gitsigns settings and session maps,
+-- drop the write autocmd, and close the quickfix window.
+function M.close()
+  if not session.active then
+    return
+  end
+
+  session.active = false
+  remove_session_keymaps()
+  unguard_qf_keys()
+  restore_gitsigns(session.saved)
+
+  if session.augroup then
+    vim.api.nvim_del_augroup_by_id(session.augroup)
+    session.augroup = nil
+  end
+
+  vim.cmd("cclose")
+  session.hunks = {}
+  session.file_index = {}
+  session.qf_id = nil
+end
+
+-- Toggle the review session on/off (bound to `M`).
+function M.toggle()
+  if session.active then
+    M.close()
+  else
+    M.open()
+  end
+end
+
+-- Toggle only the changed-line highlight, independent of the review session
+-- (bound to `sf`). No-op while a session is active, since the session already
+-- renders the highlight and owns its teardown.
+function M.toggle_highlight()
+  if session.active then
+    vim.notify("OneDiff: session active -- highlight already on", vim.log.levels.INFO)
+    return
+  end
+
+  if highlight.active then
+    highlight.active = false
+    restore_gitsigns(highlight.saved)
+    return
+  end
+
+  highlight.active = true
+  highlight.saved = {}
+  snapshot_gitsigns(highlight.saved)
+  enable_change_highlight()
+end
+
+-- Whether a review session is currently running.
+function M.is_active()
+  return session.active
+end
+
+return M

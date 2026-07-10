@@ -10,47 +10,26 @@
 -- app to recover.
 require("hs.ipc")
 
-local clickNotification = require("click_notification")
-local cycleAppWindows = require("cycle_app_windows")
-local dismissNotifications = require("dismiss_notifications").dismiss
-local mediaKeys = require("media_keys")
-local notifyReturn = require("notify_return")
--- Starts the side-button eventtap and exposes a toggle to mute its
--- mappings (so games binding mouse 3/4 keep receiving the raw clicks).
-local mouseSideButtons = require("mouse_side_buttons")
+-- Hammerspoon only searches hs.configdir (and Spoons/) by default, so the
+-- subdirectories have to be added to package.path before anything in them
+-- can be require()d. Flat module names are kept — require("caffeine"), not
+-- require("modules.caffeine") — so a file can move between modules/ and
+-- lib/ without touching every call site. Also applies to `hs -c` one-liners,
+-- which share this Lua state.
+--   modules/ — self-contained features (one keybind or menubar item each)
+--   lib/     — shared primitives with no bindings of their own
+local searchPaths = {"modules", "lib"}
 
--- Volume control: F10 up, F9 down
--- For keychron mechanic low profile keyboard
-hs.hotkey.bind({}, "f10", mediaKeys.volumeUp, nil, mediaKeys.volumeUp)
-hs.hotkey.bind({}, "f9", mediaKeys.volumeDown, nil, mediaKeys.volumeDown)
+for _, dir in ipairs(searchPaths) do
+  package.path = hs.configdir .. "/" .. dir .. "/?.lua;" .. package.path
+end
 
--- Volume control: Numpad +/- (raw keycodes: 69 = numpad+, 78 = numpad-)
--- For regular full width membrane keyboard
-hs.hotkey.bind({}, 69, mediaKeys.volumeUp, nil, mediaKeys.volumeUp)
-hs.hotkey.bind({}, 78, mediaKeys.volumeDown, nil, mediaKeys.volumeDown)
+-- Required here rather than left to config/keys.lua because loading them has
+-- side effects beyond exposing a toggle: caffeine installs its menubar item,
+-- and mouse_side_buttons / hyper start their eventtaps at require time.
+require("caffeine")
+require("mouse_side_buttons")
+require("hyper")
 
--- Mute/unmute: Numpad * (raw keycode 67)
-hs.hotkey.bind({}, 67, mediaKeys.toggleMute)
-
--- Play/pause (continue) media playback: Numpad 0 (raw keycode 82)
-hs.hotkey.bind({}, 82, mediaKeys.togglePlayPause)
-
--- Cmd+K → return to the pre-jump app (+ tmux loc if it was Ghostty)
-hs.hotkey.bind({"cmd"}, "k", notifyReturn.restoreFull)
-
--- Cmd+0 → dismiss all notifications (numpad * keycode 67 still toggles mute)
-hs.hotkey.bind({"cmd"}, "i", dismissNotifications)
-
--- Cmd+L → activate (click) the topmost notification's default action
-hs.hotkey.bind({"cmd"}, "l", clickNotification.open)
-
--- Cmd+` → cycle through windows of the frontmost app
-hs.hotkey.bind({"cmd"}, "`", cycleAppWindows.cycle)
-
--- Cmd+E → App Exposé (current app windows overview)
-hs.hotkey.bind({"cmd"}, "e", function()
-  hs.spaces.toggleAppExpose()
-end)
-
--- Cmd+- → toggle mouse side-button mappings (off = pass through to games)
-hs.hotkey.bind({"cmd"}, "m", mouseSideButtons.toggle)
+-- All global hotkey bindings.
+require("keys")
