@@ -7,7 +7,6 @@ local caffeine = require("caffeine")
 local clickNotification = require("click_notification")
 local cycleAppWindows = require("cycle_app_windows")
 local dismissNotifications = require("dismiss_notifications").dismiss
-local hyper = require("hyper").modifiers
 local mediaKeys = require("media_keys")
 local mouseSideButtons = require("mouse_side_buttons")
 local notifyReturn = require("notify_return")
@@ -50,15 +49,3 @@ hs.hotkey.bind({"cmd"}, "m", caffeine.toggle)
 
 -- Cmd+Shift+M → toggle mouse side-button mappings (off = pass through to games)
 hs.hotkey.bind({"cmd", "shift"}, "m", mouseSideButtons.toggle)
-
--- Hyper (hold either physical Ctrl key) bindings. hyper.lua rewrites those
--- keys into a real Cmd+Alt+Ctrl+Shift chord, which nothing else on macOS
--- claims — so the binds below are conflict-free with app and terminal
--- shortcuts, unlike the Cmd+... binds above. Other apps can bind the same
--- chord directly. Caps Lock keeps sending Control as before.
-
--- Hyper+T → Ghostty
-hs.hotkey.bind(hyper, "t", function() hs.application.launchOrFocus("Ghostty") end)
-
--- Hyper+B → Google Chrome
-hs.hotkey.bind(hyper, "b", function() hs.application.launchOrFocus("Google Chrome") end)

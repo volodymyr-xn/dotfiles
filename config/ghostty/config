@@ -107,10 +107,10 @@ keybind = ctrl+seven=text:\x01\x37
 keybind = ctrl+eight=text:\x01\x38
 keybind = ctrl+nine=text:\x01\x39
 
-# Ctrl+0 opens the AI agent pane selector. Same workaround as the numbers
-# above: sends the tmux prefix + `l`, reusing the `prefix l` binding, because
+# Ctrl+0 switches to the next tmux session. Same workaround as the numbers
+# above: sends the tmux prefix + `0`, reusing the `prefix 0` binding, because
 # macOS eats Ctrl+0 before Ghostty can deliver it as a real key.
-keybind = ctrl+zero=text:\x01l
+keybind = ctrl+zero=text:\x01\x30
 
 # Make fonts bolder (works only on MacOS)
 font-thicken=true
