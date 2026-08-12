@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"
+     fill="none" stroke="currentColor" stroke-width="1.2"
+     stroke-linecap="round" stroke-linejoin="round">
+  <!-- Board outline; the fan circle is what tells it apart from RAM. -->
+  <rect x="1.4" y="3.6" width="13.2" height="8.2" rx="1.2"/>
+  <circle cx="5.6" cy="7.7" r="2.1"/>
+  <!-- Heatsink fins beside the fan. -->
+  <path d="M9.8 6.3h3.2M9.8 9.1h3.2"/>
+  <!-- Slot pins along the bottom edge. -->
+  <path d="M4.2 11.8v2.2M11 11.8v2.2"/>
+</svg>

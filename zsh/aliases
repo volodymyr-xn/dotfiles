@@ -1,6 +1,9 @@
 # Vim specific
 alias vi='vim'
-alias vi:='vim ~/.vim/vimrc'
+# Name is quoted so the line does not read as a Vim modeline: a bare
+# "vi"+colon after whitespace makes Vim parse the rest of the line as
+# options and error with E518 every time the file is opened.
+alias 'vi:'='vim ~/.vim/vimrc'
 alias v='nvim'
 alias nv='nvim'
 alias vn='nvim'

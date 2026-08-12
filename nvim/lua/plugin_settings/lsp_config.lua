@@ -4,7 +4,7 @@ require("mason-lspconfig").setup({
   -- This setting has no relation with the `automatic_installation` setting.
   -- ensure_installed = { "lua_ls", "ts_ls", "cssls", "herb_ls", "tailwindcss"},
   -- ensure_installed = { "lua_ls", "ts_ls", "cssls", "herb_ls", "tailwindcss", "ruby_lsp"},
-  ensure_installed = { "ts_ls", "cssls", "herb_ls"},
+  ensure_installed = { "ts_ls", "cssls", "herb_ls", "lua_ls"},
   -- Whether servers that are set up (via lspconfig) should be automatically installed if they're not already installed.
   automatic_installation = false
 })
@@ -57,17 +57,34 @@ local lsp_flags = {
   debounce_text_changes = 250,
 }
 
--- lspconfig['lua_ls'].setup{
---   on_attach = on_attach,
---   flags = lsp_flags,
---   settings = {
---     Lua = {
---       completion = {
---         callSnippet = "Replace"
---       }
---     }
---   }
--- }
+-- Strips lua_ls's formatting capability before anything can use it. `<Leader>=`
+-- above is vim.lsp.buf.format, and lua_ls formats through EmmyLuaCodeStyle,
+-- which realigns assignments and collapses the blank-line grouping used
+-- throughout this config. Conform owns formatting for the filetypes that have
+-- a formatter; Lua deliberately has none.
+local function on_lua_ls_attach(client, bufnr)
+  client.server_capabilities.documentFormattingProvider = false
+  client.server_capabilities.documentRangeFormattingProvider = false
+
+  on_attach(client, bufnr)
+end
+
+-- Workspace libraries (the Neovim runtime, this config's own `lua/` tree, and
+-- installed plugin sources) are supplied by lazydev.nvim, which answers
+-- lua_ls's workspace-configuration request per `require` actually seen in the
+-- buffer. That replaces the old `workspace.library` list and makes
+-- `diagnostics.globals = { "vim" }` unnecessary.
+vim.lsp.config('lua_ls', {
+  on_attach = on_lua_ls_attach,
+  flags = lsp_flags,
+  capabilities = capabilities,
+  settings = {
+    Lua = {
+      telemetry = { enable = false },
+      completion = { callSnippet = "Replace" },
+    }
+  }
+})
 
 -- Tailwind v4 at-rules (@apply, @source, @plugin, @custom-variant) are unknown
 -- to vscode-css-language-server, so its unknownAtRules lint is disabled.
@@ -91,6 +108,18 @@ vim.lsp.config('ts_ls', {
   on_attach = on_attach,
   flags = lsp_flags,
   capabilities = capabilities
+})
+
+-- sourcekit-lsp ships with Xcode / the Swift toolchain (`/usr/bin/sourcekit-lsp` is the
+-- CLT shim), so mason must not try to manage it — it is deliberately absent from
+-- ensure_installed above.
+-- `filetypes` narrows lspconfig's default (which also claims c/cpp): sourcekit's last-resort
+-- root marker is `.git`, so on the default list it would attach to every C file in any repo.
+vim.lsp.config('sourcekit', {
+  on_attach = on_attach,
+  flags = lsp_flags,
+  capabilities = capabilities,
+  filetypes = { 'swift', 'objc', 'objcpp' }
 })
 
 -- lspconfig.emmet_language_server.setup({
@@ -211,6 +240,8 @@ vim.lsp.config('ts_ls', {
 vim.lsp.enable("ts_ls")
 vim.lsp.enable("cssls")
 vim.lsp.enable("herb_ls")
+vim.lsp.enable("lua_ls")
+vim.lsp.enable("sourcekit")
 
 
 ---------------------------------

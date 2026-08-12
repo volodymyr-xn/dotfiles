@@ -34,6 +34,3 @@ vim.keymap.set('i', '<C-b>', '<C-Right>', { noremap = true, desc = "Move forward
 
 -- Delete to first non-blank char (where I lands) and enter insert mode
 vim.keymap.set('n', 'K', 'c^', { noremap = true, desc = "Change to start of line" })
-
--- Run the :R command
-vim.keymap.set('n', '<Leader>r', ':R<CR>', { noremap = true, silent = true, desc = "Run :R command" })

@@ -3,7 +3,6 @@
 -- tied to a lazy.nvim plugin spec (local utilities, custom keymaps).
 
 require("plugin_settings/icons")
-require('plugin_settings/ack')
 require('plugin_settings/ctags')
 require('plugin_settings/ts_autotag')
 require('plugin_settings/vim_illuminate')

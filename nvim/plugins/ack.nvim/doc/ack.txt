@@ -1,0 +1,259 @@
+*ack.txt*   Run ack (or ag, rg, ...) from Neovim, with an enhanced results list
+
+                              ack.nvim manual~
+
+==============================================================================
+CONTENTS                                                        *ack.nvim*
+
+    1. Introduction ......................... |ack-introduction|
+    2. Requirements ......................... |ack-requirements|
+    3. Installation ......................... |ack-installation|
+    4. Commands ............................. |ack-commands|
+    5. Configuration ........................ |ack-configuration|
+    6. Result window mappings ............... |ack-mappings|
+    7. Gotchas .............................. |ack-gotchas|
+    8. Credits .............................. |ack-credits|
+
+==============================================================================
+1. INTRODUCTION                                         *ack-introduction*
+
+ack.nvim runs a command-line search tool and lists the results in the
+quickfix or location list window, which is augmented with mappings for
+opening the matches in splits and tabs.
+
+Under the hood it is a thin wrapper around 'grepprg', 'grepformat' and
+|:grep|, so anything you already know about the quickfix list applies.
+
+This is a Lua rewrite of ack.vim (see |ack-credits|). It keeps the same
+command names and behaviour, but is configured through a Lua `setup()` call
+instead of global variables, loads only when a command is first used, and
+can collapse duplicate per-match results.
+
+==============================================================================
+2. REQUIREMENTS                                         *ack-requirements*
+
+Neovim 0.7 or later (the plugin uses |nvim_create_user_command()|) and one
+of the following search programs on your $PATH:
+
+    ripgrep     https://github.com/BurntSushi/ripgrep
+    ag          https://github.com/ggreer/the_silver_searcher
+    ack         https://beyondgrep.com/install/
+
+If |ack-search_command| is not set, the plugin picks the first of `rg`, `ag`,
+`ack-grep` or `ack` that it finds, running the first two with `--vimgrep`.
+
+Optional: vim-dispatch (https://github.com/tpope/vim-dispatch) to run
+searches in the background, see |ack-use_dispatch|.
+
+==============================================================================
+3. INSTALLATION                                         *ack-installation*
+
+With lazy.nvim: >lua
+
+    {
+      "volodymyr-xn/ack.nvim",
+      cmd = { "Ack", "AckAdd", "AckFromSearch", "LAck", "LAckAdd",
+              "AckFile", "AckHelp", "LAckHelp", "AckWindow", "LAckWindow" },
+      opts = {},
+    }
+<
+Calling `setup()` is optional; the commands work with the defaults without
+it. Pass a table to override any of the options in |ack-configuration|.
+
+==============================================================================
+4. COMMANDS                                                 *ack-commands*
+
+All commands take `[options] {pattern} [{directories}]`, where the options
+are passed straight to the search program. All accept a bang; with a bang
+the cursor does NOT jump to the first result, matching |:grep!|.
+
+                                                                    *:Ack*
+:Ack[!] [options] {pattern} [{directories}]
+        Search recursively for {pattern} and put the matches in the
+        quickfix list. With no {pattern}, the word under the cursor is
+        used (see |ack-use_cword_for_empty_search|).
+
+                                                                 *:AckAdd*
+:AckAdd[!] [options] {pattern} [{directories}]
+        Same as |:Ack| but appends to the existing quickfix list.
+
+                                                                   *:LAck*
+:LAck[!] [options] {pattern} [{directories}]
+        Same as |:Ack| but uses the location list of the current window.
+
+                                                                *:LAckAdd*
+:LAckAdd[!] [options] {pattern} [{directories}]
+        Same as |:AckAdd| for the location list.
+
+                                                                *:AckFile*
+:AckFile[!] [options] {pattern} [{directories}]
+        List file names matching {pattern} instead of lines, by passing
+        `-g` to the search program.
+
+                                                          *:AckFromSearch*
+:AckFromSearch[!] [{directories}]
+        Search for the contents of the last search register (|quote_/|),
+        with Vim's `\<` and `\>` word boundaries rewritten as `\b`.
+
+                                                                *:AckHelp*
+:AckHelp[!] [options] {pattern}
+        Search the help files of every plugin on your 'runtimepath'.
+
+                                                               *:LAckHelp*
+:LAckHelp[!] [options] {pattern}
+        Same as |:AckHelp| for the location list.
+
+                                                              *:AckWindow*
+:AckWindow[!] [options] {pattern}
+        Search only the files open in the windows of the current tab page.
+
+                                                             *:LAckWindow*
+:LAckWindow[!] [options] {pattern}
+        Same as |:AckWindow| for the location list.
+
+==============================================================================
+5. CONFIGURATION                                       *ack-configuration*
+
+Defaults, all optional: >lua
+
+    require("ack").setup({
+      search_command = nil,
+      default_options = " -s -H --nopager --nocolor --nogroup --column",
+      use_dispatch = false,
+      apply_qmappings = true,
+      apply_lmappings = true,
+      qhandler = "botright copen",
+      lhandler = "botright lopen",
+      highlight = false,
+      autoclose = false,
+      use_cword_for_empty_search = true,
+      remove_duplicates = nil,
+      mappings = { ... },  -- see |ack-mappings|
+    })
+<
+                                                             *ack-search_command*
+search_command ~
+        The shell command that performs the search: the program plus its
+        flags, with no pattern. The escaped pattern and any file arguments
+        are appended to it, and it is used as 'grepprg' for the duration
+        of the search — so `$*` is honoured and a literal `|` has to be
+        written `\\|`.
+
+        Its output must be parsable by the format `%f:%l:%c:%m,%f:%l:%m`,
+        i.e. file, line, optional column, message; disable colour and any
+        grouped or heading output. When nil, autodetected as described in
+        |ack-requirements|. Examples: >lua
+
+            search_command = "ag --vimgrep"
+            search_command = "rg --column --no-heading --with-filename --color never"
+<
+                                                    *ack-default_options*
+default_options ~
+        Flags appended to a bare `ack` / `ack-grep` binary when it is
+        autodetected. Unused when |ack-search_command| is set.
+
+                                                       *ack-use_dispatch*
+use_dispatch ~
+        Run searches in the background with vim-dispatch's `:Make`. Falls
+        back to false with a warning if `:Dispatch` does not exist.
+        Dispatch has no location list support, so |:LAck| and friends fall
+        back to the quickfix list while this is on.
+
+                          *ack-apply_qmappings* *ack-apply_lmappings*
+apply_qmappings ~
+apply_lmappings ~
+        Whether to apply the |ack-mappings| in the quickfix window and the
+        location list window respectively.
+
+                                       *ack-qhandler* *ack-lhandler*
+qhandler ~
+lhandler ~
+        The command used to open the results, e.g. `"botright copen"`,
+        `"topleft lopen 20"`.
+
+                                                          *ack-highlight*
+highlight ~
+        Set the search register from the pattern after searching so the
+        matches are highlighted in the opened buffers.
+
+                                                          *ack-autoclose*
+autoclose ~
+        Close the results window after jumping to an entry.
+
+                                         *ack-use_cword_for_empty_search*
+use_cword_for_empty_search ~
+        Search for the word under the cursor when a command is run with no
+        pattern. When false, an empty invocation reports "No regular
+        expression found." instead.
+
+                                                  *ack-remove_duplicates*
+remove_duplicates ~
+        Keep only the first entry per file and line number. Tools invoked
+        with `--vimgrep` report every match on a line separately, which
+        shows up as duplicate quickfix entries. When nil (the default),
+        this is enabled automatically if |ack-search_command| contains
+        `--vimgrep`. Set true or false to decide yourself.
+
+                                                          *ack-ackpreview*
+g:ackpreview ~
+        When set, `j` and `k` in the results window jump to the entry under
+        the cursor while keeping focus on the list, and `<Down>` / `<Up>`
+        keep their plain movement behaviour. >lua
+
+            vim.g.ackpreview = true
+<
+==============================================================================
+6. RESULT WINDOW MAPPINGS                                   *ack-mappings*
+
+Applied buffer-locally in the quickfix / location list window:
+
+    o       open (same as <CR>), keeping focus on the results
+    O       open and close the results window
+    go      preview the file, keeping focus on the results
+    t       open in a new tab
+    T       open in a new tab without moving to it
+    h       open in a horizontal split
+    H       open in a horizontal split, keeping focus on the results
+    v       open in a vertical split
+    gv      open in a vertical split, keeping focus on the results
+    q       close the results window
+
+Override individual keys through the `mappings` table; the value is the
+sequence of keys the mapping expands to, and the table is merged over the
+defaults: >lua
+
+    require("ack").setup({
+      mappings = {
+        v = "<C-W><CR><C-W>L",
+        gv = "<Nop>",
+      },
+    })
+<
+`q` is always mapped to closing the results window and cannot be
+overridden. With |ack-autoclose| on, every mapping gets the close command
+appended and `<CR>` is mapped as well.
+
+==============================================================================
+7. GOTCHAS                                                   *ack-gotchas*
+
+Patterns containing whitespace must be quoted: `:Ack 'foo bar'`.
+
+Some characters are special to the command line and must be escaped, for
+instance `#`: `:Ack '\#define foo'`. The plugin already escapes `|`, `#`
+and `%` in the arguments it passes on.
+
+Since the search runs through |:grep|, 'grepprg' and 'grepformat' are
+temporarily replaced during the search and restored afterwards; your own
+values are untouched.
+
+==============================================================================
+8. CREDITS                                                   *ack-credits*
+
+A Lua rewrite of ack.vim (https://github.com/mileszs/ack.vim), which in
+turn derives from Antoine Imbert's "ack and Vim Integration" blog post and
+was packaged and maintained by Miles Sterrett and many contributors.
+
+Distributed under the same license terms as Vim itself; see the LICENSE
+file in the repository.
+
+vim:tw=78:ts=8:noet:ft=help:norl:

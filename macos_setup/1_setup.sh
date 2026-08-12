@@ -11,10 +11,13 @@ if ! command -v brew >/dev/null 2>&1; then
 fi
 
 echo "▶ Installing packages from Brewfile"
-brew bundle --file "$DOTFILES_DIR/macos/Brewfile"
+brew bundle --file "$DOTFILES_DIR/macos_setup/Brewfile"
 
 echo "▶ Applying macOS defaults"
-bash "$DOTFILES_DIR/macos/defaults.sh"
+bash "$DOTFILES_DIR/macos_setup/defaults.sh"
 
 echo "▶ Installing sudoers drop-ins"
-bash "$DOTFILES_DIR/macos/sudoers.sh"
+bash "$DOTFILES_DIR/macos_setup/sudoers.sh"
+
+echo "▶ Setting up Docker toolchain"
+bash "$DOTFILES_DIR/macos_setup/docker.sh"

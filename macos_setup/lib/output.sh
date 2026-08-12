@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-# Shared terminal output helpers for the macos/ setup scripts.
-# Source it, do not execute: `source "$DOTFILES_DIR/macos/lib/output.sh"`
+# Shared terminal output helpers for the macos_setup/ scripts.
+# Source it, do not execute:
+# `source "$DOTFILES_DIR/macos_setup/lib/output.sh"`
 
 # Color helpers — only emit ANSI escapes when stdout is a TTY.
 if [[ -t 1 ]]; then

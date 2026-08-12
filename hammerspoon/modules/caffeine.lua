@@ -1,7 +1,8 @@
--- Keep-awake toggle: holds a "displayIdle" power assertion so the screen
--- (and therefore the system) never idle-sleeps, and suppresses lid-close
--- sleep via `pmset disablesleep`. Equivalent to KeepingYouAwake /
--- `caffeinate -d`, plus the clamshell part neither of those can do.
+-- Keep-awake toggle: holds a "systemIdle" power assertion so the machine
+-- never idle-sleeps, and suppresses lid-close sleep via
+-- `pmset disablesleep`. Equivalent to `caffeinate -i`, plus the clamshell
+-- part it cannot do. The display still sleeps and locks on its normal
+-- schedule — only the system is kept running.
 --
 -- Deliberately not persisted: every Hammerspoon reload/restart starts OFF,
 -- so a forgotten assertion can never keep the Mac awake indefinitely.
@@ -12,10 +13,10 @@
 
 local canvasBanner = require("canvas_banner")
 
--- Assertion type held while enabled. "displayIdle" also blocks system idle
--- sleep; "systemIdle" would let the display go dark, and "system" only
--- works on AC power.
-local SLEEP_TYPE = "displayIdle"
+-- Assertion type held while enabled. "systemIdle" lets the display go dark
+-- and lock while the system stays up; "displayIdle" would also block display
+-- sleep and therefore the screen lock, and "system" only works on AC power.
+local SLEEP_TYPE = "systemIdle"
 
 -- true applies the assertion on battery as well, not just on AC power.
 local APPLY_ON_BATTERY = true
@@ -87,9 +88,9 @@ local function toggle()
   local subtitle
 
   if not lidCovered then
-    subtitle = "Idle sleep only — sudo rule missing"
+    subtitle = "System sleep only — sudo rule missing"
   elseif keepAwake then
-    subtitle = "Idle + lid-close sleep blocked"
+    subtitle = "System + lid-close sleep blocked"
   else
     subtitle = "Normal sleep schedule restored"
   end

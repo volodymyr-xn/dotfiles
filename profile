@@ -129,6 +129,18 @@ export GOPATH="$HOME/.programing_languages/go"
   # Add dotfiles bin directory to PATH
   export PATH="$HOME/dotfiles/bin:$PATH"
 
+  # Add this OS's compiled native modules to PATH. They are built by
+  # setup/build_native_modules.sh and are not portable between platforms,
+  # so each OS gets its own directory.
+  case "$(uname -s)" in
+    Darwin)
+      export PATH="$HOME/dotfiles/bin_native/macos:$PATH"
+      ;;
+    Linux)
+      export PATH="$HOME/dotfiles/bin_native/linux:$PATH"
+      ;;
+  esac
+
   # Add vips to PATH
   export PATH="$PATH:$VIPSHOME/bin"
 
@@ -242,7 +254,13 @@ export BAT_THEME="Catppuccin Mocha"
 # Always use number of processing cores with make
 # shopt -s checkwinsize
 
-export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+# Rootless Docker socket. Linux only: XDG_RUNTIME_DIR is a systemd
+# variable and is unset on macOS, where it would collapse the value to
+# unix:///docker.sock. macOS gets its endpoint from the docker context
+# that Colima/Docker Desktop configure.
+if [[ "$(uname -s)" == "Linux" ]]; then
+  export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+fi
 
 # export ASDF_FORCE_PREPEND=yes
 

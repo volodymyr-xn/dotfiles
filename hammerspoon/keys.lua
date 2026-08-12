@@ -48,4 +48,4 @@ end)
 hs.hotkey.bind({"cmd"}, "m", caffeine.toggle)
 
 -- Cmd+Shift+M → toggle mouse side-button mappings (off = pass through to games)
-hs.hotkey.bind({"cmd", "shift"}, "m", mouseSideButtons.toggle)
+hs.hotkey.bind({"cmd", "shift"}, "n", mouseSideButtons.toggle)

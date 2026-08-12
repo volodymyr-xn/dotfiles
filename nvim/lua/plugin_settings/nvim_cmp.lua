@@ -119,23 +119,23 @@ end
 -- local snippy = require('snippy')
 local luasnip = require('luasnip')
 
--- local fuzzy_buffer_source_config =
---     {
---       name = 'fuzzy_buffer',
---         keyword_length = 8,
---         max_item_count = 3,
---       option = {
---         keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%([^-.,;\s]\w*\)*\)]],
---         -- this option works only for nvim-buffer-fzf
---         max_matches = 7,
---         -- get_bufnrs = getVisibleBuffers,
---         -- -- All buffers
---         fuzzy_extra_arg = 2,
---         get_bufnrs = function()
---           return vim.api.nvim_list_bufs()
---         end
---       }
---     }
+local fuzzy_buffer_source_config =
+    {
+      name = 'fuzzy_buffer',
+        keyword_length = 8,
+        max_item_count = 3,
+      option = {
+        keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%([^-.,;\s]\w*\)*\)]],
+        -- this option works only for nvim-buffer-fzf
+        max_matches = 7,
+        -- get_bufnrs = getVisibleBuffers,
+        -- -- All buffers
+        fuzzy_extra_arg = 2,
+        get_bufnrs = function()
+          return vim.api.nvim_list_bufs()
+        end
+      }
+    }
 
 local lspkind = require('lspkind')
 
@@ -302,6 +302,20 @@ cmp.setup({
     -- },
     {
       name = 'nvim_lsp',
+    },
+    -- Signature of the call the cursor is inside. Kept unranked next to
+    -- nvim_lsp so it appears alongside ordinary completions rather than
+    -- displacing them.
+    {
+      name = 'nvim_lsp_signature_help',
+    },
+    -- lazydev resolves `require("...")` paths for Lua buffers. group_index 0
+    -- puts it ahead of every other group so its module paths win over the
+    -- partial ones nvim_lsp offers for the same prefix; it yields entirely
+    -- outside Lua files.
+    {
+      name = 'lazydev',
+      group_index = 0,
     }
   }),
 
@@ -328,6 +342,8 @@ cmp.setup({
       menu = ({
         buffer = "[Buffer]",
         nvim_lsp = "[LSP]",
+        nvim_lsp_signature_help = "[Signature]",
+        lazydev = "[LazyDev]",
         luasnip = "[LuaSnip]",
         nvim_lua = "[Lua]",
         latex_symbols = "[Latex]",
@@ -339,28 +355,28 @@ cmp.setup({
 local cmp_autopairs = require("nvim-autopairs.completion.cmp")
 cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done({ map_char = { tex = "" } }))
 
--- local html_config = cmp.config.sources({
---     {
---       name = 'nvim_lsp',
---     },
---     {
---       name = 'buffer',
---       option = {
---         max_item_count = 7,
---         keyword_length = 1,
---         get_bufnrs = getVisibleBuffers,
---       }
---     },
---     -- -- fuzzy_buffer_source_config,
---     -- {
---     --   name = 'rg',
---     --   keyword_length = 2
---     -- },
---   })
+local html_config = cmp.config.sources({
+    -- {
+    --   name = 'nvim_lsp',
+    -- },
+    {
+      name = 'buffer',
+      option = {
+        max_item_count = 7,
+        keyword_length = 1,
+        get_bufnrs = getVisibleBuffers,
+      }
+    },
+    fuzzy_buffer_source_config,
+    -- {
+    --   name = 'rg',
+    --   keyword_length = 2
+    -- },
+  })
 
--- cmp.setup.filetype({'eruby'}, {
---   sources = html_config
--- })
+cmp.setup.filetype({'eruby'}, {
+  sources = html_config
+})
 --
 -- cmp.setup.filetype({'haml'}, {
 --   sources = html_config
@@ -377,13 +393,13 @@ cmp.setup.filetype('scss', {
       name = 'nvim_lsp',
       max_item_count = 5,
     },
-    -- {
-    --   name = 'buffer',
-    --   max_item_count = 5,
-    --   option = {
-    --     get_bufnrs = getVisibleBuffers
-    --   }
-    -- },
+    {
+      name = 'buffer',
+      max_item_count = 5,
+      option = {
+        get_bufnrs = getVisibleBuffers
+      }
+    },
   }),
 
   sorting = {

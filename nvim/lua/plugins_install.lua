@@ -21,6 +21,16 @@ vim.opt.rtp:prepend(lazypath)
 -- got dropped on the floor, letting `vim.loader` keep serving stale
 -- bytecode (the root cause of the recurring git_diff_popup bug).
 local lazy_opts = {
+  -- Own plugins live in this repo under nvim/plugins/ and are loaded straight
+  -- from there: a spec marked `dev = true` resolves to <path>/<repo name>.
+  -- `plugins/` (not `plugin/`) so Neovim does not auto-source them outside of
+  -- lazy. `fallback = false` keeps lazy from silently cloning from GitHub if
+  -- the directory is missing — a loud error beats editing a stale clone.
+  dev = {
+    path = vim.fn.stdpath("config") .. "/plugins",
+    patterns = { "volodymyr-xn" },
+    fallback = false,
+  },
   performance = {
     -- Disable lazy's bytecode cache (which is `vim.loader` under the hood).
     -- See the long-form rationale in init.lua. Without this, lazy re-enables
@@ -240,6 +250,14 @@ require("lazy").setup({
     config = function() require("plugin_settings.lsp_config") end,
   },
 
+  -- Feeds lua_ls the Neovim runtime, this config's own `lua/` tree and every
+  -- installed plugin's source as workspace libraries, resolved lazily per
+  -- `require` seen in the buffer instead of indexing all of `lazy/` up front.
+  -- Successor to neodev.nvim (archived). `ft = "lua"` is the upstream-
+  -- recommended trigger: lua_ls asks for its workspace settings after attach,
+  -- and lazydev answers that request, so it does not need to load earlier.
+  { "folke/lazydev.nvim", ft = "lua", opts = {} },
+
   -- A neovim plugin that preview code with LSP code actions applied.
   -- actions-preview and cmp sources/icons are loaded as deps of nvim-cmp below.
   -- {
@@ -259,6 +277,9 @@ require("lazy").setup({
     dependencies = {
       "aznhe21/actions-preview.nvim",
       "hrsh7th/cmp-nvim-lsp",
+      -- Shows the signature of the call the cursor sits inside, with the
+      -- active parameter highlighted, as an entry in the completion menu.
+      "hrsh7th/cmp-nvim-lsp-signature-help",
       "hrsh7th/cmp-buffer",
       "hrsh7th/cmp-path",
       "hrsh7th/cmp-cmdline",
@@ -824,8 +845,21 @@ require("lazy").setup({
   -- Search / quickfix / lint / format
   -- ============================================================
 
-  -- Global search by ack cli util
-  -- "mileszs/ack.vim",
+  -- Global search by ack cli util. Own plugin (Lua rewrite of ack.vim),
+  -- living in nvim/plugins/ack.nvim — see the `dev` key in lazy_opts.
+  -- `!` is the only ack keymap registered here; the other ack
+  -- keymaps this config used to set live in keymappings/search.lua, which
+  -- loads later and owns those keys.
+  {
+    "volodymyr-xn/ack.nvim",
+    dev = true,
+    cmd = { "Ack", "AckAdd", "AckFromSearch", "LAck", "LAckAdd",
+            "AckFile", "AckHelp", "LAckHelp", "AckWindow", "LAckWindow" },
+    keys = {
+      { "!", ":Ack<SPACE>", desc = "Ack search" },
+    },
+    config = function() require("plugin_settings.ack") end,
+  },
 
   -- Delete entries from quickfix
   -- "stefandtw/quickfix-reflector.vim",

@@ -1,0 +1,4 @@
+# Track the generated help tags: lazy only builds them for plugins it
+# installs, never for a `dev` one, so :help ack.nvim would break without
+# this. The global excludesfile ignores `tags` (ctags), hence the negation.
+!doc/tags

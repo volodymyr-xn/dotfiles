@@ -3,6 +3,28 @@
 --   filetypes = { "html" , "eruby" },
 -- })
 
+local parser_configs = require("nvim-treesitter.parsers").get_parser_configs()
+
+-- Upstream ships swift with `requires_generate_from_grammar = true`, which needs the
+-- tree-sitter CLI — `brew install tree-sitter` (install/treesitter.sh) only provides the C
+-- library; the generator is the separate `tree-sitter-cli` formula. The grammar author
+-- maintains a `with-generated-files` branch with src/parser.c + src/scanner.c committed,
+-- so pointing at it turns the swift install into a plain compile with no extra tooling.
+--
+-- Pinned rather than tracking the branch head: nvim-treesitter is archived, so its
+-- queries/swift/*.scm are frozen against the Mar 2025 grammar in lockfile.json. The
+-- current branch head (Jun 2026) renamed the `#available` / `#unavailable` tokens to
+-- `available` / `unavailable`, which makes highlights.scm fail to compile and leaves swift
+-- buffers unhighlighted. 1905b85 is the last generated snapshot before that rename.
+-- If the pin ever needs to move, `brew install tree-sitter-cli` and drop this override to
+-- go back to generating from the locked revision.
+parser_configs.swift.install_info = {
+  url = "https://github.com/alex-pinkus/tree-sitter-swift",
+  branch = "with-generated-files",
+  revision = "1905b8518e261be56d3274a98a51720e4ff63f81",
+  files = { "src/parser.c", "src/scanner.c" },
+}
+
 -- NOTE: nvim-treesitter/nvim-treesitter was archived Apr 3 2026 (maintainer burnout after the
 -- 0.12 rewrite). We stay on it because the community fork (neovim-treesitter/nvim-treesitter)
 -- is still an incompatible early rewrite. The 0.12 breaking change (iter_matches now returns
@@ -23,6 +45,7 @@ require("nvim-treesitter.configs").setup({
     "python",
     "elixir",
     "sql",
+    "swift",
     "vim",
     "yaml",
     "embedded_template",

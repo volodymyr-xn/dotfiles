@@ -8,6 +8,8 @@
 --   * `<Tab>` / `<S-Tab>` walk hunks across ALL changed files
 --   * `(` / `)` (keymappings/git.lua) walk hunks within the current buffer
 --   * `<C-S-M>` toggles inline deleted-line virtual lines (off by default)
+--   * `dd` / `3dd` / visual `d` in the list hide entries for this session only;
+--     toggling OneDiff off and on brings the full diff back
 --
 -- Deleted files are listed (with a red `-` tag) but are not navigation
 -- targets: they contribute no hunks, so `<Tab>` skips them, and `<CR>` over
@@ -31,7 +33,8 @@ local qf_ns = vim.api.nvim_create_namespace("onediff_qf")
 -- autocmd; `saved` snapshots gitsigns settings + `<Tab>` maps restored on
 -- close; `hunks`/`file_index` drive cross-file hunk navigation; `qf_id` pins
 -- our quickfix list so refresh and cursor sync never touch a list the user
--- switched to mid-session.
+-- switched to mid-session; `dismissed` is the set of paths hidden with `dd`,
+-- dropped on close so the next toggle starts from the full diff again.
 local session = {
   active = false,
   augroup = nil,
@@ -39,6 +42,7 @@ local session = {
   hunks = {},
   file_index = {},
   qf_id = nil,
+  dismissed = {},
 }
 
 -- Standalone changed-line highlight, toggled by `sf` independently of a review
@@ -170,6 +174,28 @@ local function diff_hunks(root)
   return map
 end
 
+-- Status records minus the paths dismissed with `dd`. Filtering here (rather
+-- than only in the rendered list) keeps items, hunks, and file_index built from
+-- one sequence, so a dismissed file also stops being a `<Tab>` target and the
+-- record index stays usable as the quickfix entry index.
+local function visible_records(root)
+  local records = status_records(root)
+
+  if vim.tbl_isempty(session.dismissed) then
+    return records
+  end
+
+  local kept = {}
+
+  for _, record in ipairs(records) do
+    if not session.dismissed[normalize(root .. "/" .. record.path)] then
+      kept[#kept + 1] = record
+    end
+  end
+
+  return kept
+end
+
 -- Read a single line from a file on disk, or "" if unavailable.
 local function read_line(path, lnum)
   local ok, lines = pcall(vim.fn.readfile, path, "", lnum)
@@ -191,7 +217,7 @@ local function collect()
     return {}, {}, {}
   end
 
-  local records = status_records(root)
+  local records = visible_records(root)
   local hunks_by_path = diff_hunks(root)
 
   local items = {}
@@ -325,8 +351,68 @@ local function open_qf_entry()
   vim.cmd(".cc")
 end
 
+-- Park the quickfix window cursor on `line`, clamped to the current list size.
+-- Used after a dismissal so the cursor lands on the entry that moved up into
+-- the removed one's place instead of jumping to the top.
+local function place_qf_cursor(line)
+  local qf_win = vim.fn.getqflist({ winid = 0 }).winid
+  local size = vim.fn.getqflist({ id = session.qf_id, size = 1 }).size
+
+  if qf_win == 0 or size == 0 then
+    return
+  end
+
+  pcall(vim.api.nvim_win_set_cursor, qf_win, { math.min(line, size), 0 })
+end
+
+-- Hide the entries on the inclusive line range for the rest of the session:
+-- their paths join session.dismissed, which visible_records filters out, so the
+-- files leave the list and stop contributing hunks. Nothing on disk or in git
+-- changes -- the next `M` toggle rebuilds the full diff.
+local function dismiss_range(first, last)
+  if not session.active or not onediff_list_active() then
+    return
+  end
+
+  local items = vim.fn.getqflist({ items = 1 }).items
+
+  for line = first, math.min(last, #items) do
+    local bufnr = items[line].bufnr
+
+    if bufnr > 0 then
+      local path = vim.api.nvim_buf_get_name(bufnr)
+
+      if path ~= "" then
+        session.dismissed[normalize(path)] = true
+      end
+    end
+  end
+
+  M.refresh()
+  place_qf_cursor(first)
+end
+
+-- `dd` (and `3dd`) in the quickfix: dismiss from the cursor down.
+local function dismiss_under_cursor()
+  local first = vim.fn.line(".")
+
+  dismiss_range(first, first + vim.v.count1 - 1)
+end
+
+-- `d` over a visual selection: dismiss every selected entry. Visual mode is
+-- still active inside the callback, so the range comes from `v`/`.` and the
+-- selection is cleared before the list is rebuilt under it.
+local function dismiss_selection()
+  local anchor, cursor = vim.fn.line("v"), vim.fn.line(".")
+
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "x", false)
+
+  dismiss_range(math.min(anchor, cursor), math.max(anchor, cursor))
+end
+
 -- Route `<CR>` and double-click in the quickfix buffer through the guarded
--- open. Buffer-local, so the native behavior is untouched in other lists.
+-- open, and bind the session-local `dd` / visual `d` dismissal. Buffer-local,
+-- so the native behavior is untouched in other lists.
 local function guard_qf_keys()
   local qf_buf = qf_buffer()
 
@@ -337,6 +423,11 @@ local function guard_qf_keys()
   local opts = { buffer = qf_buf, desc = "OneDiff v2: open entry (deleted files inert)" }
   vim.keymap.set("n", "<CR>", open_qf_entry, opts)
   vim.keymap.set("n", "<2-LeftMouse>", open_qf_entry, opts)
+
+  vim.keymap.set("n", "dd", dismiss_under_cursor,
+    { buffer = qf_buf, desc = "OneDiff v2: dismiss entry for this session" })
+  vim.keymap.set("x", "d", dismiss_selection,
+    { buffer = qf_buf, desc = "OneDiff v2: dismiss selected entries for this session" })
 end
 
 -- Drop the guarded maps on session close. Neovim reuses the quickfix buffer
@@ -350,6 +441,8 @@ local function unguard_qf_keys()
 
   pcall(vim.keymap.del, "n", "<CR>", { buffer = qf_buf })
   pcall(vim.keymap.del, "n", "<2-LeftMouse>", { buffer = qf_buf })
+  pcall(vim.keymap.del, "n", "dd", { buffer = qf_buf })
+  pcall(vim.keymap.del, "x", "d", { buffer = qf_buf })
 end
 
 -- Re-apply everything that depends on the rendered quickfix buffer.
@@ -690,6 +783,7 @@ function M.open()
   local autonav = not is_real_file(current_buf)
 
   session.active = true
+  session.dismissed = {}
 
   -- Adopt an in-progress standalone highlight (`sf`): reuse its pre-highlight
   -- snapshot so close() restores the true original state rather than the
@@ -703,6 +797,13 @@ function M.open()
   end
 
   install_session_keymaps()
+
+  -- Keep vim-qfedit off our list: it makes the quickfix buffer modifiable and
+  -- re-parses it on TextChanged against the default `file|lnum| text` render,
+  -- which our leading status symbol breaks -- an accidental edit would then
+  -- match no entry and wipe the list. Our own `dd` covers the same need.
+  session.saved.qfedit_enable = vim.g.qfedit_enable
+  vim.g.qfedit_enable = 0
 
   -- Hide deleted-line virtual lines by default (toggle on with `<C-S-M>`),
   -- then enable the full-line add/change highlight, which re-renders open
@@ -722,14 +823,11 @@ function M.open()
       jump_to(session.hunks[1])
     end
   elseif current_fidx then
-    -- The current buffer is one of the changed files: keep the cursor here (the
-    -- highlight is already applied) rather than leaving it in the list copen
-    -- focused, and point the list at the matching entry.
-    vim.cmd("wincmd p")
-
-    if vim.bo.buftype ~= "quickfix" then
-      sync_qf_cursor(current_fidx)
-    end
+    -- The current buffer is one of the changed files: its highlight is already
+    -- applied, so keep the focus in the list copen just opened and park the
+    -- cursor on the matching entry -- the review starts from the file on screen
+    -- with the list ready for `dd` / `<CR>`.
+    sync_qf_cursor(current_fidx)
   end
 
   setup_autocmds()
@@ -757,6 +855,7 @@ function M.close()
   remove_session_keymaps()
   unguard_qf_keys()
   restore_gitsigns(session.saved)
+  vim.g.qfedit_enable = session.saved.qfedit_enable
 
   if session.augroup then
     vim.api.nvim_del_augroup_by_id(session.augroup)
@@ -767,6 +866,7 @@ function M.close()
   session.hunks = {}
   session.file_index = {}
   session.qf_id = nil
+  session.dismissed = {}
 end
 
 -- Toggle the review session on/off (bound to `M`).

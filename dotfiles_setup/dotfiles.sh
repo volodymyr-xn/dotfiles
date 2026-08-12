@@ -60,10 +60,10 @@ files_to_symlink="\
   config.reek stylelint"
 
 dirs_to_symlink_to_xdg_config="\
-  nvim vim tmux"
+  nvim vim tmux ghostty"
 
 config_dirs_to_symlink_to_xdg_config="\
- fish bundle nvim vim tmux rubocop pry htop ghostty mise kitty"
+ fish bundle nvim vim tmux rubocop pry htop mise kitty"
 
 # dirs_to_symlink_to_xdg_config_linux_only="\
 #   pipewire wireplumber kitty rofi"
@@ -118,6 +118,11 @@ else
 fi
 
 symlink_to "$DOTFILES_DIR/hammerspoon" "$HOME/.hammerspoon"
+
+# Docker writes its own state (contexts, buildx, cli-plugins, token seed) into
+# $DOCKER_CONFIG, so only config.json is symlinked and the directory stays real.
+mkdir -p "$HOME/.config/docker"
+symlink_to "$DOTFILES_DIR/docker/config.json" "$HOME/.config/docker/config.json"
 
 ln -nsf "../nvim/snippets" "$DOTFILES_DIR/vim/snippets"
 ln -nsf "$DOTFILES_DIR/config/rubocop/config.yml" "$DOTFILES_DIR/.rubocop.yml"

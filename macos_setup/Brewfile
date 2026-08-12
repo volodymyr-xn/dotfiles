@@ -104,6 +104,16 @@ brew "postgresql@14"
 # In-memory data structure store
 brew "redis"
 
+# Containers
+# Container runtimes on macOS (provides the Docker daemon)
+brew "colima"
+# Pack, ship and run any application as a lightweight container
+brew "docker"
+# Docker CLI plugin for extended build capabilities with BuildKit
+brew "docker-buildx"
+# Isolated development environments using Docker
+brew "docker-compose"
+
 # Root CA certificates bundle
 brew "ca-certificates"
 # OpenSSL cryptography library

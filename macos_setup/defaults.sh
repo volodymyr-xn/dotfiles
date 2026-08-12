@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-source "$HOME/dotfiles/macos/lib/output.sh"
+source "$HOME/dotfiles/macos_setup/lib/output.sh"
 
 section "Finder"
 

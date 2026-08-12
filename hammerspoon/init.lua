@@ -25,10 +25,12 @@ for _, dir in ipairs(searchPaths) do
 end
 
 -- Required here rather than left to config/keys.lua because loading them has
--- side effects beyond exposing a toggle: caffeine installs its menubar item
--- and mouse_side_buttons starts its eventtap at require time.
+-- side effects beyond exposing a toggle: caffeine installs its menubar item,
+-- mouse_side_buttons starts its eventtap, and temperature installs its own
+-- menubar item and refresh timer at require time.
 require("caffeine")
 require("mouse_side_buttons")
+require("temperature")
 
 -- All global hotkey bindings.
 require("keys")

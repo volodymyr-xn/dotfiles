@@ -14,3 +14,13 @@ tmux/plugins/
 *.log
 .DS_Store
 .DS_Store?
+
+## compiled native modules, rebuilt by setup/build_native_modules.sh
+## (the platform dirs stay tracked, their binaries do not)
+bin_native/*/*
+!bin_native/*/.gitkeep
+
+## docker: only config.json is a dotfile, everything else Docker writes
+## (contexts, buildx state, cli-plugin links, token seed) is machine state
+docker/*
+!docker/config.json
