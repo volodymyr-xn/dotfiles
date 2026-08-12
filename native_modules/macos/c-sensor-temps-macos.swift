@@ -451,6 +451,26 @@ struct PowerSensor {
     }
 }
 
+// Swap in use, straight out of the same sysctl `sysctl -n vm.swapusage`
+// prints. Read here rather than in the caller because Hammerspoon's
+// hs.execute spawns a shell for it — 4ms of blocked main thread every
+// refresh, against nothing measurable on this side of an already-running
+// process.
+struct SwapUsage {
+    private static let name = "vm.swapusage"
+
+    static func usedBytes() -> UInt64? {
+        var usage = xsw_usage()
+        var size = MemoryLayout<xsw_usage>.stride
+
+        guard sysctlbyname(name, &usage, &size, nil, 0) == 0 else {
+            return nil
+        }
+
+        return usage.xsu_used
+    }
+}
+
 // The readings the command reports, and their JSON rendering.
 struct SensorReport {
     private static let reportedDecimals = 1
@@ -461,6 +481,7 @@ struct SensorReport {
     let gpuAverageCelsius: Float?
     let gpuUsagePercent: Int?
     let watts: Float?
+    let swapUsedBytes: UInt64?
 
     // null rather than a stand-in number, so a caller can tell "not
     // readable" from "cold" and show a placeholder instead of a lie.
@@ -480,10 +501,19 @@ struct SensorReport {
         return "\(percent)"
     }
 
+    private func field(_ bytes: UInt64?) -> String {
+        guard let bytes else {
+            return "null"
+        }
+
+        return "\(bytes)"
+    }
+
     var json: String {
         "{\"cpu\":\(field(cpuCelsius)),\"cpu_avg\":\(field(cpuAverageCelsius)),"
             + "\"gpu\":\(field(gpuCelsius)),\"gpu_avg\":\(field(gpuAverageCelsius)),"
-            + "\"gpu_usage\":\(field(gpuUsagePercent)),\"watts\":\(field(watts))}"
+            + "\"gpu_usage\":\(field(gpuUsagePercent)),\"watts\":\(field(watts)),"
+            + "\"swap_bytes\":\(field(swapUsedBytes))}"
     }
 }
 
@@ -551,7 +581,8 @@ struct SensorTempsCommand {
                                   gpuCelsius: gpu.hottest,
                                   gpuAverageCelsius: gpu.average,
                                   gpuUsagePercent: AcceleratorUsage.percent(),
-                                  watts: PowerSensor.watts(on: connection))
+                                  watts: PowerSensor.watts(on: connection),
+                                  swapUsedBytes: SwapUsage.usedBytes())
 
         print(report.json)
         exit(0)

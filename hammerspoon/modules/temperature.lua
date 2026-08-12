@@ -37,15 +37,15 @@ end
 
 local canvasBanner = require("canvas_banner")
 
--- Absolute paths because hs.task and hs.execute do not consult the login
--- shell's PATH, which is where ~/dotfiles/bin_native/macos is added.
+-- An absolute path because hs.task does not consult the login shell's PATH,
+-- which is where ~/dotfiles/bin_native/macos is added.
 local HELPER = os.getenv("HOME") .. "/dotfiles/bin_native/macos/c-sensor-temps-macos"
-local SYSCTL = "/usr/sbin/sysctl"
 
--- One read costs about 5ms, so the interval is a display choice rather than
--- a cost one. Temperature alone would sit happily at 15s, but load is spiky
--- and a stale percentage reads as a broken widget.
-local REFRESH_SECONDS = 5
+-- A refresh costs about 2ms on the main thread plus a 5ms helper process
+-- that runs off it, so the interval is a display choice rather than a cost
+-- one. Temperature alone would sit happily at 15s, but load is spiky and a
+-- stale percentage reads as a broken widget.
+local REFRESH_SECONDS = 3
 
 -- Above this the reading is drawn in orange.
 local WARN_CELSIUS = 75
@@ -99,13 +99,6 @@ local BYTES_PER_GIGABYTE = 1024 * 1024 * 1024
 -- real and the point where everything starts feeling slow.
 local WARN_SWAP_BYTES = 1 * BYTES_PER_GIGABYTE
 local CRITICAL_SWAP_BYTES = 3 * BYTES_PER_GIGABYTE
-
--- Multipliers for the unit letters `sysctl vm.swapusage` prints.
-local SWAP_UNIT_BYTES = {
-  K = 1024,
-  M = 1024 * 1024,
-  G = BYTES_PER_GIGABYTE,
-}
 
 local menu = hs.menubar.new()
 local canvas = hs.canvas.new({ x = 0, y = 0, w = 1, h = BAR_HEIGHT })
@@ -218,32 +211,64 @@ local function averageWatts()
   return powerTotal / count
 end
 
+-- Tick counters from the previous refresh, against which this one is a
+-- delta. hs.host.cpuUsage() would hand the percentages over ready-made, but
+-- it blocks Hammerspoon for 100ms while it takes its own two samples —
+-- measured at 101ms a call against 0.03ms for the raw counters. Diffing
+-- across refreshes also widens the window from 100ms to the whole interval,
+-- so a burst between two refreshes still shows up.
+local previousCpuTicks = nil
+
+-- Share of one core's ticks spent doing anything but idling, over the span
+-- between the two samples. nil when the counters did not move, which is
+-- what a wrapped or reset counter looks like.
+local function coreActivePercent(core, previous)
+  local activeTicks = (core.user - previous.user) + (core.system - previous.system)
+    + (core.nice - previous.nice)
+  local totalTicks = activeTicks + (core.idle - previous.idle)
+
+  if totalTicks <= 0 then
+    return nil
+  end
+
+  return 100 * activeTicks / totalTicks
+end
+
 -- Busiest single core and the mean across all of them, the same pairing the
 -- temperature column uses: one pegged core is what a single-threaded build
--- looks like, and the mean alone hides it.
---
--- hs.host.cpuUsage() reports deltas against its own previous invocation, so
--- both figures are averages over one refresh interval rather than
--- instantaneous samples. The per-core entries sit at numeric keys, with the
--- core count in `n`.
+-- looks like, and the mean alone hides it. Both are nil on the first
+-- refresh, which has no earlier sample to diff against.
 local function cpuUsagePercents()
-  local usage = hs.host.cpuUsage()
+  local ticks = hs.host.cpuUsageTicks()
+  local previous = previousCpuTicks
+  previousCpuTicks = ticks
 
-  if usage == nil or usage.overall == nil then
+  if ticks == nil or previous == nil or previous.n ~= ticks.n then
     return nil, nil
   end
 
   local busiest = nil
+  local total = 0
+  local counted = 0
 
-  for index = 1, usage.n do
-    local core = usage[index]
+  for index = 1, ticks.n do
+    local percent = coreActivePercent(ticks[index], previous[index])
 
-    if core ~= nil and (busiest == nil or core.active > busiest) then
-      busiest = core.active
+    if percent ~= nil then
+      total = total + percent
+      counted = counted + 1
+
+      if busiest == nil or percent > busiest then
+        busiest = percent
+      end
     end
   end
 
-  return busiest, usage.overall.active
+  if counted == 0 then
+    return nil, nil
+  end
+
+  return busiest, total / counted
 end
 
 -- Memory actually claimed: resident pages, plus what the kernel has pinned,
@@ -260,25 +285,6 @@ local function ramUsedBytes()
   local pages = stat.pagesActive + stat.pagesWiredDown + stat.pagesUsedByVMCompressor
 
   return pages * stat.pageSize
-end
-
--- Swap in use, parsed out of `sysctl vm.swapusage` ("used = 4438.62M").
--- There is no Hammerspoon API for it, and the swapfile grows on demand, so
--- the absolute figure matters more than a share of the current total.
-local function swapUsedBytes()
-  local output = hs.execute(SYSCTL .. " -n vm.swapusage")
-
-  if output == nil then
-    return nil
-  end
-
-  local amount, unit = output:match("used%s*=%s*([%d%.]+)([KMG])")
-
-  if amount == nil then
-    return nil
-  end
-
-  return tonumber(amount) * (SWAP_UNIT_BYTES[unit] or 1)
 end
 
 -- One temperature figure, tinted by how close it is to throttling.
@@ -383,7 +389,9 @@ local function render(reading)
 end
 
 -- Everything the helper does not own is read here, so the row still carries
--- live load, RAM and swap when the temperature binary never answered.
+-- live load and RAM when the sensor binary never answered. Both calls are
+-- counter reads rather than sampled measurements, which is what keeps the
+-- refresh off the millisecond scale.
 local function localReading()
   local busiestUsage, overallUsage = cpuUsagePercents()
 
@@ -391,7 +399,6 @@ local function localReading()
     cpuBusiestUsage = busiestUsage,
     cpuUsage = overallUsage,
     ramUsed = ramUsedBytes(),
-    swapUsed = swapUsedBytes(),
   }
 end
 
@@ -416,6 +423,7 @@ local function applyReading(exitCode, stdout)
   reading.cpuCelsius = sensors.cpu
   reading.cpuAverageCelsius = sensors.cpu_avg
   reading.watts = sensors.watts
+  reading.swapUsed = sensors.swap_bytes
 
   recordWatts(reading.watts)
   render(reading)
