@@ -38,7 +38,7 @@ build_sensor_temps_macos() {
   fi
 
   build_swift_module "$MODULES_DIR/macos/c-sensor-temps-macos.swift" \
-    -framework IOKit
+    -framework IOKit -framework SystemConfiguration
 }
 
 build_macos_modules() {

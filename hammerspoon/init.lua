@@ -30,6 +30,7 @@ end
 -- menubar item and refresh timer at require time.
 require("caffeine")
 require("mouse_side_buttons")
+
 require("temperature")
 
 -- All global hotkey bindings.

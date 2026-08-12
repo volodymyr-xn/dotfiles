@@ -33,6 +33,7 @@
 
 import Darwin
 import IOKit
+import SystemConfiguration
 
 struct SMCVersion {
     var major: CUnsignedChar = 0
@@ -284,6 +285,12 @@ struct SMCConnection {
     }
 }
 
+// A CFString for a literal, built the Core Foundation way because this tool
+// does not import Foundation and so has no String bridging.
+func cfString(_ text: String) -> CFString {
+    CFStringCreateWithCString(nil, text, CFStringBuiltInEncodings.UTF8.rawValue)
+}
+
 // GPU load, straight out of the accelerator's own performance counters.
 // The same numbers Activity Monitor's GPU history draws, and the only
 // route to them: there is no SMC key for utilisation.
@@ -293,10 +300,6 @@ struct AcceleratorUsage {
     private static let serviceClass = "IOAccelerator"
     private static let statisticsProperty = "PerformanceStatistics"
     private static let utilizationKey = "Device Utilization %"
-
-    private static func cfString(_ text: String) -> CFString {
-        CFStringCreateWithCString(nil, text, CFStringBuiltInEncodings.UTF8.rawValue)
-    }
 
     // Percentage of the GPU busy right now, or nil when the registry entry
     // is missing or shaped differently than expected.
@@ -471,6 +474,108 @@ struct SwapUsage {
     }
 }
 
+// Bytes in and out since boot on whichever interface the default route
+// currently uses — Wi-Fi at a desk, Ethernet once docked, and it follows the
+// switch without a restart because the interface is resolved per call.
+//
+// Counters rather than rates: a one-shot process has no earlier sample to
+// divide by, so the caller diffs two of these across its own refresh. The
+// same split the CPU tick counters use.
+struct NetworkCounters {
+    // The dynamic store key carrying the interface the IPv4 default route
+    // points at. There is no sysctl for it; the routing table would have to
+    // be parsed to answer the same question.
+    private static let globalIPv4Key = "State:/Network/Global/IPv4"
+    private static let primaryInterfaceProperty = "PrimaryInterface"
+    private static let storeName = "c-sensor-temps-macos"
+
+    // Long enough for any BSD interface name ("en0", "utun4", "bridge100").
+    private static let nameLength = 32
+
+    // Name of the interface the default route uses, or nil when nothing is
+    // routed — an offline machine, or one with only a link-local address.
+    private static func primaryInterfaceName() -> String? {
+        guard let store = SCDynamicStoreCreate(nil, cfString(storeName), nil, nil),
+              let value = SCDynamicStoreCopyValue(store, cfString(globalIPv4Key)),
+              CFGetTypeID(value) == CFDictionaryGetTypeID() else {
+            return nil
+        }
+
+        let global = unsafeBitCast(value, to: CFDictionary.self)
+        let property = cfString(primaryInterfaceProperty)
+
+        // Unmanaged rather than unsafeBitCast: the key has to stay alive
+        // across the lookup, and a bitcast hands ARC no reason to keep it.
+        guard let rawName = CFDictionaryGetValue(global,
+                                                 Unmanaged.passUnretained(property).toOpaque()) else {
+            return nil
+        }
+
+        let name = Unmanaged<CFString>.fromOpaque(rawName).takeUnretainedValue()
+
+        guard CFGetTypeID(name) == CFStringGetTypeID() else {
+            return nil
+        }
+
+        var buffer = [CChar](repeating: 0, count: nameLength)
+
+        guard CFStringGetCString(name, &buffer, nameLength,
+                                 CFStringBuiltInEncodings.UTF8.rawValue) else {
+            return nil
+        }
+
+        return String(cString: buffer)
+    }
+
+    // Byte counters for one interface, off its AF_LINK entry.
+    //
+    // These are 32-bit and wrap every 4GB — about half a minute of saturated
+    // Ethernet. The wrap is the caller's problem, and a cheap one at a
+    // several-second refresh: an unsigned delta modulo 2^32 is exact as long
+    // as no more than one wrap happens between two reads.
+    //
+    // The 64-bit counters are not reachable from here. NET_RT_IFLIST2 is
+    // documented to carry if_data64, but on this macOS its messages hold the
+    // same truncated values — a full scan of the interface's message finds
+    // the low 32 bits and nothing wider — so the extra sysctl walk buys
+    // nothing over getifaddrs.
+    private static func bytes(onInterface name: String) -> (received: UInt64, sent: UInt64)? {
+        var addresses: UnsafeMutablePointer<ifaddrs>?
+
+        guard getifaddrs(&addresses) == 0 else {
+            return nil
+        }
+
+        defer { freeifaddrs(addresses) }
+
+        var pointer = addresses
+
+        while let entry = pointer {
+            let interface = entry.pointee
+
+            if interface.ifa_addr?.pointee.sa_family == UInt8(AF_LINK),
+               strcmp(interface.ifa_name, name) == 0,
+               let payload = interface.ifa_data {
+                let data = payload.assumingMemoryBound(to: if_data.self).pointee
+
+                return (UInt64(data.ifi_ibytes), UInt64(data.ifi_obytes))
+            }
+
+            pointer = interface.ifa_next
+        }
+
+        return nil
+    }
+
+    static func current() -> (received: UInt64, sent: UInt64)? {
+        guard let name = primaryInterfaceName() else {
+            return nil
+        }
+
+        return bytes(onInterface: name)
+    }
+}
+
 // The readings the command reports, and their JSON rendering.
 struct SensorReport {
     private static let reportedDecimals = 1
@@ -482,6 +587,8 @@ struct SensorReport {
     let gpuUsagePercent: Int?
     let watts: Float?
     let swapUsedBytes: UInt64?
+    let networkReceivedBytes: UInt64?
+    let networkSentBytes: UInt64?
 
     // null rather than a stand-in number, so a caller can tell "not
     // readable" from "cold" and show a placeholder instead of a lie.
@@ -509,11 +616,28 @@ struct SensorReport {
         return "\(bytes)"
     }
 
+    // The wire format, one line per key, so adding a reading is one line and
+    // the name sits next to the value it carries.
+    private var fields: [(name: String, value: String)] {
+        [
+            ("cpu", field(cpuCelsius)),
+            ("cpu_avg", field(cpuAverageCelsius)),
+            ("gpu", field(gpuCelsius)),
+            ("gpu_avg", field(gpuAverageCelsius)),
+            ("gpu_usage", field(gpuUsagePercent)),
+            ("watts", field(watts)),
+            ("swap_bytes", field(swapUsedBytes)),
+            ("net_in_bytes", field(networkReceivedBytes)),
+            ("net_out_bytes", field(networkSentBytes)),
+        ]
+    }
+
+    // Raw string delimiters so the quotes around a key are quotes rather than
+    // backslash-escapes; `\#(…)` is interpolation inside one.
     var json: String {
-        "{\"cpu\":\(field(cpuCelsius)),\"cpu_avg\":\(field(cpuAverageCelsius)),"
-            + "\"gpu\":\(field(gpuCelsius)),\"gpu_avg\":\(field(gpuAverageCelsius)),"
-            + "\"gpu_usage\":\(field(gpuUsagePercent)),\"watts\":\(field(watts)),"
-            + "\"swap_bytes\":\(field(swapUsedBytes))}"
+        let pairs = fields.map { #""\#($0.name)":\#($0.value)"# }
+
+        return "{" + pairs.joined(separator: ",") + "}"
     }
 }
 
@@ -576,13 +700,16 @@ struct SensorTempsCommand {
 
         let cpu = SensorGroup.cpu.summary(on: connection)
         let gpu = SensorGroup.gpu.summary(on: connection)
+        let network = NetworkCounters.current()
         let report = SensorReport(cpuCelsius: cpu.hottest,
                                   cpuAverageCelsius: cpu.average,
                                   gpuCelsius: gpu.hottest,
                                   gpuAverageCelsius: gpu.average,
                                   gpuUsagePercent: AcceleratorUsage.percent(),
                                   watts: PowerSensor.watts(on: connection),
-                                  swapUsedBytes: SwapUsage.usedBytes())
+                                  swapUsedBytes: SwapUsage.usedBytes(),
+                                  networkReceivedBytes: network?.received,
+                                  networkSentBytes: network?.sent)
 
         print(report.json)
         exit(0)

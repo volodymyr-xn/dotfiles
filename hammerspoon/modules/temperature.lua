@@ -41,11 +41,11 @@ local canvasBanner = require("canvas_banner")
 -- which is where ~/dotfiles/bin_native/macos is added.
 local HELPER = os.getenv("HOME") .. "/dotfiles/bin_native/macos/c-sensor-temps-macos"
 
--- A refresh costs about 2ms on the main thread plus a 5ms helper process
+-- A refresh costs about 2ms on the main thread plus a 13ms helper process
 -- that runs off it, so the interval is a display choice rather than a cost
--- one. Temperature alone would sit happily at 15s, but load is spiky and a
--- stale percentage reads as a broken widget.
-local REFRESH_SECONDS = 3
+-- one. Temperature alone would sit happily at 15s, but load and throughput
+-- are spiky and a stale figure reads as a broken widget.
+local REFRESH_SECONDS = 1
 
 -- Above this the reading is drawn in orange.
 local WARN_CELSIUS = 75
@@ -75,6 +75,32 @@ local POWER_AVERAGE_SECONDS = 60
 local POWER_SAMPLE_LIMIT = POWER_AVERAGE_SECONDS / REFRESH_SECONDS
 local WATTS_SUFFIX = "W"
 
+-- Throughput is the one column with glyphs: an arrow says which direction a
+-- rate belongs to in less width than any word would.
+local ICON_DIRECTORY = hs.configdir .. "/assets/"
+local UPLOAD_ICON = "arrow_up"
+local DOWNLOAD_ICON = "arrow_down"
+
+-- The token every icon paints itself with. Substituted for a hex colour at
+-- render, which is how one file serves the light bar and the dark one;
+-- SVG's own `currentColor` never resolves inside an NSImage.
+local ICON_COLOR_TOKEN = "currentColor"
+
+-- Square, sized to the row it sits in rather than the whole bar, with a
+-- point of air after it.
+local ICON_SIZE = BAR_HEIGHT / ROW_COUNT - 2
+local ICON_TEXT_GAP = 2
+
+-- The interface counters are 32-bit and wrap every 4GB — a delta modulo
+-- that is exact as long as under one wrap happens between two refreshes,
+-- which at this interval means anything short of a 11Gbit/s link.
+local COUNTER_WRAP = 2 ^ 32
+
+-- Rates are shown as "49 KB/s", the form Stats uses.
+local BYTES_PER_KILOBYTE = 1024
+local RATE_UNITS = { "B", "KB", "MB", "GB" }
+local RATE_SUFFIX = "/s"
+
 -- Shown per figure when the helper is missing or a key stopped resolving.
 local PLACEHOLDER = "--"
 
@@ -92,12 +118,13 @@ local DARK_COLOR = { white = 1, alpha = 1 }
 -- the size Stats sets its own stacked widgets in.
 local MENUBAR_FONT = { name = ".AppleSystemUIFont", size = 10 }
 
-local BYTES_PER_GIGABYTE = 1024 * 1024 * 1024
+local BYTES_PER_MEGABYTE = 1024 * 1024
+local BYTES_PER_GIGABYTE = 1024 * BYTES_PER_MEGABYTE
 
--- Swap gets the same two-step treatment as temperature: a gigabyte is
--- pressure the compressor could not absorb, three is the machine paging for
--- real and the point where everything starts feeling slow.
-local WARN_SWAP_BYTES = 1 * BYTES_PER_GIGABYTE
+-- Swap gets the same two-step treatment as temperature: 200MB means the
+-- compressor stopped absorbing the pressure, three gigabytes means the
+-- machine is paging for real and everything starts feeling slow.
+local WARN_SWAP_BYTES = 200 * BYTES_PER_MEGABYTE
 local CRITICAL_SWAP_BYTES = 3 * BYTES_PER_GIGABYTE
 
 local menu = hs.menubar.new()
@@ -107,6 +134,11 @@ local readTask = nil
 
 -- Plain-text mirror of what was last painted, for the `title` accessor.
 local lastText = ""
+
+-- Raw SVG source per file, and rendered images per file-and-colour. Both are
+-- permanent: two icons across at most a handful of colours.
+local iconSources = {}
+local iconImages = {}
 
 -- Resting text colour. Read per refresh rather than cached, because the
 -- appearance can flip under the running config (Auto mode at dusk).
@@ -134,6 +166,62 @@ local function thresholdColor(value, warnAt, criticalAt)
   end
 
   return restingColor()
+end
+
+-- "#RRGGBB" for an hs.drawing colour table, so the same colour drives both
+-- the text attributes and the icon substitution. Handles the greyscale form
+-- (`white`) as well as the RGB one.
+local function colorHex(color)
+  local red = color.red or color.white or 0
+  local green = color.green or color.white or 0
+  local blue = color.blue or color.white or 0
+
+  return string.format("#%02X%02X%02X", red * 255, green * 255, blue * 255)
+end
+
+-- SVG source for an icon, read once per file.
+local function iconSource(name)
+  local cached = iconSources[name]
+
+  if cached ~= nil then
+    return cached
+  end
+
+  local file = io.open(ICON_DIRECTORY .. name .. ".svg", "r")
+
+  if file == nil then
+    return nil
+  end
+
+  local source = file:read("a")
+  file:close()
+  iconSources[name] = source
+
+  return source
+end
+
+-- An icon painted in one specific colour. Built through a data URL rather
+-- than imageFromPath because the colour is stamped into the source first.
+local function iconImage(name, color)
+  local hex = colorHex(color)
+  local key = name .. hex
+  local cached = iconImages[key]
+
+  if cached ~= nil then
+    return cached
+  end
+
+  local source = iconSource(name)
+
+  if source == nil then
+    return nil
+  end
+
+  local svg = source:gsub(ICON_COLOR_TOKEN, hex)
+  local image = hs.image.imageFromURL("data:image/svg+xml;base64," .. hs.base64.encode(svg))
+  iconImages[key] = image
+
+  return image
 end
 
 -- Styled run for one part of the row, in the colour that part carries.
@@ -169,13 +257,90 @@ local function formatGigabytes(bytes)
   return string.format("%.0fG", bytes / BYTES_PER_GIGABYTE)
 end
 
--- "18W" for a live figure, whole watts for the same reason.
+-- "512M" under a gigabyte, "3G" above it. Swap needs the finer unit because
+-- it turns orange at 200MB, and a warning colour on a figure reading "0G"
+-- looks like a bug rather than a warning.
+local function formatSwap(bytes)
+  if bytes == nil then
+    return PLACEHOLDER
+  end
+
+  if bytes < BYTES_PER_GIGABYTE then
+    return string.format("%.0fM", bytes / BYTES_PER_MEGABYTE)
+  end
+
+  return formatGigabytes(bytes)
+end
+
+-- "18.1W" — one decimal, because idle draw moves in tenths and the whole
+-- number alone made the column look frozen.
 local function formatWatts(watts)
   if watts == nil then
     return PLACEHOLDER .. WATTS_SUFFIX
   end
 
-  return string.format("%.0f" .. WATTS_SUFFIX, watts)
+  return string.format("%.1f" .. WATTS_SUFFIX, watts)
+end
+
+-- "49 KB/s" — the largest unit the rate fits in, with a decimal only below
+-- ten so the column stays narrow while a slow link still shows movement.
+local function formatRate(bytesPerSecond)
+  if bytesPerSecond == nil then
+    return PLACEHOLDER .. RATE_SUFFIX
+  end
+
+  local value = bytesPerSecond
+  local unit = 1
+
+  while value >= BYTES_PER_KILOBYTE and unit < #RATE_UNITS do
+    value = value / BYTES_PER_KILOBYTE
+    unit = unit + 1
+  end
+
+  local format = (value < 10 and unit > 1) and "%.1f %s" or "%.0f %s"
+
+  return string.format(format, value, RATE_UNITS[unit]) .. RATE_SUFFIX
+end
+
+-- Counters from the previous refresh with the moment they were taken, so
+-- throughput is a delta the same way CPU load is. The elapsed time is
+-- measured rather than assumed to be REFRESH_SECONDS: the helper answers
+-- asynchronously, and at a one-second interval that jitter is a visible
+-- share of the divisor.
+local previousNetworkCounters = nil
+
+-- Bytes moved since the previous reading, unwrapping the 32-bit counter.
+local function counterDelta(current, previous)
+  if current >= previous then
+    return current - previous
+  end
+
+  return current + COUNTER_WRAP - previous
+end
+
+-- Upload and download rates in bytes per second, or nil on the first
+-- refresh, when there is no earlier counter to subtract.
+local function networkRates(receivedBytes, sentBytes)
+  if receivedBytes == nil or sentBytes == nil then
+    return nil, nil
+  end
+
+  local previous = previousNetworkCounters
+  local now = hs.timer.secondsSinceEpoch()
+  previousNetworkCounters = { received = receivedBytes, sent = sentBytes, at = now }
+
+  if previous == nil then
+    return nil, nil
+  end
+
+  local elapsed = now - previous.at
+
+  if elapsed <= 0 then
+    return nil, nil
+  end
+
+  return counterDelta(sentBytes, previous.sent) / elapsed,
+    counterDelta(receivedBytes, previous.received) / elapsed
 end
 
 -- The readings behind the rolling average, oldest first, with their running
@@ -295,15 +460,20 @@ local function celsiusCell(celsius)
   }
 end
 
--- The four columns, left to right, unlabelled, each leading with the figure
--- that spikes over the one that qualifies it: busiest core over mean load,
--- hottest die over the mean of the sensor set, memory in use over swap,
--- current draw over the rolling mean. The GPU is not shown at all.
+-- The six columns, left to right, unlabelled: busiest core over mean load,
+-- hottest die over the mean of the sensor set, memory in use, swap in use,
+-- current draw over the rolling mean, and upload over download. Memory and
+-- swap carry one figure each and sit on the top row, the way a column with
+-- nothing to qualify it does. The GPU is not shown at all.
+--
+-- Throughput is the one column carrying icons — the arrows name the two
+-- rates the way the units name the other columns.
 --
 -- Only readings with a threshold take the warning colour: the load is not
 -- what got hot, and the resident memory is not what is paging.
 local function columns(reading, resting)
   local swapUsed = reading.swapUsed
+  local uploadRate, downloadRate = networkRates(reading.networkReceived, reading.networkSent)
 
   return {
     {
@@ -316,8 +486,10 @@ local function columns(reading, resting)
     },
     {
       top = { text = formatGigabytes(reading.ramUsed), color = resting },
-      bottom = {
-        text = formatGigabytes(swapUsed),
+    },
+    {
+      top = {
+        text = formatSwap(swapUsed),
         color = thresholdColor(swapUsed, WARN_SWAP_BYTES, CRITICAL_SWAP_BYTES),
       },
     },
@@ -325,33 +497,77 @@ local function columns(reading, resting)
       top = { text = formatWatts(reading.watts), color = resting },
       bottom = { text = formatWatts(averageWatts()), color = resting },
     },
+    {
+      top = { icon = UPLOAD_ICON, text = formatRate(uploadRate), color = resting },
+      bottom = { icon = DOWNLOAD_ICON, text = formatRate(downloadRate), color = resting },
+    },
   }
 end
 
--- One text element, centred in its row: the two rows split the bar in half,
--- and the figure sits in the middle of its half whatever the font's own
--- line height turns out to be.
+-- Vertical placement for one of the two rows: they split the bar in half and
+-- the content sits in the middle of its half, whatever height it turns out
+-- to have.
+local function rowOrigin(row, height)
+  local rowHeight = BAR_HEIGHT / ROW_COUNT
+
+  return row * rowHeight + (rowHeight - height) / 2
+end
+
+-- One text element and the width it claimed.
 local function textElement(styled, x, row)
   local size = hs.drawing.getTextDrawingSize(styled)
-  local rowHeight = BAR_HEIGHT / ROW_COUNT
 
   return {
     type = "text",
     text = styled,
     -- A point of slack on the width: the measured size rounds down often
     -- enough to clip the last glyph otherwise.
-    frame = {
-      x = x,
-      y = row * rowHeight + (rowHeight - size.h) / 2,
-      w = size.w + 1,
-      h = size.h,
-    },
+    frame = { x = x, y = rowOrigin(row, size.h), w = size.w + 1, h = size.h },
   }, size.w
 end
 
+-- The icon that heads one row, or nil when the row carries none or its file
+-- failed to load — a missing asset costs the arrow, not the reading.
+local function iconElement(name, color, x, row)
+  local image = iconImage(name, color)
+
+  if image == nil then
+    return nil
+  end
+
+  return {
+    type = "image",
+    image = image,
+    imageScaling = "scaleProportionally",
+    frame = { x = x, y = rowOrigin(row, ICON_SIZE), w = ICON_SIZE, h = ICON_SIZE },
+  }
+end
+
+-- One row of a column: its icon, if any, then the figure. Returns the width
+-- the pair claimed, so the column can size itself to its widest row.
+local function rowElements(cell, x, row, elements)
+  local textX = x
+  local iconWidth = 0
+
+  if cell.icon ~= nil then
+    local icon = iconElement(cell.icon, cell.color, x, row)
+
+    if icon ~= nil then
+      elements[#elements + 1] = icon
+      iconWidth = ICON_SIZE + ICON_TEXT_GAP
+      textX = x + iconWidth
+    end
+  end
+
+  local element, textWidth = textElement(styledValue(cell.text, cell.color), textX, row)
+  elements[#elements + 1] = element
+
+  return iconWidth + textWidth
+end
+
 -- Lay the columns out left to right and hand the snapshot to the menubar.
--- The label heads the top row and the two figures share a left edge under
--- it, so the column reads as one block rather than two stray numbers.
+-- The two rows of a column share a left edge, so the pair reads as one block
+-- rather than two stray numbers.
 local function render(reading)
   local resting = restingColor()
   local elements = {}
@@ -361,16 +577,11 @@ local function render(reading)
   for _, column in ipairs(columns(reading, resting)) do
     local top = column.top
     local bottom = column.bottom
-    local topElement, columnWidth = textElement(styledValue(top.text, top.color), x, 0)
+    local columnWidth = rowElements(top, x, 0, elements)
     local plainText = top.text
 
-    elements[#elements + 1] = topElement
-
     if bottom ~= nil then
-      local bottomElement, bottomWidth = textElement(styledValue(bottom.text, bottom.color), x, 1)
-
-      elements[#elements + 1] = bottomElement
-      columnWidth = math.max(columnWidth, bottomWidth)
+      columnWidth = math.max(columnWidth, rowElements(bottom, x, 1, elements))
       plainText = plainText .. VALUE_SEPARATOR .. bottom.text
     end
 
@@ -424,6 +635,8 @@ local function applyReading(exitCode, stdout)
   reading.cpuAverageCelsius = sensors.cpu_avg
   reading.watts = sensors.watts
   reading.swapUsed = sensors.swap_bytes
+  reading.networkReceived = sensors.net_in_bytes
+  reading.networkSent = sensors.net_out_bytes
 
   recordWatts(reading.watts)
   render(reading)

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"
+     fill="none" stroke="currentColor" stroke-width="2.2"
+     stroke-linecap="round" stroke-linejoin="round">
+  <!-- Upload: shaft plus a wide head, drawn heavy so it still reads at the
+       9pt row height the menubar leaves for it. -->
+  <path d="M8 13.5V3.4"/>
+  <path d="M3.4 8L8 3.2l4.6 4.8"/>
+</svg>
