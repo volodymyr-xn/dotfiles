@@ -18,6 +18,10 @@ ZSH_THEME="avit_custom"
 plugins=()
 # plugins=(git vi-mode asdf gitfast)
 
+# Custom completion functions (_tmuxinator, ...) must be on fpath before
+# oh-my-zsh.sh runs compinit, otherwise they are never registered.
+fpath=("$HOME/dotfiles/zsh/completions" $fpath)
+
 source $ZSH/oh-my-zsh.sh
 
 # MODE_INDICATOR="%F{yellow}NORMAL%f"
