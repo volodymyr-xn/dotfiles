@@ -1,0 +1,166 @@
+onboarding = false
+# herdr configuration — mirrors ~/dotfiles/tmux/tmux.conf where herdr has an
+# equivalent. tmux concept -> herdr concept: session -> workspace,
+# window -> tab, pane -> pane, status bar -> sidebar.
+
+[theme]
+name = "catppuccin"
+auto_switch = false
+
+# Palette lifted from the tmux THEME block.
+[theme.custom]
+panel_bg = "#2f3042"   # tmux: status-style bg
+# Pins the sidebar — tmux only ever colored the status bar, not popups.
+sidebar_bg = "#2f3042"
+accent = "#82d595"     # tmux: pane-active-border-style / active window bg
+green = "#82d595"
+yellow = "#e1d39f"     # tmux: status-left fg
+
+[terminal]
+# tmux: set -g default-command "${SHELL}" — non-login shell. herdr's "auto"
+# would use a login shell on macOS.
+shell_mode = "non_login"
+
+# tmux: every split/new-window used -c "#{pane_current_path}"
+new_cwd = "follow"
+
+[keys]
+# tmux: unbind C-b; set -g prefix C-a. No `send-prefix` equivalent exists.
+prefix = "ctrl+a"
+
+# tmux: prefix d
+detach = "prefix+d"
+
+# tmux: bind s choose-tree -ZsN (session chooser)
+workspace_picker = "prefix+s"
+
+# Displaced from its prefix+s default by workspace_picker above.
+settings = "prefix+shift+s"
+
+# tmux: bind n display-popup c-tmux-switch-pane — herdr's native
+# cross-workspace pane picker replaces the fzf popup.
+goto = "prefix+n"
+
+# tmux: bind -n C-Up / C-Down switch-client -n / -p
+next_workspace = "ctrl+up"
+previous_workspace = "ctrl+down"
+
+# tmux: bind c new-window -c "#{pane_current_path}". prompt_new_tab_name is
+# true by default, so this also covers tmux's `bind o` name-prompt variant.
+new_tab = "prefix+c"
+previous_tab = "prefix+p"
+
+# tmux: bind -n M-0 next-window
+next_tab = "alt+0"
+
+# tmux: ctrl+1..9 selects window N. macOS steals ctrl+digit for Mission
+# Control, so ~/.config/ghostty/config rewrites those chords to "\x01"+digit —
+# Ctrl-A (the prefix) followed by the number. herdr therefore sees prefix+N,
+# not a literal ctrl+N, and must bind it that way.
+# The parallel tmux M-1..9 bindings are dropped: herdr allows one indexed
+# binding per action.
+switch_tab = "prefix+1..9"
+
+# tmux: bind -n C-h/j/k/l select-pane, minus the is_vim passthrough probe —
+# herdr has no conditional bindings, so nvim no longer receives these.
+focus_pane_left = "ctrl+h"
+focus_pane_down = "ctrl+j"
+focus_pane_up = "ctrl+k"
+focus_pane_right = "ctrl+l"
+
+# tmux: bind -n C-\ select-pane -l
+last_pane = "ctrl+backslash"
+
+# tmux: bind v split-window -h
+split_vertical = "prefix+v"
+
+# tmux: bind i split-window -v (b / j / " aliases have no herdr equivalent)
+split_horizontal = "prefix+i"
+
+# tmux bound zoom to C-m, which only worked because of `extended-keys always`;
+# ctrl+m is carriage return and herdr has no extended-keys negotiation.
+zoom = "prefix+z"
+
+# tmux used `bind -n End kill-pane`, but herdr rejects "end" as a key name
+# ("invalid keybinding ... disabling binding"), so keep the herdr default.
+close_pane = "prefix+x"
+
+# tmux: bind -n S-Left/S-Right/S-Down/S-Up resize-pane. Direct resize
+# actions did not exist when this config was written, so resize_mode below
+# was the only approximation.
+resize_pane_left = "shift+left"
+resize_pane_down = "shift+down"
+resize_pane_up = "shift+up"
+resize_pane_right = "shift+right"
+
+# No tmux equivalent. Kept alongside the direct keys above for sustained
+# resizing: arrows repeat until Esc.
+resize_mode = "prefix+r"
+
+toggle_sidebar = "prefix+b"
+edit_scrollback = "prefix+e"
+
+# tmux: bind Space — swap-pane -D. herdr splits this into four directional
+# actions, paired with the ctrl+h/j/k/l focus keys above.
+swap_pane_left = "prefix+shift+h"
+swap_pane_down = "prefix+shift+j"
+swap_pane_up = "prefix+shift+k"
+swap_pane_right = "prefix+shift+l"
+
+# tmux: bind -n C-[ copy-mode (the C-] page-down half has no equivalent).
+copy_mode = "prefix+["
+
+# tmux: bind l — jump back to where a notification click pulled you from.
+# herdr tracks the notification source itself, so the C_TMUX_BACK global env
+# var and its watcher script are not needed.
+open_notification_target = "prefix+l"
+
+# tmux: bind g c-claude-toggle-popup. herdr knows which panes host agents,
+# so cycling agents replaces the popup-toggle script.
+next_agent = "prefix+g"
+previous_agent = "prefix+shift+b"
+focus_agent = "prefix+alt+1..9"
+
+# tmux: bind Y — copy the pane's cwd to the system clipboard.
+[[keys.command]]
+key = "prefix+shift+y"
+type = "shell"
+command = "pwd | c-clipboard-copy"
+description = "copy pane cwd to clipboard"
+
+[ui]
+accent = "#82d595"
+mouse_capture = true   # tmux: set -g mouse on
+copy_on_select = true  # tmux: copy-pipe on MouseDragEnd1Pane
+pane_borders = true    # tmux: pane-border-lines heavy
+agent_panel_sort = "spaces"
+
+show_agent_labels_on_pane_borders = true
+
+# tmux: the status bar sits below the panes.
+tab_bar_position = "bottom"
+
+# tmux: status-right carried only the zoom indicator, and status-left's
+# session name is already covered by the sidebar. hostname and datetime go
+# past tmux — its clock block was commented out.
+tab_bar_right = [
+  { type = "zoom" },
+  { type = "hostname" },
+  { type = "datetime", format = "%H:%M" },
+]
+tab_bar_right_separator = " · "
+
+# Each pane gets its own closed box: outer borders frame the outside edge,
+# gaps stop adjacent panes from sharing a single splitter line.
+pane_outer_borders = true
+pane_gaps = true
+
+[experimental]
+# tmux: set -g allow-passthrough all — let programs push Kitty graphics
+# escape sequences through the multiplexer. Ghostty is a compatible host.
+kitty_graphics = true
+
+[advanced]
+# tmux: set -g history-limit 30000 (lines). herdr counts bytes; 10 MB is well
+# past 30k lines of typical output.
+scrollback_limit_bytes = 10000000

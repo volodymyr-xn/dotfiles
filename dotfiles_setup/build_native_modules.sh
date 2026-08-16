@@ -41,8 +41,16 @@ build_sensor_temps_macos() {
     -framework IOKit -framework SystemConfiguration
 }
 
+# Interface byte counters. Portable across Apple Silicon and Intel, but the
+# APIs it uses are macOS-only.
+build_net_counters_macos() {
+  build_swift_module "$MODULES_DIR/macos/c-net-counters-macos.swift" \
+    -framework SystemConfiguration
+}
+
 build_macos_modules() {
   build_sensor_temps_macos
+  build_net_counters_macos
 }
 
 build_linux_modules() {

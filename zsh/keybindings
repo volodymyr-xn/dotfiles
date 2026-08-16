@@ -46,8 +46,13 @@ bindkey '\e[1;3C' forward-word    # Option+Right (alternative)
 bindkey '\eb' backward-word       # Option+Left (emacs-style)
 bindkey '\ef' forward-word        # Option+Right (emacs-style)
 
-bindkey "^q" backward-word
 bindkey "^b" forward-word
+
+# Open the current command line in $EDITOR; on exit it is placed back on the
+# prompt (run it with Enter).
+autoload -Uz edit-command-line
+zle -N edit-command-line
+bindkey "^q" edit-command-line
 
 
 # bindkey -s "^x" 'eza -alh\n'

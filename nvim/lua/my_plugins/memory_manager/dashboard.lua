@@ -666,11 +666,16 @@ local function render_view_model(view, width)
     return fmt_dur(math.max(0, now_epoch - epoch)) .. " ago"
   end
 
-  -- Section label, its stats grid, then a blank line separating sections.
+  -- Section boundary — the label embedded in a horizontal rule spanning the
+  -- same width as the process table — then its stats grid and a blank line.
   local function push_section(label, rows)
+    local rule_width = span_width(widths) + 2
+    local tail = math.max(0, rule_width - 4 - fn.strdisplaywidth(label))
     local label_line, label_marks = build_line({
       { TABLE_INDENT, nil },
+      { "── ", "MemDashHeaderBorder" },
       { label, "MemDashSection" },
+      { " " .. string.rep("─", tail), "MemDashHeaderBorder" },
     })
     push(label_line, label_marks, { kind = "header" })
 
@@ -821,21 +826,13 @@ local function render_view_model(view, width)
     local detail = p.error and ("⚠ " .. tostring(p.error)) or subsystem_text(p)
     local detail_hl = p.error and "MemDashError" or "MemDashUptime"
     local pane = tmux_label(p.tmux)
-    local cwd_segments = {
-      { shorten_path(p.cwd, pane and (cwd_width - #pane - 2) or cwd_width),
-        is_current and "MemDashCurrent" or "MemDashCwd" },
-    }
-
-    if pane then
-      table.insert(cwd_segments, { "  ", nil })
-      table.insert(cwd_segments, { pane, "MemDashTmux" })
-    end
 
     local row_line, row_marks = build_table_row(widths, {
       { fold_glyph(p.pid) .. (is_current and "★" or " "),
         is_current and "MemDashCurrent" or "MemDashSep" },
       { tostring(p.pid), "MemDashPid" },
-      { segments = cwd_segments },
+      { shorten_path(p.cwd, cwd_width),
+        is_current and "MemDashCurrent" or "MemDashCwd" },
       { utils.fmt_mb(p.rss_mb) or "?", rss_hl_proc },
       { detail, detail_hl },
       { fmt_uptime_short(p.uptime_seconds), uptime_hl(p.uptime_seconds) },
@@ -843,6 +840,17 @@ local function render_view_model(view, width)
       { tostring(p.parsers or 0), "MemDashMetricDim" },
     })
     push(row_line, row_marks, { kind = "proc", pid = p.pid, proc = p })
+
+    -- tmux location gets its own row under the path, in the CWD column;
+    -- tagged as the same proc row so fold/kill keymaps work on it too.
+    if pane then
+      local tmux_line, tmux_marks = build_table_row(widths, {
+        {}, {},
+        { pane, "MemDashTmux" },
+        {}, {}, {}, {}, {},
+      })
+      push(tmux_line, tmux_marks, { kind = "proc", pid = p.pid, proc = p })
+    end
 
     local expanded = not shared.dashboard_state.folded[p.pid]
       and not p.error
@@ -1083,7 +1091,7 @@ local HELP_SECTIONS = {
     { "Keep LSP", "clients never auto-stopped when their last buffer unloads" },
   } },
   { "PROCESS TABLE", {
-    { "CWD", "working directory, plus ⧉ session:window.pane when in tmux" },
+    { "CWD", "working directory; ⧉ session:window.pane on the row below when in tmux" },
     { "SUBSYSTEMS", "LSP child-process RSS, TS ≈ source bytes × 3, fugitive, Lua heap" },
     { "UPTIME", "process age — yellow from 5 days, red from 2 weeks" },
     { "BUFS / PARSERS", "loaded buffers and active treesitter parsers" },

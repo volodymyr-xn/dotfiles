@@ -1,15 +1,21 @@
 // Read Apple Silicon CPU and GPU die temperatures from the SMC, report the
-// hottest sensor in each group, and add the GPU's current utilisation and
-// the whole machine's power draw.
+// hottest and mean sensor in each group, and add the GPU's current
+// utilisation, the whole machine's power draw, swap and physical memory.
 //
 // Build with `dotfiles_setup/build_native_modules.sh`, which drops the
 // binary in ~/dotfiles/bin_native/macos/. The source lives in
 // native_modules/ because it is compiled rather than interpreted; only the
 // built artefact goes on PATH, and only on macOS.
 //
-//   c-sensor-temps-macos          {"cpu":47.9,"gpu":42.0,"gpu_usage":12,"watts":10.2}
-//   c-sensor-temps-macos list     every readable T-prefixed sensor, one per line
-//   c-sensor-temps-macos list P   the same for the P-prefixed power keys
+//   c-sensor-temps-macos           one JSON line, then exit
+//   c-sensor-temps-macos watch     a line every second until killed
+//   c-sensor-temps-macos watch 250 the same at another interval
+//   c-sensor-temps-macos list      every readable T-prefixed sensor, one per line
+//   c-sensor-temps-macos list P    the same for the P-prefixed power keys
+//
+// Network counters live in c-net-counters-macos instead: throughput wants a
+// faster cadence than temperature does, and splitting them lets each run on
+// its own.
 //
 // CPU utilisation is deliberately absent: the caller (Hammerspoon) already
 // has hs.host.cpuUsage(), while GPU utilisation has no equivalent there and
@@ -33,7 +39,6 @@
 
 import Darwin
 import IOKit
-import SystemConfiguration
 
 struct SMCVersion {
     var major: CUnsignedChar = 0
@@ -474,105 +479,21 @@ struct SwapUsage {
     }
 }
 
-// Bytes in and out since boot on whichever interface the default route
-// currently uses — Wi-Fi at a desk, Ethernet once docked, and it follows the
-// switch without a restart because the interface is resolved per call.
-//
-// Counters rather than rates: a one-shot process has no earlier sample to
-// divide by, so the caller diffs two of these across its own refresh. The
-// same split the CPU tick counters use.
-struct NetworkCounters {
-    // The dynamic store key carrying the interface the IPv4 default route
-    // points at. There is no sysctl for it; the routing table would have to
-    // be parsed to answer the same question.
-    private static let globalIPv4Key = "State:/Network/Global/IPv4"
-    private static let primaryInterfaceProperty = "PrimaryInterface"
-    private static let storeName = "c-sensor-temps-macos"
+// Physical memory fitted to the machine. Constant for the life of the boot,
+// but reported per call anyway: it costs one sysctl and saves the caller a
+// second source of truth for what "total" means.
+struct PhysicalMemory {
+    private static let name = "hw.memsize"
 
-    // Long enough for any BSD interface name ("en0", "utun4", "bridge100").
-    private static let nameLength = 32
+    static func totalBytes() -> UInt64? {
+        var total: UInt64 = 0
+        var size = MemoryLayout<UInt64>.stride
 
-    // Name of the interface the default route uses, or nil when nothing is
-    // routed — an offline machine, or one with only a link-local address.
-    private static func primaryInterfaceName() -> String? {
-        guard let store = SCDynamicStoreCreate(nil, cfString(storeName), nil, nil),
-              let value = SCDynamicStoreCopyValue(store, cfString(globalIPv4Key)),
-              CFGetTypeID(value) == CFDictionaryGetTypeID() else {
+        guard sysctlbyname(name, &total, &size, nil, 0) == 0 else {
             return nil
         }
 
-        let global = unsafeBitCast(value, to: CFDictionary.self)
-        let property = cfString(primaryInterfaceProperty)
-
-        // Unmanaged rather than unsafeBitCast: the key has to stay alive
-        // across the lookup, and a bitcast hands ARC no reason to keep it.
-        guard let rawName = CFDictionaryGetValue(global,
-                                                 Unmanaged.passUnretained(property).toOpaque()) else {
-            return nil
-        }
-
-        let name = Unmanaged<CFString>.fromOpaque(rawName).takeUnretainedValue()
-
-        guard CFGetTypeID(name) == CFStringGetTypeID() else {
-            return nil
-        }
-
-        var buffer = [CChar](repeating: 0, count: nameLength)
-
-        guard CFStringGetCString(name, &buffer, nameLength,
-                                 CFStringBuiltInEncodings.UTF8.rawValue) else {
-            return nil
-        }
-
-        return String(cString: buffer)
-    }
-
-    // Byte counters for one interface, off its AF_LINK entry.
-    //
-    // These are 32-bit and wrap every 4GB — about half a minute of saturated
-    // Ethernet. The wrap is the caller's problem, and a cheap one at a
-    // several-second refresh: an unsigned delta modulo 2^32 is exact as long
-    // as no more than one wrap happens between two reads.
-    //
-    // The 64-bit counters are not reachable from here. NET_RT_IFLIST2 is
-    // documented to carry if_data64, but on this macOS its messages hold the
-    // same truncated values — a full scan of the interface's message finds
-    // the low 32 bits and nothing wider — so the extra sysctl walk buys
-    // nothing over getifaddrs.
-    private static func bytes(onInterface name: String) -> (received: UInt64, sent: UInt64)? {
-        var addresses: UnsafeMutablePointer<ifaddrs>?
-
-        guard getifaddrs(&addresses) == 0 else {
-            return nil
-        }
-
-        defer { freeifaddrs(addresses) }
-
-        var pointer = addresses
-
-        while let entry = pointer {
-            let interface = entry.pointee
-
-            if interface.ifa_addr?.pointee.sa_family == UInt8(AF_LINK),
-               strcmp(interface.ifa_name, name) == 0,
-               let payload = interface.ifa_data {
-                let data = payload.assumingMemoryBound(to: if_data.self).pointee
-
-                return (UInt64(data.ifi_ibytes), UInt64(data.ifi_obytes))
-            }
-
-            pointer = interface.ifa_next
-        }
-
-        return nil
-    }
-
-    static func current() -> (received: UInt64, sent: UInt64)? {
-        guard let name = primaryInterfaceName() else {
-            return nil
-        }
-
-        return bytes(onInterface: name)
+        return total
     }
 }
 
@@ -587,8 +508,7 @@ struct SensorReport {
     let gpuUsagePercent: Int?
     let watts: Float?
     let swapUsedBytes: UInt64?
-    let networkReceivedBytes: UInt64?
-    let networkSentBytes: UInt64?
+    let memoryTotalBytes: UInt64?
 
     // null rather than a stand-in number, so a caller can tell "not
     // readable" from "cold" and show a placeholder instead of a lie.
@@ -616,6 +536,16 @@ struct SensorReport {
         return "\(bytes)"
     }
 
+    // Interface names come from the kernel and cannot contain a quote or a
+    // backslash, so they need no escaping beyond the quotes themselves.
+    private func field(_ text: String?) -> String {
+        guard let text else {
+            return "null"
+        }
+
+        return #""\#(text)""#
+    }
+
     // The wire format, one line per key, so adding a reading is one line and
     // the name sits next to the value it carries.
     private var fields: [(name: String, value: String)] {
@@ -627,8 +557,7 @@ struct SensorReport {
             ("gpu_usage", field(gpuUsagePercent)),
             ("watts", field(watts)),
             ("swap_bytes", field(swapUsedBytes)),
-            ("net_in_bytes", field(networkReceivedBytes)),
-            ("net_out_bytes", field(networkSentBytes)),
+            ("ram_total_bytes", field(memoryTotalBytes)),
         ]
     }
 
@@ -645,15 +574,33 @@ struct SensorReport {
 struct SensorTempsCommand {
     private static let toolName = "c-sensor-temps-macos"
     private static let listSubcommand = "list"
+    private static let watchSubcommand = "watch"
     private static let listedDecimals = 2
 
     // Which family of keys `list` walks when no prefix is given.
     private static let defaultListedPrefix = UInt8(ascii: "T")
 
+    // Temperature and power move slowly enough that a second is generous.
+    private static let defaultIntervalMilliseconds: UInt32 = 1000
+    private static let microsecondsPerMillisecond: UInt32 = 1000
+
     let arguments: [String]
 
     private var wantsKeyListing: Bool {
         arguments.dropFirst().first == Self.listSubcommand
+    }
+
+    private var wantsWatch: Bool {
+        arguments.dropFirst().first == Self.watchSubcommand
+    }
+
+    private var intervalMilliseconds: UInt32 {
+        guard let argument = arguments.dropFirst(2).first,
+              let milliseconds = UInt32(argument), milliseconds > 0 else {
+            return Self.defaultIntervalMilliseconds
+        }
+
+        return milliseconds
     }
 
     // `list P` walks the power keys instead of the temperature ones. Only the
@@ -688,6 +635,25 @@ struct SensorTempsCommand {
         }
     }
 
+    // One reading, printed. stdout is block-buffered once it is a pipe, so a
+    // watching caller would see nothing for kilobytes at a time without the
+    // flush.
+    private func emit(on connection: SMCConnection) {
+        let cpu = SensorGroup.cpu.summary(on: connection)
+        let gpu = SensorGroup.gpu.summary(on: connection)
+        let report = SensorReport(cpuCelsius: cpu.hottest,
+                                  cpuAverageCelsius: cpu.average,
+                                  gpuCelsius: gpu.hottest,
+                                  gpuAverageCelsius: gpu.average,
+                                  gpuUsagePercent: AcceleratorUsage.percent(),
+                                  watts: PowerSensor.watts(on: connection),
+                                  swapUsedBytes: SwapUsage.usedBytes(),
+                                  memoryTotalBytes: PhysicalMemory.totalBytes())
+
+        print(report.json)
+        fflush(stdout)
+    }
+
     func run() -> Never {
         guard let connection = SMCConnection() else {
             fail("cannot open AppleSMC")
@@ -698,21 +664,20 @@ struct SensorTempsCommand {
             exit(0)
         }
 
-        let cpu = SensorGroup.cpu.summary(on: connection)
-        let gpu = SensorGroup.gpu.summary(on: connection)
-        let network = NetworkCounters.current()
-        let report = SensorReport(cpuCelsius: cpu.hottest,
-                                  cpuAverageCelsius: cpu.average,
-                                  gpuCelsius: gpu.hottest,
-                                  gpuAverageCelsius: gpu.average,
-                                  gpuUsagePercent: AcceleratorUsage.percent(),
-                                  watts: PowerSensor.watts(on: connection),
-                                  swapUsedBytes: SwapUsage.usedBytes(),
-                                  networkReceivedBytes: network?.received,
-                                  networkSentBytes: network?.sent)
+        if !wantsWatch {
+            emit(on: connection)
+            exit(0)
+        }
 
-        print(report.json)
-        exit(0)
+        // The SMC user client is opened once and reused for the life of the
+        // process, which is most of what watching saves over re-invoking:
+        // the connection and the Swift runtime both survive the interval.
+        let interval = intervalMilliseconds * Self.microsecondsPerMillisecond
+
+        while true {
+            emit(on: connection)
+            usleep(interval)
+        }
     }
 }
 

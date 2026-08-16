@@ -124,6 +124,11 @@ symlink_to "$DOTFILES_DIR/hammerspoon" "$HOME/.hammerspoon"
 mkdir -p "$HOME/.config/docker"
 symlink_to "$DOTFILES_DIR/docker/config.json" "$HOME/.config/docker/config.json"
 
+# herdr keeps its socket, logs and session.json next to the config, so only
+# config.toml is symlinked and the directory stays real.
+mkdir -p "$HOME/.config/herdr"
+symlink_to "$DOTFILES_DIR/herdr/config.toml" "$HOME/.config/herdr/config.toml"
+
 ln -nsf "../nvim/snippets" "$DOTFILES_DIR/vim/snippets"
 ln -nsf "$DOTFILES_DIR/config/rubocop/config.yml" "$DOTFILES_DIR/.rubocop.yml"
 
