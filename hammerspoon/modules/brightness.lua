@@ -122,36 +122,92 @@ local function snapTarget(luminance, delta)
   return math.max(0, math.min(100, target))
 end
 
--- A non-zero exit means the display is asleep or DDC is unavailable, in
--- which case there is nothing truthful to show.
-local function onSetExit(exitCode, stdOut, _stdErr)
-  if exitCode ~= 0 then
+-- Cached level is only trusted briefly: the panel can also be changed by
+-- its own buttons or another app, so a fresh burst starts from a real read.
+local CACHE_TTL = 5
+
+local cachedLuminance = nil
+local cachedAt = 0
+local writtenLuminance = nil
+local writeInFlight = false
+local readInFlight = false
+local queuedDeltas = {}
+
+-- Push the pending level to the panel, one DDC write at a time. Anything
+-- typed while a write is in flight only moves the cached target; the value
+-- that actually gets written is whatever the target is once the wire frees
+-- up, so a burst of keystrokes costs one or two round trips, not one each.
+local function flush()
+  if writeInFlight or cachedLuminance == writtenLuminance then
     return
   end
 
-  local luminance = tonumber(stdOut)
+  local target = cachedLuminance
+  writeInFlight = true
 
-  if luminance then
-    showLevel(luminance)
+  local function onSetExit(_exitCode, _stdOut, _stdErr)
+    writeInFlight = false
+    writtenLuminance = target
+
+    flush()
   end
+
+  hs.task.new(M1DDC, onSetExit, {"set", "luminance", tostring(target)}):start()
 end
 
--- Apply a relative brightness change (percentage points). Reading first is
--- required to snap onto the STEP grid; both calls run through hs.task
--- because a DDC round trip is 50-200ms and hs.execute would block the main
--- thread for that long on every keypress.
+-- Move the cached level by one step and reflect it immediately: the HUD
+-- must not wait for the DDC round trip, or repeated keystrokes would each
+-- render a stale value.
+local function applyDelta(delta)
+  cachedLuminance = snapTarget(cachedLuminance, delta)
+  cachedAt = hs.timer.secondsSinceEpoch()
+
+  showLevel(cachedLuminance)
+  flush()
+end
+
+-- Apply a relative brightness change (percentage points). The first press
+-- of a burst reads the panel to snap onto the STEP grid; later presses
+-- reuse the cache, or queue behind that read, so none are lost to an
+-- in-flight round trip. A non-zero exit means the display is asleep or DDC
+-- is unavailable, in which case there is nothing truthful to show.
 local function step(delta)
+  if readInFlight then
+    queuedDeltas[#queuedDeltas + 1] = delta
+
+    return
+  end
+
+  if cachedLuminance and hs.timer.secondsSinceEpoch() - cachedAt < CACHE_TTL then
+    applyDelta(delta)
+
+    return
+  end
+
   local function onGetExit(exitCode, stdOut, _stdErr)
+    readInFlight = false
+
     local luminance = exitCode == 0 and tonumber(stdOut)
 
     if not luminance then
+      queuedDeltas = {}
+
       return
     end
 
-    local target = snapTarget(luminance, delta)
+    cachedLuminance = luminance
+    writtenLuminance = luminance
 
-    hs.task.new(M1DDC, onSetExit, {"set", "luminance", tostring(target)}):start()
+    applyDelta(delta)
+
+    for _, queuedDelta in ipairs(queuedDeltas) do
+      applyDelta(queuedDelta)
+    end
+
+    queuedDeltas = {}
   end
+
+  readInFlight = true
 
   hs.task.new(M1DDC, onGetExit, {"get", "luminance"}):start()
 end

@@ -1,0 +1,9 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+  "runtime.version": "Lua 5.4",
+  "workspace.library": [
+    "~/.hammerspoon/Spoons/EmmyLua.spoon/annotations"
+  ],
+  "workspace.checkThirdParty": false,
+  "diagnostics.globals": ["spoon"]
+}

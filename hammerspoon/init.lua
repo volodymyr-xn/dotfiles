@@ -10,6 +10,14 @@
 -- app to recover.
 require("hs.ipc")
 
+-- Generates EmmyLua type annotations for the whole `hs` API (and every
+-- installed Spoon) into Spoons/EmmyLua.spoon/annotations on each reload.
+-- hammerspoon/.luarc.json points lua-language-server at that directory, which
+-- is what stops the editor reporting `hs` as an undefined global and gives
+-- real completion/signatures instead. Editor-only: nothing at runtime depends
+-- on it, so a missing Spoon must not break the config.
+hs.loadSpoon("EmmyLua")
+
 -- Hammerspoon only searches hs.configdir (and Spoons/) by default, so the
 -- subdirectories have to be added to package.path before anything in them
 -- can be require()d. Flat module names are kept — require("caffeine"), not
