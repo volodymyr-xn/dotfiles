@@ -300,3 +300,19 @@ export MALLOC_ARENA_MAX=2
 
 # Test change
 alias ag='rg --follow --column --color always'
+
+# Force ExecJS (uglifier, terser, sprockets, coffee-script) to use Node.
+#
+# ExecJS::Runtimes.runtimes lists Bun BEFORE Node, and autodetect returns
+# the first available entry. So installing bun anywhere on PATH silently
+# switches the JS interpreter of every Rails asset build on this machine
+# -- no Gemfile, config or app change involved, and nothing reports it.
+#
+# Runtimes.from_environment reads EXECJS_RUNTIME before autodetect runs,
+# so this pins Node. It also raises RuntimeUnavailable when Node is
+# missing instead of quietly falling back to Bun -- a loud failure is
+# wanted here, since a wrong interpreter only shows up as subtly
+# different minified assets.
+#
+# Verify with: c-js-runtime-check
+export EXECJS_RUNTIME=Node

@@ -206,6 +206,16 @@ vim.cmd('autocmd BufRead,BufNewFile *.arb setfiletype ruby')
 -- module files.
 vim.filetype.add({ extension = { rpy = "renpy", rpym = "renpy" } })
 
+-- dub package files are SDLang, but `*.sdl` maps to the builtin `sdl`
+-- filetype (ITU-T Specification and Description Language), which mangles
+-- them. Remap by filename only, so real ITU SDL files keep their syntax.
+vim.filetype.add({
+  filename = {
+    ["dub.sdl"] = "sdlang",
+    ["dub.selections.sdl"] = "sdlang",
+  },
+})
+
 -- Highlight a matching [{()}?P] when cursor is placed on start/end character
 vim.o.showmatch=true
 

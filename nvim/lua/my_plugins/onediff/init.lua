@@ -1,13 +1,13 @@
--- OneDiff v2 (quickfix edition): a lightweight git-diff review session built
--- on gitsigns. Instead of v1's custom scratch-buffer view + sidebar
--- (my_plugins/onediff/), it opens a quickfix list of changed files and
--- highlights changed lines directly in the real buffers you edit.
+-- OneDiff: a lightweight git-diff review session built on gitsigns. It opens a
+-- quickfix list of changed files and highlights changed lines directly in the
+-- real buffers you edit.
 --
 -- Navigation during a session:
 --   * `:cnext` / `:cprev` walk the quickfix (one entry per file)
 --   * `<Tab>` / `<S-Tab>` walk hunks across ALL changed files
 --   * `(` / `)` (keymappings/git.lua) walk hunks within the current buffer
---   * `<C-S-M>` toggles inline deleted-line virtual lines (off by default)
+--   * `<C-S-M>` toggles inline deleted-line virtual lines (start state is the
+--     `show_deleted` setting, off by default)
 --   * `dd` / `3dd` / visual `d` in the list hide entries for this session only;
 --     toggling OneDiff off and on brings the full diff back
 --
@@ -18,16 +18,16 @@
 local M = {}
 
 -- Safe to require at the top: this module is itself loaded lazily on the first
--- `M` press (plugin_settings/onediff_qf.lua), by which point gitsigns has
+-- `M` press (plugin_settings/onediff.lua), by which point gitsigns has
 -- attached via its own BufReadPre event.
 local gitsigns = require("gitsigns")
 
--- Diff every buffer against HEAD (not the index) while the session runs, so
--- both staged and unstaged changes are highlighted -- matching v1's semantics.
-local BASE_REF = "HEAD"
+-- Settings table (base ref, deleted/changed line visibility at session start),
+-- populated by plugin_settings/onediff.lua before this module ever loads.
+local config = require("my_plugins.onediff.config")
 
 -- Namespace for the quickfix status-tag highlights.
-local qf_ns = vim.api.nvim_create_namespace("onediff_qf")
+local qf_ns = vim.api.nvim_create_namespace("onediff")
 
 -- Session state. `active` gates the toggle; `augroup` holds the write-refresh
 -- autocmd; `saved` snapshots gitsigns settings + `<Tab>` maps restored on
@@ -57,17 +57,21 @@ local highlight = {
 -- Colored status tags in the quickfix. New files link to the yellow change
 -- color; changed links to the green add color; deleted links to the red delete
 -- color. `default` yields to any user override.
-vim.api.nvim_set_hl(0, "OneDiffQfAdded", { link = "GitSignsChange", default = true })
-vim.api.nvim_set_hl(0, "OneDiffQfChanged", { link = "GitSignsAdd", default = true })
-vim.api.nvim_set_hl(0, "OneDiffQfDeleted", { link = "GitSignsDelete", default = true })
+vim.api.nvim_set_hl(0, "OneDiffAdded", { link = "GitSignsChange", default = true })
+vim.api.nvim_set_hl(0, "OneDiffChanged", { link = "GitSignsAdd", default = true })
+vim.api.nvim_set_hl(0, "OneDiffDeleted", { link = "GitSignsDelete", default = true })
 
 -- Per status: the leading symbol and its highlight group. New shows a yellow
 -- `*`; changed shows a green `+`; deleted shows a red `-`.
 local STATUS = {
-  added = { sym = "*", hl = "OneDiffQfAdded" },
-  changed = { sym = "+", hl = "OneDiffQfChanged" },
-  deleted = { sym = "-", hl = "OneDiffQfDeleted" },
+  added = { sym = "*", hl = "OneDiffAdded" },
+  changed = { sym = "+", hl = "OneDiffChanged" },
+  deleted = { sym = "-", hl = "OneDiffDeleted" },
 }
+
+-- What every buffer is diffed against. HEAD (not the index) means staged and
+-- unstaged changes are both shown.
+local BASE_REF = "HEAD"
 
 local normalize = vim.fs.normalize
 
@@ -143,7 +147,7 @@ end
 local function diff_hunks(root)
   local result = vim.system({
     "git", "-C", root, "-c", "core.quotePath=false",
-    "diff", "--unified=0", "--no-color", "-M", "HEAD",
+    "diff", "--unified=0", "--no-color", "-M", BASE_REF,
   }):wait()
 
   local map = {}
@@ -420,14 +424,14 @@ local function guard_qf_keys()
     return
   end
 
-  local opts = { buffer = qf_buf, desc = "OneDiff v2: open entry (deleted files inert)" }
+  local opts = { buffer = qf_buf, desc = "OneDiff: open entry (deleted files inert)" }
   vim.keymap.set("n", "<CR>", open_qf_entry, opts)
   vim.keymap.set("n", "<2-LeftMouse>", open_qf_entry, opts)
 
   vim.keymap.set("n", "dd", dismiss_under_cursor,
-    { buffer = qf_buf, desc = "OneDiff v2: dismiss entry for this session" })
+    { buffer = qf_buf, desc = "OneDiff: dismiss entry for this session" })
   vim.keymap.set("x", "d", dismiss_selection,
-    { buffer = qf_buf, desc = "OneDiff v2: dismiss selected entries for this session" })
+    { buffer = qf_buf, desc = "OneDiff: dismiss selected entries for this session" })
 end
 
 -- Drop the guarded maps on session close. Neovim reuses the quickfix buffer
@@ -643,7 +647,8 @@ function M.prev_hunk()
 end
 
 -- Toggle inline deleted-line virtual lines for the session (bound to
--- `<C-S-M>`). On at session start; refresh re-renders open buffers.
+-- `<C-S-M>`). Starts from the `show_deleted` setting; refresh re-renders open
+-- buffers.
 function M.toggle_deleted()
   if not session.active then
     return
@@ -664,11 +669,11 @@ local function install_session_keymaps()
   session.saved.del = vim.fn.maparg("<C-S-M>", "n", false, true)
 
   vim.keymap.set("n", "<Tab>", function() M.next_hunk() end,
-    { desc = "OneDiff v2: next hunk across all files" })
+    { desc = "OneDiff: next hunk across all files" })
   vim.keymap.set("n", "<S-Tab>", function() M.prev_hunk() end,
-    { desc = "OneDiff v2: prev hunk across all files" })
+    { desc = "OneDiff: prev hunk across all files" })
   vim.keymap.set("n", "<C-S-M>", function() M.toggle_deleted() end,
-    { desc = "OneDiff v2: toggle deleted lines" })
+    { desc = "OneDiff: toggle deleted lines" })
 end
 
 -- Remove the session keymaps and restore any prior mapping.
@@ -710,11 +715,11 @@ end
 -- edits and staging, and end the session when its window is closed. Both torn
 -- down in close().
 local function setup_autocmds()
-  session.augroup = vim.api.nvim_create_augroup("OneDiffQf", { clear = true })
+  session.augroup = vim.api.nvim_create_augroup("OneDiff", { clear = true })
 
   vim.api.nvim_create_autocmd("BufWritePost", {
     group = session.augroup,
-    desc = "Refresh OneDiff v2 quickfix on save",
+    desc = "Refresh OneDiff quickfix on save",
     callback = function()
       M.refresh()
     end,
@@ -722,7 +727,7 @@ local function setup_autocmds()
 
   vim.api.nvim_create_autocmd("WinClosed", {
     group = session.augroup,
-    desc = "End OneDiff v2 session when its quickfix window closes",
+    desc = "End OneDiff session when its quickfix window closes",
     callback = on_qf_window_closed,
   })
 end
@@ -751,16 +756,20 @@ local function restore_gitsigns(store)
   gitsigns.refresh()
 end
 
--- Turn on the full-line add/change highlight diffed against HEAD, then re-render
--- so already-attached buffers (including the current one) pick it up -- the
--- gitsigns toggle_* setters only mutate config, so without refresh() only
--- buffers opened afterward would show it. Changed lines link to the add-line
--- group so they render the same green as added lines. Shared by the review
--- session (M.open) and the standalone toggle (`sf`); each sets its own
--- show_deleted before calling, so this single refresh renders that too.
+-- Turn on the full-line add/change highlight. Changed lines link to the
+-- add-line group so they render the same green as added lines. Shared by the
+-- review session (M.open) and the standalone toggle (`sf`).
 local function enable_change_highlight()
   vim.api.nvim_set_hl(0, "GitSignsChangeLn", { link = "GitSignsAddLn" })
   gitsigns.toggle_linehl(true)
+end
+
+-- Re-diff against the configured base and re-render, so already-attached
+-- buffers (including the current one) pick up the settings just applied -- the
+-- gitsigns toggle_* setters only mutate its config table, so without refresh()
+-- only buffers opened afterward would show them. One call renders the line
+-- highlight and the deleted-line setting together.
+local function render_against_base()
   gitsigns.change_base(BASE_REF, true)
   gitsigns.refresh()
 end
@@ -805,11 +814,13 @@ function M.open()
   session.saved.qfedit_enable = vim.g.qfedit_enable
   vim.g.qfedit_enable = 0
 
-  -- Hide deleted-line virtual lines by default (toggle on with `<C-S-M>`),
-  -- then enable the full-line add/change highlight, which re-renders open
-  -- buffers. All restored on close.
-  gitsigns.toggle_deleted(false)
+  -- Apply the configured deleted-line visibility and the changed-line
+  -- highlight (`<C-S-M>` and `sf` still flip them by hand), then re-render open
+  -- buffers against the base. All restored on close.
+  gitsigns.toggle_deleted(config.options.show_deleted)
   enable_change_highlight()
+
+  render_against_base()
 
   populate(true, false)
 
@@ -878,25 +889,27 @@ function M.toggle()
   end
 end
 
--- Toggle only the changed-line highlight, independent of the review session
--- (bound to `sf`). No-op while a session is active, since the session already
--- renders the highlight and owns its teardown.
-function M.toggle_highlight()
+-- Turn on the changed-line highlight and re-diff every buffer against the base
+-- (bound to `sf`), independent of the review session. Pressing it again is a
+-- refresh, not a toggle: the highlight picks up commits, stages, and checkouts
+-- made since it went on. The pre-highlight gitsigns settings are snapshotted
+-- once, on the first call, so a later session close restores the true original
+-- state. No-op while a session is active, since the session already renders the
+-- highlight and owns its teardown.
+function M.refresh_highlight()
   if session.active then
     vim.notify("OneDiff: session active -- highlight already on", vim.log.levels.INFO)
     return
   end
 
-  if highlight.active then
-    highlight.active = false
-    restore_gitsigns(highlight.saved)
-    return
+  if not highlight.active then
+    highlight.active = true
+    highlight.saved = {}
+    snapshot_gitsigns(highlight.saved)
   end
 
-  highlight.active = true
-  highlight.saved = {}
-  snapshot_gitsigns(highlight.saved)
   enable_change_highlight()
+  render_against_base()
 end
 
 -- Whether a review session is currently running.

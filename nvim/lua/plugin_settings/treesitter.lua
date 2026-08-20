@@ -133,6 +133,11 @@ vim.api.nvim_set_hl(0, "BlinkCmpLabelMatch", { fg = "#ffffff" })
 vim.api.nvim_set_hl(0, "@binding.pry.ruby", { link = "DiagnosticSignHint" })
 vim.api.nvim_set_hl(0, "@ruby.class_dsl.ruby", { link = "Statement" })
 
+-- D return types (captured in after/queries/d/highlights.scm). Linked to
+-- Constant, which is catppuccin's peach, rather than to a literal hex so the
+-- colour follows the palette override in colors.lua.
+vim.api.nvim_set_hl(0, "@type.return.d", { link = "Constant" })
+
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "ruby",
   callback = function()

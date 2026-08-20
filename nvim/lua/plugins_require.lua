@@ -9,7 +9,7 @@ require('plugin_settings/vim_illuminate')
 require('plugin_settings/comment_nvim')
 require('plugin_settings/quickfix')
 require('plugin_settings/1_ror')
-require('plugin_settings/onediff_qf')
+require('plugin_settings/onediff')
 require('plugin_settings/markdown_preview')
 require('plugin_settings/markdown_html_preview')
 

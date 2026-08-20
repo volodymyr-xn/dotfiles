@@ -18,13 +18,13 @@
 // default and `watch` carry only what a menubar row can show — four
 // readings, small enough to stream every couple of seconds forever.
 // `details` is the one a dropdown asks for when it opens: every die sensor
-// separately, GPU, total memory, uptime, load and the heaviest processes.
-// None of that is worth a kernel round-trip twice a second, and the process
-// table alone costs more than the whole streaming report.
+// named separately, the GPU, and total memory. None of that is worth a
+// kernel round-trip twice a second.
 //
-// Network counters live in c-net-counters-macos instead: throughput wants a
-// faster cadence than temperature does, and splitting them lets each run on
-// its own.
+// Network counters live in c-net-counters-macos, and processes, uptime and
+// load average in c-process-stats-macos. Throughput wants a faster cadence
+// than system_stats does; the process table wants a far slower one and comes
+// from a kernel interface this tool never touches.
 //
 // CPU utilisation is deliberately absent: the caller (Hammerspoon) already
 // has hs.host.cpuUsage(), while GPU utilisation has no equivalent there and
@@ -551,172 +551,6 @@ struct PhysicalMemory {
     }
 }
 
-// Seconds since boot, off the same `kern.boottime` uptime(1) reads. Detail
-// only: the row has no line for it, and it moves once a second by
-// definition.
-struct SystemUptime {
-    private static let name = "kern.boottime"
-
-    static func seconds() -> UInt64? {
-        var boot = timeval()
-        var size = MemoryLayout<timeval>.stride
-
-        guard sysctlbyname(name, &boot, &size, nil, 0) == 0, boot.tv_sec > 0 else {
-            return nil
-        }
-
-        let now = time(nil)
-
-        guard now > boot.tv_sec else {
-            return nil
-        }
-
-        return UInt64(now - boot.tv_sec)
-    }
-}
-
-// The 1, 5 and 15 minute load averages, the three uptime(1) prints. Load is
-// runnable threads rather than busy time, so it says something the CPU
-// percentages do not: a machine at 20% with a load of 12 is waiting on
-// something.
-struct LoadAverage {
-    private static let windowCount = 3
-
-    static func values() -> [Float]? {
-        var averages = [Double](repeating: 0, count: windowCount)
-
-        guard getloadavg(&averages, Int32(windowCount)) == Int32(windowCount) else {
-            return nil
-        }
-
-        return averages.map(Float.init)
-    }
-}
-
-// One process as the detail report carries it.
-//
-// Cumulative CPU time rather than a percentage: a percentage needs two
-// samples and this command takes one. The caller diffs two calls when it has
-// them and falls back to the mean over the process's life when it does not —
-// the same split the CPU tick counters use. `ageSeconds` is what makes that
-// work without a clock on the other side: the difference between two of them
-// is exactly the wall time between the two calls.
-struct ProcessSample {
-    let pid: pid_t
-    let name: String
-    let cpuMilliseconds: UInt64
-    let residentBytes: UInt64
-    let ageSeconds: UInt64
-}
-
-// Every process this user can ask about, with what it has burned and what it
-// is holding.
-//
-// Processes owned by another user do not answer PROC_PIDTASKALLINFO without
-// privileges and are skipped, which leaves the ones worth naming in a menu:
-// a root daemon is never the answer to "what is eating my machine".
-struct ProcessTable {
-    private static let nanosecondsPerMillisecond: UInt64 = 1_000_000
-
-    // proc_taskinfo reports CPU time in mach absolute time units, not in
-    // nanoseconds — the two are the same on Intel and differ by a factor of
-    // 24 on Apple Silicon, where the tick is 125/3 ns. Read once: the ratio
-    // is fixed for the life of the boot.
-    private static let timebase: mach_timebase_info_data_t = {
-        var timebase = mach_timebase_info_data_t()
-        mach_timebase_info(&timebase)
-
-        return timebase
-    }()
-
-    private static func milliseconds(ofTicks ticks: UInt64) -> UInt64 {
-        guard timebase.denom > 0 else {
-            return 0
-        }
-
-        return ticks * UInt64(timebase.numer) / UInt64(timebase.denom) / nanosecondsPerMillisecond
-    }
-
-    // A fixed-size C character array as a String. proc_bsdinfo declares its
-    // names that way, and Swift imports such an array as a tuple with no
-    // reading of its own.
-    private static func string<T>(from characters: T) -> String {
-        var characters = characters
-
-        return withUnsafePointer(to: &characters) { pointer in
-            pointer.withMemoryRebound(to: CChar.self, capacity: MemoryLayout<T>.size) {
-                String(cString: $0)
-            }
-        }
-    }
-
-    // pbi_name carries the full name and pbi_comm its 16-character
-    // truncation; a kernel thread has only the latter.
-    private static func name(of info: proc_bsdinfo) -> String {
-        let full = string(from: info.pbi_name)
-
-        if !full.isEmpty {
-            return full
-        }
-
-        return string(from: info.pbi_comm)
-    }
-
-    private static func sample(of pid: pid_t, now: time_t) -> ProcessSample? {
-        var info = proc_taskallinfo()
-        let size = Int32(MemoryLayout<proc_taskallinfo>.size)
-
-        guard proc_pidinfo(pid, PROC_PIDTASKALLINFO, 0, &info, size) == size else {
-            return nil
-        }
-
-        let started = time_t(info.pbsd.pbi_start_tvsec)
-        let ticks = info.ptinfo.pti_total_user + info.ptinfo.pti_total_system
-
-        return ProcessSample(pid: pid,
-                             name: name(of: info.pbsd),
-                             cpuMilliseconds: milliseconds(ofTicks: ticks),
-                             residentBytes: info.ptinfo.pti_resident_size,
-                             ageSeconds: now > started ? UInt64(now - started) : 0)
-    }
-
-    static func all() -> [ProcessSample] {
-        let byteCount = proc_listpids(UInt32(PROC_ALL_PIDS), 0, nil, 0)
-
-        guard byteCount > 0 else {
-            return []
-        }
-
-        var pids = [pid_t](repeating: 0, count: Int(byteCount) / MemoryLayout<pid_t>.size)
-        let written = proc_listpids(UInt32(PROC_ALL_PIDS), 0, &pids, byteCount)
-
-        guard written > 0 else {
-            return []
-        }
-
-        let now = time(nil)
-        var samples: [ProcessSample] = []
-
-        for pid in pids.prefix(Int(written) / MemoryLayout<pid_t>.size) where pid > 0 {
-            guard let sample = sample(of: pid, now: now) else {
-                continue
-            }
-
-            samples.append(sample)
-        }
-
-        return samples
-    }
-
-    // The heaviest few by whichever measure is handed in. Ranked here rather
-    // than in the caller because the table is several hundred entries and
-    // nothing past the top few is ever shown.
-    static func heaviest(_ samples: [ProcessSample], by measure: (ProcessSample) -> UInt64,
-                         count: Int) -> [ProcessSample] {
-        Array(samples.sorted { measure($0) > measure($1) }.prefix(count))
-    }
-}
-
 // Rendering for the one-line JSON both reports emit, by hand because this
 // tool does not import Foundation and so has no JSONSerialization.
 //
@@ -821,26 +655,10 @@ struct DetailReport {
     let watts: Float?
     let swapUsedBytes: UInt64?
     let memoryTotalBytes: UInt64?
-    let uptimeSeconds: UInt64?
-    let loadAverages: [Float]?
-    let heaviestByCpu: [ProcessSample]
-    let heaviestByMemory: [ProcessSample]
 
     private func sensors(_ readings: [SensorReading]) -> String {
         JSON.array(readings.map {
             JSON.object([("key", JSON.text($0.key)), ("c", JSON.number($0.celsius))])
-        })
-    }
-
-    private func processes(_ samples: [ProcessSample]) -> String {
-        JSON.array(samples.map {
-            JSON.object([
-                ("pid", JSON.integer(Int($0.pid))),
-                ("name", JSON.text($0.name)),
-                ("cpu_ms", JSON.integer($0.cpuMilliseconds)),
-                ("rss_bytes", JSON.integer($0.residentBytes)),
-                ("age_seconds", JSON.integer($0.ageSeconds)),
-            ])
         })
     }
 
@@ -859,10 +677,6 @@ struct DetailReport {
             ("watts", JSON.number(watts)),
             ("swap_bytes", JSON.integer(swapUsedBytes)),
             ("ram_total_bytes", JSON.integer(memoryTotalBytes)),
-            ("uptime_seconds", JSON.integer(uptimeSeconds)),
-            ("load_avg", JSON.array((loadAverages ?? []).map { JSON.number($0, decimals: 2) })),
-            ("top_cpu", processes(heaviestByCpu)),
-            ("top_memory", processes(heaviestByMemory)),
         ])
     }
 }
@@ -874,18 +688,6 @@ struct SensorTempsCommand {
     private static let watchSubcommand = "watch"
     private static let detailsSubcommand = "details"
     private static let listedDecimals = 2
-
-    // How many processes the detail report carries per ranking. Resident
-    // memory is measured, so its list is an answer and stays short.
-    //
-    // CPU time is cumulative, which is a poor proxy for what is busy now: the
-    // caller re-ranks against its own previous call, so this list is
-    // candidates rather than an answer, and it has to be deep enough that a
-    // process which only started working recently is in it at all. A hundred
-    // entries reaches about a second of accumulated CPU on a freshly booted
-    // machine — anything busy for longer than that is a candidate.
-    private static let cpuCandidateCount = 100
-    private static let memoryCandidateCount = 6
 
     // Which family of keys `list` walks when no prefix is given.
     private static let defaultListedPrefix = UInt8(ascii: "T")
@@ -963,24 +765,17 @@ struct SensorTempsCommand {
         fflush(stdout)
     }
 
-    // The dropdown's reading. One shot only: the process table is walked for
-    // it, which is orders of magnitude more work than the streamed report,
-    // and nothing here is worth repeating between two menu openings.
+    // The dropdown's reading. One shot only: every key of both sensor sets is
+    // read separately for it, where the streamed report reduces each set to
+    // two figures, and nothing here changes fast enough to be worth repeating
+    // between two menu openings.
     private func emitDetails(on connection: SMCConnection) {
-        let processes = ProcessTable.all()
-        let report = DetailReport(
-            cpuSensors: SensorGroup.cpu.readings(on: connection),
-            gpuSensors: SensorGroup.gpu.readings(on: connection),
-            gpuUsagePercent: AcceleratorUsage.percent(),
-            watts: PowerSensor.watts(on: connection),
-            swapUsedBytes: SwapUsage.usedBytes(),
-            memoryTotalBytes: PhysicalMemory.totalBytes(),
-            uptimeSeconds: SystemUptime.seconds(),
-            loadAverages: LoadAverage.values(),
-            heaviestByCpu: ProcessTable.heaviest(processes, by: { $0.cpuMilliseconds },
-                                                 count: Self.cpuCandidateCount),
-            heaviestByMemory: ProcessTable.heaviest(processes, by: { $0.residentBytes },
-                                                    count: Self.memoryCandidateCount))
+        let report = DetailReport(cpuSensors: SensorGroup.cpu.readings(on: connection),
+                                  gpuSensors: SensorGroup.gpu.readings(on: connection),
+                                  gpuUsagePercent: AcceleratorUsage.percent(),
+                                  watts: PowerSensor.watts(on: connection),
+                                  swapUsedBytes: SwapUsage.usedBytes(),
+                                  memoryTotalBytes: PhysicalMemory.totalBytes())
 
         print(report.json)
         fflush(stdout)

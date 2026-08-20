@@ -137,9 +137,13 @@ eval "$(c-fzf-bins --init)"
 # bun completions
 [ -s "/Users/tech/.bun/_bun" ] && source "/Users/tech/.bun/_bun"
 
-# bun
+# bun. Appended, never prepended: bun must never shadow node/npm/npx from
+# mise, or Rails asset tooling silently changes JS interpreter.
 export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
+case ":$PATH:" in
+  *":$BUN_INSTALL/bin:"*) ;;
+  *) export PATH="$PATH:$BUN_INSTALL/bin" ;;
+esac
 
 # TODO: enable after a trial period if hidden-cursor leaks keep happening.
 # Re-show terminal cursor before each prompt, in case a program exited

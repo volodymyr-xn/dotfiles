@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+# Verify no JS tooling silently resolves to bun: reports the resolved
+# node/bun binaries, PATH ordering, and the runtime ExecJS would pick in
+# the current project (ExecJS autodetect ranks Bun above Node).
+
+set -uo pipefail
+
+node_path="$(command -v node || true)"
+bun_path="$(command -v bun || true)"
+status=0
+
+echo "node:            ${node_path:-<not found>}"
+echo "bun:             ${bun_path:-<not found>}"
+echo "EXECJS_RUNTIME:  ${EXECJS_RUNTIME:-<unset>}"
+
+if [ -z "$node_path" ]; then
+  echo "FAIL: node is not on PATH; ExecJS would fall back to bun"
+  status=1
+fi
+
+if [ "${EXECJS_RUNTIME:-}" != "Node" ]; then
+  echo "FAIL: EXECJS_RUNTIME is not Node; ExecJS autodetect prefers Bun"
+  status=1
+fi
+
+# bun appearing before node on PATH means a future bun shim could shadow it
+if [ -n "$bun_path" ] && [ -n "$node_path" ]; then
+  bun_dir="$(dirname "$bun_path")"
+  node_dir="$(dirname "$node_path")"
+  echo "PATH order:"
+  echo "$PATH" | tr ':' '\n' | grep -n -E "^($bun_dir|$node_dir)$" | while read -r entry; do
+    echo "  $entry"
+  done
+fi
+
+# Only meaningful inside a bundled project that actually loads ExecJS
+if [ -f Gemfile ] && grep -qE "execjs|uglifier|terser|sprockets|coffee" Gemfile Gemfile.lock 2>/dev/null; then
+  resolved_runtime="$(bundle exec ruby -rexecjs -e 'print ExecJS.runtime.name' 2>/dev/null)"
+
+  if [ -n "$resolved_runtime" ]; then
+    echo "ExecJS runtime:  $resolved_runtime"
+
+    case "$resolved_runtime" in
+      *Bun*)
+        echo "FAIL: this project resolves ExecJS to Bun"
+        status=1
+        ;;
+    esac
+  else
+    echo "ExecJS runtime:  <could not load; run bundle install>"
+  fi
+fi
+
+if [ "$status" -eq 0 ]; then
+  echo "OK: bun is not the default JS interpreter here"
+fi
+
+exit "$status"

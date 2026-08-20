@@ -26,12 +26,13 @@ end
 
 -- Required here rather than left to config/keys.lua because loading them has
 -- side effects beyond exposing a toggle: caffeine installs its menubar item,
--- mouse_side_buttons starts its eventtap, and temperature installs its own
+-- mouse_side_buttons starts its eventtap, and system_stats installs its own
 -- menubar item and refresh timer at require time.
 require("caffeine")
 require("mouse_side_buttons")
 
-require("temperature")
+require("system_stats")
+require("process_stats")
 
 -- All global hotkey bindings.
 require("keys")

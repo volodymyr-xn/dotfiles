@@ -12,9 +12,9 @@
 -- title is a single line of text however it is styled, so two rows in the
 -- height of the bar cannot be done any other way.
 --
--- The temperatures come from c-sensor-temps-macos, a small Swift helper that
+-- The temperatures come from c-system-sensors-macos, a small Swift helper that
 -- reads the SMC directly (see
--- native_modules/macos/c-sensor-temps-macos.swift).
+-- native_modules/macos/c-system-sensors-macos.swift).
 -- Hammerspoon has no temperature API of its own — hs.host.thermalState()
 -- returns a coarse pressure word, not degrees — and macmon, the obvious CLI,
 -- only exposes averages, so a "hottest" figure cannot be recovered from it.
@@ -24,37 +24,53 @@
 -- visible.
 --
 -- Clicking the item opens a panel with everything the row has no width for,
--- drawn into canvases the same way the row is: sections of gauges rather
--- than lines of text, because a share of a limit is a bar and reads as one.
--- The hide action lives at the bottom of it. Once hidden, `hs -c
--- 'require("temperature").show()'` or a config reload brings it back.
+-- drawn into canvases the same way the row is: sections of gauges rather than
+-- lines of text, because a share of a limit is a bar and reads as one. The
+-- drawing itself lives in stat_panel, which the process widget shares.
 --
--- The panel's readings come from a second, separate call to the same helper
--- — `c-sensor-temps-macos details` — taken once per open. It reports every
--- die sensor by name, the GPU, total memory, uptime, load and the heaviest
--- processes; the streamed report carries four figures and nothing else, so
--- the cost of all that lands on a menu that has not been drawn yet rather
--- than on every tick of a row nobody is looking at.
+-- The panel's readings come from a second, separate call to the same helper —
+-- `c-system-sensors-macos details` — taken once per open. It names every die
+-- sensor rather than reducing the set to two figures, and adds the GPU and
+-- total memory. The streamed report carries four figures and nothing else, so
+-- that cost lands on a menu that has not been drawn yet rather than on every
+-- tick of a row nobody is looking at.
+--
+-- There is no hide item in the panel: `hs -c 'require("system_stats").hide()'`
+-- still works, and `show()` or a config reload brings the widget back.
 
 -- One widget per Hammerspoon instance. modules/ is on package.path, so the
--- file is reachable as both "temperature" and "modules.temperature" — two
+-- file is reachable as both "system_stats" and "modules.system_stats" — two
 -- package.loaded entries, and without this guard the second require runs
 -- the body again and paints a second item in the bar.
-local INSTANCE_KEY = "temperatureWidget"
+local INSTANCE_KEY = "systemStatsWidget"
 
 if _G[INSTANCE_KEY] ~= nil then
   return _G[INSTANCE_KEY]
 end
 
 local canvasBanner = require("canvas_banner")
+local statFormat = require("stat_format")
+local statPanel = require("stat_panel")
+
+-- Aliased rather than called through the table: these run several times per
+-- cell on every repaint, and the row is the one place in this config where
+-- that is worth a local.
+local formatCelsius = statFormat.celsius
+local formatPercent = statFormat.percent
+local formatGigabytes = statFormat.gigabytes
+local formatBytes = statFormat.bytes
+local formatWatts = statFormat.watts
+local formatRate = statFormat.rate
+local PLACEHOLDER = statFormat.PLACEHOLDER
 
 -- Absolute paths because hs.task does not consult the login shell's PATH,
 -- which is where ~/dotfiles/bin_native/macos is added.
 local NATIVE_DIRECTORY = os.getenv("HOME") .. "/dotfiles/bin_native/macos/"
-local SENSOR_HELPER = NATIVE_DIRECTORY .. "c-sensor-temps-macos"
+local SENSOR_HELPER = NATIVE_DIRECTORY .. "c-system-sensors-macos"
 local NETWORK_HELPER = NATIVE_DIRECTORY .. "c-net-counters-macos"
 
--- The sensor helper's other report, which the dropdown asks for by itself.
+-- The sensor helper's other report, which the dropdown asks for by itself
+-- rather than reading off the stream.
 local DETAILS_SUBCOMMAND = " details"
 
 -- Both helpers are started once in `watch` mode and stream a line per
@@ -105,7 +121,6 @@ local COLUMN_SEPARATOR = "  "
 -- over the mean of the last minute, which is what a burst actually cost.
 local POWER_AVERAGE_SECONDS = 60
 local POWER_SAMPLE_LIMIT = POWER_AVERAGE_SECONDS * 1000 / SENSOR_INTERVAL_MILLISECONDS
-local WATTS_SUFFIX = "W"
 
 -- Throughput is the one column with glyphs: an arrow says which direction a
 -- rate belongs to in less width than any word would.
@@ -133,11 +148,8 @@ local DESCENDER_SHARE = 0.09
 -- which at this interval means anything short of a 11Gbit/s link.
 local COUNTER_WRAP = 2 ^ 32
 
--- Rates are shown as "49 KB/s", the form Stats uses; plain sizes get the
--- one-letter form instead, because they share a column with the readings.
-local BYTES_PER_KILOBYTE = 1024
-local RATE_UNITS = { "B", "KB", "MB", "GB" }
-local SIZE_UNITS = { "B", "K", "M", "G", "T" }
+-- The reserved-width template below is measured in these, so the suffix has
+-- to match the one stat_format puts on a rate.
 local RATE_SUFFIX = "/s"
 
 -- The throughput column alone is reserved at the width of its widest reading
@@ -149,16 +161,11 @@ local RATE_SUFFIX = "/s"
 -- Eights because they are the widest digit in a proportional face.
 local RATE_WIDTH_TEMPLATE = "888 MB" .. RATE_SUFFIX
 
--- Shown per figure when the helper is missing or a key stopped resolving.
-local PLACEHOLDER = "--"
-
 -- nf-md-eye_off — the banner glyph confirming the widget was hidden.
 local HIDDEN_ICON = "󰛑"
 
 local WARN_COLOR = { red = 1, green = 0.58, blue = 0, alpha = 1 }
 local CRITICAL_COLOR = { red = 1, green = 0.23, blue = 0.19, alpha = 1 }
-local LIGHT_COLOR = { white = 0, alpha = 1 }
-local DARK_COLOR = { white = 1, alpha = 1 }
 
 -- The macOS UI font, which is what the Stats app draws its widgets with
 -- (NSFont.systemFont); the hidden PostScript name is how AppKit exposes it.
@@ -170,9 +177,9 @@ local MENUBAR_FONT = { name = ".AppleSystemUIFont", size = 10 }
 -- stacked columns cannot.
 local SOLO_COLUMN_FONT = { name = ".AppleSystemUIFont", size = 13.9 }
 
--- The detail menu takes the system font at the size macOS sets its own menu
--- items in, so the panel reads as a native menu rather than a terminal.
-local MENU_FONT = { name = ".AppleSystemUIFont", size = 13 }
+-- The idle-swap word is the one cell carrying prose instead of a figure, so
+-- it is set bold to keep the weight of a reading next to the numbers.
+local SOLO_COLUMN_BOLD_FONT = { name = ".AppleSystemUIFontBold", size = 13.9 }
 
 local BYTES_PER_MEGABYTE = 1024 * 1024
 local BYTES_PER_GIGABYTE = 1024 * BYTES_PER_MEGABYTE
@@ -182,56 +189,7 @@ local BYTES_PER_GIGABYTE = 1024 * BYTES_PER_MEGABYTE
 -- machine is paging for real and everything starts feeling slow.
 local WARN_SWAP_BYTES = 200 * BYTES_PER_MEGABYTE
 local CRITICAL_SWAP_BYTES = 3 * BYTES_PER_GIGABYTE
-
--- The dropdown is drawn rather than typed: each section is a canvas image on
--- its own menu item, because AppKit has no gauge for a menu item and
--- hs.menubar takes a title or an image. One image per section rather than
--- one for the whole panel, so the hover highlight lands on a block the size
--- of a menu row instead of lighting up everything at once.
--- Asymmetric on purpose: AppKit indents a menu item's image by the width of
--- the checkmark column it reserves, so a left inset of its own lands on top
--- of that one and the panel reads as pushed off centre. The right side gets
--- the full margin, which is all the panel actually needs.
-local PANEL_WIDTH = 340
-local PANEL_LEFT_MARGIN = 4
-local PANEL_RIGHT_MARGIN = 14
-local PANEL_CONTENT_WIDTH = PANEL_WIDTH - PANEL_LEFT_MARGIN - PANEL_RIGHT_MARGIN
-
--- Above the header and below the last row of a section. Two of these plus
--- the menu's own separator are the whole gap between one section and the
--- next, so it buys twice what it reads as.
-local PANEL_SECTION_PADDING = 5
-
--- Section heading: small, uppercase and faded, the way macOS labels a group
--- inside one of its own panels.
-local PANEL_HEADER_SIZE = 10
-local PANEL_HEADER_HEIGHT = 13
-local PANEL_HEADER_GAP = 5
-
--- A reading's own line — its name on the left, its figures on the right —
--- and the smaller line that qualifies it underneath.
-local PANEL_VALUE_SIZE = 12.5
-local PANEL_VALUE_HEIGHT = 16
-local PANEL_DETAIL_SIZE = 10.5
-local PANEL_DETAIL_HEIGHT = 14
-
--- The bar under a reading: a full-width track with the reading's share
--- filled in, rounded enough to read as a bar rather than as a rule.
-local GAUGE_HEIGHT = 4
-local GAUGE_RADIUS = 2
-local GAUGE_GAP = 5
-local ROW_GAP = 9
-
--- One slot per die sensor, each filled from the bottom by how hot that one
--- sensor is: twelve cores as twelve columns, which is the shape of the
--- reading the "hottest over mean" pair only summarises.
-local STRIP_HEIGHT = 16
-local STRIP_GAP = 2
-
--- Strength of the resting colour for the panel's furniture: labels and the
--- qualifying lines at the first, the empty part of a gauge at the second.
-local FADED_ALPHA = 0.52
-local TRACK_ALPHA = 0.13
+local NO_SWAP_TEXT = "No swap"
 
 -- A gauge with nothing to be a share of still needs a full scale. Power gets
 -- a fixed ceiling — an Apple Silicon laptop pulling this much is at its
@@ -239,41 +197,13 @@ local TRACK_ALPHA = 0.13
 -- under the bar and make a steady draw look like it was climbing.
 local POWER_CEILING_WATTS = 40
 
--- How many processes each of the two rankings shows. The helper hands over
--- more candidates than this for the CPU one, which is re-ranked here.
-local TOP_PROCESS_COUNT = 4
-
--- Characters a process name gets before it is cut short. An Electron helper
--- runs past the figure it shares a line with otherwise.
-local PROCESS_NAME_LIMIT = 24
-
--- Bounds on the gap between two `details` calls that a CPU share may be
--- measured over: under the first, the figure is noise; over the second, it
--- is a mean across a stretch nobody was watching, and the process's own
--- lifetime mean is the more honest answer.
-local PROCESS_SAMPLE_MINIMUM_SECONDS = 1
-local PROCESS_SAMPLE_MAXIMUM_SECONDS = 600
-
-local MILLISECONDS_PER_SECOND = 1000
-local SECONDS_PER_MINUTE = 60
-local SECONDS_PER_HOUR = 60 * SECONDS_PER_MINUTE
-local SECONDS_PER_DAY = 24 * SECONDS_PER_HOUR
-
 -- Separates the two figures of a detail line. Wider than a space on each
 -- side because the two are different readings, not one phrase.
 local DETAIL_SEPARATOR = "  ·  "
 
+
 local menu = hs.menubar.new()
 local canvas = hs.canvas.new({ x = 0, y = 0, w = 1, h = BAR_HEIGHT })
-
--- Sized and painted once per section, then snapshotted: one canvas serves
--- every section of every open, the same way the row's own canvas is reused
--- across repaints.
-local panelCanvas = hs.canvas.new({ x = 0, y = 0, w = PANEL_WIDTH, h = PANEL_WIDTH })
-
--- The previous `details` call, kept so a process's CPU share can be measured
--- between two openings rather than over its whole life.
-local previousDetails = nil
 local sensorTask = nil
 local networkTask = nil
 local supervisorTimer = nil
@@ -294,24 +224,12 @@ local lastReading = {}
 local iconSources = {}
 local iconImages = {}
 
--- Resting colour for the detail menu, which macOS paints in the appearance
--- of the moment: white text on the dark panel, black on the light one. Read
--- per open rather than cached, because the appearance can flip under the
--- running config (Auto mode at dusk).
-local function menuTextColor()
-  if hs.host.interfaceStyle() == "Dark" then
-    return DARK_COLOR
-  end
-
-  return LIGHT_COLOR
-end
-
--- The row follows the system appearance, same as the menu: white text in
--- Dark, black in Light. It does not follow the wallpaper the way macOS tints
--- its own items — that needs the strip behind the bar sampled, which nothing
--- in Hammerspoon exposes.
+-- The row follows the system appearance, same as the panel behind it: white
+-- text in Dark, black in Light. It does not follow the wallpaper the way macOS
+-- tints its own items — that needs the strip behind the bar sampled, which
+-- nothing in Hammerspoon exposes.
 local function barTextColor()
-  return menuTextColor()
+  return statPanel.textColor()
 end
 
 -- Colour for one reading against its own pair of thresholds: red once
@@ -394,101 +312,6 @@ end
 -- carries; a cell without a font of its own takes the stacked-row one.
 local function styledValue(text, color, font)
   return hs.styledtext.new(text, { font = font or MENUBAR_FONT, color = color })
-end
-
--- "45°" for a live reading.
-local function formatCelsius(celsius)
-  if celsius == nil then
-    return PLACEHOLDER .. "°"
-  end
-
-  return string.format("%.0f°", celsius)
-end
-
--- "12%" for a live figure.
-local function formatPercent(percent)
-  if percent == nil then
-    return PLACEHOLDER .. "%"
-  end
-
-  return string.format("%.0f%%", percent)
-end
-
--- The same figure for a single process, which needs a decimal the machine
--- total does not: an idle desktop is a dozen processes at a fraction of a
--- percent each, and whole numbers render that ranking as a column of zeroes.
-local function formatProcessPercent(percent)
-  if percent == nil then
-    return PLACEHOLDER .. "%"
-  end
-
-  if percent >= 10 then
-    return string.format("%.0f%%", percent)
-  end
-
-  return string.format("%.1f%%", percent)
-end
-
--- "15GB" — whole gigabytes: the decimal was noise at a glance, and dropping
--- it keeps the column narrow.
-local function formatGigabytes(bytes)
-  if bytes == nil then
-    return PLACEHOLDER
-  end
-
-  return string.format("%.0fGB", bytes / BYTES_PER_GIGABYTE)
-end
-
--- "512M", "3G", "1.2T" — a size in the largest unit it fills, one letter and
--- no space so it stays column-width. Swap needs the finer units because it
--- turns orange at 200MB, and a warning colour on a figure reading "0G" looks
--- like a bug rather than a warning.
-local function formatBytes(bytes)
-  if bytes == nil then
-    return PLACEHOLDER
-  end
-
-  local value = bytes
-  local unit = 1
-
-  while value >= BYTES_PER_KILOBYTE and unit < #SIZE_UNITS do
-    value = value / BYTES_PER_KILOBYTE
-    unit = unit + 1
-  end
-
-  local format = (value < 10 and unit > 1) and "%.1f%s" or "%.0f%s"
-
-  return string.format(format, value, SIZE_UNITS[unit])
-end
-
--- "18.1W" — one decimal, because idle draw moves in tenths and the whole
--- number alone made the column look frozen.
-local function formatWatts(watts)
-  if watts == nil then
-    return PLACEHOLDER .. WATTS_SUFFIX
-  end
-
-  return string.format("%.1f" .. WATTS_SUFFIX, watts)
-end
-
--- "49 KB/s" — the largest unit the rate fits in, with a decimal only below
--- ten so the column stays narrow while a slow link still shows movement.
-local function formatRate(bytesPerSecond)
-  if bytesPerSecond == nil then
-    return PLACEHOLDER .. RATE_SUFFIX
-  end
-
-  local value = bytesPerSecond
-  local unit = 1
-
-  while value >= BYTES_PER_KILOBYTE and unit < #RATE_UNITS do
-    value = value / BYTES_PER_KILOBYTE
-    unit = unit + 1
-  end
-
-  local format = (value < 10 and unit > 1) and "%.1f %s" or "%.0f %s"
-
-  return string.format(format, value, RATE_UNITS[unit]) .. RATE_SUFFIX
 end
 
 -- Counters from the previous refresh with the moment they were taken, so
@@ -703,6 +526,18 @@ local function celsiusCell(celsius, resting)
   }
 end
 
+-- Idle swap reads "No swap" rather than "0B": zero paging is a state, and the
+-- word says so where a zeroed size looks like a stalled reading.
+local function swapCell(bytes, resting)
+  local color = thresholdColor(bytes, WARN_SWAP_BYTES, CRITICAL_SWAP_BYTES, resting)
+
+  if bytes == 0 then
+    return { text = NO_SWAP_TEXT, color = color, font = SOLO_COLUMN_BOLD_FONT }
+  end
+
+  return { text = formatBytes(bytes), color = color, font = SOLO_COLUMN_FONT }
+end
+
 -- The six columns, left to right, unlabelled: memory in use, swap in use,
 -- busiest core over mean load, hottest die over the mean of the sensor set,
 -- current draw over the rolling mean, and upload over download. Memory leads
@@ -727,11 +562,7 @@ local function columns(reading, resting)
       },
     },
     {
-      top = {
-        text = formatBytes(swapUsed),
-        color = thresholdColor(swapUsed, WARN_SWAP_BYTES, CRITICAL_SWAP_BYTES, resting),
-        font = SOLO_COLUMN_FONT,
-      },
+      top = swapCell(swapUsed, resting),
     },
     {
       top = { text = formatPercent(reading.cpuBusiestUsage), color = resting },
@@ -1026,7 +857,7 @@ local function hide()
 
   canvasBanner.show({
     title = "Sensors hidden",
-    subtitle = "hs -c 'require(\"temperature\").show()'",
+    subtitle = "hs -c 'require(\"system_stats\").show()'",
     state = "off",
     icon = HIDDEN_ICON,
   })
@@ -1047,10 +878,10 @@ end
 -- dimmed — which would fade the whole section image, gauges included.
 local function ignoreClick() end
 
--- One `details` call, decoded. Synchronous, because hs.menubar wants its
--- menu returned there and then and an hs.task cannot answer in time; the
--- helper takes about 7ms including the spawn, and it is paid against a panel
--- that has not been drawn yet rather than on a timer.
+-- One `details` call, decoded. Synchronous, because hs.menubar wants its menu
+-- returned there and then and an hs.task cannot answer in time; the helper
+-- takes about 6ms including the spawn, and it is paid against a panel that has
+-- not been drawn yet rather than on a timer.
 local function fetchDetails()
   local output = hs.execute(SENSOR_HELPER .. DETAILS_SUBCOMMAND)
 
@@ -1061,294 +892,6 @@ local function fetchDetails()
   return hs.json.decode(output)
 end
 
--- The resting colour at reduced strength, for the panel's own furniture:
--- labels, qualifying lines, and the empty part of a gauge.
-local function fadedColor(resting, alpha)
-  return { white = resting.white, alpha = alpha }
-end
-
--- Share of a scale, clamped: a reading past its ceiling fills the track
--- rather than overflowing it, and one below zero cannot happen but would
--- draw backwards if it did.
-local function gaugeFraction(value, ceiling)
-  if value == nil or ceiling == nil or ceiling <= 0 then
-    return 0
-  end
-
-  return math.max(0, math.min(1, value / ceiling))
-end
-
--- "3d 4h", "4h 12m", "12m" — two units, because the third never changes what
--- the first two already said.
-local function formatUptime(seconds)
-  if seconds == nil then
-    return PLACEHOLDER
-  end
-
-  local days = math.floor(seconds / SECONDS_PER_DAY)
-  local hours = math.floor(seconds % SECONDS_PER_DAY / SECONDS_PER_HOUR)
-  local minutes = math.floor(seconds % SECONDS_PER_HOUR / SECONDS_PER_MINUTE)
-
-  if days > 0 then
-    return string.format("%dd %dh", days, hours)
-  end
-
-  if hours > 0 then
-    return string.format("%dh %dm", hours, minutes)
-  end
-
-  return string.format("%dm", minutes)
-end
-
--- The three windows getloadavg reports, in the order it reports them.
-local function formatLoadAverages(averages)
-  if averages == nil or #averages == 0 then
-    return PLACEHOLDER
-  end
-
-  local windows = {}
-
-  for _, average in ipairs(averages) do
-    windows[#windows + 1] = string.format("%.2f", average)
-  end
-
-  return table.concat(windows, DETAIL_SEPARATOR)
-end
-
--- A process name that fits the label column. An Electron helper's name runs
--- past the figure it shares a line with otherwise.
-local function shortenName(name)
-  if name == nil then
-    return PLACEHOLDER
-  end
-
-  if #name <= PROCESS_NAME_LIMIT then
-    return name
-  end
-
-  return name:sub(1, PROCESS_NAME_LIMIT - 1) .. "…"
-end
-
--- The previous call's samples by pid, so a process can be matched to its own
--- earlier reading.
-local function processesByPid(samples)
-  local byPid = {}
-
-  for _, sample in ipairs(samples or {}) do
-    byPid[sample.pid] = sample
-  end
-
-  return byPid
-end
-
--- Share of one core a process took, out of cumulative CPU time: the helper
--- reports the total it has burned since it started, because a percentage
--- needs two samples and it takes one.
---
--- With an earlier call to diff against, this is the share over the gap
--- between the two — and the gap is read off the two ages rather than a clock,
--- so a line that arrived late cannot skew it. Without one, it is the mean
--- over the process's whole life, which is the honest answer for a menu that
--- was last open an hour ago.
-local function processCpuPercent(sample, previous)
-  if previous ~= nil and sample.cpu_ms >= previous.cpu_ms then
-    local elapsed = sample.age_seconds - previous.age_seconds
-
-    if elapsed >= PROCESS_SAMPLE_MINIMUM_SECONDS
-      and elapsed <= PROCESS_SAMPLE_MAXIMUM_SECONDS then
-      return 100 * (sample.cpu_ms - previous.cpu_ms) / (elapsed * MILLISECONDS_PER_SECOND)
-    end
-  end
-
-  if sample.age_seconds > 0 then
-    return 100 * sample.cpu_ms / (sample.age_seconds * MILLISECONDS_PER_SECOND)
-  end
-
-  return nil
-end
-
--- The helper's candidates re-ranked by what they are doing now rather than
--- by what they have done in total, which is the order it could hand over.
-local function rankedByCpu(samples, previousSamples)
-  local previousByPid = processesByPid(previousSamples)
-  local ranked = {}
-
-  for _, sample in ipairs(samples or {}) do
-    ranked[#ranked + 1] = {
-      name = sample.name,
-      percent = processCpuPercent(sample, previousByPid[sample.pid]),
-    }
-  end
-
-  table.sort(ranked, function(left, right)
-    return (left.percent or 0) > (right.percent or 0)
-  end)
-
-  return ranked
-end
-
--- A panel under construction: the elements drawn so far and the vertical pen
--- they are laid against. Every row appends and advances it, which is the
--- whole layout — nothing has to know its own height in advance.
-local function newPanel()
-  return { elements = {}, y = PANEL_SECTION_PADDING }
-end
-
--- One line of text at the pen's height. The label and the figure share the
--- line and the full content width, separated by their alignment alone, which
--- is also what lines the figure up with the right edge of the gauge below it
--- without a single string being measured.
-local function addText(panel, text, size, height, color, alignment)
-  local elements = panel.elements
-
-  elements[#elements + 1] = {
-    type = "text",
-    text = text,
-    textFont = MENU_FONT.name,
-    textSize = size,
-    textColor = color,
-    textAlignment = alignment,
-    frame = { x = PANEL_LEFT_MARGIN, y = panel.y, w = PANEL_CONTENT_WIDTH, h = height },
-  }
-end
-
-local function barElement(x, y, width, height, color)
-  return {
-    type = "rectangle",
-    action = "fill",
-    fillColor = color,
-    roundedRectRadii = { xRadius = GAUGE_RADIUS, yRadius = GAUGE_RADIUS },
-    frame = { x = x, y = y, w = width, h = height },
-  }
-end
-
--- A reading's share of its scale. The track is drawn whatever the reading
--- is, so a figure at zero still shows what it is being measured against.
-local function addGauge(panel, fraction, color, trackColor)
-  local elements = panel.elements
-
-  elements[#elements + 1] =
-    barElement(PANEL_LEFT_MARGIN, panel.y, PANEL_CONTENT_WIDTH, GAUGE_HEIGHT, trackColor)
-
-  if fraction > 0 then
-    elements[#elements + 1] =
-      barElement(PANEL_LEFT_MARGIN, panel.y, PANEL_CONTENT_WIDTH * fraction, GAUGE_HEIGHT, color)
-  end
-
-  panel.y = panel.y + GAUGE_HEIGHT
-end
-
--- Several shares of one scale laid end to end, for a total worth breaking
--- down: what the apps hold, what the kernel pinned, what the compressor took.
-local function addSegments(panel, parts, trackColor)
-  local elements = panel.elements
-  local x = PANEL_LEFT_MARGIN
-
-  elements[#elements + 1] =
-    barElement(PANEL_LEFT_MARGIN, panel.y, PANEL_CONTENT_WIDTH, GAUGE_HEIGHT, trackColor)
-
-  for _, part in ipairs(parts) do
-    local width = PANEL_CONTENT_WIDTH * part.fraction
-
-    if width > 0 then
-      elements[#elements + 1] = barElement(x, panel.y, width, GAUGE_HEIGHT, part.color)
-      x = x + width
-    end
-  end
-
-  panel.y = panel.y + GAUGE_HEIGHT
-end
-
--- One column per die sensor, filled from the bottom by how hot that sensor
--- is: the shape the "hottest over mean" pair only summarises, and the reason
--- the helper reports the set rather than the summary of it.
-local function addStrip(panel, readings, resting, trackColor)
-  local count = #readings
-
-  if count == 0 then
-    return
-  end
-
-  local elements = panel.elements
-  local slotWidth = (PANEL_CONTENT_WIDTH - STRIP_GAP * (count - 1)) / count
-
-  for index, sensor in ipairs(readings) do
-    local x = PANEL_LEFT_MARGIN + (slotWidth + STRIP_GAP) * (index - 1)
-    local celsius = sensor.c
-    local filled = STRIP_HEIGHT * gaugeFraction(celsius, CRITICAL_CELSIUS)
-
-    elements[#elements + 1] = barElement(x, panel.y, slotWidth, STRIP_HEIGHT, trackColor)
-
-    if filled > 0 then
-      elements[#elements + 1] = barElement(x, panel.y + STRIP_HEIGHT - filled, slotWidth, filled,
-        thresholdColor(celsius, WARN_CELSIUS, CRITICAL_CELSIUS, fadedColor(resting, 0.7)))
-    end
-  end
-
-  panel.y = panel.y + STRIP_HEIGHT
-end
-
--- One row: its line of text, whichever bar it carries, and the smaller line
--- that qualifies it. A row is described by which of those it has rather than
--- by a kind, so a plain reading and a gauged one are the same table with one
--- field more or less.
-local function addRow(panel, row, resting)
-  local faded = fadedColor(resting, FADED_ALPHA)
-  local track = fadedColor(resting, TRACK_ALPHA)
-  local hasBar = row.fraction ~= nil or row.parts ~= nil or row.readings ~= nil
-
-  if row.label ~= nil then
-    addText(panel, row.label, PANEL_VALUE_SIZE, PANEL_VALUE_HEIGHT, faded, "left")
-  end
-
-  if row.value ~= nil then
-    addText(panel, row.value, PANEL_VALUE_SIZE, PANEL_VALUE_HEIGHT, row.color or resting, "right")
-  end
-
-  if row.label ~= nil or row.value ~= nil then
-    panel.y = panel.y + PANEL_VALUE_HEIGHT + (hasBar and GAUGE_GAP or 0)
-  end
-
-  if row.fraction ~= nil then
-    addGauge(panel, row.fraction, row.gaugeColor, track)
-  elseif row.parts ~= nil then
-    addSegments(panel, row.parts, track)
-  elseif row.readings ~= nil then
-    addStrip(panel, row.readings, resting, track)
-  end
-
-  if row.detail ~= nil then
-    panel.y = panel.y + GAUGE_GAP
-    addText(panel, row.detail, PANEL_DETAIL_SIZE, PANEL_DETAIL_HEIGHT, faded, "left")
-    panel.y = panel.y + PANEL_DETAIL_HEIGHT
-  end
-end
-
--- One section, painted and snapshotted. The canvas is resized to whatever
--- the rows turned out to need rather than to a figure worked out in advance.
-local function sectionImage(section, resting)
-  local panel = newPanel()
-  local rows = section.rows
-
-  addText(panel, section.header, PANEL_HEADER_SIZE, PANEL_HEADER_HEIGHT,
-    fadedColor(resting, FADED_ALPHA), "left")
-
-  panel.y = panel.y + PANEL_HEADER_HEIGHT + PANEL_HEADER_GAP
-
-  for index, row in ipairs(rows) do
-    if index > 1 then
-      panel.y = panel.y + ROW_GAP
-    end
-
-    addRow(panel, row, resting)
-  end
-
-  panelCanvas:size({ w = PANEL_WIDTH, h = panel.y + PANEL_SECTION_PADDING })
-  panelCanvas:replaceElements(table.unpack(panel.elements))
-
-  return panelCanvas:imageFromCanvas()
-end
-
 -- One die reading as a row of the temperature summary: hottest over mean,
 -- against the threshold that decides its colour.
 local function temperatureRow(label, hottest, average, resting)
@@ -1357,15 +900,15 @@ local function temperatureRow(label, hottest, average, resting)
     value = formatCelsius(hottest) .. " hottest" .. DETAIL_SEPARATOR
       .. formatCelsius(average) .. " mean",
     color = thresholdColor(hottest, WARN_CELSIUS, CRITICAL_CELSIUS, resting),
-    fraction = gaugeFraction(hottest, CRITICAL_CELSIUS),
+    fraction = statPanel.fraction(hottest, CRITICAL_CELSIUS),
     gaugeColor = thresholdColor(hottest, WARN_CELSIUS, CRITICAL_CELSIUS,
-      fadedColor(resting, 0.75)),
+      statPanel.faded(resting, 0.75)),
   }
 end
 
--- Both dies in one place, which is the question the widget is named after
--- and the one the row itself can only answer for the CPU. The sensor sets
--- these summarise stay with the unit they belong to, further down.
+-- Both dies in one place, which the row itself can only answer for the CPU:
+-- it has no width for a GPU column. The sensor sets these
+-- summarise stay with the unit they belong to, further down.
 local function temperatureSection(details, resting)
   return {
     header = "Temperature",
@@ -1376,9 +919,27 @@ local function temperatureSection(details, resting)
   }
 end
 
--- Load, then the whole sensor set the summary above was reduced from. The
--- load figures stay Hammerspoon's own: the helper has no CPU utilisation to
--- report, because hs.host.cpuUsageTicks() already does.
+-- One slot per die sensor, each filled by how hot that sensor is against the
+-- critical threshold and tinted the same way the summary above it is.
+local function sensorBars(readings, resting)
+  local bars = {}
+  local resting70 = statPanel.faded(resting, 0.7)
+
+  for index, sensor in ipairs(readings or {}) do
+    local celsius = sensor.c
+
+    bars[index] = {
+      fraction = statPanel.fraction(celsius, CRITICAL_CELSIUS),
+      color = thresholdColor(celsius, WARN_CELSIUS, CRITICAL_CELSIUS, resting70),
+    }
+  end
+
+  return bars
+end
+
+-- Load, then the whole sensor set the summary above was reduced from. The load
+-- figures stay Hammerspoon's own: the helper has no CPU utilisation to report,
+-- because hs.host.cpuUsageTicks() already does.
 local function cpuSection(details, resting)
   local reading = lastReading
   local busiest = reading.cpuBusiestUsage
@@ -1390,10 +951,10 @@ local function cpuSection(details, resting)
         label = "Load",
         value = formatPercent(busiest) .. " busiest" .. DETAIL_SEPARATOR
           .. formatPercent(reading.cpuUsage) .. " mean",
-        fraction = gaugeFraction(busiest, 100),
-        gaugeColor = fadedColor(resting, 0.75),
+        fraction = statPanel.fraction(busiest, 100),
+        gaugeColor = statPanel.faded(resting, 0.75),
       },
-      { label = "Cores", readings = details.cpu_sensors or {} },
+      { label = "Cores", bars = sensorBars(details.cpu_sensors, resting) },
     },
   }
 end
@@ -1408,16 +969,16 @@ local function gpuSection(details, resting)
       {
         label = "Load",
         value = formatPercent(usage),
-        fraction = gaugeFraction(usage, 100),
-        gaugeColor = fadedColor(resting, 0.75),
+        fraction = statPanel.fraction(usage, 100),
+        gaugeColor = statPanel.faded(resting, 0.75),
       },
-      { label = "Dies", readings = details.gpu_sensors or {} },
+      { label = "Dies", bars = sensorBars(details.gpu_sensors, resting) },
     },
   }
 end
 
--- Memory read again here rather than taken from the last tick: it is a
--- counter read, and the panel is a snapshot of the moment it opened.
+-- Memory read again here rather than taken from the last tick: it is a counter
+-- read, and the panel is a snapshot of the moment it opened.
 local function memorySection(details, resting)
   local memory = memoryUsage() or {}
   local total = details.ram_total_bytes
@@ -1430,9 +991,12 @@ local function memorySection(details, resting)
         label = "RAM",
         value = formatGigabytes(memory.used) .. " of " .. formatGigabytes(total),
         parts = {
-          { fraction = gaugeFraction(memory.app, total), color = fadedColor(resting, 0.85) },
-          { fraction = gaugeFraction(memory.wired, total), color = fadedColor(resting, 0.55) },
-          { fraction = gaugeFraction(memory.compressed, total), color = fadedColor(resting, 0.3) },
+          { fraction = statPanel.fraction(memory.app, total),
+            color = statPanel.faded(resting, 0.85) },
+          { fraction = statPanel.fraction(memory.wired, total),
+            color = statPanel.faded(resting, 0.55) },
+          { fraction = statPanel.fraction(memory.compressed, total),
+            color = statPanel.faded(resting, 0.3) },
         },
         detail = "app " .. formatBytes(memory.app) .. DETAIL_SEPARATOR
           .. "wired " .. formatBytes(memory.wired) .. DETAIL_SEPARATOR
@@ -1442,9 +1006,9 @@ local function memorySection(details, resting)
         label = "Swap",
         value = formatBytes(swapUsed) .. " in use",
         color = thresholdColor(swapUsed, WARN_SWAP_BYTES, CRITICAL_SWAP_BYTES, resting),
-        fraction = gaugeFraction(swapUsed, CRITICAL_SWAP_BYTES),
+        fraction = statPanel.fraction(swapUsed, CRITICAL_SWAP_BYTES),
         gaugeColor = thresholdColor(swapUsed, WARN_SWAP_BYTES, CRITICAL_SWAP_BYTES,
-          fadedColor(resting, 0.75)),
+          statPanel.faded(resting, 0.75)),
       },
     },
   }
@@ -1463,8 +1027,8 @@ local function powerSection(details, resting)
         label = "Draw",
         value = formatWatts(details.watts) .. " now" .. DETAIL_SEPARATOR
           .. formatWatts(averageWatts()) .. " mean",
-        fraction = gaugeFraction(details.watts, POWER_CEILING_WATTS),
-        gaugeColor = fadedColor(resting, 0.75),
+        fraction = statPanel.fraction(details.watts, POWER_CEILING_WATTS),
+        gaugeColor = statPanel.faded(resting, 0.75),
         detail = string.format("%s low%s%s peak over the last %ds",
           formatWatts(lowestWatts), DETAIL_SEPARATOR, formatWatts(highestWatts),
           POWER_AVERAGE_SECONDS),
@@ -1495,134 +1059,50 @@ local function networkSection()
   }
 end
 
--- Load average rather than another CPU percentage: it counts threads waiting
--- for a turn, so a machine at 20% with a load of twelve is stuck on
--- something the utilisation figures cannot show.
-local function systemSection(details)
-  return {
-    header = "System",
-    rows = {
-      { label = "Uptime", value = formatUptime(details.uptime_seconds) },
-      { label = "Load avg", value = formatLoadAverages(details.load_avg) },
-    },
-  }
-end
-
-local function topCpuSection(details, resting)
-  local ranked = rankedByCpu(details.top_cpu, previousDetails and previousDetails.top_cpu)
-  local rows = {}
-
-  for index = 1, math.min(TOP_PROCESS_COUNT, #ranked) do
-    local process = ranked[index]
-
-    rows[#rows + 1] = {
-      label = shortenName(process.name),
-      value = formatProcessPercent(process.percent),
-      fraction = gaugeFraction(process.percent, 100),
-      gaugeColor = fadedColor(resting, 0.6),
-    }
-  end
-
-  return { header = "Top by CPU", rows = rows }
-end
-
-local function topMemorySection(details, resting)
-  local total = details.ram_total_bytes
-  local samples = details.top_memory or {}
-  local rows = {}
-
-  for index = 1, math.min(TOP_PROCESS_COUNT, #samples) do
-    local process = samples[index]
-
-    rows[#rows + 1] = {
-      label = shortenName(process.name),
-      value = formatBytes(process.rss_bytes),
-      fraction = gaugeFraction(process.rss_bytes, total),
-      gaugeColor = fadedColor(resting, 0.6),
-    }
-  end
-
-  return { header = "Top by memory", rows = rows }
-end
-
--- Everything the bar has no width for, rebuilt each time the panel opens so
--- it carries the reading of the moment it was opened rather than the one the
--- menu was built on.
+-- Everything the bar has no width for, rebuilt each time the panel opens so it
+-- carries the reading of the moment it was opened rather than the one the menu
+-- was built on.
+--
+-- Processes, uptime and load average are not here: they have a menubar item of
+-- their own, and the helper behind it never runs for this one.
 local function detailSections(resting)
   local details = fetchDetails() or {}
+
   -- Memory leads, the way it leads the row: it is the figure worth a glance.
   -- The temperature summary follows, and the per-unit sections after it.
-  local sections = {
+  return {
     memorySection(details, resting),
     temperatureSection(details, resting),
     cpuSection(details, resting),
     gpuSection(details, resting),
     powerSection(details, resting),
     networkSection(),
-    systemSection(details),
-    topCpuSection(details, resting),
-    topMemorySection(details, resting),
   }
-
-  previousDetails = details
-
-  return sections
 end
 
 local function detailMenu()
-  local resting = menuTextColor()
+  local resting = statPanel.textColor()
   local items = {}
 
-  for _, section in ipairs(detailSections(resting)) do
-    if #section.rows > 0 then
-      -- template = false keeps the colours, the same way the row's own icon
-      -- does: the default treats the image as a mask and repaints it in the
-      -- menu's own tint.
-      local image = sectionImage(section, resting):template(false)
-
-      items[#items + 1] = { title = "", image = image, fn = ignoreClick }
+  for index, section in ipairs(detailSections(resting)) do
+    if index > 1 then
       items[#items + 1] = { title = "-" }
     end
-  end
 
-  items[#items + 1] = { title = styledValue("Hide sensors", resting, MENU_FONT), fn = hide }
+    -- template = false keeps the colours, the same way the row's own icon
+    -- does: the default treats the image as a mask and repaints it in the
+    -- menu's own tint.
+    local image = statPanel.sectionImage(section, resting):template(false)
+
+    items[#items + 1] = { title = "", image = image, fn = ignoreClick }
+  end
 
   return items
 end
 
 -- A menu rather than a click callback: hs.menubar honours one or the other,
--- and the hide action lives in the menu now that the click opens it.
+-- and there is nothing to do with a click but open this.
 menu:setMenu(detailMenu)
-
--- The plain-text mirror of one panel row, for reading the panel from `hs -c`
--- without opening it. A gauge has no text to mirror; the sensor strip does,
--- and it is the one thing the panel shows that no line of the old menu ever
--- did.
-local function rowText(row)
-  local lines = {}
-
-  if row.value ~= nil then
-    lines[#lines + 1] = string.format("  %-27s %s", row.label or "", row.value)
-  elseif row.label ~= nil then
-    lines[#lines + 1] = "  " .. row.label
-  end
-
-  if row.readings ~= nil then
-    local sensors = {}
-
-    for _, sensor in ipairs(row.readings) do
-      sensors[#sensors + 1] = sensor.key .. " " .. formatCelsius(sensor.c)
-    end
-
-    lines[#lines + 1] = "  " .. table.concat(sensors, "  ")
-  end
-
-  if row.detail ~= nil then
-    lines[#lines + 1] = "  " .. row.detail
-  end
-
-  return table.concat(lines, "\n")
-end
 
 -- Restart both helpers, which is the only "refresh" a streaming widget has:
 -- the readings arrive on their own, and the useful manual action is bringing
@@ -1648,17 +1128,7 @@ local widget = {
   title = function() return lastText end,
   paintCost = function() return lastPaintMilliseconds end,
   details = function()
-    local lines = {}
-
-    for _, section in ipairs(detailSections(menuTextColor())) do
-      lines[#lines + 1] = section.header
-
-      for _, row in ipairs(section.rows) do
-        lines[#lines + 1] = rowText(row)
-      end
-    end
-
-    return table.concat(lines, "\n")
+    return statPanel.stackText(detailSections(statPanel.textColor()))
   end,
 }
 

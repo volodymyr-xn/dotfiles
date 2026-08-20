@@ -9,7 +9,7 @@
 //   c-net-counters-macos watch 250    the same at another interval
 //
 // Split out of c-sensor-temps-macos because throughput wants a faster
-// cadence than temperature does: half a second here against a second there,
+// cadence than system_stats does: half a second here against a second there,
 // and a rate is only as good as the interval it was measured over.
 //
 // Counters rather than rates: the caller diffs two lines across the interval

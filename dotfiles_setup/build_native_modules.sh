@@ -31,13 +31,13 @@ build_swift_module() {
 
 # SMC sensor reader. The key sets it ships are Apple Silicon only, so the
 # binary is pointless on an Intel Mac.
-build_sensor_temps_macos() {
+build_system_sensors_macos() {
   if [[ "$(uname -m)" != "arm64" ]]; then
-    echo "skipped c-sensor-temps-macos: Apple Silicon only" >&2
+    echo "skipped c-system-sensors-macos: Apple Silicon only" >&2
     return
   fi
 
-  build_swift_module "$MODULES_DIR/macos/c-sensor-temps-macos.swift" \
+  build_swift_module "$MODULES_DIR/macos/c-system-sensors-macos.swift" \
     -framework IOKit -framework SystemConfiguration
 }
 
@@ -48,9 +48,16 @@ build_net_counters_macos() {
     -framework SystemConfiguration
 }
 
+# Process table, uptime and load average. Darwin only, no framework beyond
+# libSystem.
+build_process_stats_macos() {
+  build_swift_module "$MODULES_DIR/macos/c-process-stats-macos.swift"
+}
+
 build_macos_modules() {
-  build_sensor_temps_macos
+  build_system_sensors_macos
   build_net_counters_macos
+  build_process_stats_macos
 }
 
 build_linux_modules() {

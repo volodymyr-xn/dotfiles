@@ -3,6 +3,7 @@
 -- Loaded last by init.lua, after package.path is extended so the module
 -- requires below resolve out of modules/.
 
+local brightness = require("brightness")
 local caffeine = require("caffeine")
 local clickNotification = require("click_notification")
 local cycleAppWindows = require("cycle_app_windows")
@@ -10,6 +11,11 @@ local dismissNotifications = require("dismiss_notifications").dismiss
 local mediaKeys = require("media_keys")
 local mouseSideButtons = require("mouse_side_buttons")
 local notifyReturn = require("notify_return")
+
+-- External display brightness over DDC: F6 up, F5 down
+-- Mirrors the F10/F9 volume direction; held keys ramp.
+hs.hotkey.bind({}, "f6", brightness.up, nil, brightness.up)
+hs.hotkey.bind({}, "f5", brightness.down, nil, brightness.down)
 
 -- Volume control: F10 up, F9 down
 -- For keychron mechanic low profile keyboard
