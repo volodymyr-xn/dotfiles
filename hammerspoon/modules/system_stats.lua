@@ -28,6 +28,11 @@
 -- lines of text, because a share of a limit is a bar and reads as one. The
 -- drawing itself lives in stat_panel, which the process widget shares.
 --
+-- What this file owns is the row, the panel and the cadence they refresh on.
+-- Taking the readings does not live here: cpu_ticks, memory_usage,
+-- net_counters and power_window each own one source and the baseline it needs
+-- to be a rate, and line_stream owns the helper processes they read from.
+--
 -- The panel's readings come from a second, separate call to the same helper —
 -- `c-system-sensors-macos details` — taken once per open. It names every die
 -- sensor rather than reducing the set to two figures, and adds the GPU and
@@ -49,6 +54,11 @@ if _G[INSTANCE_KEY] ~= nil then
 end
 
 local canvasBanner = require("canvas_banner")
+local cpuTicks = require("cpu_ticks")
+local lineStream = require("line_stream")
+local memoryUsage = require("memory_usage")
+local netCounters = require("net_counters")
+local powerWindow = require("power_window")
 local statFormat = require("stat_format")
 local statPanel = require("stat_panel")
 
@@ -73,10 +83,8 @@ local NETWORK_HELPER = NATIVE_DIRECTORY .. "c-net-counters-macos"
 -- rather than reading off the stream.
 local DETAILS_SUBCOMMAND = " details"
 
--- Both helpers are started once in `watch` mode and stream a line per
--- interval, rather than being spawned per refresh: the spawn cost about
--- 13ms of Hammerspoon's main thread — six times the actual reading — and it
--- was paid on every tick.
+-- Both helpers stream a line per interval through lib/line_stream, which
+-- carries why that beats spawning one per refresh.
 --
 -- Both on the same second: throughput is the spikiest reading and was worth
 -- twice the cadence on its own, but every extra line lands a repaint, and a
@@ -142,11 +150,6 @@ local ICON_TEXT_GAP = 2
 -- Half of it is what a digits-only figure has to come down by to sit on the
 -- optical centre rather than the geometric one.
 local DESCENDER_SHARE = 0.09
-
--- The interface counters are 32-bit and wrap every 4GB — a delta modulo
--- that is exact as long as under one wrap happens between two refreshes,
--- which at this interval means anything short of a 11Gbit/s link.
-local COUNTER_WRAP = 2 ^ 32
 
 -- The reserved-width template below is measured in these, so the suffix has
 -- to match the one stat_format puts on a rate.
@@ -314,184 +317,13 @@ local function styledValue(text, color, font)
   return hs.styledtext.new(text, { font = font or MENUBAR_FONT, color = color })
 end
 
--- Counters from the previous refresh with the moment they were taken, so
--- throughput is a delta the same way CPU load is. The elapsed time is
--- measured rather than assumed to match the helper's interval: lines arrive
--- when the scheduler gets to them, and at half a second that jitter is a
--- visible share of the divisor.
-local previousNetworkCounters = nil
-
--- Bytes moved since the previous reading, unwrapping the 32-bit counter.
-local function counterDelta(current, previous)
-  if current >= previous then
-    return current - previous
-  end
-
-  return current + COUNTER_WRAP - previous
-end
-
--- Upload and download rates in bytes per second, or nil on the first
--- refresh, when there is no earlier counter to subtract.
-local function networkRates(receivedBytes, sentBytes)
-  if receivedBytes == nil or sentBytes == nil then
-    return nil, nil
-  end
-
-  local previous = previousNetworkCounters
-  local now = hs.timer.secondsSinceEpoch()
-  previousNetworkCounters = { received = receivedBytes, sent = sentBytes, at = now }
-
-  if previous == nil then
-    return nil, nil
-  end
-
-  local elapsed = now - previous.at
-
-  if elapsed <= 0 then
-    return nil, nil
-  end
-
-  return counterDelta(sentBytes, previous.sent) / elapsed,
-    counterDelta(receivedBytes, previous.received) / elapsed
-end
-
--- The readings behind the rolling average, oldest first, with their running
--- total: the mean is wanted every refresh, and re-adding a dozen samples for
--- it is work the sum already did.
-local powerSamples = {}
-local powerTotal = 0
-
--- Take one reading into the window, dropping the oldest once the window is
--- full. A refresh that could not read power leaves the window untouched
--- rather than recording a zero, which would drag the mean down.
-local function recordWatts(watts)
-  if watts == nil then
-    return
-  end
-
-  powerSamples[#powerSamples + 1] = watts
-  powerTotal = powerTotal + watts
-
-  if #powerSamples > POWER_SAMPLE_LIMIT then
-    powerTotal = powerTotal - table.remove(powerSamples, 1)
-  end
-end
-
--- Mean of the window, or nil until the first reading lands.
-local function averageWatts()
-  local count = #powerSamples
-
-  if count == 0 then
-    return nil
-  end
-
-  return powerTotal / count
-end
-
--- Floor and ceiling of the same window, for the detail menu: the mean says
--- what a stretch cost, these two say how spiky it was.
-local function wattsRange()
-  local lowest = nil
-  local highest = nil
-
-  for _, watts in ipairs(powerSamples) do
-    if lowest == nil or watts < lowest then
-      lowest = watts
-    end
-
-    if highest == nil or watts > highest then
-      highest = watts
-    end
-  end
-
-  return lowest, highest
-end
-
--- Tick counters from the previous refresh, against which this one is a
--- delta. hs.host.cpuUsage() would hand the percentages over ready-made, but
--- it blocks Hammerspoon for 100ms while it takes its own two samples —
--- measured at 101ms a call against 0.03ms for the raw counters. Diffing
--- across refreshes also widens the window from 100ms to the whole interval,
--- so a burst between two refreshes still shows up.
-local previousCpuTicks = nil
-
--- Share of one core's ticks spent doing anything but idling, over the span
--- between the two samples. nil when the counters did not move, which is
--- what a wrapped or reset counter looks like.
-local function coreActivePercent(core, previous)
-  local activeTicks = (core.user - previous.user) + (core.system - previous.system)
-    + (core.nice - previous.nice)
-  local totalTicks = activeTicks + (core.idle - previous.idle)
-
-  if totalTicks <= 0 then
-    return nil
-  end
-
-  return 100 * activeTicks / totalTicks
-end
-
--- Busiest single core and the mean across all of them, the same pairing the
--- temperature column uses: one pegged core is what a single-threaded build
--- looks like, and the mean alone hides it. Both are nil on the first
--- refresh, which has no earlier sample to diff against.
-local function cpuUsagePercents()
-  local ticks = hs.host.cpuUsageTicks()
-  local previous = previousCpuTicks
-  previousCpuTicks = ticks
-
-  if ticks == nil or previous == nil or previous.n ~= ticks.n then
-    return nil, nil
-  end
-
-  local busiest = nil
-  local total = 0
-  local counted = 0
-
-  for index = 1, ticks.n do
-    local percent = coreActivePercent(ticks[index], previous[index])
-
-    if percent ~= nil then
-      total = total + percent
-      counted = counted + 1
-
-      if busiest == nil or percent > busiest then
-        busiest = percent
-      end
-    end
-  end
-
-  if counted == 0 then
-    return nil, nil
-  end
-
-  return busiest, total / counted
-end
-
--- Memory actually claimed, split the way the menu shows it — Activity
--- Monitor's own formula: app memory (anonymous pages minus what is
--- purgeable on demand), what the kernel has pinned, and what the
--- compressor holds. Anonymous rather than active, because inactive
--- anonymous pages still hold app data; counting only the active ones
--- undercounts by whatever the apps have not touched lately.
-local function memoryUsage()
-  local stat = hs.host.vmStat()
-
-  if stat == nil or stat.pageSize == nil then
-    return nil
-  end
-
-  local pageSize = stat.pageSize
-  local app = (stat.anonymousPages - stat.pagesPurgeable) * pageSize
-  local wired = stat.pagesWiredDown * pageSize
-  local compressed = stat.pagesUsedByVMCompressor * pageSize
-
-  return {
-    app = app,
-    wired = wired,
-    compressed = compressed,
-    used = app + wired + compressed,
-  }
-end
+-- Rate, load and memory readings all come from lib collectors; the two that
+-- need a baseline (throughput, CPU load) get an instance of their own here,
+-- so nothing else in this Lua state can consume the span between two of this
+-- widget's refreshes.
+local networkTracker = netCounters.new()
+local cpuSampler = cpuTicks.new()
+local wattsWindow = powerWindow.new(POWER_SAMPLE_LIMIT)
 
 -- Width a column claims whatever it currently reads: its widest form, plus
 -- the icon and the gap after it when the column carries one. Measured once
@@ -574,7 +406,7 @@ local function columns(reading, resting)
     },
     {
       top = { text = formatWatts(reading.watts), color = resting },
-      bottom = { text = formatWatts(averageWatts()), color = resting },
+      bottom = { text = formatWatts(wattsWindow.average()), color = resting },
     },
     {
       reservedWidth = reservedWidth(RATE_WIDTH_TEMPLATE, nil, true),
@@ -727,8 +559,8 @@ local function applySensorLine(line)
     return
   end
 
-  local busiestUsage, overallUsage = cpuUsagePercents()
-  local memory = memoryUsage()
+  local busiestUsage, overallUsage = cpuSampler.usagePercents()
+  local memory = memoryUsage.current()
 
   reading.cpuBusiestUsage = busiestUsage
   reading.cpuUsage = overallUsage
@@ -739,7 +571,7 @@ local function applySensorLine(line)
   reading.watts = sensors.watts
   reading.swapUsed = sensors.swap_bytes
 
-  recordWatts(reading.watts)
+  wattsWindow.record(reading.watts)
   readingChanged = true
 end
 
@@ -757,72 +589,30 @@ local function applyNetworkLine(line)
   reading.networkSent = counters.out
   reading.networkInterface = counters.interface
   reading.uploadRate, reading.downloadRate =
-    networkRates(reading.networkReceived, reading.networkSent)
+    networkTracker.rates(reading.networkReceived, reading.networkSent)
 
   readingChanged = true
 end
 
--- A streaming callback that hands whole lines to `handleLine`. hs.task
--- delivers whatever the pipe had, which is usually one line and occasionally
--- half of one, so the remainder is carried to the next call.
-local function lineReader(handleLine)
-  local pending = ""
-
-  return function(_, stdout, _)
-    if stdout == nil then
-      return true
-    end
-
-    pending = pending .. stdout
-
-    while true do
-      local newline = pending:find("\n")
-
-      if newline == nil then
-        break
-      end
-
-      handleLine(pending:sub(1, newline - 1))
-      pending = pending:sub(newline + 1)
-    end
-
-    return true
-  end
-end
-
--- Start one helper in watch mode, or nil when the binary is missing.
--- hs.task.new hands back a task object even for a path that does not exist;
--- the failure only shows up as start() returning false.
+-- Start one helper in watch mode, at the cadence it should report on.
+-- "watch" is this pair of helpers' own subcommand, not something lib knows.
 local function startStream(path, intervalMilliseconds, handleLine)
-  local task = hs.task.new(path, nil, lineReader(handleLine),
-    { "watch", tostring(intervalMilliseconds) })
-
-  if task == nil or not task:start() then
-    return nil
-  end
-
-  return task
+  return lineStream.start(path, { "watch", tostring(intervalMilliseconds) }, handleLine)
 end
 
 local function startStreams()
-  if sensorTask == nil or not sensorTask:isRunning() then
+  if not lineStream.isRunning(sensorTask) then
     sensorTask = startStream(SENSOR_HELPER, SENSOR_INTERVAL_MILLISECONDS, applySensorLine)
   end
 
-  if networkTask == nil or not networkTask:isRunning() then
+  if not lineStream.isRunning(networkTask) then
     networkTask = startStream(NETWORK_HELPER, NETWORK_INTERVAL_MILLISECONDS, applyNetworkLine)
   end
 end
 
-local function stopStream(task)
-  if task ~= nil and task:isRunning() then
-    task:terminate()
-  end
-end
-
 local function stopStreams()
-  stopStream(sensorTask)
-  stopStream(networkTask)
+  lineStream.stop(sensorTask)
+  lineStream.stop(networkTask)
 
   sensorTask = nil
   networkTask = nil
@@ -980,7 +770,7 @@ end
 -- Memory read again here rather than taken from the last tick: it is a counter
 -- read, and the panel is a snapshot of the moment it opened.
 local function memorySection(details, resting)
-  local memory = memoryUsage() or {}
+  local memory = memoryUsage.current() or {}
   local total = details.ram_total_bytes
   local swapUsed = details.swap_bytes
 
@@ -1018,7 +808,7 @@ end
 -- readings, one every couple of seconds, which is the only place a minute of
 -- history exists.
 local function powerSection(details, resting)
-  local lowestWatts, highestWatts = wattsRange()
+  local lowestWatts, highestWatts = wattsWindow.range()
 
   return {
     header = "Power",
@@ -1026,7 +816,7 @@ local function powerSection(details, resting)
       {
         label = "Draw",
         value = formatWatts(details.watts) .. " now" .. DETAIL_SEPARATOR
-          .. formatWatts(averageWatts()) .. " mean",
+          .. formatWatts(wattsWindow.average()) .. " mean",
         fraction = statPanel.fraction(details.watts, POWER_CEILING_WATTS),
         gaugeColor = statPanel.faded(resting, 0.75),
         detail = string.format("%s low%s%s peak over the last %ds",

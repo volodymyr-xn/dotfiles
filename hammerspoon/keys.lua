@@ -11,6 +11,7 @@ local dismissNotifications = require("dismiss_notifications").dismiss
 local mediaKeys = require("media_keys")
 local mouseSideButtons = require("mouse_side_buttons")
 local notifyReturn = require("notify_return")
+local swichMonitorFocus = require("swich_monitor_focus")
 
 -- External display brightness over DDC: F6 up, F5 down
 -- Mirrors the F10/F9 volume direction; held keys ramp.
@@ -55,3 +56,6 @@ hs.hotkey.bind({"cmd"}, "m", caffeine.toggle)
 
 -- Cmd+Shift+M → toggle mouse side-button mappings (off = pass through to games)
 hs.hotkey.bind({"cmd", "shift"}, "n", mouseSideButtons.toggle)
+
+-- Cmd+Alt+M → move the mouse to the next monitor and focus its front window
+hs.hotkey.bind({"cmd", "alt"}, "m", swichMonitorFocus.cycle)

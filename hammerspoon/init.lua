@@ -15,8 +15,9 @@ require("hs.ipc")
 -- hammerspoon/.luarc.json points lua-language-server at that directory, which
 -- is what stops the editor reporting `hs` as an undefined global and gives
 -- real completion/signatures instead. Editor-only: nothing at runtime depends
--- on it, so a missing Spoon must not break the config.
-hs.loadSpoon("EmmyLua")
+-- on it, so neither a missing Spoon nor an error raised inside its init() may
+-- abort this file before keys.lua is required and the hotkeys are bound.
+pcall(hs.loadSpoon, "EmmyLua")
 
 -- Hammerspoon only searches hs.configdir (and Spoons/) by default, so the
 -- subdirectories have to be added to package.path before anything in them
@@ -24,8 +25,13 @@ hs.loadSpoon("EmmyLua")
 -- require("modules.caffeine") — so a file can move between modules/ and
 -- lib/ without touching every call site. Also applies to `hs -c` one-liners,
 -- which share this Lua state.
---   modules/ — self-contained features (one keybind or menubar item each)
---   lib/     — shared primitives with no bindings of their own
+--   modules/ — self-contained features (one keybind or menubar item each),
+--              plus the composers that dispatch between them
+--   lib/     — shared primitives with no bindings of their own; these may
+--              only require hs.* and each other, never a module, so the
+--              dependency direction stays modules/ -> lib/
+-- attic/ is deliberately absent: superseded implementations kept for
+-- reference only, unreachable by require() so they cannot come back to life.
 local searchPaths = {"modules", "lib"}
 
 for _, dir in ipairs(searchPaths) do
