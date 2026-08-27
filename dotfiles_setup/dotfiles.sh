@@ -129,6 +129,11 @@ symlink_to "$DOTFILES_DIR/docker/config.json" "$HOME/.config/docker/config.json"
 mkdir -p "$HOME/.config/herdr"
 symlink_to "$DOTFILES_DIR/herdr/config.toml" "$HOME/.config/herdr/config.toml"
 
+# hunk stores state.json (session/view preferences) beside its config, so only
+# config.toml is symlinked and the directory stays real.
+mkdir -p "$HOME/.config/hunk"
+symlink_to "$DOTFILES_DIR/hunk/config.toml" "$HOME/.config/hunk/config.toml"
+
 ln -nsf "../nvim/snippets" "$DOTFILES_DIR/vim/snippets"
 ln -nsf "$DOTFILES_DIR/config/rubocop/config.yml" "$DOTFILES_DIR/.rubocop.yml"
 

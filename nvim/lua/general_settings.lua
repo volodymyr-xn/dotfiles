@@ -191,6 +191,11 @@ vim.o.visualbell=true
 -- Visual autocomplete for command menu (e.g. :e ~/path/to/file)
 vim.o.wildmenu=true
 
+-- Keep manually sized splits when a window opens or closes. With the default
+-- `equalalways`, every open and close rebalances every window, so toggling a
+-- sidebar like neo-tree flattens custom split sizes.
+vim.o.equalalways = false
+
 -- Automatically rebalance windows on vim resize
 vim.cmd('autocmd VimResized * :wincmd =')
 

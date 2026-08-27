@@ -11,6 +11,10 @@
 --   * `dd` / `3dd` / visual `d` in the list hide entries for this session only;
 --     toggling OneDiff off and on brings the full diff back
 --
+-- The list opens at the bottom by default; the `position` / `width` settings
+-- move it to a vertical sidebar, which also drops the changed line's text from
+-- each entry so the file path stays readable in a narrow split.
+--
 -- Deleted files are listed (with a red `-` tag) but are not navigation
 -- targets: they contribute no hunks, so `<Tab>` skips them, and `<CR>` over
 -- one is a no-op rather than opening an empty buffer at the removed path.
@@ -267,12 +271,48 @@ local function collect()
   return items, hunks, file_index
 end
 
+-- Whether the quickfix opens as a vertical sidebar rather than the default
+-- full-width split at the bottom.
+local function qf_is_sidebar()
+  return config.options.position == "right" or config.options.position == "left"
+end
+
+-- Strip the sign and fold columns the quickfix window inherits from the global
+-- settings: a quickfix buffer places nothing in either, so they are dead
+-- columns stealing width from the entry text. `number` stays on -- the entry
+-- numbers are the `:cc {nr}` / `dd` targets.
+local function strip_qf_gutter()
+  local win = vim.api.nvim_get_current_win()
+
+  vim.wo[win].signcolumn = "no"
+  vim.wo[win].foldcolumn = "0"
+end
+
+-- Open the quickfix window in the configured position. `width` is only the
+-- starting size: the sidebar stays a normal window, so `<C-w><` / `<C-w>>`,
+-- `:vertical resize` and dragging the separator all work as usual.
+local function open_qf_window()
+  if not qf_is_sidebar() then
+    vim.cmd("copen")
+    strip_qf_gutter()
+
+    return
+  end
+
+  local side = config.options.position == "left" and "topleft" or "botright"
+
+  vim.cmd(string.format("vertical %s copen %d", side, config.options.width))
+  strip_qf_gutter()
+end
+
 -- Render each quickfix entry as `<sym> filepath|lnum| linetext`, leading with
 -- the status symbol (setqflist's default renders the file name first). Wired
 -- via the list's quickfixtextfunc; the path is shown relative to the working
--- directory.
+-- directory. In a sidebar the changed line's text is dropped -- it never fits
+-- in a narrow split and only pushes the path out of view.
 local function qf_textfunc(info)
   local items = vim.fn.getqflist({ id = info.id, items = 1 }).items
+  local show_text = not qf_is_sidebar()
   local out = {}
 
   for i = info.start_idx, info.end_idx do
@@ -280,7 +320,7 @@ local function qf_textfunc(info)
     local label = item.user_data and item.user_data.label
     local sym = (label and STATUS[label] and STATUS[label].sym) or " "
     local fname = item.bufnr > 0 and vim.fn.fnamemodify(vim.fn.bufname(item.bufnr), ":.") or ""
-    local body = item.text ~= "" and (" " .. item.text) or ""
+    local body = (show_text and item.text ~= "") and (" " .. item.text) or ""
 
     out[#out + 1] = string.format("%s %s|%d|%s", sym, fname, item.lnum, body)
   end
@@ -506,7 +546,7 @@ local function populate(open, keep_idx)
   end
 
   if open then
-    vim.cmd("copen")
+    open_qf_window()
   end
 
   -- Recolor and rebind after the quickfix buffer has re-rendered its lines.

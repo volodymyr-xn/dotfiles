@@ -1,0 +1,125 @@
+# hunk configuration — https://hunk.dev/docs/reference/config/
+# Only this file is symlinked from the dotfiles; hunk writes state.json next
+# to it, so ~/.config/hunk stays a real directory.
+
+theme = "custom"
+
+# Let the terminal width decide between split and stack.
+mode = "auto"
+
+# Wrap instead of truncating — long Ruby/Lua lines otherwise fall off screen.
+wrap_lines = true
+
+# Match the editorconfig / nvim indent width.
+tab_width = 2
+
+# Agent-authored changesets are the main use case, so show the notes up front.
+agent_notes = true
+
+# Ghostty/kitty run an opaque background; the theme paints its own base.
+transparent_background = false
+
+# Highlight lines git moved rather than showing them as delete + add.
+color_moved = true
+
+# Pager sessions come from `git diff`/`git show`, where the file list adds
+# little — keep the stream full width.
+[pager]
+sidebar = false
+
+#===============================================================
+#================= Catppuccin Macchiato (custom) ===============
+#===============================================================
+# Mirrors the palette in nvim/lua/colors.lua and config/kitty/kitty.conf:
+# base #212433 (not upstream #24273a), text #ffffff, peach #F5B07F,
+# mauve #C69FF6. mantle/crust below carry the same -03/-03/-07 shift the
+# custom base applies to upstream macchiato.
+
+[custom_theme]
+base = "catppuccin-macchiato"
+label = "Catppuccin Macchiato (custom)"
+
+background = "#212433"   # custom base
+panel = "#1b1d29"        # shifted mantle
+panelAlt = "#15161f"     # shifted crust
+border = "#494d64"       # surface1
+accent = "#C69FF6"       # custom mauve
+accentMuted = "#b7bdf8"  # lavender
+text = "#ffffff"         # custom text
+muted = "#a5adcb"        # subtext0
+
+# Full-row tint for a changed line, then a stronger tint on the changed span.
+addedBg = "#23342c"
+addedContentBg = "#2c4436"
+removedBg = "#352530"
+removedContentBg = "#47303a"
+contextBg = "#212433"
+contextContentBg = "#212433"
+
+# Moved blocks get their own hues so they never read as add/remove.
+movedAddedBg = "#223a44"    # sapphire tint
+movedRemovedBg = "#33304a"  # lavender tint
+
+addedSignColor = "#a6da95"   # green
+removedSignColor = "#ed8796" # red
+
+lineNumberBg = "#1b1d29"
+lineNumberFg = "#6e738d"     # overlay0
+selectedHunk = "#363a4f"     # surface0
+
+badgeAdded = "#a6da95"
+badgeRemoved = "#ed8796"
+badgeNeutral = "#939ab7"     # overlay2
+
+fileNew = "#a6da95"
+fileDeleted = "#ed8796"
+fileRenamed = "#8aadf4"      # blue
+fileModified = "#F5B07F"     # custom peach
+fileUntracked = "#8087a2"    # overlay1
+
+# Agent notes reuse the accent so they read as chrome, not as diff content.
+noteBorder = "#C69FF6"
+noteBackground = "#1b1d29"
+noteTitleBackground = "#363a4f"
+noteTitleText = "#ffffff"
+
+# The `text` key above only paints UI chrome. hunk builds a custom theme's
+# syntax colors from the *base* theme (buildCustomTheme keeps
+# baseTheme.syntaxColors), so code spans keep macchiato's own #cad3f5 —
+# which is why plain text did not follow the white above.
+# nvim/lua/colors.lua remaps the palette entry itself, so every scope that
+# upstream paints with `text` turns white. This is that same remap: the full
+# set of catppuccin-macchiato scopes bound to #cad3f5, re-bound to #ffffff.
+# `source` and `text` are the broad, lowest-specificity pair (hunk maps its
+# legacy `syntax.default` role to `source`); the rest are the more-specific
+# base rules that would otherwise win over them.
+# peach and mauve are deliberately not remapped here: #f5a97f -> #F5B07F and
+# #c6a0f6 -> #C69FF6 differ by one channel step and are not visible.
+[custom_theme.syntax_scopes]
+"text" = "#ffffff"
+"source" = "#ffffff"
+"variable.other.readwrite" = "#ffffff"
+"punctuation.definition.variable" = "#ffffff"
+"variable.object.property" = "#ffffff"
+"string.template variable" = "#ffffff"
+"string variable" = "#ffffff"
+"meta.interpolation.cs" = "#ffffff"
+"comment.block.documentation.cs" = "#ffffff"
+"string.quoted variable.other.env" = "#ffffff"
+"variable.graphql" = "#ffffff"
+"storage.modifier.import.java" = "#ffffff"
+"variable.other.constant.js" = "#ffffff"
+"variable.other.constant.ts" = "#ffffff"
+"variable.other.property.js" = "#ffffff"
+"variable.other.property.ts" = "#ffffff"
+"support.type.object.console.js" = "#ffffff"
+"comment.line.double-dash.documentation.lua entity.name.variable.lua" = "#ffffff"
+"comment.line.double-dash.documentation.lua variable.lua" = "#ffffff"
+"variable.parameter.name.nix" = "#ffffff"
+"support.variable.magic.python" = "#ffffff"
+"meta.function-call.arguments.python" = "#ffffff"
+"meta.function-call.arguments.r" = "#ffffff"
+"string.regexp.ts" = "#ffffff"
+"meta.function.return-type.rust meta.generic.rust storage.type.rust" = "#ffffff"
+"meta.function.call.rust variable.other.rust" = "#ffffff"
+"string.quoted.double.shell variable.other.normal.shell" = "#ffffff"

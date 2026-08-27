@@ -47,3 +47,17 @@ st = status
 up = !git fetch origin && git rebase origin/master
 [init]
 	defaultBranch = main
+
+# hunk (https://hunk.dev) as the review UI for diff output. Kept on the
+# per-command pager instead of core.pager so `git status`/`git log` without
+# -p keep the plain pager.
+[pager]
+	diff = hunk pager
+	show = hunk pager
+	log = hunk pager
+[diff]
+	tool = hunk
+[difftool]
+	prompt = false
+[difftool "hunk"]
+	cmd = hunk difftool "$LOCAL" "$REMOTE" "$MERGED"

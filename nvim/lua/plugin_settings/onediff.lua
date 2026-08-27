@@ -14,6 +14,11 @@ require("my_plugins.onediff.config").setup({
   -- Inline deleted-line virtual lines from session start (`<C-S-M>` flips).
   -- show_deleted = false,
   show_deleted = true,
+
+  -- Quickfix layout: "bottom" (full-width split) or "right" / "left" (sidebar
+  -- `width` columns wide, entries rendered without the changed line's text).
+  position = "left",
+  width = 60,
 })
 
 -- Load the implementation on first use. `require` is memoized, so every call

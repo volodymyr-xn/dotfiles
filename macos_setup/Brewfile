@@ -57,6 +57,8 @@ brew "gallery-dl"
 # Development & Build Tools
 # Version control system
 brew "git"
+# Review-first terminal diff viewer for agent-authored changesets
+brew "hunk"
 # Cross-platform portable archive format
 brew "p7zip"
 # Universal document converter

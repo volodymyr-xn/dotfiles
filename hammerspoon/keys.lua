@@ -59,3 +59,6 @@ hs.hotkey.bind({"cmd", "shift"}, "n", mouseSideButtons.toggle)
 
 -- Cmd+Alt+M → move the mouse to the next monitor and focus its front window
 hs.hotkey.bind({"cmd", "alt"}, "m", swichMonitorFocus.cycle)
+
+-- Cmd+Shift+L → put the whole machine to sleep
+hs.hotkey.bind({"cmd", "shift"}, "l", hs.caffeinate.systemSleep)
