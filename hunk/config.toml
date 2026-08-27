@@ -22,11 +22,6 @@ transparent_background = false
 # Highlight lines git moved rather than showing them as delete + add.
 color_moved = true
 
-# Pager sessions come from `git diff`/`git show`, where the file list adds
-# little — keep the stream full width.
-[pager]
-sidebar = false
-
 #===============================================================
 #================= Catppuccin Macchiato (custom) ===============
 #===============================================================
