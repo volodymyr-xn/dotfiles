@@ -1,5 +1,8 @@
 [tools]
+elixir = "latest"
+erlang = "latest"
 go = "latest"
+java = "temurin-21"
 node = "24.14.1"
 postgres = "latest"
 python = "3.12"

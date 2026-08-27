@@ -93,6 +93,13 @@ local FONT_NAME = ".AppleSystemUIFont"
 local LIGHT_COLOR = { white = 0, alpha = 1 }
 local DARK_COLOR = { white = 1, alpha = 1 }
 
+-- The warning ladder every readout shares: orange once a figure is warm, red
+-- once it is past the point where it costs something. Here rather than in the
+-- widgets because the bar and the panel behind it have to agree on what a
+-- warning looks like, and two of them draw one.
+panel.WARN_COLOR = { red = 1, green = 0.58, blue = 0, alpha = 1 }
+panel.CRITICAL_COLOR = { red = 1, green = 0.23, blue = 0.19, alpha = 1 }
+
 -- Ladder for the plain-text mirror of a `bars` row: eight levels is what the
 -- block glyphs give, and a strip of twelve sensors reads fine at that.
 local SPARK_GLYPHS = { "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█" }
@@ -116,6 +123,26 @@ end
 -- The resting colour at reduced strength, for the panel's own furniture.
 function panel.faded(resting, alpha)
   return { white = resting.white, alpha = alpha }
+end
+
+-- Colour for one reading against its own pair of thresholds, for the readings
+-- that get worse as they climb: red once critical, orange once warm, otherwise
+-- the resting colour it was handed — which differs between the bar and the
+-- panel, so it is passed in rather than looked up here.
+function panel.thresholdColor(value, warnAt, criticalAt, resting)
+  if value == nil then
+    return resting
+  end
+
+  if value >= criticalAt then
+    return panel.CRITICAL_COLOR
+  end
+
+  if value >= warnAt then
+    return panel.WARN_COLOR
+  end
+
+  return resting
 end
 
 -- Share of a scale, clamped: a reading past its ceiling fills the track rather

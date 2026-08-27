@@ -45,6 +45,10 @@ end
 require("caffeine")
 require("mouse_side_buttons")
 
+-- Order matters here: macOS puts each new status item to the *left* of the
+-- ones already in the bar, so this list reads right to left on screen —
+-- sensors, then throughput, then the process gear.
+require("network_stats")
 require("system_stats")
 require("process_stats")
 

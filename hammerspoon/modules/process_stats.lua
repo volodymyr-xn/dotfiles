@@ -8,15 +8,10 @@
 -- at all until someone looks.
 --
 -- The panel is an hs.canvas rather than a menu, which is what buys the
--- once-a-second refresh. A native NSMenu runs a modal event loop while it is
--- tracking — Hammerspoon's timers do not fire during it, and hs.menubar hands
--- out no reference to an item already on screen — so a menu can only ever show
--- the readings it was built with. Owning the surface costs the dismissal a
--- menu gives away for free, so a click outside, Escape, and a second click on
--- the icon are all wired up below.
---
--- The rows are drawn by stat_panel, which the sensors widget shares; only the
--- readings and their units are this file's.
+-- once-a-second refresh; canvas_panel owns that surface, where it hangs and
+-- how it is dismissed, and the network widget draws its own the same way. The
+-- rows inside it are stat_panel's, which the sensors widget shares too. What
+-- is this file's is the readings and their units.
 --
 -- Rates are a delta between two of the helper's reports, measured against a
 -- monotonic clock on this side rather than against anything in the report:
@@ -34,6 +29,7 @@ if _G[INSTANCE_KEY] ~= nil then
   return _G[INSTANCE_KEY]
 end
 
+local canvasPanel = require("canvas_panel")
 local statFormat = require("stat_format")
 local statPanel = require("stat_panel")
 
@@ -63,28 +59,6 @@ local TOP_PROCESS_COUNT = 4
 -- runs past the figure it shares a line with otherwise.
 local PROCESS_NAME_LIMIT = 24
 
--- The panel pays back stat_panel's lopsided margin, which exists only to
--- cancel the indent AppKit gives a menu item's image. Nothing indents this
--- one.
-local PANEL_INSET = statPanel.EVEN_MARGIN_INSET
-local PANEL_WIDTH = statPanel.WIDTH + PANEL_INSET
-local PANEL_RADIUS = 6
-
--- Clear of the menubar, and clear of the screen edge if the icon sits far
--- enough right that the panel would hang off it.
-local MENUBAR_GAP = 2
-local SCREEN_MARGIN = 8
-
--- The surface behind the rows, matched to a native menu as closely as a canvas
--- can be: the radius and the wash are the menu's, but not the material. AppKit
--- blurs what is behind a menu through an NSVisualEffectView, and hs.canvas has
--- no such element — so this is a near-opaque wash in the appearance of the
--- moment, which is the one visible difference from the sensors dropdown.
-local DARK_SURFACE = { white = 0.14, alpha = 0.98 }
-local LIGHT_SURFACE = { white = 0.97, alpha = 0.98 }
-local BORDER_ALPHA = 0.16
-local BORDER_WIDTH = 1
-
 -- Strength of the gauge fill under a process row. Lower than a reading with a
 -- threshold behind it: nothing here is a warning, it is a ranking.
 local GAUGE_ALPHA = 0.6
@@ -109,31 +83,12 @@ local CPU_CEILING_PERCENT = 100
 
 local SEPARATOR = "  ·  "
 
-local ESCAPE_KEY_CODE = hs.keycodes.map.escape
-
 local menu = hs.menubar.new()
-
--- Created once and reused: the panel is shown and hidden rather than built and
--- thrown away, so the window it lives in keeps its place in the level order.
-local panelCanvas = hs.canvas.new({ x = 0, y = 0, w = PANEL_WIDTH, h = PANEL_WIDTH })
-
-local refreshTimer = nil
-local outsideTap = nil
-local escapeTap = nil
-local visible = false
 
 -- The previous report and the moment it was taken, which is what every rate
 -- below is measured against.
 local previousStats = nil
 local previousFetchedAt = nil
-
--- Set when the panel was dismissed by a click that landed on the icon, so the
--- menubar callback that follows does not read it as a request to open again.
-local dismissedByIcon = false
-
--- Plain text of what the panel last drew, for reading it from `hs -c` without
--- opening it.
-local lastText = ""
 
 -- One helper run to completion, decoded. Synchronous because the panel is
 -- repainted from a timer callback and there is nothing else for this
@@ -276,12 +231,23 @@ local function heaviestValue(ranked)
   return first ~= nil and first.value or nil
 end
 
-local function panelSections(stats, elapsed, resting)
+-- Take a reading, rank it against the previous one, and hand the panel its
+-- sections. Called on open and then on the panel's own cadence, which only
+-- runs while it is up — so the helper is not spawned for an item nobody
+-- clicked.
+local function panelSections(resting)
+  local stats = fetchStats() or {}
+  local takenAt = hs.timer.absoluteTime()
+  local elapsed = previousFetchedAt ~= nil
+    and (takenAt - previousFetchedAt) / NANOSECONDS_PER_SECOND or nil
   local processes = stats.processes or {}
   local previousByPid = processesByPid(previousStats and previousStats.processes)
   local byCpu = rankedByRate(processes, previousByPid, elapsed, "cpu_ms", asPercent)
   local byEnergy = rankedByRate(processes, previousByPid, elapsed, "energy_nj", asWatts)
   local byMemory = rankedByResident(processes)
+
+  previousStats = stats
+  previousFetchedAt = takenAt
 
   return {
     systemSection(stats),
@@ -294,171 +260,7 @@ local function panelSections(stats, elapsed, resting)
   }
 end
 
-local function surfaceColor()
-  if hs.host.interfaceStyle() == "Dark" then
-    return DARK_SURFACE
-  end
-
-  return LIGHT_SURFACE
-end
-
--- Where the panel hangs: under the icon and left-aligned to it, the way a menu
--- would, pulled back inside the screen when the icon sits far enough right
--- that the panel would overhang.
-local function panelOrigin()
-  local item = menu:frame()
-  local screen = hs.screen.mainScreen():fullFrame()
-  local rightLimit = screen.x + screen.w - PANEL_WIDTH - SCREEN_MARGIN
-
-  return math.max(screen.x + SCREEN_MARGIN, math.min(item.x, rightLimit)),
-    item.y + item.h + MENUBAR_GAP
-end
-
--- The rounded wash and its hairline, under everything the rows draw.
-local function surfaceElements(height, resting)
-  return {
-    {
-      type = "rectangle",
-      action = "fill",
-      fillColor = surfaceColor(),
-      roundedRectRadii = { xRadius = PANEL_RADIUS, yRadius = PANEL_RADIUS },
-      frame = { x = 0, y = 0, w = PANEL_WIDTH, h = height },
-    },
-    {
-      type = "rectangle",
-      action = "stroke",
-      strokeColor = statPanel.faded(resting, BORDER_ALPHA),
-      strokeWidth = BORDER_WIDTH,
-      roundedRectRadii = { xRadius = PANEL_RADIUS, yRadius = PANEL_RADIUS },
-      -- Inset by half a point so the stroke lands inside the canvas instead of
-      -- straddling its edge and coming out half as bright.
-      frame = {
-        x = BORDER_WIDTH / 2,
-        y = BORDER_WIDTH / 2,
-        w = PANEL_WIDTH - BORDER_WIDTH,
-        h = height - BORDER_WIDTH,
-      },
-    },
-  }
-end
-
--- Take a reading, rank it against the previous one, and repaint. Called once
--- on open and then on the timer, which only runs while the panel is up.
-local function repaint()
-  local stats = fetchStats() or {}
-  local takenAt = hs.timer.absoluteTime()
-  local elapsed = previousFetchedAt ~= nil
-    and (takenAt - previousFetchedAt) / NANOSECONDS_PER_SECOND or nil
-  local resting = statPanel.textColor()
-  local sections = panelSections(stats, elapsed, resting)
-
-  previousStats = stats
-  previousFetchedAt = takenAt
-  lastText = statPanel.stackText(sections)
-
-  local rows, height = statPanel.stack(sections, resting, PANEL_INSET)
-  local elements = surfaceElements(height, resting)
-
-  for _, row in ipairs(rows) do
-    elements[#elements + 1] = row
-  end
-
-  local x, y = panelOrigin()
-
-  panelCanvas:frame({ x = x, y = y, w = PANEL_WIDTH, h = height })
-  panelCanvas:replaceElements(table.unpack(elements))
-end
-
-local function hidePanel()
-  if not visible then
-    return
-  end
-
-  visible = false
-  refreshTimer:stop()
-  outsideTap:stop()
-  escapeTap:stop()
-  panelCanvas:hide()
-end
-
-local function containsPoint(frame, point)
-  return point.x >= frame.x and point.x <= frame.x + frame.w
-    and point.y >= frame.y and point.y <= frame.y + frame.h
-end
-
--- Dismiss on any click that is not on the panel. The click is passed through
--- rather than swallowed, so dismissing the panel and clicking what is behind
--- it are one gesture.
-local function handleClickOutside(event)
-  local point = event:location()
-
-  if containsPoint(panelCanvas:frame(), point) then
-    return false
-  end
-
-  -- A click on the icon reaches this tap before the menubar callback. Without
-  -- the flag the callback would read the panel as already shut and open it
-  -- straight back, so the icon would never close it.
-  if containsPoint(menu:frame(), point) then
-    dismissedByIcon = true
-  end
-
-  hidePanel()
-
-  return false
-end
-
--- Escape is swallowed, because dismissing a panel is the whole of what the
--- keystroke meant.
-local function handleEscape(event)
-  if event:getKeyCode() ~= ESCAPE_KEY_CODE then
-    return false
-  end
-
-  hidePanel()
-
-  return true
-end
-
-local function showPanel()
-  visible = true
-
-  repaint()
-  panelCanvas:show()
-  refreshTimer:start()
-  outsideTap:start()
-  escapeTap:start()
-end
-
-local function togglePanel()
-  if dismissedByIcon then
-    dismissedByIcon = false
-
-    return
-  end
-
-  if visible then
-    hidePanel()
-
-    return
-  end
-
-  showPanel()
-end
-
-refreshTimer = hs.timer.new(REFRESH_SECONDS, repaint)
-outsideTap = hs.eventtap.new({
-  hs.eventtap.event.types.leftMouseDown,
-  hs.eventtap.event.types.rightMouseDown,
-  hs.eventtap.event.types.otherMouseDown,
-}, handleClickOutside)
-escapeTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, handleEscape)
-
--- Above ordinary windows and clear of the menubar, and present on whichever
--- Space is in front — the panel belongs to the bar, not to a desktop.
-panelCanvas:level(hs.canvas.windowLevels.popUpMenu)
-panelCanvas:behavior(hs.canvas.windowBehaviors.canJoinAllSpaces
-  + hs.canvas.windowBehaviors.stationary)
+local panel = canvasPanel.new(menu, REFRESH_SECONDS, panelSections)
 
 local icon = hs.image.imageFromPath(ICON_PATH)
 
@@ -473,21 +275,13 @@ end
 
 -- A click callback rather than a menu: the panel is drawn, and hs.menubar
 -- honours one or the other.
-menu:setClickCallback(togglePanel)
+menu:setClickCallback(panel.toggle)
 
 local widget = {
-  show = showPanel,
-  hide = hidePanel,
-  toggle = togglePanel,
-  -- Plain text of what the panel last drew. Takes a fresh reading when the
-  -- panel has never been opened, so it answers on a cold config too.
-  text = function()
-    if lastText == "" then
-      repaint()
-    end
-
-    return lastText
-  end,
+  show = panel.show,
+  hide = panel.hide,
+  toggle = panel.toggle,
+  text = panel.text,
 }
 
 _G[INSTANCE_KEY] = widget

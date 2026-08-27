@@ -132,6 +132,8 @@ brew "gemini-cli"
 # Simple tool to make locally trusted development certificates
 brew "mkcert"
 
+brew "hey"
+
 
 # Terminal Emulators
 # Terminal emulator that uses platform-native UI and GPU acceleration
