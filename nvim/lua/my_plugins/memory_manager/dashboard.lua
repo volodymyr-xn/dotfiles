@@ -821,10 +821,26 @@ local function render_view_model(view, width)
 
   for proc_index, p in ipairs(view) do
     local is_current = p.is_current
-    local rss_hl_proc = (p.rss_mb and p.rss_mb > cleaner.config.rss_warn_threshold_mb)
+    -- A stalled remote's RSS is meaningless: the dirty heap it keeps growing
+    -- is swapped straight out, so a multi-GB instance reports a few MB
+    -- resident. Show its real footprint in the memory column and say so in
+    -- the detail column, otherwise the row that matters most reads as idle.
+    local mem_mb = (p.stalled and p.footprint_mb) or p.rss_mb
+    local rss_hl_proc = (p.stalled
+      or (mem_mb and mem_mb > cleaner.config.rss_warn_threshold_mb))
       and "MemDashMetricWarn" or "MemDashMetric"
     local detail = p.error and ("⚠ " .. tostring(p.error)) or subsystem_text(p)
     local detail_hl = p.error and "MemDashError" or "MemDashUptime"
+
+    -- ⇅ marks the memory cell as a footprint (resident + swapped) instead of
+    -- RSS; the detail column carries the RSS the process is claiming, which
+    -- is the misleading number the row exists to contradict.
+    local mem_text = utils.fmt_mb(mem_mb) or "?"
+
+    if p.stalled and p.footprint_mb then
+      mem_text = "⇅ " .. mem_text
+      detail = detail .. string.format(" · RSS %s", utils.fmt_mb(p.rss_mb) or "?")
+    end
     local pane = tmux_label(p.tmux)
 
     local row_line, row_marks = build_table_row(widths, {
@@ -833,7 +849,7 @@ local function render_view_model(view, width)
       { tostring(p.pid), "MemDashPid" },
       { shorten_path(p.cwd, cwd_width),
         is_current and "MemDashCurrent" or "MemDashCwd" },
-      { utils.fmt_mb(p.rss_mb) or "?", rss_hl_proc },
+      { mem_text, rss_hl_proc },
       { detail, detail_hl },
       { fmt_uptime_short(p.uptime_seconds), uptime_hl(p.uptime_seconds) },
       { tostring(p.loaded or 0), "MemDashMetric" },
@@ -1234,7 +1250,19 @@ local function action_prune_all()
   refresh()
 end
 
+-- Signal a stalled remote by pid. `:qa!` travels over the same RPC that
+-- already timed out, so it cannot reach a wedged nvim — a signal is the only
+-- route left. SIGTERM still reaches nvim's handler through the libuv loop
+-- (timers keep firing while the queue is stuck) and preserves swap files;
+-- SIGKILL is offered separately for when even that does not land.
+local function signal_stalled_remote(pid, signal_name)
+  vim.system({ "kill", "-" .. signal_name, tostring(pid) },
+    { text = true, timeout = 1000 }):wait()
+end
+
 -- x: kill remote nvim under cursor (y/n confirm); sends :qa! via vim.system.
+-- A stalled remote cannot process that, so it gets a signal-based prompt
+-- instead, with SIGTERM first so its swap files are written out.
 local function action_kill_remote()
   local row = row_at_cursor()
   if not row or row.kind ~= "proc" then return end
@@ -1246,6 +1274,28 @@ local function action_kill_remote()
   end
 
   local cwd_short = proc.cwd or "?"
+
+  if proc.stalled then
+    local choice = fn.confirm(
+      string.format(
+        "nvim pid %d (%s) is stalled and cannot answer :qa!.\nSignal it?",
+        proc.pid, cwd_short),
+      "&Terminate (saves swap)\n&Force kill\n&Cancel", 3)
+
+    if choice == 1 then
+      signal_stalled_remote(proc.pid, "TERM")
+    elseif choice == 2 then
+      signal_stalled_remote(proc.pid, "KILL")
+    else
+      return
+    end
+
+    -- Longer than the healthy path: SIGTERM makes nvim write swap files
+    -- before it exits, so the process is still listed for a moment.
+    vim.defer_fn(refresh, 1000)
+    return
+  end
+
   local choice = fn.confirm(
     string.format("Kill nvim pid %d (%s)?", proc.pid, cwd_short),
     "&Yes\n&No", 2)

@@ -67,6 +67,61 @@ function M.rss_mb_for(pid)
   return kb and math.floor(kb / 1024) or nil
 end
 
+-- Physical footprint in MB on macOS: resident plus compressed/swapped pages,
+-- parsed from `vmmap -summary`. Returns nil when vmmap fails or times out.
+local function darwin_footprint_mb(pid)
+  local result = vim.system({ "vmmap", "-summary", tostring(pid) },
+    { text = true, timeout = 4000 }):wait()
+
+  if result.code ~= 0 or not result.stdout then
+    return nil
+  end
+
+  local amount, unit = result.stdout:match("Physical footprint:%s+([%d%.]+)([KMG])")
+
+  if not amount then
+    return nil
+  end
+
+  local megabytes = tonumber(amount)
+
+  if unit == "K" then
+    megabytes = megabytes / 1024
+  elseif unit == "G" then
+    megabytes = megabytes * 1024
+  end
+
+  return math.floor(megabytes)
+end
+
+-- Same figure on Linux: VmRSS + VmSwap from /proc/<pid>/status, both in kB.
+local function linux_footprint_mb(pid)
+  local status_lines = fn.readfile("/proc/" .. tostring(pid) .. "/status")
+  local total_kb = nil
+
+  for _, line in ipairs(status_lines or {}) do
+    local kb = line:match("^VmRSS:%s+(%d+) kB") or line:match("^VmSwap:%s+(%d+) kB")
+
+    if kb then
+      total_kb = (total_kb or 0) + tonumber(kb)
+    end
+  end
+
+  return total_kb and math.floor(total_kb / 1024) or nil
+end
+
+-- Real memory cost of a pid, counting pages the kernel has swapped or
+-- compressed away. RSS alone is misleading for a long-lived or wedged
+-- process: macOS pages dirty heap out, so a 13 GB nvim can report 33 MB
+-- resident. Returns nil when the platform read fails.
+function M.footprint_mb_for(pid)
+  if uv.os_uname().sysname == "Darwin" then
+    return darwin_footprint_mb(pid)
+  end
+
+  return linux_footprint_mb(pid)
+end
+
 -- Process start time as a human-readable string ("uptime"); macOS lstart / Linux etime.
 function M.lstart_for(pid)
   local ok, out = pcall(fn.system, { "ps", "-o", "lstart=", "-p", tostring(pid) })

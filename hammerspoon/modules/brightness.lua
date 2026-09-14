@@ -4,7 +4,7 @@ local M = {}
 -- Absolute path: Hammerspoon's PATH does not include Homebrew's bin.
 local M1DDC = "/opt/homebrew/bin/m1ddc"
 
-local STEP = 10
+local STEP = 5
 
 -- Top-right HUD: DDC changes bypass macOS entirely, so there is no native
 -- OSD to piggyback on. hs.alert can only draw centred, hence a canvas.
@@ -108,7 +108,7 @@ local function showLevel(luminance)
 end
 
 -- Snap to the next/previous multiple of STEP rather than adding a raw
--- delta, so a panel sitting on an odd value (6%) lands on 10/20/30 instead
+-- delta, so a panel sitting on an odd value (6%) lands on 5/10/15 instead
 -- of carrying the offset forever.
 local function snapTarget(luminance, delta)
   local target

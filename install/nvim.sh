@@ -48,7 +48,7 @@ git clone https://github.com/neovim/neovim "$neovim_source_dir"
 cd "$neovim_source_dir"
 
 # Pin to the stable tag for reproducible installs; comment out for HEAD.
-git checkout stable
+# git checkout stable
 
 echo "Starting compile process"
 make clean || true

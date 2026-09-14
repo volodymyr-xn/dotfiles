@@ -28,18 +28,26 @@ local DEFAULT_TIMEOUT_MS = 1500
 -- dashboard renders ts_bytes × 3 as a rough parser-tree memory estimate.
 local REMOTE_SNAPSHOT_EXPR = [[luaeval("(function() local p=0 local langs={} local ts_bytes=0 local fug_count=0 local fug_bytes=0 local ts=(vim.treesitter.highlighter and vim.treesitter.highlighter.active) or {} for _,b in ipairs(vim.api.nvim_list_bufs()) do if vim.api.nvim_buf_is_valid(b) then local loaded=vim.api.nvim_buf_is_loaded(b) local ft=loaded and vim.bo[b].filetype or '' local name=vim.api.nvim_buf_get_name(b) or '' local is_fug=(ft:match('^fugitive') or name:match('^fugitive://') or name:match('fugitiveblame')) and true or false if is_fug then fug_count=fug_count+1 end if loaded and ts[b] then p=p+1 if ft and ft~='' then langs[ft]=true end end if loaded and (ts[b] or is_fug) then local ok,info=pcall(vim.api.nvim_buf_call,b,function() return vim.fn.wordcount().bytes end) if ok and info then if ts[b] then ts_bytes=ts_bytes+info end if is_fug then fug_bytes=fug_bytes+info end end end end end local langs_list={} for k in pairs(langs) do table.insert(langs_list,k) end table.sort(langs_list) local lsp_names={} local gc=vim.lsp.get_clients or vim.lsp.get_active_clients for _,c in ipairs(gc()) do table.insert(lsp_names,c.name) end table.sort(lsp_names) return vim.fn.json_encode({cwd=vim.fn.getcwd(),bufs=vim.fn.getbufinfo(),parsers=p,ts_langs=langs_list,ts_bytes=ts_bytes,fug_count=fug_count,fug_bytes=fug_bytes,lsp_names=lsp_names,lua_heap_kb=math.floor(collectgarbage('count'))}) end)()")]]
 
--- Run a vim expression on the remote nvim; returns stdout (string) or nil+err.
+-- Run a vim expression on the remote nvim; returns stdout (string), or
+-- nil + error message + whether the call burned its whole timeout budget.
+-- That third value separates a wedged remote (alive, holding its socket,
+-- never answering) from one that failed fast (stale socket, broken nvim
+-- binary, bad expression). Decided by elapsed time rather than the exit
+-- code, so it does not depend on how `vim.system` reports a timeout.
 local function run_remote_expr(socket, expr, timeout_ms)
+  local budget_ms = timeout_ms or DEFAULT_TIMEOUT_MS
+  local started_ns = uv.hrtime()
   local result = vim.system({
     "nvim", "--server", socket, "--remote-expr", expr,
-  }, { text = true, timeout = timeout_ms or DEFAULT_TIMEOUT_MS }):wait()
+  }, { text = true, timeout = budget_ms }):wait()
+  local elapsed_ms = (uv.hrtime() - started_ns) / 1e6
 
   if result.code ~= 0 then
     local err = result.stderr ~= "" and result.stderr or ("exit " .. tostring(result.code))
-    return nil, err
+    return nil, err, elapsed_ms >= budget_ms * 0.9
   end
 
-  return (result.stdout or ""):gsub("\n$", ""), nil
+  return (result.stdout or ""):gsub("\n$", ""), nil, false
 end
 M.run_remote_expr = run_remote_expr
 
@@ -510,15 +518,26 @@ function M.stats_remote(proc)
     }
   end
 
-  local out, err = run_remote_expr(proc.socket, REMOTE_SNAPSHOT_EXPR)
+  local out, err, hit_timeout = run_remote_expr(proc.socket, REMOTE_SNAPSHOT_EXPR)
 
   if not out then
+    -- A remote that consumed its whole timeout while its pid is still alive
+    -- is wedged, not gone: the process holds its socket but never processes
+    -- the request. Its RSS means nothing in that state, because the dirty
+    -- heap it keeps growing gets swapped straight out, so read the real
+    -- footprint for the row instead.
+    local is_stalled = hit_timeout and pid_alive(proc.pid)
+
     return {
       pid = proc.pid, cwd = proc.cwd, buffers = {},
       loaded = 0, parsers = 0, rss_mb = stats.rss_mb_for(proc.pid),
       uptime = proc.uptime, uptime_seconds = proc.uptime_seconds,
       tmux = proc.tmux,
-      error = err or "remote unreachable",
+      stalled = is_stalled,
+      footprint_mb = is_stalled and stats.footprint_mb_for(proc.pid) or nil,
+      -- Kept terse: the SUBSYSTEMS column is narrow and truncates, and this
+      -- is the one row the user must not skim past.
+      error = is_stalled and "stalled" or (err or "remote unreachable"),
     }
   end
 
