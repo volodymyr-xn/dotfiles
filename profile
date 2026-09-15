@@ -33,11 +33,6 @@ export HISTSIZE=550000
 export SAVEHIST=500000
 
 # set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/bin" ] ; then
-    PATH="$HOME/bin:$PATH"
-fi
-
-# set PATH so it includes user's private bin if it exists
 # if [ -d "$HOME/.local/bin" ] ; then
 #     PATH="$HOME/.local/bin:$PATH"
 # fi
@@ -287,12 +282,6 @@ fi
 #   . "$HOME/.cargo/env"
 # fi
 
-if [[ -f "/Users/tech/.local/bin/mise" ]] ; then
-  echo "Activating mise from profile"
-  eval "$(activate zsh)"
-fi
-
-export PATH="$PATH:$HOME/.local/bin"
 . "$HOME/.cargo/env"
 
 # Reduce meory usage by malloc(ruby garbage collection at the moment)

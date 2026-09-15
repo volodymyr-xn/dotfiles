@@ -54,7 +54,7 @@ set -e # Terminate script if anything exits with a non-zero value
 set -u # Prevent unset variables
 
 files_to_symlink="\
-  profile zprofile bash_profile ackrc asdfrc ctags gemrc \
+  profile zprofile zshenv bash_profile ackrc asdfrc ctags gemrc \
   gitconfig gitignore_global gitmessage npmrc zshrc \
   inputrc default-gems asdfrc bashrc editorconfig \
   config.reek stylelint"
