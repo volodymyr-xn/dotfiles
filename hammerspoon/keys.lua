@@ -13,15 +13,16 @@ local mouseSideButtons = require("mouse_side_buttons")
 local notifyReturn = require("notify_return")
 local swichMonitorFocus = require("swich_monitor_focus")
 
--- External display brightness over DDC: F6 up, F5 down
+-- External display brightness over DDC (built-in display when no external
+-- one is attached): F1 down, F2 up
 -- Mirrors the F10/F9 volume direction; held keys ramp.
-hs.hotkey.bind({}, "f6", brightness.up, nil, brightness.up)
-hs.hotkey.bind({}, "f5", brightness.down, nil, brightness.down)
+hs.hotkey.bind({}, "f1", brightness.down, nil, brightness.down)
+hs.hotkey.bind({}, "f2", brightness.up, nil, brightness.up)
 
 -- Volume control: F10 up, F9 down
 -- For keychron mechanic low profile keyboard
-hs.hotkey.bind({}, "f10", mediaKeys.volumeUp, nil, mediaKeys.volumeUp)
 hs.hotkey.bind({}, "f9", mediaKeys.volumeDown, nil, mediaKeys.volumeDown)
+hs.hotkey.bind({}, "f10", mediaKeys.volumeUp, nil, mediaKeys.volumeUp)
 
 -- Volume control: Numpad +/- (raw keycodes: 69 = numpad+, 78 = numpad-)
 -- For regular full width membrane keyboard

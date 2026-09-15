@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+
+# Wrapper that shadows the real `docker` on PATH (dotfiles/bin is
+# prepended in `profile`). On macOS it starts Colima on demand, so a
+# docker command issued after a reboot works without starting the VM by
+# hand. Every argument, exit code, and stdio stream is forwarded
+# untouched. On every other OS it is a straight passthrough.
+
+set -euo pipefail
+
+# Resolved once and reused: both the PATH scan and the Colima lib lookup
+# need it, and resolving costs a subshell.
+self_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+
+# Resolve the real docker by scanning PATH and skipping this wrapper,
+# so the lookup cannot recurse into itself.
+find_real_docker() {
+  local entry candidate
+
+  while IFS= read -r -d: entry; do
+    [[ -n "$entry" ]] || continue
+
+    candidate="$entry/docker"
+
+    # Test for the binary before resolving the directory: resolution costs
+    # a subshell, and almost no entry on PATH holds a docker.
+    [[ -x "$candidate" && ! -d "$candidate" ]] || continue
+    [[ "$(cd -- "$entry" 2>/dev/null && pwd -P)" == "$self_dir" ]] && continue
+
+    printf '%s' "$candidate"
+    return 0
+  done <<< "$PATH:"
+
+  return 1
+}
+
+# True when the argument list is satisfied entirely by the docker CLI and
+# never reaches the daemon, so booting the VM for it would be wasted time.
+is_daemon_free_command() {
+  local arg
+
+  for arg in "$@"; do
+    case "$arg" in
+      --version|-v|--help|-h) return 0 ;;
+      -*) continue ;;
+      context|completion|compose) return 0 ;;
+      *) return 1 ;;
+    esac
+  done
+
+  # A bare `docker` only prints usage.
+  return 0
+}
+
+real_docker="$(find_real_docker)" || {
+  echo "docker: no docker binary found on PATH besides this wrapper" >&2
+  exit 127
+}
+
+# Bring Colima up, unless the VM was never provisioned: a bare `colima
+# start` would then create one with the stock 2 CPU / 2 GB, too small for
+# the amd64 QEMU builds Kamal needs. The sizing lives in
+# macos_setup/docker.sh, so defer to it rather than restate it here.
+start_colima() {
+  if ! colima_vm_exists; then
+    echo "docker: no Colima VM yet — run macos_setup/docker.sh to create" \
+      "it with the right CPU/memory/disk sizing" >&2
+    return 1
+  fi
+
+  echo "docker: Colima is not running, starting it..." >&2
+
+  local start_output
+  start_output="$(colima start 2>&1)"
+  printf '%s\n' "$start_output" >&2
+
+  # `colima start` reports success while doing nothing when Colima still
+  # believes the VM is up; only a stop/start cycle clears that.
+  if [[ "$start_output" == *"already running"* ]]; then
+    echo "docker: Colima is wedged (start was a no-op) — run" \
+      "c-colima-restart" >&2
+    return 1
+  fi
+}
+
+colima_lib="$self_dir/../lib/macos/colima.sh"
+
+# The Colima checks only exist on macOS, and a missing lib must not stop
+# docker from running -- it just means no autostart.
+if [[ "$(uname -s)" == "Darwin" && -r "$colima_lib" ]] \
+  && ! is_daemon_free_command "$@"; then
+  # shellcheck source=../lib/macos/colima.sh
+  source "$colima_lib"
+
+  is_colima_running || start_colima || true
+fi
+
+exec "$real_docker" "$@"

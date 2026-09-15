@@ -8,6 +8,7 @@
 set -euo pipefail
 
 source "$HOME/dotfiles/macos_setup/lib/output.sh"
+source "$HOME/dotfiles/lib/macos/colima.sh"
 
 # Colima VM sizing. The defaults (2 CPU / 2 GB) are too small to build
 # amd64 images under QEMU emulation, which Kamal deploys rely on.
@@ -51,7 +52,7 @@ if ! command -v colima >/dev/null 2>&1; then
   exit 1
 fi
 
-if colima status >/dev/null 2>&1; then
+if is_colima_running; then
   skip "Colima already running"
 else
   note "Starting Colima ($COLIMA_CPU CPU / ${COLIMA_MEMORY}GB / ${COLIMA_DISK}GB disk)"

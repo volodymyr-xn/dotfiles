@@ -16,6 +16,16 @@ function M.volumeDown()
   postSystemKey("SOUND_DOWN")
 end
 
+-- Step built-in display brightness up by one notch (native OSD).
+function M.brightnessUp()
+  postSystemKey("BRIGHTNESS_UP")
+end
+
+-- Step built-in display brightness down by one notch (native OSD).
+function M.brightnessDown()
+  postSystemKey("BRIGHTNESS_DOWN")
+end
+
 -- Toggle system mute.
 function M.toggleMute()
   postSystemKey("MUTE")

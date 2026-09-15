@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+# Recover Colima from the state where its docker socket and lima host
+# agent are still alive but the daemon behind them is unreachable. In
+# that state a plain `colima start` is a no-op ("already running,
+# ignoring") because Colima's own bookkeeping still says the VM is up,
+# so only a full stop/start cycle brings docker back.
+# Stops any running containers -- that is inherent to restarting the VM.
+
+set -euo pipefail
+
+if ! command -v colima >/dev/null 2>&1; then
+  echo "c-colima-restart: colima is not installed" >&2
+  exit 1
+fi
+
+echo "Stopping Colima..."
+colima stop
+
+echo "Starting Colima..."
+colima start
+
+echo "Colima restarted."

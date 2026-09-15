@@ -1,3 +1,5 @@
+local mediaKeys = require("media_keys")
+
 local M = {}
 
 -- m1ddc talks DDC/CI to the external panel over USB-C (DisplayPort Alt Mode).
@@ -212,14 +214,35 @@ local function step(delta)
   hs.task.new(M1DDC, onGetExit, {"get", "luminance"}):start()
 end
 
--- Raise external display brightness by one step.
-function M.up()
-  step(STEP)
+-- True when any non built-in screen is attached, i.e. a DDC target exists.
+local function hasExternalScreen()
+  for _, screen in ipairs(hs.screen.allScreens()) do
+    if not screen:name():find("^Built%-in") then
+      return true
+    end
+  end
+
+  return false
 end
 
--- Lower external display brightness by one step.
+-- Raise external display brightness by one step, or the built-in one when
+-- no external display is attached.
+function M.up()
+  if hasExternalScreen() then
+    step(STEP)
+  else
+    mediaKeys.brightnessUp()
+  end
+end
+
+-- Lower external display brightness by one step, or the built-in one when
+-- no external display is attached.
 function M.down()
-  step(-STEP)
+  if hasExternalScreen() then
+    step(-STEP)
+  else
+    mediaKeys.brightnessDown()
+  end
 end
 
 return M
