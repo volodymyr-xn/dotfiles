@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+# Print how much macOS RAM the Colima VM is currently holding, in MiB.
+#
+# This is not "memory in use inside the guest". Under `vmType: vz` the
+# guest's RAM is a single host mapping that only ever grows: once Linux
+# touches a page -- a build, an image pull, ordinary page cache -- the host
+# keeps it resident even after the guest frees it, because
+# Virtualization.framework exposes no free-page-reporting balloon. So this
+# number is the high-water mark of everything the VM has touched since it
+# booted, and `free -h` inside the VM will routinely report a fraction of
+# it. Only a VM restart brings it back down -- see bin/c-colima-trim.
+
+set -euo pipefail
+
+source "$HOME/dotfiles/lib/macos/colima.sh"
+
+if ! host_rss_mb="$(colima_vm_host_rss_mb)"; then
+  echo "c-colima-host-memory: no unique Colima VM process found" >&2
+  exit 1
+fi
+
+echo "$host_rss_mb"

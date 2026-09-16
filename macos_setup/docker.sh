@@ -12,8 +12,17 @@ source "$HOME/dotfiles/lib/macos/colima.sh"
 
 # Colima VM sizing. The defaults (2 CPU / 2 GB) are too small to build
 # amd64 images under QEMU emulation, which Kamal deploys rely on.
+#
+# Memory reads like a harmless ceiling, but under `vmType: vz` it is the
+# only ceiling there is. The guest's RAM is one host mapping that never
+# shrinks: every page Linux touches stays resident in macOS even after the
+# guest frees it, because Virtualization.framework has no free-page-
+# reporting balloon to give them back. So the figure below is not "up to
+# this much if needed", it is "this much, eventually, until the VM
+# restarts". 8GB clears the amd64 builds with room to spare;
+# bin/c-colima-trim reclaims what the VM has already parked.
 COLIMA_CPU=6
-COLIMA_MEMORY=12
+COLIMA_MEMORY=8
 COLIMA_DISK=100
 
 section "Docker CLI plugins"

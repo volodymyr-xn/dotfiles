@@ -45,6 +45,11 @@ end
 require("caffeine")
 require("mouse_side_buttons")
 
+-- Same reason, no user-facing control at all: requiring it starts the timer
+-- that watches how much macOS RAM the Colima VM is holding. Nothing else
+-- references it, so this line is the whole of its wiring.
+require("colima_autotrim")
+
 -- Order matters here: macOS puts each new status item to the *left* of the
 -- ones already in the bar, so this list reads right to left on screen —
 -- sensors, then throughput, then the process gear.

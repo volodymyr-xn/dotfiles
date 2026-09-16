@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+# Unattended half of c-colima-trim: run it only when the VM has grown past
+# a threshold AND nothing would be lost by restarting it. Exits 0 in
+# silence otherwise, so it is safe on a timer -- hammerspoon/modules/
+# colima_autotrim.lua is the scheduler.
+#
+# Kept separate from c-colima-trim rather than folded in behind a flag: the
+# manual command is an explicit "do it now", this one is allowed to decide
+# on its own that now is a bad moment.
+
+set -euo pipefail
+
+source "$HOME/dotfiles/lib/macos/colima.sh"
+
+# How much macOS RAM the VM has to be holding before a restart is worth the
+# interruption. Below this the VM is still cheap and the containers it would
+# kill cost more than the memory it would return.
+THRESHOLD_MB="${COLIMA_TRIM_THRESHOLD_MB:-6000}"
+
+# A container busier than this counts as work in flight. Builds run inside
+# the buildkit container, which is otherwise on the ignore list below, so
+# CPU is what distinguishes "idle builder" from "build in progress".
+BUSY_CPU_PERCENT=5
+
+# Containers Kamal brings back on its own the next time it needs them, so
+# killing them loses nothing a later command will not redo.
+INFRASTRUCTURE_PATTERN='^(buildx_buildkit_|kamal-docker-registry$)'
+
+# True when every running container is disposable infrastructure and none of
+# them is doing real work.
+colima_is_idle() {
+  local container_names busiest_cpu_percent
+
+  container_names="$(docker ps --format '{{.Names}}')"
+
+  # Guarded on emptiness because a herestring feeds `grep -v` one empty
+  # line when there are no containers at all, which would read as a
+  # non-infrastructure container and veto the trim exactly when it is
+  # safest.
+  if [[ -n "$container_names" ]] \
+    && grep -qvE "$INFRASTRUCTURE_PATTERN" <<< "$container_names"; then
+    return 1
+  fi
+
+  busiest_cpu_percent="$(docker stats --no-stream --format '{{.CPUPerc}}' \
+    | tr -d '%' | sort -rn | head -1)"
+  busiest_cpu_percent="${busiest_cpu_percent%%.*}"
+
+  (( ${busiest_cpu_percent:-0} < BUSY_CPU_PERCENT ))
+}
+
+is_colima_running || exit 0
+
+host_rss_mb="$(colima_vm_host_rss_mb)" || exit 0
+(( host_rss_mb >= THRESHOLD_MB )) || exit 0
+
+colima_is_idle || exit 0
+
+c-colima-trim

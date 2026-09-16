@@ -14,10 +14,10 @@ local notifyReturn = require("notify_return")
 local swichMonitorFocus = require("swich_monitor_focus")
 
 -- External display brightness over DDC (built-in display when no external
--- one is attached): F1 down, F2 up
+-- one is attached): F3 down, F4 up
 -- Mirrors the F10/F9 volume direction; held keys ramp.
-hs.hotkey.bind({}, "f1", brightness.down, nil, brightness.down)
-hs.hotkey.bind({}, "f2", brightness.up, nil, brightness.up)
+hs.hotkey.bind({}, "f3", brightness.down, nil, brightness.down)
+hs.hotkey.bind({}, "f4", brightness.up, nil, brightness.up)
 
 -- Volume control: F10 up, F9 down
 -- For keychron mechanic low profile keyboard

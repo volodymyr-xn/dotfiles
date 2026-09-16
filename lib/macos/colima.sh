@@ -25,3 +25,19 @@ is_colima_running() {
 colima_vm_exists() {
   [[ -f "$HOME/.colima/_lima/colima/lima.yaml" ]]
 }
+
+# Resident size, in MiB, of the Virtualization.framework process that holds
+# the Colima VM's RAM -- what Activity Monitor labels "Virtual Machine
+# Service for limactl". It is an XPC service reparented to launchd, so there
+# is no process-tree link back to limactl and the executable path is the only
+# handle available. Refusing to answer when the match is not unique keeps a
+# second VZ guest (Docker Desktop, UTM, another lima instance) from being
+# reported as Colima's.
+colima_vm_host_rss_mb() {
+  local vm_pids
+
+  vm_pids="$(pgrep -f com.apple.Virtualization.VirtualMachine)" || return 1
+  [[ "$(wc -l <<< "$vm_pids")" -eq 1 ]] || return 1
+
+  ps -o rss= -p "$vm_pids" | awk '{ printf "%d\n", $1 / 1024 }'
+}

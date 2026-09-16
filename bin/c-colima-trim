@@ -1,0 +1,165 @@
+#!/usr/bin/env bash
+
+# Hand the RAM the Colima VM has accumulated back to macOS.
+#
+# Two steps, in this order:
+#   1. prune the Docker build cache on every builder, so the next builds
+#      have less to read back in and the VM grows slower afterwards;
+#   2. restart the VM, which is what actually frees the memory.
+#
+# Step 2 looks blunt but is not optional. `vmType: vz` backs the guest with
+# a host mapping that never shrinks, so `drop_caches` inside Linux leaves
+# the host process byte-for-byte as large -- measured here at a guest down
+# to ~600MB while the host still held 6.6GB. Tearing the VM down is the
+# only thing that releases those pages.
+#
+# Stops any running containers -- that is inherent to restarting the VM.
+
+set -euo pipefail
+
+source "$HOME/dotfiles/lib/macos/colima.sh"
+
+# Long enough for a prune that is genuinely working through a large cache,
+# short enough that a wedged one does not hold the whole run hostage.
+PRUNE_DEADLINE_SECONDS=180
+
+# A live daemon answers `docker version` immediately; one behind a dead VM
+# never answers at all. This only has to tell those two apart.
+DAEMON_PROBE_DEADLINE_SECONDS=15
+
+# mkdir is the atomic test-and-set macOS offers -- there is no flock(1)
+# here. The lock matters because there are two entry points: this command
+# by hand, and the Hammerspoon timer through c-colima-trim-when-idle. Two
+# overlapping stop/start cycles leave lima holding a hostagent with no VM
+# behind it, a state only `colima stop --force` clears.
+LOCK_DIR="${TMPDIR:-/tmp}/c-colima-trim.lock"
+
+# Take the lock, or step aside. A lock whose owner is gone is stale -- a
+# previous run killed mid-restart would otherwise block every later one
+# until the file was removed by hand.
+acquire_lock() {
+  local owner_pid
+
+  if mkdir "$LOCK_DIR" 2>/dev/null; then
+    echo $$ > "$LOCK_DIR/pid"
+    return 0
+  fi
+
+  owner_pid="$(cat "$LOCK_DIR/pid" 2>/dev/null || true)"
+
+  if [[ -n "$owner_pid" ]] && kill -0 "$owner_pid" 2>/dev/null; then
+    return 1
+  fi
+
+  echo $$ > "$LOCK_DIR/pid"
+}
+
+release_lock() {
+  rm -f "$LOCK_DIR/pid"
+  rmdir "$LOCK_DIR" 2>/dev/null || true
+}
+
+# Run a command, killing it if it outlasts the deadline. macOS ships no
+# timeout(1), and `docker buildx prune` does not honour its own --timeout
+# once the daemon stops answering: against a crashed VM it blocked for ten
+# minutes here before being killed by hand. The bound has to be external.
+#
+# `set -m` puts the child in its own process group so the kill reaches the
+# CLI plugin too -- docker-buildx runs as a separate process, and signalling
+# only the parent leaves it behind still holding the socket.
+run_with_deadline() {
+  local deadline_seconds="$1"
+  shift
+
+  local command_pid waited_seconds=0
+
+  set -m
+  "$@" &
+  command_pid=$!
+  set +m
+
+  while (( waited_seconds < deadline_seconds )) \
+    && kill -0 "$command_pid" 2>/dev/null; do
+    sleep 1
+    (( waited_seconds += 1 ))
+  done
+
+  if kill -0 "$command_pid" 2>/dev/null; then
+    kill -TERM -- "-$command_pid" 2>/dev/null || true
+    sleep 1
+    kill -KILL -- "-$command_pid" 2>/dev/null || true
+
+    return 1
+  fi
+
+  wait "$command_pid"
+}
+
+# is_colima_running deliberately stops short of proving the daemon answers,
+# and that gap is exactly the case this script keeps meeting: a VM that
+# crashed out from under a live socket and hostagent.
+daemon_responds() {
+  run_with_deadline "$DAEMON_PROBE_DEADLINE_SECONDS" \
+    docker version --format '{{.Server.Version}}' >/dev/null 2>&1
+}
+
+# Builder names only. `docker buildx ls` indents each builder's nodes under
+# it and marks the current builder with a trailing `*`, so unindented lines
+# past the header are the builders and the star has to come off before the
+# name can be passed back to buildx.
+list_builders() {
+  docker buildx ls 2>/dev/null \
+    | awk 'NR > 1 && NF && $0 !~ /^[[:space:]]/ { sub(/\*$/, "", $1); print $1 }'
+}
+
+# Drop every cache blob on one builder. Failures are reported and skipped
+# rather than fatal: a builder whose backing container is gone -- a stale
+# Kamal docker-container builder is the usual case -- must not stop the
+# restart that actually reclaims the memory.
+prune_builder() {
+  local builder_name="$1"
+
+  echo "Pruning build cache on $builder_name..."
+
+  run_with_deadline "$PRUNE_DEADLINE_SECONDS" \
+    docker buildx prune --builder "$builder_name" --all --force \
+    >/dev/null 2>&1 || echo "  unreachable or too slow, skipped"
+}
+
+prune_all_builders() {
+  local builder_name
+
+  while IFS= read -r builder_name; do
+    prune_builder "$builder_name"
+  done < <(list_builders)
+
+  echo "Removing unused images, containers, and networks..."
+  run_with_deadline "$PRUNE_DEADLINE_SECONDS" docker system prune --force \
+    >/dev/null 2>&1 || echo "  skipped"
+}
+
+if ! is_colima_running; then
+  echo "c-colima-trim: Colima is not running, nothing to trim" >&2
+  exit 1
+fi
+
+if ! acquire_lock; then
+  echo "c-colima-trim: another trim is already running" >&2
+  exit 1
+fi
+
+trap release_lock EXIT
+
+before_mb="$(colima_vm_host_rss_mb || echo 0)"
+echo "Colima is holding ${before_mb}MB of macOS RAM."
+
+if daemon_responds; then
+  prune_all_builders
+else
+  echo "Docker daemon is not answering — skipping the prune, restarting only."
+fi
+
+c-colima-restart
+
+after_mb="$(colima_vm_host_rss_mb || echo 0)"
+echo "Colima is now holding ${after_mb}MB — reclaimed $((before_mb - after_mb))MB."
