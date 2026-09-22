@@ -12,6 +12,7 @@ stty -ixon
 . "$HOME/dotfiles/zsh/oh-my-zsh-config"
 . "$HOME/dotfiles/zsh/aliases"
 . "$HOME/dotfiles/zsh/tmux"
+. "$HOME/dotfiles/zsh/herdr"
 . "$HOME/dotfiles/zsh/functions"
 . "$HOME/dotfiles/zsh/keybindings"
 

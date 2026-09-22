@@ -1,0 +1,36 @@
+id = "dotfiles.tab-numbers"
+name = "Tab Numbers"
+version = "0.1.0"
+min_herdr_version = "0.9.0"
+description = "Prefix every tab label with its number, like tmux window-status-format"
+platforms = ["linux", "macos"]
+
+# Renumber whenever the tab set changes, so labels track herdr's own numbering
+# the way tmux's `renumber-windows on` kept #I correct.
+[[events]]
+on = "tab.created"
+command = ["./renumber"]
+
+[[events]]
+on = "tab.closed"
+command = ["./renumber"]
+
+[[events]]
+on = "tab.moved"
+command = ["./renumber"]
+
+[[events]]
+on = "tab.renamed"
+command = ["./renumber"]
+
+# Rebuild the labels after a server restart, when tabs are restored without
+# any of the events above firing.
+[[startup]]
+command = ["./renumber"]
+
+# Also reachable by hand when the labels drift.
+[[actions]]
+id = "renumber"
+title = "Renumber tabs"
+contexts = ["workspace"]
+command = ["./renumber"]

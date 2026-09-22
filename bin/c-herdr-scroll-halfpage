@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+# Scroll the focused herdr pane half a viewport, or pass Escape through to a
+# running vim/nvim instead.
+#
+# Reproduces tmux.conf's `bind -n C-[ if-shell "$is_vim" 'send-keys Escape'
+# 'copy-mode -e ; send-keys -X halfpage-up'` and its C-] page-down half.
+# herdr has no conditional bindings and its `copy_mode` action only enters at
+# the bottom, so the branch and the scroll both have to happen out here.
+#
+# Scrolling goes through the socket API's pane.scroll, which takes an absolute
+# offset_from_bottom and has no CLI subcommand of its own.
+#
+# Usage: c-herdr-scroll-halfpage up|down
+
+import json
+import os
+import re
+import socket
+import sys
+
+# Matches the editor names tmux's $is_vim probe accepted: vi, vim, view, nvim,
+# gvim, vimdiff and friends.
+EDITOR_NAME = re.compile(r"^(\S+/)?g?(view|n?vim?x?)(diff)?$", re.IGNORECASE)
+
+SOCKET_TIMEOUT_SECONDS = 5
+
+
+# Path of the running server's control socket.
+def socket_path():
+    from_env = os.environ.get("HERDR_SOCKET")
+    if from_env:
+        return from_env
+
+    config_home = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config")
+
+    return os.path.join(config_home, "herdr", "herdr.sock")
+
+
+# Send one newline-delimited JSON request and return its parsed reply.
+def call(method, params):
+    connection = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    connection.settimeout(SOCKET_TIMEOUT_SECONDS)
+    connection.connect(socket_path())
+
+    try:
+        request = {"id": "c-herdr-scroll-halfpage", "method": method, "params": params}
+        connection.sendall((json.dumps(request) + "\n").encode())
+
+        reply = b""
+        while not reply.endswith(b"\n"):
+            chunk = connection.recv(65536)
+            if not chunk:
+                break
+            reply += chunk
+    finally:
+        connection.close()
+
+    return json.loads(reply.decode())
+
+
+# Id of the pane focused when the key was pressed. herdr hands custom
+# commands HERDR_ACTIVE_PANE_ID; pane.current is the fallback for manual runs.
+def target_pane_id():
+    return os.environ.get("HERDR_ACTIVE_PANE_ID") or call("pane.current", {})["result"]["pane"]["pane_id"]
+
+
+# True when the pane's foreground process is a vim variant, so the keystroke
+# belongs to the editor rather than to herdr.
+def editor_has_focus(pane_id):
+    process_info = call("pane.process_info", {"pane_id": pane_id})["result"]["process_info"]
+
+    for process in process_info.get("foreground_processes", []):
+        for candidate in (process.get("argv0"), process.get("name")):
+            if candidate and EDITOR_NAME.match(candidate):
+                return True
+
+    return False
+
+
+def main():
+    if len(sys.argv) != 2 or sys.argv[1] not in ("up", "down"):
+        print("usage: c-herdr-scroll-halfpage up|down", file=sys.stderr)
+        return 1
+
+    direction = sys.argv[1]
+    pane_id = target_pane_id()
+
+    if editor_has_focus(pane_id):
+        call("pane.send_keys", {"pane_id": pane_id, "keys": ["esc"]})
+        return 0
+
+    scroll = call("pane.get", {"pane_id": pane_id})["result"]["pane"]["scroll"]
+    half_page = max(1, scroll["viewport_rows"] // 2)
+
+    if direction == "up":
+        offset = min(scroll["offset_from_bottom"] + half_page, scroll["max_offset_from_bottom"])
+    else:
+        offset = max(scroll["offset_from_bottom"] - half_page, 0)
+
+    call("pane.scroll", {"pane_id": pane_id, "offset_from_bottom": offset})
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

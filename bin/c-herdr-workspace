@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# Create a herdr workspace rooted at a directory, or focus the existing one
+# carrying the same label.
+#
+# Why this exists: herdr spawns panes from its persistent server, never from
+# the client you typed `herdr` in, so the shell's cwd is not inherited. With
+# `terminal.new_cwd = "follow"` a workspace that has no source workspace to
+# follow falls back to $HOME — which is why a bare `herdr` always lands in ~.
+# Only an explicit --cwd overrides that, and `herdr` takes no --cwd at launch.
+# This restores what `tmux new-session -As` gave the zsh/tmux helpers.
+#
+# Usage: c-herdr-workspace <label> [directory]
+set -euo pipefail
+
+# Seconds to wait for a freshly spawned server to publish its socket.
+SERVER_START_TIMEOUT=10
+
+workspace_label=${1:-}
+workspace_root=${2:-$PWD}
+
+if [ -z "$workspace_label" ]; then
+  echo "usage: c-herdr-workspace <label> [directory]" >&2
+  exit 1
+fi
+
+if [ ! -d "$workspace_root" ]; then
+  echo "not a directory: $workspace_root" >&2
+  exit 1
+fi
+
+if ! command -v jq >/dev/null; then
+  echo "jq is required to look up workspaces by label" >&2
+  exit 1
+fi
+
+# True while the socket API reports a live server. `herdr status server` exits
+# 0 whether or not one is running, so match its status line, not the code.
+server_is_running() {
+  herdr status server 2>/dev/null | grep -q '^status: running'
+}
+
+# Start the headless server detached and wait for it to answer, so the
+# workspace exists before any client attaches to it.
+start_server() {
+  nohup herdr server >/dev/null 2>&1 &
+  local deadline=$((SECONDS + SERVER_START_TIMEOUT))
+
+  while [ "$SECONDS" -lt "$deadline" ]; do
+    server_is_running && return 0
+    sleep 0.2
+  done
+
+  echo "herdr server did not answer within ${SERVER_START_TIMEOUT}s" >&2
+  return 1
+}
+
+# Echo the id of the workspace labelled $1, or nothing when none matches.
+workspace_id_for_label() {
+  herdr workspace list |
+    jq -r --arg label "$1" \
+      'first(.result.workspaces[] | select(.label == $label) | .workspace_id) // empty'
+}
+
+server_is_running || start_server
+
+existing_workspace_id=$(workspace_id_for_label "$workspace_label")
+
+# Focus rather than rebuild, matching `tmux new-session -As` and tmuxinator.
+if [ -n "$existing_workspace_id" ]; then
+  herdr workspace focus "$existing_workspace_id" >/dev/null
+  exit 0
+fi
+
+herdr workspace create \
+  --cwd "$workspace_root" \
+  --label "$workspace_label" \
+  --focus >/dev/null

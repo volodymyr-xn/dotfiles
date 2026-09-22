@@ -1,0 +1,72 @@
+# herdr counterparts of the tmux helpers in zsh/tmux. herdr runs one
+# persistent session holding many workspaces, so what was a tmux *session*
+# here is a herdr *workspace*.
+
+# Workspace label for a directory: its basename with dots swapped for dashes,
+# mirroring `tm`'s `tr . -`. $HOME answers `~` so the workspace herdr creates
+# for itself on a cold start is reused instead of shadowed by a `tech` twin.
+function _herdr_workspace_label() {
+  if [[ $1 == $HOME ]]; then
+    print -r -- '~'
+    return
+  fi
+
+  print -r -- "${1:t:gs/./-}"
+}
+
+# Create or focus the workspace labelled $1 rooted at $2, then attach unless
+# we are already inside a pane. `command herdr` skips the wrapper below, which
+# would otherwise recurse back into here.
+function _herdr_enter_workspace() {
+  c-herdr-workspace "$1" "$2" || return
+  [[ -n $HERDR_PANE_ID ]] || command herdr
+}
+
+# Launch herdr in a workspace rooted at the current directory rather than
+# $HOME. herdr accepts no --cwd at launch and its server never inherits the
+# client's cwd, so the workspace has to exist before attaching — see
+# bin/c-herdr-workspace. Anything with arguments is a subcommand or a flag and
+# passes straight through to the binary.
+function herdr() {
+  if (( $# )); then
+    command herdr "$@"
+    return
+  fi
+
+  hm
+}
+
+# Create or focus a workspace named after the current directory, then attach.
+# Mirrors `tm`. Kept as its own name so the behavior is still reachable when
+# the wrapper above is bypassed.
+function hm() {
+  _herdr_enter_workspace "$(_herdr_workspace_label "$PWD")" "$PWD"
+}
+
+# Create or focus a workspace under an explicit name, rooted at the current
+# directory, then attach. Mirrors `tn`.
+function hn() {
+  if [[ -z $1 ]]; then
+    echo "usage: hn <name>" >&2
+    return 1
+  fi
+
+  _herdr_enter_workspace "$1" "$PWD"
+}
+
+# List workspaces with their pane counts, sorted by name. Mirrors `tl`.
+function hl() {
+  herdr workspace list |
+    jq -r '.result.workspaces[] | "\(.label)\t\(.pane_count) panes"' |
+    sort
+}
+
+# Stop every herdr session, killing the panes and agents they own. Mirrors
+# `tka`. Destructive: running agents are terminated, not detached.
+function hka() {
+  herdr session list --json |
+    jq -r '.sessions[] | select(.running) | .name' |
+    while read -r session_name; do
+      herdr session stop "$session_name"
+    done
+}

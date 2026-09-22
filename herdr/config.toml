@@ -7,14 +7,50 @@ onboarding = false
 name = "catppuccin"
 auto_switch = false
 
-# Palette lifted from the tmux THEME block.
+# Backgrounds and the text ramp come from nvim/lua/colors.lua so herdr and
+# nvim share one surface; the accents still come from the tmux THEME block.
+# herdr ships no macchiato flavour, which is what nvim runs, so every
+# macchiato-specific value has to be pinned by hand here.
 [theme.custom]
-panel_bg = "#2f3042"   # tmux: status-style bg
-# Pins the sidebar — tmux only ever colored the status bar, not popups.
-sidebar_bg = "#2f3042"
+# nvim: color_overrides.all.base
+panel_bg = "#212433"
+sidebar_bg = "#212433"
+
+# nvim: color_overrides.all.text — pure white, not catppuccin's #cad3f5.
+text = "#ffffff"
+
+# herdr has no muted/dim token and no border token: tab labels and pane
+# borders both ride catppuccin's subtext0/overlay ramp. herdr 0.9.0
+# (src/client/shell/tabs.rs) draws an inactive tab in overlay1 when its label
+# is custom — every tab here, since herdr/plugins/tab-numbers renames them —
+# and in dimmed overlay0 otherwise. overlay1 also colors the tab bar's "+",
+# the focused pane's scrollbar thumb and overlay hint text. overlay0 stays
+# dim so inactive borders recede and the accent-colored active border reads
+# as the loud one. herdr cannot vary border thickness, so contrast is the
+# only lever tmux's `pane-border-lines heavy` has left here.
+subtext0 = "#f0f0f7"
+# tmux: setw -g window-status-style fg=#f0f0f7
+overlay1 = "#f0f0f7"
+overlay0 = "#6e738d"
+
+# nvim: color_overrides.all.peach / .violet. herdr has no violet token, so
+# the nvim value lands on mauve, its nearest slot.
+peach = "#F5B07F"
+mauve = "#C69FF6"
+
 accent = "#82d595"     # tmux: pane-active-border-style / active window bg
 green = "#82d595"
 yellow = "#e1d39f"     # tmux: status-left fg
+# tmux: mode-style bg=green colored the choose-tree cursor. Reusing the
+# accent here would make the cursor indistinguishable from the active
+# Space row, so take the copy-mode-position-style bg instead.
+selection_bg = "#3a3c52"
+
+# Background of the active Space row and the focused Agent row. The theme
+# default sits a hair above panel_bg, which left the selected agent almost
+# indistinguishable from its neighbours. Lifted well clear of both panel_bg
+# and selection_bg while staying dark enough for the white row text.
+active_row_bg = "#454a63"
 
 [terminal]
 # tmux: set -g default-command "${SHELL}" — non-login shell. herdr's "auto"
@@ -24,6 +60,12 @@ shell_mode = "non_login"
 # tmux: every split/new-window used -c "#{pane_current_path}"
 new_cwd = "follow"
 
+# tmux: set -g allow-passthrough all — let programs push Kitty graphics
+# escape sequences through the multiplexer. Ghostty is a compatible host.
+# Moved here from [experimental] in herdr 0.9.0, which also made it the
+# default; kept explicit because the tmux line it mirrors is explicit.
+kitty_graphics = true
+
 [keys]
 # tmux: unbind C-b; set -g prefix C-a. No `send-prefix` equivalent exists.
 prefix = "ctrl+a"
@@ -31,8 +73,14 @@ prefix = "ctrl+a"
 # tmux: prefix d
 detach = "prefix+d"
 
+# tmux: bind r source-file ~/.config/tmux/tmux.conf
+reload_config = "prefix+r"
+
 # tmux: bind s choose-tree -ZsN (session chooser)
 workspace_picker = "prefix+s"
+
+# tmux default: prefix $ renames the session.
+rename_workspace = "prefix+$"
 
 # Displaced from its prefix+s default by workspace_picker above.
 settings = "prefix+shift+s"
@@ -45,13 +93,24 @@ goto = "prefix+n"
 next_workspace = "ctrl+up"
 previous_workspace = "ctrl+down"
 
-# tmux: bind c new-window -c "#{pane_current_path}". prompt_new_tab_name is
-# true by default, so this also covers tmux's `bind o` name-prompt variant.
+# tmux: bind c new-window -c "#{pane_current_path}". tmux's `bind o`
+# name-prompt variant is dropped: ui.prompt_new_tab_name below turns the
+# prompt off, and the tab-numbers plugin supplies the placeholder name.
 new_tab = "prefix+c"
 previous_tab = "prefix+p"
 
+# tmux defaults: prefix , renames the window, prefix & kills it.
+# There is no tmux counterpart for renaming a *pane* — select-pane -T
+# ships unbound — so rename_pane keeps herdr's prefix+shift+p.
+rename_tab = "prefix+,"
+close_tab = "prefix+&"
+
 # tmux: bind -n M-0 next-window
 next_tab = "alt+0"
+
+# No tmux equivalent — tmux could only swap-window by index.
+move_tab_previous = "alt+shift+left"
+move_tab_next = "alt+shift+right"
 
 # tmux: ctrl+1..9 selects window N. macOS steals ctrl+digit for Mission
 # Control, so ~/.config/ghostty/config rewrites those chords to "\x01"+digit —
@@ -68,14 +127,16 @@ focus_pane_down = "ctrl+j"
 focus_pane_up = "ctrl+k"
 focus_pane_right = "ctrl+l"
 
-# tmux: bind -n C-\ select-pane -l
-last_pane = "ctrl+backslash"
+# tmux: bind -n C-\ select-pane -l. Deliberately unbound here — ctrl+\ is
+# left to the pane's own application. Empty disables the action outright,
+# which is also herdr's own default.
+last_pane = ""
 
 # tmux: bind v split-window -h
 split_vertical = "prefix+v"
 
-# tmux: bind i split-window -v (b / j / " aliases have no herdr equivalent)
-split_horizontal = "prefix+i"
+# tmux: bind b split-window -v (i / j / " aliases have no herdr equivalent)
+split_horizontal = "prefix+b"
 
 # tmux bound zoom to C-m, which only worked because of `extended-keys always`;
 # ctrl+m is carriage return and herdr has no extended-keys negotiation.
@@ -85,19 +146,19 @@ zoom = "prefix+z"
 # ("invalid keybinding ... disabling binding"), so keep the herdr default.
 close_pane = "prefix+x"
 
-# tmux: bind -n S-Left/S-Right/S-Down/S-Up resize-pane. Direct resize
-# actions did not exist when this config was written, so resize_mode below
-# was the only approximation.
+# tmux: bind -n S-Left/S-Right/S-Down/S-Up resize-pane.
 resize_pane_left = "shift+left"
 resize_pane_down = "shift+down"
 resize_pane_up = "shift+up"
 resize_pane_right = "shift+right"
 
 # No tmux equivalent. Kept alongside the direct keys above for sustained
-# resizing: arrows repeat until Esc.
-resize_mode = "prefix+r"
+# resizing: arrows repeat until Esc. Displaced from prefix+r by
+# reload_config, onto the key reload_config itself vacated.
+resize_mode = "prefix+shift+r"
 
-toggle_sidebar = "prefix+b"
+# Displaced from its prefix+b default by split_horizontal above.
+toggle_sidebar = "prefix+i"
 edit_scrollback = "prefix+e"
 
 # tmux: bind Space — swap-pane -D. herdr splits this into four directional
@@ -107,7 +168,7 @@ swap_pane_down = "prefix+shift+j"
 swap_pane_up = "prefix+shift+k"
 swap_pane_right = "prefix+shift+l"
 
-# tmux: bind -n C-[ copy-mode (the C-] page-down half has no equivalent).
+# tmux: bind -n C-[ copy-mode.
 copy_mode = "prefix+["
 
 # tmux: bind l — jump back to where a notification click pulled you from.
@@ -128,17 +189,72 @@ type = "shell"
 command = "pwd | c-clipboard-copy"
 description = "copy pane cwd to clipboard"
 
+# tmux: bind l — break the pane out into its own window, prompting for the
+# name. herdr has no native action, so drive the CLI: `pane current` with
+# no target resolves the UI-focused pane, which is the one that pressed the
+# key. Custom commands cannot prompt, so the new tab keeps its generated
+# name. prefix+l is taken by open_notification_target above.
+[[keys.command]]
+key = "prefix+shift+m"
+type = "shell"
+command = 'herdr pane move "$(herdr pane current | jq -r .result.pane.pane_id)" --new-tab'
+description = "move pane to a new tab"
+
+# tmux: bind -n C-[ / C-] — half-page scroll with a passthrough to a running
+# vim, and C-[ also entered copy mode in the same press. herdr's copy_mode
+# action only enters at the bottom and herdr has no conditional bindings, so
+# c-herdr-scroll-halfpage does the branch and the scroll itself. It moves the
+# same viewport the mouse wheel does — no mode to leave afterwards.
+#
+# ctrl+[ is byte 0x1B, the same byte as Escape, and herdr negotiates no
+# enhanced keyboard protocol with the host terminal — so ghostty/config
+# rewrites both chords to prefix+u / prefix+o, which herdr can tell apart.
+[[keys.command]]
+key = "prefix+u"
+type = "shell"
+command = "c-herdr-scroll-halfpage up"
+description = "scroll half a page up (Escape when vim has the pane)"
+
+[[keys.command]]
+key = "prefix+o"
+type = "shell"
+command = "c-herdr-scroll-halfpage down"
+description = "scroll half a page down (Escape when vim has the pane)"
+
 [ui]
 accent = "#82d595"
 mouse_capture = true   # tmux: set -g mouse on
+
+# tmux confirmed nothing here: `bind . kill-pane` and `bind-key 0 kill-pane`
+# killed outright, and no key was bound to kill-session at all. herdr has no
+# pane-close prompt either — the one this suppresses is the workspace prompt
+# that closing a tab's last pane escalates into.
+confirm_close = false
+
+# Create tabs straight away instead of asking for a name. herdr then generates
+# the tab number as the label, which herdr/plugins/tab-numbers rewrites to
+# "<number>:new_tab".
+prompt_new_tab_name = false
 copy_on_select = true  # tmux: copy-pipe on MouseDragEnd1Pane
-pane_borders = true    # tmux: pane-border-lines heavy
+# tmux: pane-border-lines heavy. "always" also frames a lone pane, which
+# tmux did (dimmed, via the pane-active-border-style conditional); the
+# legacy `true` is "auto" and would draw borders only once a tab splits.
+pane_borders = "always"
 agent_panel_sort = "spaces"
 
 show_agent_labels_on_pane_borders = true
 
+# tmux: setw -g pane-scrollbars on. herdr has no scrollbar style or width
+# knob, so the tmux colors have no counterpart.
+pane_scrollbars = true
+
 # tmux: the status bar sits below the panes.
 tab_bar_position = "bottom"
+
+# tmux: set -g set-titles on / set-titles-string '#S:#I #W'. herdr has no
+# tab-index token, so the index drops out. {hostname} is left off to match
+# tmux, which never carried it.
+window_title = "{workspace}:{tab}"
 
 # tmux: status-right carried only the zoom indicator, and status-left's
 # session name is already covered by the sidebar. hostname and datetime go
@@ -155,10 +271,15 @@ tab_bar_right_separator = " · "
 pane_outer_borders = true
 pane_gaps = true
 
-[experimental]
-# tmux: set -g allow-passthrough all — let programs push Kitty graphics
-# escape sequences through the multiplexer. Ghostty is a compatible host.
-kitty_graphics = true
+# The sidebar agent rows render the tab and agent tokens dimmed by default,
+# which is what made "1:vim" and "claude" read as grey next to the workspace
+# name. Styling the tokens is the targeted fix; the subtext0/overlay0 ramp
+# above is shared with pane borders and cannot be raised for these alone.
+[ui.sidebar.agents]
+rows = [
+  ["state_icon", "machine", "workspace", { token = "tab", fg = "#f0f0f7", dim = false }],
+  [{ token = "agent", fg = "#f0f0f7", dim = false }],
+]
 
 [advanced]
 # tmux: set -g history-limit 30000 (lines). herdr counts bytes; 10 MB is well

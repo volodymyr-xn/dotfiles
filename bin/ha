@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Attach to a running herdr session, the way `tmux attach` did.
+#
+# Deliberately not the same as a bare `herdr`: that launches a server when
+# none is running and lands in a $HOME workspace. `tmux attach` refused to
+# start anything, so this refuses too — use `hm` to create a workspace for the
+# current directory, or `herdr` to launch outright.
+#
+# Usage: ha [session]
+
+set -euo pipefail
+
+session_name=${1:-}
+
+if ! command -v jq >/dev/null; then
+  echo "jq is required to inspect herdr sessions" >&2
+  exit 1
+fi
+
+# Names of every herdr session currently running.
+running_sessions() {
+  herdr session list --json | jq -r '.sessions[] | select(.running) | .name'
+}
+
+if [ -z "$session_name" ]; then
+  if [ -z "$(running_sessions)" ]; then
+    echo "no herdr sessions" >&2
+    exit 1
+  fi
+
+  exec herdr
+fi
+
+if ! running_sessions | grep -qxF "$session_name"; then
+  echo "no herdr session named $session_name" >&2
+  exit 1
+fi
+
+exec herdr session attach "$session_name"
