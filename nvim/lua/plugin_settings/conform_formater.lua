@@ -20,7 +20,7 @@ conform.setup({
     javascriptreact = { "prettierd", "prettier", stop_after_first = true },
     typescriptreact = { "prettierd", "prettier", stop_after_first = true },
     json = { "prettierd", "prettier", stop_after_first = true },
-    yaml = { "yamlfix" },
+    yaml = { "yamlfmt" },
   },
   formatters = {
     -- ERB via the projekt's Herb toolchain. `herb format -` reads stdin and
@@ -49,7 +49,9 @@ conform.setup({
       return
     end
 
-    return { timeout_ms = 3000, lsp_format = "fallback" }
+    -- quiet: a missing formatter binary or a formatter failure never
+    -- interrupts a save; `:Format` stays loud and reports both.
+    return { timeout_ms = 3000, lsp_format = "fallback", quiet = true }
   end,
 })
 

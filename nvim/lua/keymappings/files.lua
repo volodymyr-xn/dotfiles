@@ -1,5 +1,17 @@
--- Save current buffer
-vim.api.nvim_set_keymap('n', '<Leader>w', ':w<CR>', { silent = true, noremap = true, desc = "Save current file" })
+-- Save current buffer; no-op in special buffers (neo-tree, quickfix, help,
+-- terminal) where :w fails with E382. `acwrite` buffers (fugitive, oil)
+-- stay writable since they handle :w through BufWriteCmd.
+local function write_current_file()
+  local buftype = vim.bo.buftype
+
+  if buftype ~= '' and buftype ~= 'acwrite' then
+    return
+  end
+
+  vim.cmd('write')
+end
+
+vim.keymap.set('n', '<Leader>w', write_current_file, { silent = true, noremap = true, desc = "Save current file" })
 
 -- Re-source the entire Neovim config (with bytecode cache wipe).
 -- `:Reload` is defined in `commands.lua` — it clears `vim.loader`'s luac

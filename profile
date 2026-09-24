@@ -249,13 +249,21 @@ export BAT_THEME="Catppuccin Mocha"
 # Always use number of processing cores with make
 # shopt -s checkwinsize
 
-# Rootless Docker socket. Linux only: XDG_RUNTIME_DIR is a systemd
-# variable and is unset on macOS, where it would collapse the value to
-# unix:///docker.sock. macOS gets its endpoint from the docker context
-# that Colima/Docker Desktop configure.
-if [[ "$(uname -s)" == "Linux" ]]; then
-  export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
-fi
+# Docker daemon socket per OS: Colima's default profile on macOS, rootless
+# Docker on Linux (XDG_RUNTIME_DIR is a systemd variable, unset on macOS).
+#
+# An explicit DOCKER_HOST rather than a docker context: contexts are read
+# from DOCKER_CONFIG above, and when the colima context is missing there the
+# CLI silently falls back to /var/run/docker.sock, which Colima never
+# creates.
+case "$(uname -s)" in
+  Darwin)
+    export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
+    ;;
+  Linux)
+    export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/docker.sock"
+    ;;
+esac
 
 # export ASDF_FORCE_PREPEND=yes
 
