@@ -260,7 +260,12 @@ local function panelSections(resting)
   }
 end
 
-local panel = canvasPanel.new(menu, REFRESH_SECONDS, panelSections)
+-- Where the gear sits, which is where the panel hangs.
+local function menuFrame()
+  return menu:frame()
+end
+
+local panel = canvasPanel.new(menuFrame, REFRESH_SECONDS, panelSections)
 
 local icon = hs.image.imageFromPath(ICON_PATH)
 

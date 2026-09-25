@@ -1,23 +1,22 @@
 -- Menubar readout of what the machine is moving over its network: upload over
--- download for the interface the default route currently uses, refreshed on a
--- timer, with the interface's own details behind a click.
+-- download for the interface the default route currently uses, refreshed on
+-- every line of the shared stats stream, with the interface's own details
+-- behind a click.
 --
 -- Its own item rather than a column of the sensors row, because throughput is
--- the spikiest reading on the bar and wants a cadence of its own: a rate is
--- only as good as the interval it was measured over, and the sensor figures
--- move by a digit where this one swings from "0 B/s" to "999 MB/s" and back
--- inside two seconds.
+-- the spikiest reading on the bar and wants a column wide enough for "999
+-- MB/s" without pushing the sensor figures around. It used to want a cadence
+-- of its own too — a line a second from a helper of its own — but that cost a
+-- third wake-up every two seconds for a figure that reads just as well over
+-- two; it now repaints on the same line, and in the same commit, as
+-- system_stats.
 --
--- The two rates are stacked in the height of the bar the same way the sensor
--- columns are — menubar_row owns that drawing, so the two items are
--- indistinguishable in the bar — and the arrows are what name them: a glyph
--- says which direction a rate belongs to in less width than any word would.
---
--- The counters come from c-net-counters-macos, a small Swift helper that reads
--- the primary interface's AF_LINK counters (see
--- native_modules/macos/c-net-counters-macos.swift). It reports totals rather
--- than rates, because a rate needs two samples and it takes one; net_counters
--- owns the baseline that turns them into one.
+-- The item itself is drawn by c-system-sensors-macos, not here (see
+-- native_modules/macos/c-system-sensors-macos.swift, NetworkRow): the two
+-- rates stacked in the height of the bar the same way the sensor columns are,
+-- the arrows naming them. The helper reads the primary interface's AF_LINK
+-- counters, turns them into rates, and repaints the item on its own timer;
+-- this file gets the readings over stats_stream and draws only the panel.
 --
 -- Build the helper once with `dotfiles_setup/build_native_modules.sh`; until
 -- then this shows placeholders rather than disappearing, so a missing binary
@@ -25,7 +24,8 @@
 --
 -- Clicking the item opens a panel with everything the row has no width for:
 -- the two rates spelled out, the interface's address, its Wi-Fi signal when it
--- has one, and the totals the rates were taken from.
+-- has one, and the totals the rates were taken from. The helper reports the
+-- click with the item's frame, which is where the panel hangs.
 -- The panel is a canvas rather than a menu, which is what buys it a refresh
 -- while it is open; canvas_panel owns the surface, the placement and the
 -- dismissal, and process_stats draws its own the same way.
@@ -36,7 +36,7 @@
 -- One widget per Hammerspoon instance. modules/ is on package.path, so the
 -- file is reachable as both "network_stats" and "modules.network_stats" — two
 -- package.loaded entries, and without this guard the second require runs the
--- body again and paints a second item in the bar.
+-- body again and builds a second panel.
 local INSTANCE_KEY = "networkStatsWidget"
 
 if _G[INSTANCE_KEY] ~= nil then
@@ -45,52 +45,17 @@ end
 
 local canvasBanner = require("canvas_banner")
 local canvasPanel = require("canvas_panel")
-local lineStream = require("line_stream")
-local menubarRow = require("menubar_row")
-local netCounters = require("net_counters")
 local statFormat = require("stat_format")
 local statPanel = require("stat_panel")
+local statsStream = require("stats_stream")
 
 local formatBytes = statFormat.bytes
 local formatRate = statFormat.rate
 local PLACEHOLDER = statFormat.PLACEHOLDER
 
--- Absolute path because hs.task does not consult the login shell's PATH,
--- which is where ~/dotfiles/bin_native/macos is added.
-local NATIVE_DIRECTORY = os.getenv("HOME") .. "/dotfiles/bin_native/macos/"
-local NETWORK_HELPER = NATIVE_DIRECTORY .. "c-net-counters-macos"
-
--- The helper streams a line per interval through lib/line_stream, which
--- carries why that beats spawning one per refresh.
---
--- A second is the cadence a throughput figure is readable at: half of it makes
--- the digits flicker faster than they can be read, and two of them average a
--- burst away. The row repaints per line rather than on a timer of its own —
--- with one stream feeding it, the line *is* the cadence.
-local STREAM_INTERVAL_MILLISECONDS = 1000
-
--- How often a dead stream is noticed and restarted. Loose because a helper
--- that dies at all is the unexpected case — this is a backstop, not a poll.
-local SUPERVISOR_SECONDS = 10
-
--- While the panel is open. Matched to the stream, so the sparkline gains a
--- slot per repaint rather than showing the same one twice.
-local PANEL_REFRESH_SECONDS = STREAM_INTERVAL_MILLISECONDS / 1000
-
-local UPLOAD_ICON = "arrow_up"
-local DOWNLOAD_ICON = "arrow_down"
-
--- The reserved-width template below is measured in these, so the suffix has to
--- match the one stat_format puts on a rate.
-local RATE_SUFFIX = "/s"
-
--- The column is reserved at the width of its widest reading and its figures
--- are right-aligned inside that. Rates swing several digits from one second to
--- the next, and without the reservation the item's own width would follow —
--- dragging every menubar item to its left sideways on every spike.
---
--- Eights because they are the widest digit in a proportional face.
-local RATE_WIDTH_TEMPLATE = "888 MB" .. RATE_SUFFIX
+-- While the panel is open. Matched to the stream, so every repaint shows a
+-- new reading rather than the same one twice.
+local PANEL_REFRESH_SECONDS = statsStream.INTERVAL_SECONDS
 
 -- hs.wifi.interfaceDetails costs about 55ms — it builds the scan cache and the
 -- supported-channel list along with the signal, and there is no way to ask for
@@ -118,19 +83,17 @@ local NO_ADDRESS_TEXT = "No address"
 -- nf-md-network_off — the banner glyph confirming the widget was hidden.
 local HIDDEN_ICON = "󰲛"
 
-local menu = hs.menubar.new()
-local barRow = menubarRow.new()
-local tracker = netCounters.new()
-
-local streamTask = nil
-local supervisorTimer = nil
-
 -- The latest counters and the rates taken from them. One table reused rather
 -- than replaced, so the panel always reads the reading of the moment.
 local reading = {}
 
--- Plain-text mirror of what was last painted, for the `title` accessor.
+-- Plain-text mirror of what the helper last painted, for the `title` accessor.
 local lastText = ""
+
+-- Where the item sat when it was last clicked, in Hammerspoon's screen
+-- coordinates. The panel hangs from it and a click inside it closes the
+-- panel; nil until the first click, which is also the first open.
+local itemFrame = nil
 
 -- The Wi-Fi reading and when it was taken, because taking it is expensive
 -- enough to be worth keeping.
@@ -167,51 +130,17 @@ local function currentWifiDetails()
   return wifiDetails
 end
 
--- The two rates as one stacked column: upload over download, each headed by
--- the arrow that names it.
-local function columns()
-  local resting = menubarRow.textColor()
+-- Keep the tick's figures for the panel and the `title` accessor. The rates
+-- arrive already taken: the helper holds the baseline, and drops it itself
+-- after a pause.
+local function applyReadings(event)
+  reading.received = event.net_in
+  reading.sent = event.net_out
+  reading.interface = event.net_interface
+  reading.uploadRate = event.up_rate
+  reading.downloadRate = event.down_rate
 
-  return {
-    {
-      reservedWidth = menubarRow.reservedWidth(RATE_WIDTH_TEMPLATE, nil, true),
-      top = { icon = UPLOAD_ICON, text = formatRate(reading.uploadRate), color = resting },
-      bottom = { icon = DOWNLOAD_ICON, text = formatRate(reading.downloadRate), color = resting },
-    },
-  }
-end
-
--- Counters in, rates out, and one slot onto the history. Taking a rate
--- consumes the previous counters, so it happens exactly once per line.
-local function applyLine(line)
-  local counters = hs.json.decode(line)
-
-  if counters == nil then
-    return
-  end
-
-  reading.received = counters["in"]
-  reading.sent = counters.out
-  reading.interface = counters.interface
-  reading.uploadRate, reading.downloadRate = tracker.rates(reading.received, reading.sent)
-
-  lastText = barRow.paint(menu, columns())
-end
-
-local function startStream()
-  if lineStream.isRunning(streamTask) then
-    return
-  end
-
-  -- "watch" is this helper's own subcommand, not something lib knows.
-  streamTask = lineStream.start(NETWORK_HELPER,
-    { "watch", tostring(STREAM_INTERVAL_MILLISECONDS) }, applyLine)
-end
-
-local function stopStream()
-  lineStream.stop(streamTask)
-
-  streamTask = nil
+  lastText = event.network_text or ""
 end
 
 -- The two rates spelled out, which is the same pair the row carries: the row
@@ -349,15 +278,26 @@ local function panelSections(resting)
   }
 end
 
-local panel = canvasPanel.new(menu, PANEL_REFRESH_SECONDS, panelSections)
+-- An empty frame before the first click, which containsPoint never matches.
+local function anchorFrame()
+  return itemFrame or { x = 0, y = 0, w = 0, h = 0 }
+end
 
--- Take the item out of the bar and kill the helper with it: hidden, the widget
--- costs nothing, not even the process.
+local panel = canvasPanel.new(anchorFrame, PANEL_REFRESH_SECONDS, panelSections)
+
+-- The item was clicked: remember where it is, then open or close the panel.
+local function handleClick(event)
+  itemFrame = event.frame
+  panel.toggle()
+end
+
+local subscriber = { readings = applyReadings, click = handleClick }
+
+-- Take the item out of the bar: the helper restarts without it, or stops
+-- when no other widget is left. Hidden, the widget costs nothing.
 local function hide()
   panel.hide()
-  supervisorTimer:stop()
-  stopStream()
-  menu:removeFromMenuBar()
+  statsStream.unsubscribe("network")
 
   canvasBanner.show({
     title = "Network hidden",
@@ -367,37 +307,16 @@ local function hide()
   })
 end
 
--- Put it back and start the stream again. The first rate lands one line after
--- that — two are needed for a delta — and until then the row shows the
--- placeholders it was built with rather than the rates it was hidden on.
+-- Put it back. The first rate lands one tick after that — two readings are
+-- needed for a delta — and until then the row shows placeholders.
 local function show()
-  menu:returnToMenuBar()
-  startStream()
-  supervisorTimer:start()
+  statsStream.subscribe("network", subscriber)
 end
 
--- Restart the helper, which is the only "refresh" a streaming widget has: the
--- readings arrive on their own, and the useful manual action is bringing the
--- stream back after killing its process by hand.
-local function restart()
-  stopStream()
-  startStream()
-end
-
--- A click callback rather than a menu: the panel is drawn, and hs.menubar
--- honours one or the other.
-menu:setClickCallback(panel.toggle)
-
-supervisorTimer = hs.timer.new(SUPERVISOR_SECONDS, startStream)
-
--- Claim the menubar slot before the first line arrives, so the item is never a
--- zero-width gap on startup.
-lastText = barRow.paint(menu, columns())
-startStream()
-supervisorTimer:start()
+statsStream.subscribe("network", subscriber)
 
 local widget = {
-  refresh = restart,
+  refresh = statsStream.restart,
   show = show,
   hide = hide,
   toggle = panel.toggle,

@@ -13,11 +13,10 @@
 //
 // Split out of c-sensor-temps-macos, which is named for the SMC and has no
 // business walking the process table: different kernel interface, different
-// failure modes, and nothing in common but the caller. The same split
-// c-net-counters-macos was made for.
+// failure modes, and nothing in common but the caller.
 //
-// One shot only, and no `watch` mode: the two streaming helpers feed a
-// menubar row that repaints every couple of seconds, while this one answers
+// One shot only, and no `watch` mode: the streaming helper feeds the
+// menubar rows that repaint every couple of seconds, while this one answers
 // a dropdown that has to be opened before anyone can read it. Walking several
 // hundred processes on a timer would be work nobody asked for.
 //

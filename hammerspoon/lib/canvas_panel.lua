@@ -13,9 +13,15 @@
 -- the moment as stat_panel sections. It is called on open and then on the
 -- refresh cadence, and only while the panel is visible.
 --
+-- The item the panel hangs from is given as a function returning its frame
+-- rather than as an hs.menubar, because not every item is Hammerspoon's: the
+-- stats items are drawn by c-system-sensors-macos, which reports where each
+-- one sits when it is clicked.
+--
 -- Usage:
 --   local canvasPanel = require("canvas_panel")
---   local panel = canvasPanel.new(menu, 1, buildSections)
+--   local function menuFrame() return menu:frame() end
+--   local panel = canvasPanel.new(menuFrame, 1, buildSections)
 --   menu:setClickCallback(panel.toggle)
 
 local statPanel = require("stat_panel")
@@ -87,10 +93,10 @@ local function containsPoint(frame, point)
     and point.y >= frame.y and point.y <= frame.y + frame.h
 end
 
--- One panel under one menubar item. Created once and reused: the panel is
--- shown and hidden rather than built and thrown away, so the window it lives
--- in keeps its place in the level order.
-function M.new(menu, refreshSeconds, buildSections)
+-- One panel under the menubar item `anchorFrame()` locates. Created once and
+-- reused: the panel is shown and hidden rather than built and thrown away, so
+-- the window it lives in keeps its place in the level order.
+function M.new(anchorFrame, refreshSeconds, buildSections)
   -- Created at the panel width and squared off; the height it actually needs
   -- is only known once the rows have been laid out.
   local canvas = hs.canvas.new({ x = 0, y = 0, w = PANEL_WIDTH, h = PANEL_WIDTH })
@@ -113,7 +119,7 @@ function M.new(menu, refreshSeconds, buildSections)
   -- menu would, pulled back inside the screen when the icon sits far enough
   -- right that the panel would overhang.
   local function panelOrigin()
-    local item = menu:frame()
+    local item = anchorFrame()
     local screen = hs.screen.mainScreen():fullFrame()
     local rightLimit = screen.x + screen.w - PANEL_WIDTH - SCREEN_MARGIN
 
@@ -203,7 +209,7 @@ function M.new(menu, refreshSeconds, buildSections)
     -- A click on the icon reaches this tap before the menubar callback.
     -- Without the flag the callback would read the panel as already shut and
     -- open it straight back, so the icon would never close it.
-    if containsPoint(menu:frame(), point) then
+    if containsPoint(anchorFrame(), point) then
       dismissedByIcon = true
     end
 

@@ -29,8 +29,9 @@ build_swift_module() {
   echo "built $BIN_DIR/$binary_name"
 }
 
-# SMC sensor reader. The key sets it ships are Apple Silicon only, so the
-# binary is pointless on an Intel Mac.
+# SMC sensor reader, which also streams the interface byte counters. The key
+# sets it ships are Apple Silicon only, so the binary is pointless on an
+# Intel Mac.
 build_system_sensors_macos() {
   if [[ "$(uname -m)" != "arm64" ]]; then
     echo "skipped c-system-sensors-macos: Apple Silicon only" >&2
@@ -41,13 +42,6 @@ build_system_sensors_macos() {
     -framework IOKit -framework SystemConfiguration
 }
 
-# Interface byte counters. Portable across Apple Silicon and Intel, but the
-# APIs it uses are macOS-only.
-build_net_counters_macos() {
-  build_swift_module "$MODULES_DIR/macos/c-net-counters-macos.swift" \
-    -framework SystemConfiguration
-}
-
 # Process table, uptime and load average. Darwin only, no framework beyond
 # libSystem.
 build_process_stats_macos() {
@@ -56,7 +50,6 @@ build_process_stats_macos() {
 
 build_macos_modules() {
   build_system_sensors_macos
-  build_net_counters_macos
   build_process_stats_macos
 }
 
