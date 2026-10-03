@@ -106,11 +106,6 @@ function M.new(anchorFrame, refreshSeconds, buildSections)
   local escapeTap = nil
   local visible = false
 
-  -- Set when the panel was dismissed by a click that landed on the icon, so
-  -- the menubar callback that follows does not read it as a request to open
-  -- again.
-  local dismissedByIcon = false
-
   -- Plain text of what was last drawn, for reading the panel from `hs -c`
   -- without opening it.
   local lastText = ""
@@ -171,12 +166,6 @@ function M.new(anchorFrame, refreshSeconds, buildSections)
   end
 
   function panel.toggle()
-    if dismissedByIcon then
-      dismissedByIcon = false
-
-      return
-    end
-
     if visible then
       panel.hide()
 
@@ -199,6 +188,13 @@ function M.new(anchorFrame, refreshSeconds, buildSections)
   -- Dismiss on any click that is not on the panel. The click is passed through
   -- rather than swallowed, so dismissing the panel and clicking what is behind
   -- it are one gesture.
+  --
+  -- Except on the panel's own icon, where the click is swallowed: closing is
+  -- all it meant, and passed on it would reach the icon's callback and open
+  -- the panel straight back. A flag telling that callback to stand down went
+  -- stale whenever the callback never came — macOS does not always deliver
+  -- it — and then ate the next click, so the icon opened only every other
+  -- time.
   local function handleClickOutside(event)
     local point = event:location()
 
@@ -206,16 +202,9 @@ function M.new(anchorFrame, refreshSeconds, buildSections)
       return false
     end
 
-    -- A click on the icon reaches this tap before the menubar callback.
-    -- Without the flag the callback would read the panel as already shut and
-    -- open it straight back, so the icon would never close it.
-    if containsPoint(anchorFrame(), point) then
-      dismissedByIcon = true
-    end
-
     panel.hide()
 
-    return false
+    return containsPoint(anchorFrame(), point)
   end
 
   -- Escape is swallowed, because dismissing a panel is the whole of what the
