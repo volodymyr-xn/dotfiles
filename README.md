@@ -159,3 +159,126 @@ has probably rotted.
 
 ## TODO
 - port to Gentoo.
+
+## Neovim in detail
+
+How the custom parts of `nvim/` work and how I drive them. Tuned values
+live in `lua/plugin_settings/<name>.lua`, not in the modules.
+
+### Memory
+
+My nvim sessions stay open for days, so memory is managed on purpose.
+
+- `memory_cleaner` loads at startup and owns every timer. Buffers are
+  stamped on `BufLeave`, and a periodic sweep unloads the ones idle for a
+  few hours, skipping visible, modified and special buffers. The same sweep
+  stops LSP clients left without a buffer, and hidden fugitive blames are
+  wiped. Crossing the RSS limit warns once, not on every tick.
+- `:MemClearAll` (`se`) is the manual reset: it stops every treesitter
+  parser and LSP client, wipes fugitive buffers and runs the GC.
+  `:MemClearTreesitter`, `:MemClearFugitive` and `:MemClearLsp` do one part.
+- `memory_monitor` is the `󰘚 234M` lualine chip. It samples on its own
+  timer, so a redraw never shells out to `ps`.
+- `memory_manager` (`sv`, `:MemDashboard`) loads on first use. It finds
+  every running nvim by its server socket and shows one row per process:
+  RSS, subsystems, uptime, buffers, parsers, and peak and trend over 24h.
+  `<Tab>` expands a process into its buffers, `u`/`w` unload or wipe one,
+  `X` (after a confirm) unloads every idle hidden buffer in every instance,
+  `x` kills a stuck instance,
+  `?` lists the rest. Remote calls go through `nvim --remote-expr` with a
+  hard timeout. In-process RPC had none, so one wedged sibling froze the
+  editor that opened the dashboard.
+
+### Stall watchdog
+
+While the main loop is stuck, every queued `vim.schedule` callback stays
+alive with whatever it captured. A plugin polling on a short timer grew one
+instance to 13 GB over eight days that way. nvim can't report this itself,
+because `vim.notify` is exactly what stopped running.
+
+The watchdog runs in a libuv timer, which keeps firing. It keeps one probe
+in the queue, and when the probe hasn't come back after five minutes it
+sends an OS notification with the PID and cwd, then repeats hourly. Events
+go to `stdpath("log")/stall_watchdog.log`, which survives the restart. It
+only reports and never cancels anything, because a prompt left open is a
+legitimate stall.
+
+### OneDiff
+
+`M` toggles a review of the working-tree diff. There's no diff tab: changed
+files go into a quickfix list and hunks are highlighted in the real buffers,
+so fixing something mid-review is plain editing. The list refreshes on
+write.
+
+- `<Tab>`/`<S-Tab>` walk hunks across all files, `(`/`)` within one.
+- `<C-S-M>` toggles deleted lines as virtual lines.
+- `dd` in the list hides a file until the session is closed.
+- `sf` highlights changed lines without opening the list.
+
+Deleted files are listed but skipped. Setting `position` in
+`plugin_settings/onediff.lua` moves the list to a sidebar.
+
+### Keymaps
+
+- `shortcuts` (`s?`) reads mappings live from nvim, global and
+  buffer-local, so the list can't drift from what's bound. The source file
+  comes from `debug.getinfo` on Lua callbacks, or from the script id on
+  Vimscript maps. `s` cycles grouping (file, key prefix, mode), `/`
+  filters, `<CR>` opens the definition.
+- `ukrainian_layout` needs two mechanisms. `langmap` covers built-in
+  commands, but it applies after mapping resolution, so custom maps never
+  see it. Those get a Cyrillic twin instead, re-synced as lazy.nvim loads
+  plugins and per buffer on `FileType` and `LspAttach`. In insert and
+  cmdline modes only modifier chords are mirrored, so a `jk` twin can't
+  fire while I type "ол". `:UkrainianLayoutSync` re-runs it.
+
+### Pickers
+
+Finder keymaps call `custom_file_selectors/<backend>.lua`. Telescope,
+fzf-lua, fzf.vim and fff each implement the same functions, and
+`fuzzy_picker_selector` decides which one runs. `:PickerSwitch` cycles,
+`:PickerSet <name>` picks one. The choice lives in a state file that's
+re-read on every call, so all open nvims agree on it. fff falls back to
+fzf-lua for whatever it can't do.
+
+### tmux and AI agents
+
+`functions/tmux_panes.lua` keeps the pane inventory for the current window.
+A pane is free only when a shell is in the foreground and no `claude` or
+`agent` process runs under it. Claude Code puts `✳` in the pane title when
+idle and a braille spinner while working, which is how idle and busy are
+told apart.
+
+- `` <Leader>` `` sends `@path` of the current file to an agent pane. In
+  visual mode it sends the selection as a fenced block, and `sm` does the
+  same for the current line.
+- With two or more agent panes, a Telescope picker lists them with idle or
+  busy icons.
+- Multi-line text uses the agent's newline key (`S-Enter` for Claude),
+  so the prompt is composed but not sent and I can type the question after.
+- vim-test runs through `functions/test_runner.lua`. Vimux takes the first
+  other pane, which kept being an agent or a server. This picks an idle pane
+  or splits a new one titled `vim-test`.
+
+### Smaller pieces
+
+- `lsp_card` (`sc`) is lspconfig's old `:LspInfo` window, copied from
+  v0.1.8, plus each server's RSS, and treesitter and diagnostics sections
+  for the current buffer.
+- `git_diff_popup` (`sd`) shows the file's `git diff` in a float, with the
+  cursor on the current line.
+- `markdown_html_preview` (`sh`) renders the buffer with `c-md-to-html` and
+  opens it in the browser.
+- `ruby_component_toggle` (`s1` to `s4`) jumps between a component's `.rb`,
+  `.html.erb`, stylesheet and `.js`.
+- `renpy_tools` runs and lints a Ren'Py project in a tmux pane and finds
+  the SDK and project root itself.
+- `lua/ui2.lua` turns on nvim 0.12's experimental cmdline and messages.
+- Workarounds for upstream bugs sit behind
+  `TempFixActive(label, "YYYY-MM-DD")`. After that date the workaround
+  turns itself off and warns, so it gets deleted instead of staying
+  forever. The nvim 0.12 treesitter guard in `functions/nvim_compat.lua`
+  is one.
+- Lazy commands like `:GitDiffPopup` are stubs that `require` the module
+  and call it directly. Re-dispatching through `vim.cmd` once looped
+  forever.
