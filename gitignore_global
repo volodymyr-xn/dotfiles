@@ -38,6 +38,7 @@ C_HTML/
 C_SCRIPTS/
 C_META/
 C_FUTURE_PLANS/
+C_DB_BACKUP/
 c_commands/
 .playwright-mcp/
 .ruby_lsp

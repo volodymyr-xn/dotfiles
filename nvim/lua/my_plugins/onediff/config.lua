@@ -5,8 +5,9 @@
 local M = {}
 
 M.options = {
-  -- Show inline deleted-line virtual lines from session start. `<C-S-M>`
-  -- flips this during a session regardless of the setting.
+  -- Show inline deleted-line virtual lines from session start and with the
+  -- standalone `sf` highlight. `<C-S-M>` flips this during a session
+  -- regardless of the setting.
   show_deleted = false,
 
   -- Where the quickfix window opens: "bottom" (full-width horizontal split),

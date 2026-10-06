@@ -7,17 +7,19 @@
 -- `M` toggles the full review session (open quickfix + line highlights, or
 -- close); this shadows the native "move to middle window line" motion. `sf`
 -- turns on (and re-diffs) only the changed-line highlight, independent of the
--- session, for a quick eyeball of edits against HEAD without opening the
--- quickfix list. The `:OneDiff` command below is an alternative entry point.
+-- session (deleted lines too, per `show_deleted`), for a quick eyeball of
+-- edits against HEAD without opening the quickfix list. The `:OneDiff`
+-- command below is an alternative entry point.
 
 require("my_plugins.onediff.config").setup({
-  -- Inline deleted-line virtual lines from session start (`<C-S-M>` flips).
+  -- Inline deleted-line virtual lines from session start and with `sf`
+  -- (`<C-S-M>` flips during a session).
   -- show_deleted = false,
   show_deleted = true,
 
   -- Quickfix layout: "bottom" (full-width split) or "right" / "left" (sidebar
   -- `width` columns wide, entries rendered without the changed line's text).
-  position = "left",
+  position = "bottom",
   width = 60,
 })
 

@@ -1,0 +1,1165 @@
+<!doctype html>
+<!--
+  The dropdown behind the claude_stats menubar item (modules/claude_stats.lua),
+  styled after ClaudeBar's SwiftUI popup (github.com/LHner1/claude-bar,
+  PopupView.swift and Components.swift): header with a traffic light, limit
+  rings, sessions, token usage, footer. ClaudeBar shows one profile; this
+  merges three into the same sections.
+
+  Lua drives the page through window.claudeStats:
+    configure(profiles)  [{ name, title }], in display order
+    update(event)        a `sessions` or `usage` line from c-claude-stats-macos
+    setVisible(bool)     relative times only tick while the panel is open
+  and the page answers on webkit.messageHandlers.claudeStats with
+  { action: "resize", height }, { action: "focus", pid, cwd } and
+  { action: "reveal", cwd }.
+
+  Text sizes follow ClaudeBar's (8–13pt) rather than the 14px floor, by
+  choice: the point is to look like it.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  :root {
+    color-scheme: light dark;
+    --primary: rgba(0, 0, 0, 0.85);
+    --secondary: rgba(0, 0, 0, 0.5);
+    --tertiary: rgba(0, 0, 0, 0.28);
+    --divider: rgba(0, 0, 0, 0.08);
+    --hover: rgba(0, 0, 0, 0.08);
+    --lamp-off: rgba(0, 0, 0, 0.2);
+    --lamp-rim: rgba(0, 0, 0, 0.45);
+    --surface: rgb(242, 242, 244);
+    --border: rgba(0, 0, 0, 0.14);
+    --segment-track: rgba(0, 0, 0, 0.06);
+    --segment-on: #ffffff;
+    --red: #ff3b30;
+    --orange: #ff9500;
+    --yellow: #ffcc00;
+    --limit-yellow: #a37b00;
+    --green: #34c759;
+    --blue: #007aff;
+    --teal: #30b0c7;
+    --purple: #af52de;
+    --gray: #8e8e93;
+    --opus: rgb(217, 120, 87);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary: rgba(255, 255, 255, 0.86);
+      --secondary: rgba(255, 255, 255, 0.55);
+      --tertiary: rgba(255, 255, 255, 0.28);
+      --divider: rgba(255, 255, 255, 0.08);
+      --hover: rgba(255, 255, 255, 0.08);
+      --lamp-off: rgba(255, 255, 255, 0.2);
+      --lamp-rim: rgba(255, 255, 255, 0.45);
+      --surface: rgb(36, 38, 38);
+      --border: rgba(255, 255, 255, 0.14);
+      --segment-track: rgba(255, 255, 255, 0.08);
+      --segment-on: rgba(255, 255, 255, 0.24);
+      --red: #ff453a;
+      --orange: #ff9f0a;
+      --yellow: #ffd60a;
+      --limit-yellow: #ffd60a;
+      --green: #30d158;
+      --blue: #0a84ff;
+      --teal: #40c8e0;
+      --purple: #bf5af2;
+    }
+  }
+
+  html, body {
+    margin: 0;
+    background: transparent;
+    overflow: hidden;
+  }
+
+  /* Room around the panel for its shadow; the window itself is clear. */
+  body {
+    padding: 2px 10px 18px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    color: var(--primary);
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: default;
+  }
+
+  /* Header and footer stay put; the sections between them scroll once the
+     window is capped at the screen's height (Lua sizes the window, the page
+     fills it). The body padding is the 20px subtracted below. */
+  .panel {
+    box-sizing: border-box;
+    width: 300px;
+    max-height: calc(100vh - 20px);
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+  }
+
+  .panel-header,
+  .footer {
+    flex: 0 0 auto;
+  }
+
+  .panel-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /* A thin thumb on a clear track, so a system set to always show scroll
+     bars does not put a full-width gutter inside a 300pt panel. */
+  .panel-body::-webkit-scrollbar { width: 6px; }
+  .panel-body::-webkit-scrollbar-track { background: transparent; }
+  .panel-body::-webkit-scrollbar-thumb {
+    background: var(--tertiary);
+    border-radius: 3px;
+  }
+
+  .numeric { font-variant-numeric: tabular-nums; }
+  .secondary { color: var(--secondary); }
+
+  .divider {
+    height: 1px;
+    background: var(--divider);
+  }
+
+  .divider.spaced { margin-top: 10px; }
+
+  .section-header {
+    height: 22px;
+    padding-top: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--secondary);
+  }
+
+  /* Traffic light: three lamps in a rounded rim, lit per state. */
+  .light {
+    display: inline-flex;
+    flex-direction: column;
+    gap: var(--lamp-gap);
+    padding: 2px;
+    border: 1px solid var(--lamp-rim);
+    border-radius: calc(var(--lamp) * 0.7 + 2px);
+    flex: none;
+  }
+
+  .light i {
+    display: block;
+    width: var(--lamp);
+    height: var(--lamp);
+    border-radius: 50%;
+    background: var(--lamp-off);
+  }
+
+  .light i.on-red { background: linear-gradient(var(--red), color-mix(in srgb, var(--red) 80%, black)); box-shadow: 0 0 1.5px color-mix(in srgb, var(--red) 80%, transparent); }
+  .light i.on-yellow { background: linear-gradient(var(--yellow), color-mix(in srgb, var(--yellow) 80%, black)); box-shadow: 0 0 1.5px color-mix(in srgb, var(--yellow) 80%, transparent); }
+  .light i.on-green { background: linear-gradient(var(--green), color-mix(in srgb, var(--green) 80%, black)); box-shadow: 0 0 1.5px color-mix(in srgb, var(--green) 80%, transparent); }
+
+  .light.large { --lamp: 7px; --lamp-gap: 2px; }
+  .light.small { --lamp: 4.5px; --lamp-gap: 1.5px; }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .header .title {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .header .summary {
+    margin-top: 1px;
+    font-size: 11px;
+    color: var(--secondary);
+  }
+
+  /* Limits: one row per profile, a column per window. */
+  .limits-grid {
+    display: grid;
+    grid-template-columns: 76px 1fr 1fr;
+    align-items: center;
+    row-gap: 8px;
+    padding: 10px 12px 2px 16px;
+  }
+
+  .limits-grid .window-caption {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  /* A hairline across the whole row between two profiles. */
+  .limits-grid .limits-divider {
+    grid-column: 1 / -1;
+    height: 1px;
+    background: var(--divider);
+  }
+
+  .limits-grid .profile-name {
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .gauge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    min-width: 0;
+  }
+
+  .gauge .pct {
+    font-size: 15px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+  }
+
+  .gauge .reset {
+    width: 100%;
+    font-size: 10px;
+    color: var(--secondary);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .empty-note {
+    padding: 8px 16px 0;
+    font-size: 10px;
+    color: var(--secondary);
+    text-align: center;
+  }
+
+  /* Sessions */
+  .sessions { padding: 0 8px; }
+
+  .group-label {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 6px 2px;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--secondary);
+  }
+
+  .session {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+    margin-bottom: 2px;
+    border-radius: 6px;
+    transition: background-color 0.16s ease-out;
+  }
+
+  .session:hover { background: var(--hover); }
+
+  .session .text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .session .name {
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .session .details {
+    margin-top: 1px;
+    font-size: 10px;
+    color: var(--secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .session .status {
+    flex: none;
+    margin-left: 6px;
+    text-align: right;
+  }
+
+  .session .state {
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .session .since {
+    margin-top: 1px;
+    font-size: 10px;
+    color: var(--secondary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .state.waiting { color: var(--red); }
+  .state.busy { color: var(--orange); }
+  .state.idle { color: var(--green); }
+  .state.unknown { color: var(--secondary); }
+
+  .more {
+    padding: 2px 0 4px;
+    font-size: 10px;
+    color: var(--secondary);
+    text-align: center;
+  }
+
+  .no-sessions {
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: var(--secondary);
+  }
+
+  /* Usage */
+  .controls {
+    display: flex;
+    gap: 6px;
+    padding: 0 12px 8px;
+  }
+
+  .segmented {
+    display: flex;
+    padding: 1px;
+    border-radius: 6px;
+    background: var(--segment-track);
+  }
+
+  .segmented.range { flex: 3; }
+  .segmented.filter { flex: 2.3; }
+
+  .segmented button {
+    flex: 1;
+    min-width: 0;
+    height: 18px;
+    padding: 0 4px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--primary);
+    font: inherit;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .segmented button.selected {
+    background: var(--segment-on);
+    box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.22);
+  }
+
+  .segmented button:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: -1px;
+  }
+
+  .chart {
+    display: block;
+    margin: 0 12px;
+    width: 276px;
+    height: 90px;
+    overflow: visible;
+  }
+
+  .chart text {
+    font-size: 8px;
+    fill: var(--secondary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .chart .grid { stroke: var(--divider); stroke-width: 1; }
+
+  .chart-placeholder {
+    height: 90px;
+    margin: 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--tertiary);
+  }
+
+  .detail-rows {
+    padding: 10px 12px 0;
+  }
+
+  .detail-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 16px;
+    margin-bottom: 2px;
+    font-size: 12px;
+  }
+
+  .detail-row .label {
+    flex: 1;
+    color: var(--secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .detail-row .swatch {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    flex: none;
+  }
+
+  .detail-row .value { font-variant-numeric: tabular-nums; white-space: pre; }
+
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 12px;
+    border-top: 1px solid var(--divider);
+    font-size: 10px;
+    color: var(--tertiary);
+  }
+
+  .usage-end { height: 10px; }
+
+  .footer span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>
+</head>
+<body>
+<div class="panel" id="panel">
+  <div class="panel-header">
+    <div class="header">
+      <span class="light large" id="header-light"><i></i><i></i><i></i></span>
+      <div>
+        <div class="title">Claude Code</div>
+        <div class="summary" id="summary">Starting…</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+  </div>
+
+  <div class="panel-body" id="panel-body">
+    <div id="limits"></div>
+    <div class="divider spaced"></div>
+
+    <div class="section-header">Sessions</div>
+    <div class="sessions" id="sessions"></div>
+    <div class="divider spaced"></div>
+
+    <div class="section-header">Usage</div>
+    <div class="controls">
+      <div class="segmented range" id="range" role="tablist"></div>
+      <div class="segmented filter" id="filter" role="tablist"></div>
+    </div>
+    <div id="chart"></div>
+    <div class="detail-rows" id="totals"></div>
+    <div id="models"></div>
+    <div class="usage-end"></div>
+  </div>
+
+  <div class="footer">
+    <span id="footer-limits"></span>
+    <span id="footer-usage"></span>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var RANGES = [
+    { key: "today", label: "Today" },
+    { key: "week", label: "7 days" },
+    { key: "month", label: "30 days" },
+  ];
+  var MAX_SESSIONS_PER_PROFILE = 5;
+  var TICK_MILLISECONDS = 30000;
+  var STATE_LABELS = { waiting: "needs you", busy: "working", idle: "ready" };
+  var LAMP_BY_STATE = { waiting: "red", busy: "yellow", idle: "green" };
+
+  var profiles = [];
+  var sessionsEvent = null;
+  var usageEvent = null;
+  // { profileName: { fiveHour: "yellow", ... } } from the statusline's own
+  // colouring (Lua computes it); a window missing here falls back to the
+  // page's thresholds.
+  var limitColors = {};
+  var LIMIT_COLOR_VARS = { red: "var(--red)", yellow: "var(--limit-yellow)", green: "var(--green)" };
+  var range = localStorage.getItem("claudeStats.range") || "today";
+  var filter = localStorage.getItem("claudeStats.filter") || "all";
+  var tickTimer = null;
+  var lastHeight = 0;
+
+  function post(message) {
+    if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.claudeStats) {
+      window.webkit.messageHandlers.claudeStats.postMessage(message);
+    }
+  }
+
+  function escapeHtml(text) {
+    return String(text == null ? "" : text)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function nowSeconds() {
+    return Date.now() / 1000;
+  }
+
+  // ---- Formatting, after ClaudeBar's Fmt --------------------------------
+
+  function formatTokens(count) {
+    if (count >= 1e9) return (count / 1e9).toFixed(2) + "B";
+    if (count >= 1e6) return (count / 1e6).toFixed(1) + "M";
+    if (count >= 1e4) return (count / 1e3).toFixed(0) + "K";
+    if (count >= 1e3) return (count / 1e3).toFixed(1) + "K";
+    return String(count);
+  }
+
+  function formatTokensShort(count) {
+    if (count >= 1e9) return (count / 1e9).toFixed(1) + "B";
+    if (count >= 1e7) return (count / 1e6).toFixed(0) + "M";
+    if (count >= 1e6) return (count / 1e6).toFixed(1) + "M";
+    if (count >= 1e3) return (count / 1e3).toFixed(0) + "K";
+    return String(count);
+  }
+
+  function formatDuration(seconds) {
+    var total = Math.max(0, Math.floor(seconds));
+    var days = Math.floor(total / 86400);
+    var hours = Math.floor((total % 86400) / 3600);
+    var minutes = Math.floor((total % 3600) / 60);
+
+    if (days > 0) return days + "d " + hours + "h";
+    if (hours > 0) return hours + "h " + minutes + "m";
+    if (minutes > 0) return minutes + "m";
+    return "<1m";
+  }
+
+  function formatAge(epochSeconds) {
+    var age = nowSeconds() - epochSeconds;
+
+    return age < 60 ? "now" : formatDuration(age);
+  }
+
+  function formatClock(date) {
+    return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  }
+
+
+  function percentColor(pct) {
+    if (pct >= 85) return "var(--red)";
+    if (pct >= 60) return "var(--orange)";
+    return "var(--green)";
+  }
+
+  // claude-opus-5-5 → Opus 5.5, claude-haiku-4-5-20251001 → Haiku 4.5
+  function modelName(id) {
+    var parts = id.split("-");
+
+    if (parts[0] === "claude") parts.shift();
+    if (parts.length && /^\d{8}$/.test(parts[parts.length - 1])) parts.pop();
+
+    var familyIndex = parts.findIndex(function (part) { return !/^\d+$/.test(part); });
+
+    if (familyIndex < 0) return id;
+
+    var family = parts.splice(familyIndex, 1)[0];
+    var version = parts.filter(function (part) { return /^\d+$/.test(part); }).join(".");
+    var title = family.charAt(0).toUpperCase() + family.slice(1);
+
+    return version ? title + " " + version : title;
+  }
+
+  function modelBaseColor(name) {
+    var lower = name.toLowerCase();
+
+    if (lower.indexOf("opus") === 0) return "var(--opus)";
+    if (lower.indexOf("sonnet") === 0) return "var(--blue)";
+    if (lower.indexOf("haiku") === 0) return "var(--teal)";
+    if (lower.indexOf("fable") === 0) return "var(--purple)";
+    return "var(--gray)";
+  }
+
+  // Newest version of each family in full colour, older ones lighter.
+  function modelColors(names) {
+    var families = {};
+    var colors = {};
+
+    names.forEach(function (name) {
+      var family = name.split(" ")[0];
+      (families[family] = families[family] || []).push(name);
+    });
+
+    Object.keys(families).forEach(function (family) {
+      var members = families[family].slice().sort(function (left, right) {
+        return compareVersions(versionOf(right), versionOf(left));
+      });
+
+      members.forEach(function (name, index) {
+        var opacity = Math.max(0.35, 1 - index * 0.35);
+        colors[name] = "color-mix(in srgb, " + modelBaseColor(name) + " " + Math.round(opacity * 100) + "%, transparent)";
+      });
+    });
+
+    return colors;
+  }
+
+  function versionOf(name) {
+    var last = name.split(" ").pop();
+
+    return last.split(".").map(Number).filter(function (part) { return !isNaN(part); });
+  }
+
+  function compareVersions(left, right) {
+    for (var index = 0; index < Math.max(left.length, right.length); index++) {
+      var difference = (left[index] || 0) - (right[index] || 0);
+
+      if (difference !== 0) return difference;
+    }
+
+    return 0;
+  }
+
+  // ---- Shared pieces ----------------------------------------------------
+
+  function lightHtml(sizeClass, lit) {
+    var lamps = ["red", "yellow", "green"].map(function (color) {
+      return '<i class="' + (lit[color] ? "on-" + color : "") + '"></i>';
+    });
+
+    return '<span class="light ' + sizeClass + '">' + lamps.join("") + "</span>";
+  }
+
+  function allSessions() {
+    if (!sessionsEvent) return [];
+
+    return sessionsEvent.profiles.reduce(function (list, report) {
+      return list.concat(report.sessions);
+    }, []);
+  }
+
+  function reportFor(name) {
+    if (!sessionsEvent) return null;
+
+    return sessionsEvent.profiles.find(function (report) { return report.name === name; }) || null;
+  }
+
+  // After a reset the window is empty until a session reports fresh data.
+  function effectivePct(limitWindow) {
+    if (!limitWindow) return null;
+
+    return limitWindow.resetsAt > nowSeconds() ? limitWindow.pct : 0;
+  }
+
+  // ---- Header -----------------------------------------------------------
+
+  function renderHeader() {
+    var sessions = allSessions();
+    var counts = { waiting: 0, busy: 0, idle: 0 };
+
+    sessions.forEach(function (session) {
+      if (counts[session.state] != null) counts[session.state] += 1;
+    });
+
+    var parts = [];
+
+    if (counts.waiting > 0) parts.push(counts.waiting + (counts.waiting === 1 ? " needs you" : " need you"));
+    if (counts.idle > 0) parts.push(counts.idle + " ready");
+    if (counts.busy > 0) parts.push(counts.busy + " working");
+
+    document.getElementById("summary").textContent = !sessionsEvent
+      ? "Starting…"
+      : (parts.length ? parts.join(" · ") : "No active session");
+
+    document.getElementById("header-light").outerHTML = lightHtml("large", {
+      red: counts.waiting > 0,
+      yellow: counts.busy > 0,
+      green: counts.idle > 0,
+    }).replace('class="light large"', 'class="light large" id="header-light"');
+  }
+
+  // ---- Limits -----------------------------------------------------------
+
+  // The share used, in its threshold colour, over the time left.
+  function gaugeHtml(limitWindow, colorName) {
+    var pct = effectivePct(limitWindow);
+    var color = LIMIT_COLOR_VARS[colorName] || (pct == null ? null : percentColor(pct));
+    var pctStyle = color ? ' style="color: ' + color + '"' : "";
+
+    // Time left in the window rather than the clock time it ends at; the
+    // panel re-renders every 30s while open, so the countdown keeps up.
+    var reset = !limitWindow ? "no data" : (limitWindow.resetsAt > nowSeconds()
+      ? "resets in " + formatDuration(limitWindow.resetsAt - nowSeconds())
+      : "reset");
+
+    return '<div class="gauge">' +
+      '<span class="pct"' + pctStyle + ">" + (pct == null ? "–" : Math.round(pct) + "%") + "</span>" +
+      '<span class="reset">' + escapeHtml(reset) + "</span>" +
+      "</div>";
+  }
+
+  // A row per profile, sorted by name — claude, claude-dev, claude-dt — and
+  // a column per limit window.
+  function renderLimits() {
+    var container = document.getElementById("limits");
+    var windows = [
+      { caption: "5 hours", key: "fiveHour" },
+      { caption: "Week", key: "sevenDay" },
+    ];
+    var anyData = profiles.some(function (profile) {
+      var report = reportFor(profile.name);
+      return report && report.limits;
+    });
+    var cells = ["<div></div>"].concat(windows.map(function (limitWindow) {
+      return '<div class="window-caption">' + limitWindow.caption + "</div>";
+    }));
+
+    profiles.slice().sort(function (left, right) {
+      return left.name < right.name ? -1 : 1;
+    }).forEach(function (profile, index) {
+      var report = reportFor(profile.name);
+      var limits = report && report.limits;
+
+      if (index > 0) {
+        cells.push('<div class="limits-divider"></div>');
+      }
+
+      cells.push('<div class="profile-name">' + escapeHtml(profile.title) + "</div>");
+      windows.forEach(function (limitWindow) {
+        cells.push(gaugeHtml(limits ? limits[limitWindow.key] : null,
+          (limitColors[profile.name] || {})[limitWindow.key]));
+      });
+    });
+
+    container.innerHTML = '<div class="limits-grid">' + cells.join("") + "</div>" + (anyData || !sessionsEvent ? "" :
+      '<div class="empty-note">No limit data yet. It arrives through the status line as soon as a Claude Code session gets a response.</div>');
+  }
+
+  // ---- Sessions ---------------------------------------------------------
+
+  function sessionHtml(session) {
+    var folder = session.cwd ? session.cwd.split("/").pop() : "";
+    var details = [];
+
+    if (folder && folder !== session.name) details.push(folder);
+    if (session.model) details.push(modelName(session.model));
+    if (session.kind === "background") details.push("background");
+
+    var stateClass = STATE_LABELS[session.state] ? session.state : "unknown";
+    var stateText = session.state === "waiting" && session.waitingFor
+      ? session.waitingFor
+      : (STATE_LABELS[session.state] || session.state);
+    var lit = {};
+
+    lit[LAMP_BY_STATE[session.state]] = true;
+
+    return '<div class="session" title="' + escapeHtml("Show window · " + session.cwd) + '"' +
+      ' data-pid="' + (session.pid == null ? "" : session.pid) + '"' +
+      ' data-cwd="' + escapeHtml(session.cwd) + '">' +
+      lightHtml("small", lit) +
+      '<div class="text"><div class="name">' + escapeHtml(session.name || folder || "Session") + "</div>" +
+      '<div class="details">' + escapeHtml(details.length ? details.join(" · ") : "PID " + session.pid) + "</div></div>" +
+      '<div class="status"><div class="state ' + stateClass + '">' + escapeHtml(stateText) + "</div>" +
+      (session.since ? '<div class="since">for ' + formatDuration(nowSeconds() - session.since) + "</div>" : "") +
+      "</div></div>";
+  }
+
+  function renderSessions() {
+    var container = document.getElementById("sessions");
+    var groups = [];
+
+    profiles.forEach(function (profile) {
+      var report = reportFor(profile.name);
+
+      if (!report || report.sessions.length === 0) return;
+
+      var shown = report.sessions.slice(0, MAX_SESSIONS_PER_PROFILE).map(sessionHtml).join("");
+      var hidden = report.sessions.length - MAX_SESSIONS_PER_PROFILE;
+
+      groups.push('<div class="group-label"><span>' + escapeHtml(profile.title) + '</span><span class="numeric">' +
+        report.sessions.length + "</span></div>" + shown +
+        (hidden > 0 ? '<div class="more">+ ' + hidden + " more</div>" : ""));
+    });
+
+    container.innerHTML = groups.length ? groups.join("") :
+      '<div class="no-sessions">' + (sessionsEvent ? "No Claude Code session running" : "Looking for sessions…") + "</div>";
+  }
+
+  // ---- Usage ------------------------------------------------------------
+
+  function renderControls() {
+    var filters = [{ key: "all", label: "All" }].concat(profiles.map(function (profile) {
+      return { key: profile.name, label: profile.label };
+    }));
+
+    if (!filters.some(function (option) { return option.key === filter; })) filter = "all";
+
+    document.getElementById("range").innerHTML = segmentsHtml(RANGES, range, "range");
+    document.getElementById("filter").innerHTML = segmentsHtml(filters, filter, "filter");
+  }
+
+  function segmentsHtml(options, selected, kind) {
+    return options.map(function (option) {
+      var isSelected = option.key === selected;
+
+      return '<button type="button" role="tab" aria-selected="' + isSelected + '" class="' +
+        (isSelected ? "selected" : "") + '" data-' + kind + '="' + escapeHtml(option.key) + '">' +
+        escapeHtml(option.label) + "</button>";
+    }).join("");
+  }
+
+  // Start of the range, its buckets, and how a bucket is labelled.
+  function rangeBuckets() {
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (range === "today") {
+      var hours = [];
+
+      for (var hour = 0; hour < 24; hour++) {
+        var start = new Date(today);
+        start.setHours(hour);
+        hours.push({ start: start.getTime() / 1000, label: hour % 6 === 0 ? String(hour).padStart(2, "0") : "" });
+      }
+
+      return hours;
+    }
+
+    var dayCount = range === "week" ? 7 : 30;
+    var days = [];
+
+    for (var back = dayCount - 1; back >= 0; back--) {
+      var day = new Date(today);
+      day.setDate(day.getDate() - back);
+
+      var label = "";
+
+      if (range === "week") {
+        label = day.toLocaleDateString([], { weekday: "narrow" });
+      } else if ((dayCount - 1 - back) % 7 === 0) {
+        label = day.getDate() + "." + (day.getMonth() + 1) + ".";
+      }
+
+      days.push({ start: day.getTime() / 1000, label: label });
+    }
+
+    return days;
+  }
+
+  function bucketIndex(buckets, epochSeconds) {
+    for (var index = buckets.length - 1; index >= 0; index--) {
+      if (epochSeconds >= buckets[index].start) return index;
+    }
+
+    return -1;
+  }
+
+  function usageStats() {
+    var buckets = rangeBuckets();
+    var rangeEnd = buckets[buckets.length - 1].start + (range === "today" ? 3600 : 86400);
+    var totals = { input: 0, output: 0, cacheWrite: 0, cacheRead: 0, responses: 0 };
+    var perBucket = buckets.map(function () { return {}; });
+    var perModel = {};
+    var names = filter === "all" ? profiles.map(function (profile) { return profile.name; }) : [filter];
+
+    names.forEach(function (name) {
+      (usageEvent.profiles[name] || []).forEach(function (row) {
+        var hour = row[0];
+
+        if (hour < buckets[0].start || hour >= rangeEnd) return;
+
+        var index = bucketIndex(buckets, hour);
+        var model = modelName(usageEvent.models[row[1]] || "unknown");
+        var total = row[2] + row[3] + row[4] + row[5];
+
+        totals.input += row[2];
+        totals.output += row[3];
+        totals.cacheWrite += row[4];
+        totals.cacheRead += row[5];
+        totals.responses += row[6];
+        perBucket[index][model] = (perBucket[index][model] || 0) + total;
+        perModel[model] = (perModel[model] || 0) + total;
+      });
+    });
+
+    var models = Object.keys(perModel).sort(function (left, right) { return perModel[right] - perModel[left]; });
+    var counts = usageEvent.sessionCounts[range] || {};
+
+    return {
+      buckets: buckets,
+      perBucket: perBucket,
+      perModel: perModel,
+      models: models,
+      colors: modelColors(models),
+      totals: totals,
+      total: totals.input + totals.output + totals.cacheWrite + totals.cacheRead,
+      sessions: counts[filter] || 0,
+    };
+  }
+
+  // A round ceiling for the y axis: 1, 2 or 5 times a power of ten.
+  function niceCeiling(value) {
+    if (value <= 0) return 1;
+
+    var magnitude = Math.pow(10, Math.floor(Math.log10(value)));
+    var steps = [1, 2, 5, 10];
+
+    for (var index = 0; index < steps.length; index++) {
+      if (steps[index] * magnitude >= value) return steps[index] * magnitude;
+    }
+
+    return 10 * magnitude;
+  }
+
+  function chartHtml(stats) {
+    var width = 276;
+    var height = 90;
+    var axisWidth = 30;
+    var labelHeight = 12;
+    var plotWidth = width - axisWidth;
+    var plotHeight = height - labelHeight;
+    var bucketTotals = stats.perBucket.map(function (bucket) {
+      return Object.keys(bucket).reduce(function (sum, model) { return sum + bucket[model]; }, 0);
+    });
+    var ceiling = niceCeiling(Math.max.apply(null, bucketTotals));
+    var slot = plotWidth / stats.buckets.length;
+    var barWidth = Math.max(1.5, slot * 0.62);
+    var parts = [];
+
+    [0, 0.5, 1].forEach(function (fraction) {
+      var y = plotHeight - fraction * plotHeight;
+      parts.push('<line class="grid" x1="0" x2="' + plotWidth + '" y1="' + y + '" y2="' + y + '"></line>');
+      parts.push('<text x="' + (plotWidth + 4) + '" y="' + (y + 3) + '">' + formatTokensShort(Math.round(ceiling * fraction)) + "</text>");
+    });
+
+    stats.buckets.forEach(function (bucket, index) {
+      var x = index * slot + (slot - barWidth) / 2;
+      var y = plotHeight;
+
+      stats.models.slice().reverse().forEach(function (model) {
+        var value = stats.perBucket[index][model] || 0;
+
+        if (value <= 0) return;
+
+        var barHeight = Math.max(0.5, value / ceiling * plotHeight);
+        y -= barHeight;
+        parts.push('<rect x="' + x.toFixed(2) + '" y="' + y.toFixed(2) + '" width="' + barWidth.toFixed(2) +
+          '" height="' + barHeight.toFixed(2) + '" rx="1.5" fill="' + stats.colors[model] + '"></rect>');
+      });
+
+      if (bucket.label) {
+        parts.push('<text x="' + (index * slot + slot / 2).toFixed(2) + '" y="' + (height - 1) +
+          '" text-anchor="middle">' + escapeHtml(bucket.label) + "</text>");
+      }
+    });
+
+    if (stats.total === 0) {
+      parts.push('<text x="' + (plotWidth / 2) + '" y="' + (plotHeight / 2) +
+        '" text-anchor="middle" style="fill: var(--tertiary); font-size: 10px">No usage in this period</text>');
+    }
+
+    return '<svg class="chart" viewBox="0 0 ' + width + " " + height + '" role="img"><title>Tokens by model</title>' +
+      parts.join("") + "</svg>";
+  }
+
+  function detailRowHtml(label, value, color) {
+    return '<div class="detail-row">' +
+      (color ? '<span class="swatch" style="background:' + color + '"></span>' : "") +
+      '<span class="label">' + escapeHtml(label) + '</span><span class="value">' + escapeHtml(value) + "</span></div>";
+  }
+
+  function shareText(part, total) {
+    if (total <= 0) return "–";
+
+    var pct = part / total * 100;
+
+    return formatTokens(part) + "  " + (pct < 1 ? "<1" : Math.round(pct)) + "%";
+  }
+
+  function renderUsage() {
+    renderControls();
+
+    var chart = document.getElementById("chart");
+    var totalsContainer = document.getElementById("totals");
+    var modelsContainer = document.getElementById("models");
+
+    if (!usageEvent) {
+      chart.innerHTML = '<div class="chart-placeholder">Scanning transcripts…</div>';
+      totalsContainer.innerHTML = "";
+      modelsContainer.innerHTML = "";
+      return;
+    }
+
+    var stats = usageStats();
+
+    chart.innerHTML = chartHtml(stats);
+    totalsContainer.innerHTML = [
+      detailRowHtml("Total tokens", formatTokens(stats.total)),
+      detailRowHtml("Input", formatTokens(stats.totals.input)),
+      detailRowHtml("Output", formatTokens(stats.totals.output)),
+      detailRowHtml("Cache write", formatTokens(stats.totals.cacheWrite)),
+      detailRowHtml("Cache read", formatTokens(stats.totals.cacheRead)),
+      detailRowHtml("Responses", String(stats.totals.responses)),
+      detailRowHtml("Sessions", String(stats.sessions)),
+    ].join("");
+
+    modelsContainer.innerHTML = stats.models.length === 0 ? "" :
+      '<div class="section-header">Models</div><div class="detail-rows" style="padding-top:0">' +
+      stats.models.map(function (model) {
+        return detailRowHtml(model, shareText(stats.perModel[model], stats.total), stats.colors[model]);
+      }).join("") + "</div>";
+  }
+
+  // ---- Footer -----------------------------------------------------------
+
+  function renderFooter() {
+    var ages = profiles.map(function (profile) {
+      var report = reportFor(profile.name);
+
+      if (!report || !report.limits || !report.limits.updatedAt) return null;
+
+      return profile.label + " " + formatAge(report.limits.updatedAt);
+    }).filter(Boolean);
+
+    document.getElementById("footer-limits").textContent = ages.length
+      ? "Limits: " + ages.join(" · ")
+      : "Status line not active yet";
+    document.getElementById("footer-usage").textContent = usageEvent
+      ? "Usage: " + formatClock(new Date(usageEvent.scannedAt * 1000))
+      : "";
+  }
+
+  // ---- Wiring -----------------------------------------------------------
+
+  // The height the whole panel would take uncapped: the body's full scroll
+  // height rather than its box, which is already clamped to the window.
+  function reportHeight() {
+    var panel = document.getElementById("panel");
+    var body = document.getElementById("panel-body");
+    var bodyPadding = 20;
+    var height = Math.ceil(panel.offsetHeight - body.clientHeight + body.scrollHeight + bodyPadding);
+
+    if (height !== lastHeight) {
+      lastHeight = height;
+      post({ action: "resize", height: height });
+    }
+  }
+
+  function renderLive() {
+    renderHeader();
+    renderLimits();
+    renderSessions();
+    renderFooter();
+    reportHeight();
+  }
+
+  function renderAll() {
+    renderLive();
+    renderUsage();
+    reportHeight();
+  }
+
+  function handleClick(event) {
+    var segment = event.target.closest("button[data-range], button[data-filter]");
+
+    if (segment) {
+      if (segment.dataset.range) {
+        range = segment.dataset.range;
+        localStorage.setItem("claudeStats.range", range);
+      } else {
+        filter = segment.dataset.filter;
+        localStorage.setItem("claudeStats.filter", filter);
+      }
+
+      renderUsage();
+      reportHeight();
+      return;
+    }
+
+    var row = event.target.closest(".session");
+
+    if (!row) return;
+
+    if (row.dataset.pid) {
+      post({ action: "focus", pid: Number(row.dataset.pid), cwd: row.dataset.cwd });
+    } else {
+      post({ action: "reveal", cwd: row.dataset.cwd });
+    }
+  }
+
+  document.addEventListener("click", handleClick);
+
+  window.claudeStats = {
+    configure: function (profileList) {
+      profiles = profileList;
+      renderAll();
+    },
+
+    update: function (event) {
+      if (event.event === "sessions") {
+        sessionsEvent = event;
+        renderLive();
+      } else if (event.event === "usage") {
+        usageEvent = event;
+        renderUsage();
+        renderFooter();
+        reportHeight();
+      }
+    },
+
+    setLimitColors: function (colors) {
+      limitColors = colors || {};
+      renderLimits();
+      reportHeight();
+    },
+
+    setVisible: function (visible) {
+      clearInterval(tickTimer);
+      tickTimer = null;
+
+      if (visible) {
+        renderAll();
+        tickTimer = setInterval(renderLive, TICK_MILLISECONDS);
+      }
+    },
+  };
+
+  renderAll();
+})();
+</script>
+</body>
+</html>

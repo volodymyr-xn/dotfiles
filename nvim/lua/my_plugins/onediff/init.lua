@@ -7,7 +7,7 @@
 --   * `<Tab>` / `<S-Tab>` walk hunks across ALL changed files
 --   * `(` / `)` (keymappings/git.lua) walk hunks within the current buffer
 --   * `<C-S-M>` toggles inline deleted-line virtual lines (start state is the
---     `show_deleted` setting, off by default)
+--     `show_deleted` setting, off by default; `sf` applies it too)
 --   * `dd` / `3dd` / visual `d` in the list hide entries for this session only;
 --     toggling OneDiff off and on brings the full diff back
 --
@@ -796,10 +796,12 @@ local function restore_gitsigns(store)
   gitsigns.refresh()
 end
 
--- Turn on the full-line add/change highlight. Changed lines link to the
--- add-line group so they render the same green as added lines. Shared by the
--- review session (M.open) and the standalone toggle (`sf`).
-local function enable_change_highlight()
+-- Apply the configured deleted-line visibility and turn on the full-line
+-- add/change highlight. Changed lines link to the add-line group so they render
+-- the same green as added lines. Shared by the review session (M.open) and the
+-- standalone highlight (`sf`).
+local function enable_highlights()
+  gitsigns.toggle_deleted(config.options.show_deleted)
   vim.api.nvim_set_hl(0, "GitSignsChangeLn", { link = "GitSignsAddLn" })
   gitsigns.toggle_linehl(true)
 end
@@ -855,10 +857,9 @@ function M.open()
   vim.g.qfedit_enable = 0
 
   -- Apply the configured deleted-line visibility and the changed-line
-  -- highlight (`<C-S-M>` and `sf` still flip them by hand), then re-render open
+  -- highlight (`<C-S-M>` still flips the former by hand), then re-render open
   -- buffers against the base. All restored on close.
-  gitsigns.toggle_deleted(config.options.show_deleted)
-  enable_change_highlight()
+  enable_highlights()
 
   render_against_base()
 
@@ -929,8 +930,9 @@ function M.toggle()
   end
 end
 
--- Turn on the changed-line highlight and re-diff every buffer against the base
--- (bound to `sf`), independent of the review session. Pressing it again is a
+-- Turn on the changed-line highlight (plus deleted lines per `show_deleted`)
+-- and re-diff every buffer against the base (bound to `sf`), independent of
+-- the review session. Pressing it again is a
 -- refresh, not a toggle: the highlight picks up commits, stages, and checkouts
 -- made since it went on. The pre-highlight gitsigns settings are snapshotted
 -- once, on the first call, so a later session close restores the true original
@@ -948,7 +950,7 @@ function M.refresh_highlight()
     snapshot_gitsigns(highlight.saved)
   end
 
-  enable_change_highlight()
+  enable_highlights()
   render_against_base()
 end
 

@@ -56,6 +56,7 @@ require("colima_autotrim")
 require("network_stats")
 require("system_stats")
 require("process_stats")
+require("claude_stats")
 
 -- All global hotkey bindings.
 require("keys")

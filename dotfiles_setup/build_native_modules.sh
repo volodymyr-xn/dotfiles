@@ -48,9 +48,17 @@ build_process_stats_macos() {
   build_swift_module "$MODULES_DIR/macos/c-process-stats-macos.swift"
 }
 
+# Claude Code sessions, plan limits and token usage per profile, streamed to
+# the claude_stats menubar item. AppKit only for the screen-lock observers.
+build_claude_stats_macos() {
+  build_swift_module "$MODULES_DIR/macos/c-claude-stats-macos.swift" \
+    -framework AppKit
+}
+
 build_macos_modules() {
   build_system_sensors_macos
   build_process_stats_macos
+  build_claude_stats_macos
 }
 
 build_linux_modules() {

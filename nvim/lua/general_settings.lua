@@ -221,6 +221,33 @@ vim.filetype.add({
   },
 })
 
+-- ERB-rendered systemd units (`web.service.erb`, `backup.timer.erb`) stay
+-- eruby, but highlight the unit beneath: syntax/eruby.vim guesses the
+-- subtype from the inner extension, finds no `service.vim` and skips it.
+local SYSTEMD_UNIT_TYPES = {
+  automount = true,
+  mount = true,
+  path = true,
+  service = true,
+  slice = true,
+  socket = true,
+  swap = true,
+  target = true,
+  timer = true,
+}
+
+vim.filetype.add({
+  pattern = {
+    [".*%.(%a+)%.erb"] = function(_, _, unit_type)
+      if not SYSTEMD_UNIT_TYPES[unit_type] then return end
+
+      return "eruby", function(buf)
+        vim.b[buf].eruby_subtype = "systemd"
+      end
+    end,
+  },
+})
+
 -- Highlight a matching [{()}?P] when cursor is placed on start/end character
 vim.o.showmatch=true
 
