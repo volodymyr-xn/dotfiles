@@ -62,20 +62,66 @@ Session switching goes through fzf popups (`c-tmux-switch-session`).
 
 ## Hammerspoon
 
-Every global hotkey lives in `hammerspoon/keys.lua`. What the modules do:
+`init.lua` puts `modules/` and `lib/` on the require path, loads the modules
+that start something on load, and loads `keys.lua` last. Every global hotkey
+lives in `keys.lua`. `modules/` holds the features, `lib/` the shared pieces
+with no bindings of their own (canvas banners and dropdown panels, the helper
+process streams, number formatting). `lib/` never requires a module.
+`attic/` keeps old versions for reference, outside the require path so they
+can't load by accident.
 
-- Menubar readouts for CPU/GPU temperature, RAM, swap, power draw, network
-  and the heaviest processes. The numbers come from `c-system-sensors-macos`,
-  a small Swift binary that reads the SMC directly (Apple Silicon only).
-- A caffeine toggle that also blocks sleep on lid close.
-- F3/F4 for external monitor brightness over DDC, F9/F10 and the numpad for
-  volume.
-- Mouse side buttons: App Exposé, Mission Control, opening notifications,
-  Quick Look in Finder.
-- `Cmd+K` goes back to wherever I was before a notification pulled me away,
-  down to the tmux pane.
-- Colima's VM only ever grows its share of host RAM, so it gets restarted
-  when it's both too big and idle.
+Menubar, right to left:
+
+- `system_stats` shows CPU load, die temperature, RAM, swap and power draw.
+  Clicking it opens a panel with the rest, GPU included.
+- `network_stats` shows upload and download for whichever interface has the
+  default route. The panel shows the address, Wi-Fi signal and totals.
+- `process_stats` is a gear that opens the heaviest processes by CPU, energy
+  and memory, refreshed every second while the panel is open.
+- `claude_stats` lists every Claude Code profile: limit rings, sessions,
+  token usage by model. Clicking a session jumps to its terminal and tmux
+  pane. It reads a couple of files from my `control_panel` repo, so it won't
+  work as is anywhere else.
+
+The bar items are drawn by `c-system-sensors-macos`, a Swift helper that
+reads the SMC directly (Apple Silicon only). The process and Claude panels
+get their data from `c-process-stats-macos` and `c-claude-stats-macos`.
+Build all of them with `dotfiles_setup/build_native_modules.sh`.
+
+Keyboard and mouse:
+
+- `brightness`: F3/F4 set external monitor brightness over DDC with
+  `m1ddc` and show a small HUD. With no external monitor they fall back to
+  the built-in one.
+- `media_keys`: F9/F10 and numpad `-`/`+` for volume, numpad `*` mutes,
+  numpad `0` plays/pauses.
+- `mouse_side_buttons`: the bottom button opens App Exposé, or Mission
+  Control with `Cmd`. The top one does Quick Look in Finder and `smart_nav`
+  everywhere else. `Cmd+Shift+N` turns the mapping off for games.
+- `smart_nav` opens the top notification if there is one, otherwise goes
+  back to where I was, otherwise opens Mission Control.
+- `cycle_app_windows`: `` Cmd+` `` cycles the front app's windows, whatever
+  the keyboard layout.
+- `swich_monitor_focus`: `Cmd+Alt+M` moves the mouse and focus to the next
+  monitor.
+- `Cmd+E` opens App Exposé and `Cmd+Shift+L` puts the Mac to sleep, both
+  straight from `keys.lua`.
+
+Notifications. When an agent finishes, a notification pulls me to its tmux
+pane, and these handle the round trip:
+
+- `click_notification`: `Cmd+L` clicks the top notification.
+- `notify_return` saves where I was before the jump. `Cmd+K` within three
+  minutes goes back to that app, down to the tmux pane.
+- `dismiss_notifications`: `Cmd+I` clears every notification on screen.
+
+Background:
+
+- `caffeine`: `Cmd+M` keeps the Mac awake, lid closed included (that part
+  needs `macos_setup/sudoers.d/pmset-disablesleep`). It's always off after
+  a reload.
+- `colima_autotrim`: Colima's VM only ever grows its share of host RAM, so
+  every 15 minutes it gets restarted if it's both too big and idle.
 
 After editing anything there, run `c-hammerspoon-reload`. A bare
 `hs -c "hs.reload()"` exits 69 every time, even when the reload worked.
