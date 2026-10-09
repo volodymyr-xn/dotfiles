@@ -18,8 +18,8 @@
 -- only while told `live`, and prints a line only when something changed.
 -- A `usage` line is never decoded here — it can run to tens of kilobytes and
 -- the page is its only reader. A `sessions` line is, for the limits: their
--- colours come from the statusline's own code (usage_color.lua in
--- control_panel), so the panel and the statusline always agree.
+-- colours come from the statusline's own code (its Go port's `burn-colors`
+-- subcommand in control_panel), so the panel and the statusline always agree.
 --
 -- Build the helper once with `dotfiles_setup/build_native_modules.sh`; until
 -- then the panel stays empty.
@@ -52,17 +52,12 @@ local FOCUS_SCRIPT = HOME .. "/dotfiles/scripts/macos/c-claude-session-focus-mac
 local TMUX_PANE_LIST = HOME .. "/control_panel/bin/c-tmux-ai-pane-list"
 local PANEL_PAGE = hs.configdir .. "/assets/claude_stats/panel.html"
 
--- The statusline's own limit colouring (control_panel statuslines), loaded
--- so the panel colours a limit exactly as the statusline does: same
--- strategy, same plan scaling, same projection. Missing or broken, the page
--- falls back to its own thresholds.
-local USAGE_COLOR_MODULE = HOME .. "/control_panel/configs/claude/statuslines/usage_color.lua"
-local usageColorLoaded, usageColor = pcall(dofile, USAGE_COLOR_MODULE)
-
-if not usageColorLoaded then
-  print("claude_stats: statusline colours unavailable: " .. tostring(usageColor))
-  usageColor = nil
-end
+-- The statusline's own limit colouring (control_panel statuslines): its Go
+-- port answers `burn-colors` with one colour name per window, so the panel
+-- colours a limit exactly as the statusline does — same strategy, same plan
+-- scaling, same projection. Not built yet, the page falls back to its own
+-- thresholds.
+local COLOR_COMMAND = HOME .. "/control_panel/configs/claude/statuslines/command-go"
 
 -- The panel's limit windows by the helper's key, the statusline's window
 -- name, and the suffix of the strategy's hysteresis key.
@@ -113,6 +108,7 @@ local ESCAPE_KEY_CODE = hs.keycodes.map.escape
 local task = nil
 local supervisorTimer = nil
 local limitColorTimer = nil
+local limitColorTask = nil
 local menu = nil
 local webview = nil
 local outsideTap = nil
@@ -146,45 +142,67 @@ local function pushToPanel(line)
   webview:evaluateJavaScript("window.claudeStats.update(" .. line .. ")")
 end
 
--- One profile's colours, { fiveHour = "yellow", ... }, for the windows
--- still in force. The strategy keeps hysteresis state per key in $TMPDIR;
--- the panel_ keys keep it apart from the statusline's own, which the panel
--- must not overwrite.
-local function profileLimitColors(report)
-  local colors = {}
+-- Queue one `burn-colors` spec, "window_name:state_key:used:resets_at:
+-- plan_profile", per window of `report` still in force; `slots` records which
+-- profile and window each answer line belongs to. The strategy keeps
+-- hysteresis state per key in $TMPDIR; the panel_ keys keep it apart from
+-- the statusline's own, which the panel must not overwrite.
+local function appendLimitSpecs(report, specs, slots)
   local limits = report.limits
 
   if limits == nil then
-    return colors
+    return
   end
-
-  local multiplier = usageColor.plan_multiplier(usageColor.read_plan(report.name))
 
   for _, window in ipairs(LIMIT_WINDOWS) do
     local limit = limits[window.key]
 
     if limit ~= nil and limit.resetsAt > os.time() then
-      colors[window.key] = usageColor.burn_color_name(math.floor(limit.pct), limit.resetsAt, window.name,
-        "panel_" .. report.name .. "_" .. window.state, multiplier)
+      local stateKey = "panel_" .. report.name .. "_" .. window.state
+
+      specs[#specs + 1] = table.concat({ window.name, stateKey, math.floor(limit.pct), limit.resetsAt, report.name }, ":")
+      slots[#slots + 1] = { profile = report.name, key = window.key }
     end
   end
-
-  return colors
 end
 
--- Hand the page every profile's colours, computed now.
+-- Hand the page every profile's colours, { claude = { fiveHour = "yellow",
+-- ... }, ... }, computed now by one off-thread `burn-colors` run.
 local function pushLimitColors()
-  if usageColor == nil or latestSessions == nil or not pageReady or not panelVisible then
+  if latestSessions == nil or not pageReady or not panelVisible or hs.fs.attributes(COLOR_COMMAND) == nil then
     return
   end
 
   local colors = {}
+  local arguments = { "burn-colors" }
+  local slots = {}
 
   for _, report in ipairs(latestSessions.profiles) do
-    colors[report.name] = profileLimitColors(report)
+    colors[report.name] = {}
+    appendLimitSpecs(report, arguments, slots)
   end
 
-  webview:evaluateJavaScript("window.claudeStats.setLimitColors(" .. hs.json.encode(colors) .. ")")
+  -- Kept in a module local so the task is not collected before it reports.
+  limitColorTask = hs.task.new(COLOR_COMMAND, function(exitCode, stdOut)
+    if exitCode ~= 0 or not pageReady or not panelVisible then
+      return
+    end
+
+    local index = 0
+
+    for name in stdOut:gmatch("[^\n]+") do
+      index = index + 1
+      local slot = slots[index]
+
+      if slot ~= nil then
+        colors[slot.profile][slot.key] = name
+      end
+    end
+
+    webview:evaluateJavaScript("window.claudeStats.setLimitColors(" .. hs.json.encode(colors) .. ")")
+  end, arguments)
+
+  limitColorTask:start()
 end
 
 -- Keep the latest line of each kind for the next open, and hand it to the

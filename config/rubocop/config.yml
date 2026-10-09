@@ -7,6 +7,7 @@ AllCops:
     - 'util/**/*'
     - 'spec/**/*'
     - 'vendor/**/*'
+    - 'C_*/**/*'
     - '.pryrc'
     - 'Guardfile'
 

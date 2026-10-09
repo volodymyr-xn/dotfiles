@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="11 0 26 48" width="26" height="48">
+  <!-- Clock face for the launchd-jobs menubar item.
+       Same viewBox as gear.svg, so the two sit at the same size and claim the
+       same slot width: hs.menubar scales an icon to the bar height, and the
+       padding inside this box is what decides how large it reads.
+       Black strokes only — the image is handed over as a template, where
+       AppKit keeps the alpha channel and repaints it for Light or Dark. -->
+  <g fill="none" stroke="#000000" stroke-width="1.9" stroke-linecap="round"
+     stroke-linejoin="round">
+    <circle cx="24" cy="24" r="7.1"/>
+    <path d="M24 19.6V24L27 26"/>
+  </g>
+</svg>

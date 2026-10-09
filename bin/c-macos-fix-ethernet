@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# Recover a wired adapter stuck on a self-assigned 169.254.x.x address
+# without rebooting. Escalates from a service toggle to a DHCP renewal to
+# restarting configd (needs sudo). Targets macOS only.
+set -euo pipefail
+
+LEASE_WAIT_SECONDS=10
+
+# Print "<hardware port>|<device>" for each wired (non Wi-Fi) port.
+wired_ports() {
+  networksetup -listallhardwareports \
+    | awk -F': ' '/^Hardware Port:/ {port=$2} /^Device:/ {print port "|" $2}' \
+    | grep -Ei 'lan|ethernet' \
+    | grep -Eiv 'wi-fi|thunderbolt' || true
+}
+
+is_link_up() { ifconfig "$1" | grep -q 'status: active'; }
+
+has_self_assigned_address() { ifconfig "$1" | grep -q 'inet 169\.254\.'; }
+
+has_routable_address() {
+  ifconfig "$1" | grep 'inet ' | grep -qv 'inet 169\.254\.'
+}
+
+# Poll until the device holds a non-link-local address or the wait expires.
+wait_for_lease() {
+  local device="$1" _
+  for _ in $(seq 1 "$LEASE_WAIT_SECONDS"); do
+    has_routable_address "$device" && return 0
+    sleep 1
+  done
+  return 1
+}
+
+toggle_service() {
+  local port="$1"
+  networksetup -setnetworkserviceenabled "$port" off
+  sleep 1
+  networksetup -setnetworkserviceenabled "$port" on
+  networksetup -setdhcp "$port"
+}
+
+renew_with_sudo() {
+  local device="$1"
+  sudo ipconfig set "$device" DHCP
+  sudo killall configd || true
+  sudo ipconfig set "$device" DHCP
+}
+
+fix_port() {
+  local port="$1" device="$2"
+
+  echo "$port ($device): self-assigned address, recovering"
+
+  toggle_service "$port"
+  if wait_for_lease "$device"; then
+    echo "$device: fixed by service toggle"
+    return 0
+  fi
+
+  renew_with_sudo "$device"
+  if wait_for_lease "$device"; then
+    echo "$device: fixed by DHCP renew + configd restart"
+    return 0
+  fi
+
+  echo "$device: still no lease. Check cable, router port, DHCP pool," \
+    "and quit VPN/network extensions (WireGuard, ProtonVPN)." >&2
+  return 1
+}
+
+main() {
+  local port device stuck=0 failed=0
+
+  while IFS='|' read -r port device; do
+    is_link_up "$device" || continue
+    has_self_assigned_address "$device" || continue
+
+    stuck=1
+    fix_port "$port" "$device" || failed=1
+  done < <(wired_ports)
+
+  if [[ $stuck -eq 0 ]]; then
+    echo "No wired adapter with a self-assigned address."
+  fi
+
+  return "$failed"
+}
+
+main "$@"

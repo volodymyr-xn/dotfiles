@@ -1125,17 +1125,21 @@ enum StatText {
 }
 
 // The colours the rows are drawn in, matching hammerspoon/lib/stat_panel: the
-// resting text follows the system appearance, and a reading past its
-// threshold turns orange, then red.
+// resting text follows the bar's own tint, and a reading past its threshold
+// turns orange, then red.
 enum RowPalette {
     static let warning = NSColor(srgbRed: 1, green: 0.58, blue: 0, alpha: 1)
     static let critical = NSColor(srgbRed: 1, green: 0.23, blue: 0.19, alpha: 1)
 
-    // White on a dark bar, black on a light one.
-    static func resting() -> NSColor {
-        let dark = NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+    private static let darkAppearances: Set<NSAppearance.Name> = [.darkAqua, .vibrantDark]
 
-        return dark ? .white : .black
+    // White on a dark bar, black on a light one. The bar tints itself from
+    // the wallpaper, not the system Dark/Light setting, so the appearance
+    // has to be the status button's.
+    static func resting(on appearance: NSAppearance) -> NSColor {
+        let match = appearance.bestMatch(from: [.darkAqua, .vibrantDark, .aqua, .vibrantLight])
+
+        return match.map(darkAppearances.contains) == true ? .white : .black
     }
 
     // The warning colour a reading has earned, or `resting` below both marks.
@@ -1354,6 +1358,16 @@ enum MenubarRow {
 enum MenubarItem: String, CaseIterable {
     case network
     case system
+
+    // The columns this item shows for one tick's readings.
+    func columns(_ readings: MenubarReadings, resting: NSColor) -> [RowColumn] {
+        switch self {
+        case .network:
+            return NetworkRow.columns(readings, resting: resting)
+        case .system:
+            return SystemRow.columns(readings, resting: resting)
+        }
+    }
 }
 
 // The five system columns, left to right: memory in use, swap in use, busiest
@@ -1456,6 +1470,8 @@ final class StatsMenubar: NSObject {
     private let rates = NetworkRates()
     private let power: PowerWindow
     private var items: [MenubarItem: NSStatusItem] = [:]
+    private var appearanceObservations: [NSKeyValueObservation] = []
+    private var lastReadings: MenubarReadings?
     private var timer: Timer?
     private var away = Set<AwayReason>()
 
@@ -1488,6 +1504,11 @@ final class StatsMenubar: NSObject {
             button.target = self
             button.action = #selector(clicked(_:))
             button.sendAction(on: [.leftMouseDown, .rightMouseDown])
+            appearanceObservations.append(button.observe(\.effectiveAppearance) { [weak self] _, _ in
+                DispatchQueue.main.async {
+                    self?.repaint(item)
+                }
+            })
         }
 
         return statusItem
@@ -1550,9 +1571,10 @@ final class StatsMenubar: NSObject {
         }
 
         let readings = sample()
-        let resting = RowPalette.resting()
-        let systemText = paint(.system, SystemRow.columns(readings, resting: resting))
-        let networkText = paint(.network, NetworkRow.columns(readings, resting: resting))
+        lastReadings = readings
+
+        let systemText = paint(.system, readings)
+        let networkText = paint(.network, readings)
 
         emit([
             ("event", JSON.text("readings")),
@@ -1576,17 +1598,29 @@ final class StatsMenubar: NSObject {
         ])
     }
 
-    // Draw one item's row, or nothing when Hammerspoon did not ask for the
-    // item. Returns the plain-text mirror, nil for a hidden item.
-    private func paint(_ item: MenubarItem, _ columns: [RowColumn]) -> String? {
+    // Draw one item's row in the colours of the bar it sits on, or nothing
+    // when Hammerspoon did not ask for the item. Returns the plain-text
+    // mirror, nil for a hidden item.
+    private func paint(_ item: MenubarItem, _ readings: MenubarReadings) -> String? {
         guard let button = items[item]?.button else {
             return nil
         }
 
-        let row = MenubarRow.render(columns)
+        let resting = RowPalette.resting(on: button.effectiveAppearance)
+        let row = MenubarRow.render(item.columns(readings, resting: resting))
         button.image = row.image
 
         return row.text
+    }
+
+    // Redraw an item from the last readings when the bar changes tint under
+    // it. Sampling again here would skew the CPU, rate and power baselines.
+    private func repaint(_ item: MenubarItem) {
+        guard let lastReadings else {
+            return
+        }
+
+        _ = paint(item, lastReadings)
     }
 
     // The clicked item's frame in Hammerspoon's coordinates — origin at the

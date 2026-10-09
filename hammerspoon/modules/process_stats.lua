@@ -81,8 +81,6 @@ local MAXIMUM_ELAPSED_SECONDS = 600
 -- they contain, because neither joules nor bytes has a natural ceiling here.
 local CPU_CEILING_PERCENT = 100
 
-local SEPARATOR = "  ·  "
-
 local menu = hs.menubar.new()
 
 -- The previous report and the moment it was taken, which is what every rate
@@ -191,15 +189,11 @@ local function rankedByResident(processes)
   return ranked
 end
 
--- Load average rather than another CPU percentage: it counts threads waiting
--- for a turn, so a machine at 20% with a load of twelve is stuck on something
--- the utilisation figures cannot show.
 local function systemSection(stats)
   return {
     header = "System",
     rows = {
       { label = "Uptime", value = statFormat.uptime(stats.uptime_seconds) },
-      { label = "Load avg", value = statFormat.loadAverages(stats.load_avg, SEPARATOR) },
     },
   }
 end

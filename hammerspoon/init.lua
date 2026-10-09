@@ -58,5 +58,8 @@ require("system_stats")
 require("process_stats")
 require("claude_stats")
 
+-- Clock listing the custom launchd agents; leftmost, since it was added last.
+require("launchd_jobs")
+
 -- All global hotkey bindings.
 require("keys")

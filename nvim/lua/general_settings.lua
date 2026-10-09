@@ -221,6 +221,11 @@ vim.filetype.add({
   },
 })
 
+-- `*.d` is always D here, never DTrace. The builtin content check returns
+-- dtrace on any line matching `:%S-:%S-:` before it reaches `module`, so a
+-- doc comment like `/// Api::SearchController: ...` flips a D file to dtrace.
+vim.filetype.add({ extension = { d = "d" } })
+
 -- ERB-rendered systemd units (`web.service.erb`, `backup.timer.erb`) stay
 -- eruby, but highlight the unit beneath: syntax/eruby.vim guesses the
 -- subtype from the inner extension, finds no `service.vim` and skips it.

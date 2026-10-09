@@ -159,21 +159,6 @@ function format.uptime(seconds)
   return string.format("%dm", minutes)
 end
 
--- The three windows getloadavg reports, in the order it reports them.
-function format.loadAverages(averages, separator)
-  if averages == nil or #averages == 0 then
-    return format.PLACEHOLDER
-  end
-
-  local windows = {}
-
-  for index, average in ipairs(averages) do
-    windows[index] = string.format("%.2f", average)
-  end
-
-  return table.concat(windows, separator)
-end
-
 -- A name that fits the label column. An Electron helper runs past the figure
 -- it shares a line with otherwise.
 function format.shortened(name, limit)

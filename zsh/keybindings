@@ -32,6 +32,9 @@ bindkey -s "^o" 'bin/rails c\n'
 
 bindkey "^d" delete-word
 
+# Delete from cursor to beginning of line (zsh default kills whole line)
+bindkey "^u" backward-kill-line
+
 # bindkey '^[[1;5D' backward-word   # Ctrl+Left
 # bindkey '^[[1;5C' forward-word    # Ctrl+Right
 # bindkey '^[[5D' backward-word     # Ctrl+Left (alternative)
