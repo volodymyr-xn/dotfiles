@@ -144,7 +144,8 @@ local function temperatureRow(label, hottest, average, resting)
     color = statPanel.thresholdColor(hottest, WARN_CELSIUS, CRITICAL_CELSIUS, resting),
     fraction = statPanel.fraction(hottest, CRITICAL_CELSIUS),
     gaugeColor = statPanel.thresholdColor(hottest, WARN_CELSIUS, CRITICAL_CELSIUS,
-      statPanel.faded(resting, 0.75)),
+      statPanel.faded(resting, 0.75)
+    ),
   }
 end
 
@@ -250,7 +251,8 @@ local function memorySection(details, resting)
         color = statPanel.thresholdColor(swapUsed, WARN_SWAP_BYTES, CRITICAL_SWAP_BYTES, resting),
         fraction = statPanel.fraction(swapUsed, CRITICAL_SWAP_BYTES),
         gaugeColor = statPanel.thresholdColor(swapUsed, WARN_SWAP_BYTES, CRITICAL_SWAP_BYTES,
-          statPanel.faded(resting, 0.75)),
+          statPanel.faded(resting, 0.75)
+        ),
       },
     },
   }
@@ -273,7 +275,8 @@ local function powerSection(details, resting)
         gaugeColor = statPanel.faded(resting, 0.75),
         detail = string.format("%s low%s%s peak over the last %ds",
           formatWatts(lowestWatts), DETAIL_SEPARATOR, formatWatts(highestWatts),
-          POWER_AVERAGE_SECONDS),
+          POWER_AVERAGE_SECONDS
+        ),
       },
     },
   }

@@ -39,7 +39,8 @@ local PANE_FORMAT = table.concat({
   "#{pane_height}",
   "#{pane_current_command}",
   "#{pane_title}",
-}, " ")
+}, " "
+)
 
 -- pane_id currently claimed by each feature, keyed by owner name
 local claims = {}

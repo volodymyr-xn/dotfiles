@@ -71,7 +71,8 @@ end
 -- parsed from `vmmap -summary`. Returns nil when vmmap fails or times out.
 local function darwin_footprint_mb(pid)
   local result = vim.system({ "vmmap", "-summary", tostring(pid) },
-    { text = true, timeout = 4000 }):wait()
+    { text = true, timeout = 4000 }
+  ):wait()
 
   if result.code ~= 0 or not result.stdout then
     return nil

@@ -1,0 +1,5 @@
+{
+  "workspace": {
+    "ignoreDir": ["C_TEMP", "C_RESEARCH", "C_HTML", "tmux/plugins"]
+  }
+}

@@ -91,7 +91,8 @@ local function create_pane(target_id, orientation, size)
     "-l " .. size,
     "-c " .. vim.fn.shellescape(vim.fn.getcwd()),
     "-P -F '#{pane_id}'",
-  }, " ")
+  }, " "
+  )
 
   local pane_id = vim.trim(vim.fn.system(command))
 

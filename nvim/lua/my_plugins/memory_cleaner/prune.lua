@@ -145,7 +145,8 @@ end
 function M.format_result(result)
   if result.unloaded == 0 and result.lsp_stopped == 0 then
     return string.format("[mem] prune → nothing to reclaim (idle ≥ %dm)",
-      result.threshold_minutes)
+      result.threshold_minutes
+    )
   end
 
   local pieces = {
@@ -156,7 +157,8 @@ function M.format_result(result)
   }
 
   return string.format("[mem] prune → %s (idle ≥ %dm)",
-    table.concat(pieces, ", "), result.threshold_minutes)
+    table.concat(pieces, ", "), result.threshold_minutes
+  )
 end
 
 return M

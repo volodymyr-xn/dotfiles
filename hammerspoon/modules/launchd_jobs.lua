@@ -162,7 +162,8 @@ end
 -- nested blocks repeat `state =` for their own event channels.
 local function serviceState(label)
   local output, succeeded = hs.execute(string.format("%s print %q 2>/dev/null",
-    LAUNCHCTL, DOMAIN .. "/" .. label))
+    LAUNCHCTL, DOMAIN .. "/" .. label
+  ))
 
   if not succeeded then
     return nil
@@ -420,7 +421,8 @@ end
 -- progress is left alone rather than killed and restarted.
 local function runNow(label)
   runTask(LAUNCHCTL, { "kickstart", DOMAIN .. "/" .. label }, bannerResult(
-    { done = "Job started", failed = "Could not start job" }, label, RUN_ICON))
+    { done = "Job started", failed = "Could not start job" }, label, RUN_ICON
+  ))
 end
 
 -- Open the log in whatever app .log files open in (Console by default).
@@ -441,7 +443,8 @@ local function confirmRemoval(label)
   local choice = hs.dialog.blockAlert("Remove " .. label .. "?",
     "Unloads the agent and deletes its plist from ~/Library/LaunchAgents and "
       .. "control_panel/configs/launchd. Its log is kept.",
-    "Remove", "Cancel", "critical")
+    "Remove", "Cancel", "critical"
+  )
 
   if choice ~= "Remove" then
     return
@@ -449,7 +452,8 @@ local function confirmRemoval(label)
 
   runTask(REMOVE_SCRIPT, { label }, bannerResult(
     { done = "Agent removed", failed = "Could not remove agent" },
-    label, REMOVE_ICON))
+    label, REMOVE_ICON
+  ))
 end
 
 -- The submenu behind a job's card.

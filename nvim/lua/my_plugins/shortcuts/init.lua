@@ -295,14 +295,16 @@ local function render(width)
   for _, group in ipairs(groups) do
     local items = vim.tbl_filter(function(mapping)
       return matches_filter(mapping, state.filter)
-    end, group.items)
+    end, group.items
+    )
 
     if #items > 0 then
       push(build_rule(widths, "├", "┴", "┤"))
       push(build_span_row(widths, {
         { group.title, "ShortcutsSection" },
         { string.format("  · %d", #items), "ShortcutsDim" },
-      }), { kind = "group" })
+      }), { kind = "group" }
+      )
       push(build_rule(widths, "├", "┬", "┤"))
 
       for _, mapping in ipairs(items) do
@@ -344,7 +346,8 @@ local function paint(lines, marks, row_index)
 
   for _, mark in ipairs(marks) do
     pcall(api.nvim_buf_set_extmark, buf, NS, mark.line, mark.col,
-      { end_col = mark.end_col, hl_group = mark.hl })
+      { end_col = mark.end_col, hl_group = mark.hl }
+    )
   end
 
   vim.bo[buf].modifiable = false

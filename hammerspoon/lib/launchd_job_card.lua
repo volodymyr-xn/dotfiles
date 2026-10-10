@@ -185,7 +185,8 @@ local function addTitleRow(page, view, resting)
     append(page, textElement(view.countdown, COUNTDOWN,
       view.soon and BLUE or resting,
       { x = TEXT_X, y = page.y, w = TEXT_WIDTH, h = COUNTDOWN.height },
-      "right"))
+      "right"
+    ))
   end
 
   append(page, {
@@ -217,7 +218,8 @@ local function addLabelRow(page, view, resting)
     dateWidth = measuredWidth(view.nextDate, META) + COLUMN_GAP
 
     append(page, textElement(view.nextDate, META, meta,
-      { x = TEXT_X, y = page.y, w = TEXT_WIDTH, h = META.height }, "right"))
+      { x = TEXT_X, y = page.y, w = TEXT_WIDTH, h = META.height }, "right"
+    ))
   end
 
   local label = textElement(view.label, META, meta, {
@@ -243,7 +245,8 @@ local function addDescription(page, description, resting)
   local height = BODY.height * lineCount
   local element = textElement(description, BODY,
     statPanel.faded(resting, DESCRIPTION_ALPHA),
-    { x = TEXT_X, y = page.y, w = TEXT_WIDTH, h = height })
+    { x = TEXT_X, y = page.y, w = TEXT_WIDTH, h = height }
+  )
 
   element.textLineBreak = "wordWrap"
   append(page, element)
@@ -262,7 +265,8 @@ local function addWeekdayStrip(page, weekly, todaySlot, resting)
     local scheduled = weekly.weekdays[slot] == true
 
     append(page, filledRect({ x = x, y = page.y, w = DAY_CELL, h = DAY_CELL },
-      DAY_RADIUS, scheduled and BLUE or idleFill))
+      DAY_RADIUS, scheduled and BLUE or idleFill
+    ))
 
     if slot == todaySlot then
       -- Inset by half a point so the stroke lands inside the cell rather
@@ -282,7 +286,8 @@ local function addWeekdayStrip(page, weekly, todaySlot, resting)
       y = page.y + (DAY_CELL - DAY.height) / 2,
       w = DAY_CELL,
       h = DAY.height,
-    }, "center"))
+    }, "center"
+    ))
   end
 
   return TEXT_X + (DAY_CELL + DAY_GAP) * #WEEKDAY_INITIALS - DAY_GAP + INLINE_GAP
@@ -314,7 +319,8 @@ local function addChip(page, text, x, resting)
   end
 
   append(page, filledRect({ x = x, y = page.y, w = width, h = SCHEDULE_HEIGHT },
-    SCHEDULE_HEIGHT / 2, statPanel.faded(resting, CHIP_FILL_ALPHA)))
+    SCHEDULE_HEIGHT / 2, statPanel.faded(resting, CHIP_FILL_ALPHA)
+  ))
   append(page, textElement(text, META, statPanel.faded(resting, CHIP_TEXT_ALPHA), {
     x = x + CHIP_PADDING,
     y = page.y + (SCHEDULE_HEIGHT - META.height) / 2,
@@ -349,12 +355,14 @@ end
 -- How far the job is from its last run to its next.
 local function addProgress(page, progress, resting)
   append(page, filledRect({ x = TEXT_X, y = page.y, w = TEXT_WIDTH, h = BAR_HEIGHT },
-    BAR_HEIGHT / 2, statPanel.faded(resting, TRACK_ALPHA)))
+    BAR_HEIGHT / 2, statPanel.faded(resting, TRACK_ALPHA)
+  ))
 
   if progress > 0 then
     append(page, filledRect(
       { x = TEXT_X, y = page.y, w = TEXT_WIDTH * progress, h = BAR_HEIGHT },
-      BAR_HEIGHT / 2, BLUE))
+      BAR_HEIGHT / 2, BLUE
+    ))
   end
 
   page.y = page.y + BAR_HEIGHT
@@ -380,13 +388,16 @@ local function addFooterRow(page, view, resting)
   local stateWidth = measuredWidth(view.state, META) + COLUMN_GAP
   local lastRunX = TEXT_X + BADGE_WIDTH
   local lastRunWidth = math.min(measuredWidth(view.lastRun, META),
-    TEXT_WIDTH - BADGE_WIDTH - stateWidth)
+    TEXT_WIDTH - BADGE_WIDTH - stateWidth
+  )
 
   append(page, textElement(EXIT_BADGES[view.exit], BADGE,
     badgeColor(view.exit, resting),
-    { x = TEXT_X, y = page.y, w = BADGE_WIDTH, h = BADGE.height }))
+    { x = TEXT_X, y = page.y, w = BADGE_WIDTH, h = BADGE.height }
+  ))
   append(page, textElement(view.lastRun, META, meta,
-    { x = lastRunX, y = page.y, w = lastRunWidth, h = META.height }))
+    { x = lastRunX, y = page.y, w = lastRunWidth, h = META.height }
+  ))
 
   if view.exitText ~= nil then
     local exitX = lastRunX + lastRunWidth + INLINE_GAP
@@ -400,7 +411,8 @@ local function addFooterRow(page, view, resting)
   end
 
   append(page, textElement(view.state, META, meta,
-    { x = TEXT_X, y = page.y, w = TEXT_WIDTH, h = META.height }, "right"))
+    { x = TEXT_X, y = page.y, w = TEXT_WIDTH, h = META.height }, "right"
+  ))
 
   page.y = page.y + META.height
 end
@@ -448,7 +460,8 @@ local function addCount(page, text, color, right, resting)
   local y = page.y + (TITLE.height - META.height) / 2
 
   append(page, textElement(text, META, statPanel.faded(resting, META_ALPHA),
-    { x = textX, y = y, w = width, h = META.height }))
+    { x = textX, y = y, w = width, h = META.height }
+  ))
   append(page, {
     type = "circle",
     action = "fill",
@@ -492,7 +505,8 @@ function M.headerImage(view, resting)
 
   if view.nextName == nil then
     append(page, textElement(view.empty, BODY, meta,
-      { x = LEFT_MARGIN, y = page.y, w = CONTENT_WIDTH, h = BODY.height }))
+      { x = LEFT_MARGIN, y = page.y, w = CONTENT_WIDTH, h = BODY.height }
+    ))
   else
     local prefix = "Next up"
     local prefixWidth = measuredWidth(prefix, META) + INLINE_GAP
@@ -500,7 +514,8 @@ function M.headerImage(view, resting)
     local metaY = page.y + (BODY.height - META.height) / 2
 
     append(page, textElement(prefix, META, meta,
-      { x = LEFT_MARGIN, y = metaY, w = prefixWidth, h = META.height }))
+      { x = LEFT_MARGIN, y = metaY, w = prefixWidth, h = META.height }
+    ))
     append(page, textElement(view.nextName, BODY, resting, {
       x = LEFT_MARGIN + prefixWidth,
       y = page.y,
@@ -512,7 +527,8 @@ function M.headerImage(view, resting)
       y = page.y + (BODY.height - TIME.height) / 2,
       w = CONTENT_WIDTH,
       h = TIME.height,
-    }, "right"))
+    }, "right"
+    ))
   end
 
   page.y = page.y + BODY.height

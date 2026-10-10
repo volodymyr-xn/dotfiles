@@ -43,10 +43,12 @@ local function reload_file_with_message()
   vim.api.nvim_echo({
     { "File reloaded ", "MoreMsg" },
     { filename,        "ReloadedFilename" },
-  }, false, {})
+  }, false, {}
+  )
   vim.defer_fn(function()
     vim.api.nvim_echo({ { "" } }, false, {})
-  end, 1000)
+  end, 1000
+  )
 end
 
 -- Reload current file from disk (OneDiff buffers have their own buffer-local <Leader>e)
@@ -54,16 +56,21 @@ vim.keymap.set('n', '<Leader>e', reload_file_with_message, { noremap = true, sil
 
 -- Ruby ViewComponent: navigate to specific file type in the same component
 vim.api.nvim_set_keymap('n', 's1', '<cmd>lua require("my_plugins.ruby_component_toggle").navigate_to_extension(".rb")<CR>',
-  { noremap = true, silent = true, desc = "Navigate to .rb file" })
+  { noremap = true, silent = true, desc = "Navigate to .rb file" }
+)
 vim.api.nvim_set_keymap('n', 's2', '<cmd>lua require("my_plugins.ruby_component_toggle").navigate_to_extension(".html.erb")<CR>',
-  { noremap = true, silent = true, desc = "Navigate to .html.erb file" })
+  { noremap = true, silent = true, desc = "Navigate to .html.erb file" }
+)
 vim.api.nvim_set_keymap('n', 's3', '<cmd>lua require("my_plugins.ruby_component_toggle").navigate_to_style()<CR>',
-  { noremap = true, silent = true, desc = "Navigate to .scss/.css file" })
+  { noremap = true, silent = true, desc = "Navigate to .scss/.css file" }
+)
 vim.api.nvim_set_keymap('n', 's4', '<cmd>lua require("my_plugins.ruby_component_toggle").navigate_to_extension(".js")<CR>',
-  { noremap = true, silent = true, desc = "Navigate to .js file" })
+  { noremap = true, silent = true, desc = "Navigate to .js file" }
+)
 -- Toggle between .rb and .html.erb for Ruby view components
 vim.keymap.set('n', 'gr', function() require('my_plugins.ruby_component_toggle').toggle_alternate() end,
-  { noremap = true, silent = true, desc = "Toggle between .rb and .html.erb" })
+  { noremap = true, silent = true, desc = "Toggle between .rb and .html.erb" }
+)
 
 -- Neo-tree: defined here (not inside plugin_settings/neo_tree.lua) so that
 -- the keymaps exist at startup. Pressing them dispatches :Neotree, which
@@ -77,7 +84,8 @@ vim.api.nvim_set_keymap("n", "<C-\\>", "<NOP>", { noremap = true, silent = true 
 -- Toggle the Neotree sidebar.
 vim.keymap.set("n", "<C-\\>", function()
   vim.cmd("Neotree toggle")
-end, { noremap = true, silent = true, desc = "Toggle sidebar" })
+end, { noremap = true, silent = true, desc = "Toggle sidebar" }
+)
 
 -- Disable Vim's default Q (Ex mode) so it doesn't fire accidentally.
 vim.keymap.set("n", "Q", "<Nop>", { desc = "Disabled" })
@@ -85,7 +93,8 @@ vim.keymap.set("n", "Q", "<Nop>", { desc = "Disabled" })
 -- reveal_force_cwd: if file is outside cwd, silently change cwd to its
 -- directory instead of prompting "Change cwd to …? [Y]es, (N)o".
 vim.api.nvim_set_keymap("n", "<Leader>0", ":Neotree filesystem reveal_force_cwd<CR>",
-  { noremap = true, silent = false, desc = "Reveal file in neo-tree" })
+  { noremap = true, silent = false, desc = "Reveal file in neo-tree" }
+)
 
 -- Open current file in default app; HTML/HTM files open in Chrome with the "1 Work" profile
 vim.keymap.set('n', 'sn', function()
@@ -96,4 +105,5 @@ vim.keymap.set('n', 'sn', function()
   else
     vim.fn.jobstart({ 'open', filepath }, { detach = true })
   end
-end, { noremap = true, silent = true, desc = "Open file in default application" })
+end, { noremap = true, silent = true, desc = "Open file in default application" }
+)

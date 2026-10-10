@@ -5,7 +5,8 @@
 
 vim.api.nvim_create_user_command("Shortcuts", function()
   require("my_plugins.shortcuts").open()
-end, { desc = "Open the shortcuts float" })
+end, { desc = "Open the shortcuts float" }
+)
 
 -- `s?` — every keymap in this nvim, grouped by defining file / prefix / mode.
 vim.keymap.set("n", "s?", ":Shortcuts<CR>", {

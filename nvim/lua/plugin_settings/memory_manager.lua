@@ -15,7 +15,8 @@
 
 vim.api.nvim_create_user_command("MemDashboard", function()
   require("my_plugins.memory_manager").dashboard()
-end, { desc = "Open memory dashboard" })
+end, { desc = "Open memory dashboard" }
+)
 
 -- `sv` — quick open of the memory dashboard (cross-process buffer/parser/RSS view).
 vim.keymap.set("n", "sv", ":MemDashboard<CR>", {

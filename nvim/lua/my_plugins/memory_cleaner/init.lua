@@ -92,9 +92,11 @@ local function on_timer_tick()
   nstate.last_fire = now
   api.nvim_echo({{
     string.format("[mem] RSS %s > %s (%s)",
-      utils.fmt_mb(mb), utils.fmt_mb(threshold), stats.stats_string()),
+      utils.fmt_mb(mb), utils.fmt_mb(threshold), stats.stats_string()
+    ),
     "WarningMsg",
-  }}, true, {})
+  }}, true, {}
+  )
 end
 
 -- One-time wiring. Idempotent: the augroup is recreated with `clear = true`,
@@ -171,7 +173,8 @@ function M.setup(opts)
     local result = prune.prune({ force_minutes = mins })
     subsystems.gc()
     vim.notify(prune.format_result(result) .. " · gc", vim.log.levels.INFO)
-  end, { nargs = "?" })
+  end, { nargs = "?" }
+  )
 
   -- :MemClearAll — aggressive sweep: every treesitter parser, every fugitive
   -- buffer, every LSP client (attached or not), plus GC. Use when RSS is
@@ -180,47 +183,56 @@ function M.setup(opts)
   api.nvim_create_user_command("MemClearAll", function()
     local r = subsystems.clear_all()
     vim.notify(string.format("[mem] cleared → %d parsers, %d fugitive, %d LSP · gc",
-      r.treesitter, r.fugitive, r.lsp), vim.log.levels.INFO)
-  end, {})
+      r.treesitter, r.fugitive, r.lsp
+    ), vim.log.levels.INFO
+    )
+  end, {}
+  )
 
   -- :MemClearTreesitter — stop every active treesitter parser/highlighter.
   api.nvim_create_user_command("MemClearTreesitter", function()
     local n = subsystems.clear_treesitter()
     subsystems.gc()
     vim.notify(string.format("[mem] cleared → %d parsers · gc", n), vim.log.levels.INFO)
-  end, {})
+  end, {}
+  )
 
   -- :MemClearFugitive — wipe every fugitive blame/diff/URI buffer.
   api.nvim_create_user_command("MemClearFugitive", function()
     local n = subsystems.clear_fugitive()
     subsystems.gc()
     vim.notify(string.format("[mem] cleared → %d fugitive · gc", n), vim.log.levels.INFO)
-  end, {})
+  end, {}
+  )
 
   -- :MemClearLsp — stop every LSP client unconditionally.
   api.nvim_create_user_command("MemClearLsp", function()
     local n = subsystems.clear_lsp()
     subsystems.gc()
     vim.notify(string.format("[mem] cleared → %d LSP · gc", n), vim.log.levels.INFO)
-  end, {})
+  end, {}
+  )
 
   -- :MemStats — print buffers / parsers / RSS in one line.
   api.nvim_create_user_command("MemStats", function()
     vim.notify("[mem] " .. stats.stats_string(), vim.log.levels.INFO)
-  end, {})
+  end, {}
+  )
 
   -- :MemRSS — print current RSS, bypassing the cleaner cache for a fresh sample.
   api.nvim_create_user_command("MemRSS", function()
     shared.rss_cache.value = nil
     local mb = stats.rss_mb()
     vim.notify("[mem] RSS " .. (utils.fmt_mb(mb) or "?"), vim.log.levels.INFO)
-  end, {})
+  end, {}
+  )
 
   -- Main worker tick drives prune + RSS-threshold notify in one go.
   local prune_interval_ms = shared.config.prune_tick_interval_seconds * 1000
   local prune_timer = uv.new_timer()
   prune_timer:start(prune_interval_ms, prune_interval_ms,
-    vim.schedule_wrap(on_timer_tick))
+    vim.schedule_wrap(on_timer_tick)
+  )
 
   -- 20-min sampler feeds the RSS sparkline ring buffer; stamp tick time so
   -- the dashboard can render an accurate "next sample in" countdown.

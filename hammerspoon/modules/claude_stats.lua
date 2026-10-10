@@ -200,7 +200,8 @@ local function pushLimitColors()
     end
 
     webview:evaluateJavaScript("window.claudeStats.setLimitColors(" .. hs.json.encode(colors) .. ")")
-  end, arguments)
+  end, arguments
+  )
 
   limitColorTask:start()
 end
@@ -464,7 +465,8 @@ local function buildPanel()
   -- Space it was first shown on, and clicking the item anywhere else opened
   -- it there, out of sight. fullScreenAuxiliary lets it over a full-screen app.
   webview:behavior(hs.drawing.windowBehaviors.moveToActiveSpace
-    + hs.drawing.windowBehaviors.fullScreenAuxiliary)
+    + hs.drawing.windowBehaviors.fullScreenAuxiliary
+  )
   webview:navigationCallback(handleNavigation)
   webview:url("file://" .. PANEL_PAGE)
 end
@@ -490,7 +492,8 @@ outsideTap = hs.eventtap.new({
   hs.eventtap.event.types.leftMouseDown,
   hs.eventtap.event.types.rightMouseDown,
   hs.eventtap.event.types.otherMouseDown,
-}, handleClickOutside)
+}, handleClickOutside
+)
 escapeTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, handleEscape)
 
 startHelper()

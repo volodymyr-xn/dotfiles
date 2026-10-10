@@ -114,12 +114,14 @@ function M.setup(opts)
 
     M.refresh()
     vim.cmd("redrawstatus!")
-  end, {})
+  end, {}
+  )
 
   -- :MemStatus — echo the current cached statusline reading.
   api.nvim_create_user_command("MemStatus", function()
     vim.notify(M.get_string(), vim.log.levels.INFO)
-  end, {})
+  end, {}
+  )
 
   -- Find the latest warm-up delay so the periodic timer starts exactly one
   -- `refresh_interval_seconds` after it (avoids a near-duplicate fire when
@@ -151,7 +153,8 @@ function M.setup(opts)
         vim.defer_fn(function()
           local timer = uv.new_timer()
           timer:start(interval_ms, interval_ms, vim.schedule_wrap(M.refresh))
-        end, last_warmup_ms)
+        end, last_warmup_ms
+        )
       end
     end,
   })

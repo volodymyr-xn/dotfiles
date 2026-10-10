@@ -290,7 +290,8 @@ function M.setup(opts)
   -- :StallStatus — echo the watchdog's current view of the event loop.
   api.nvim_create_user_command("StallStatus", function()
     vim.notify(vim.inspect(M.status()), vim.log.levels.INFO)
-  end, { desc = "Show main-loop stall watchdog status" })
+  end, { desc = "Show main-loop stall watchdog status" }
+  )
 
   last_known_cwd = uv.cwd() or "?"
 

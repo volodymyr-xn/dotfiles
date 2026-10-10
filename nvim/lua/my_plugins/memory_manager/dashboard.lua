@@ -389,7 +389,8 @@ local function build_span_row(widths, left, right)
   if left_width + right_width > content_width then
     local last = left[#left]
     local allowed = math.max(1,
-      fn.strdisplaywidth(last[1]) - (left_width + right_width - content_width))
+      fn.strdisplaywidth(last[1]) - (left_width + right_width - content_width)
+    )
     left_width = left_width - fn.strdisplaywidth(last[1])
     last[1] = truncate_tail(last[1], allowed)
     left_width = left_width + fn.strdisplaywidth(last[1])
@@ -498,11 +499,13 @@ local function fmt_uptime_short(seconds)
 
   if seconds < 86400 then
     return string.format("%dh %dm", math.floor(seconds / 3600),
-      math.floor((seconds % 3600) / 60))
+      math.floor((seconds % 3600) / 60)
+    )
   end
 
   return string.format("%dd %dh", math.floor(seconds / 86400),
-    math.floor((seconds % 86400) / 3600))
+    math.floor((seconds % 86400) / 3600)
+  )
 end
 
 -- Per-subsystem RSS breakdown rendered into one cell:
@@ -526,20 +529,24 @@ local function subsystem_text(p)
     end
 
     table.insert(segments, string.format("LSP %s (%s)",
-      utils.fmt_kb(lsp_procs.total_kb), table.concat(names, ", ")))
+      utils.fmt_kb(lsp_procs.total_kb), table.concat(names, ", ")
+    ))
   elseif #lsp_names > 0 then
     table.insert(segments, string.format("LSP %d (%s)",
-      #lsp_names, table.concat(lsp_names, ", ")))
+      #lsp_names, table.concat(lsp_names, ", ")
+    ))
   end
 
   if ts_bytes > 0 then
     table.insert(segments, string.format("TS ~%s",
-      utils.fmt_kb(math.floor(ts_bytes * 3 / 1024))))
+      utils.fmt_kb(math.floor(ts_bytes * 3 / 1024))
+    ))
   end
 
   if fug_count > 0 then
     table.insert(segments, string.format("Fugitive %s",
-      utils.fmt_kb(math.floor(fug_bytes / 1024))))
+      utils.fmt_kb(math.floor(fug_bytes / 1024))
+    ))
   end
 
   if p.lua_heap_kb then
@@ -634,9 +641,11 @@ local function render_view_model(view, width)
   local prune_period = cfg.prune_tick_interval_seconds
   local rss_period = cfg.rss_history_sample_interval_seconds
   local next_prune = math.max(0,
-    (cleaner.timer_state.last_prune_at + prune_period) - now_epoch)
+    (cleaner.timer_state.last_prune_at + prune_period) - now_epoch
+  )
   local next_sample = math.max(0,
-    (cleaner.timer_state.last_rss_sample_at + rss_period) - now_epoch)
+    (cleaner.timer_state.last_rss_sample_at + rss_period) - now_epoch
+  )
 
   local function fmt_dur(s)
     if s < 60 then
@@ -693,7 +702,8 @@ local function render_view_model(view, width)
       { "Trend", trend_glyph, trend_hl },
       { "Buffers", string.format("%d (%d parsers)",
         current_proc and current_proc.loaded or 0,
-        current_proc and current_proc.parsers or 0), "MemDashMetric" },
+        current_proc and current_proc.parsers or 0
+      ), "MemDashMetric" },
       { "Uptime", fmt_uptime_short(current_proc and current_proc.uptime_seconds),
         uptime_hl(current_proc and current_proc.uptime_seconds) },
     },
@@ -711,7 +721,8 @@ local function render_view_model(view, width)
         "MemDashMetric" },
       { "Heaviest", heaviest_proc
         and string.format("pid %d · %s", heaviest_proc.pid,
-          utils.fmt_mb(heaviest_proc.rss_mb) or "?")
+          utils.fmt_mb(heaviest_proc.rss_mb) or "?"
+        )
         or "—", "MemDashMetric" },
       { "Sort", string.format("%s ↻", sort_key), "MemDashSortKey" },
     },
@@ -736,7 +747,8 @@ local function render_view_model(view, width)
       { "RSS cache", fmt_dur(cfg.rss_reading_cache_seconds), "MemDashMetric" },
       { "History", string.format("%d/%d samples (%s)", #cleaner.rss_history,
         cfg.rss_history_max_samples,
-        fmt_dur(cfg.rss_history_max_samples * rss_period)), "MemDashMetric" },
+        fmt_dur(cfg.rss_history_max_samples * rss_period)
+      ), "MemDashMetric" },
       { "Parser estimates", string.format("%d filetypes", parser_estimate_count), "MemDashMetric" },
     },
     {
@@ -785,7 +797,8 @@ local function render_view_model(view, width)
           { "  ", nil },
           { sec_name, "MemDashSection" },
           { string.format(" · %d", #items), "MemDashSectionCount" },
-        }, {})
+        }, {}
+        )
         push(sec_line, sec_marks, { kind = "section", pid = p.pid, proc = p, section = sec_name })
 
         for _, b in ipairs(items) do
@@ -827,7 +840,8 @@ local function render_view_model(view, width)
     -- the detail column, otherwise the row that matters most reads as idle.
     local mem_mb = (p.stalled and p.footprint_mb) or p.rss_mb
     local rss_hl_proc = (p.stalled
-      or (mem_mb and mem_mb > cleaner.config.rss_warn_threshold_mb))
+      or (mem_mb and mem_mb > cleaner.config.rss_warn_threshold_mb)
+    )
       and "MemDashMetricWarn" or "MemDashMetric"
     local detail = p.error and ("⚠ " .. tostring(p.error)) or subsystem_text(p)
     local detail_hl = p.error and "MemDashError" or "MemDashUptime"
@@ -1169,7 +1183,8 @@ local function open_help_float()
 
   for _, m in ipairs(marks) do
     api.nvim_buf_set_extmark(buf, hns, m.line, m.col,
-      { end_col = m.end_col, hl_group = m.hl })
+      { end_col = m.end_col, hl_group = m.hl }
+    )
   end
 
   local function close_help()
@@ -1257,7 +1272,8 @@ end
 -- SIGKILL is offered separately for when even that does not land.
 local function signal_stalled_remote(pid, signal_name)
   vim.system({ "kill", "-" .. signal_name, tostring(pid) },
-    { text = true, timeout = 1000 }):wait()
+    { text = true, timeout = 1000 }
+  ):wait()
 end
 
 -- x: kill remote nvim under cursor (y/n confirm); sends :qa! via vim.system.
@@ -1279,8 +1295,10 @@ local function action_kill_remote()
     local choice = fn.confirm(
       string.format(
         "nvim pid %d (%s) is stalled and cannot answer :qa!.\nSignal it?",
-        proc.pid, cwd_short),
-      "&Terminate (saves swap)\n&Force kill\n&Cancel", 3)
+        proc.pid, cwd_short
+      ),
+      "&Terminate (saves swap)\n&Force kill\n&Cancel", 3
+    )
 
     if choice == 1 then
       signal_stalled_remote(proc.pid, "TERM")
@@ -1298,7 +1316,8 @@ local function action_kill_remote()
 
   local choice = fn.confirm(
     string.format("Kill nvim pid %d (%s)?", proc.pid, cwd_short),
-    "&Yes\n&No", 2)
+    "&Yes\n&No", 2
+  )
 
   if choice == 1 then
     rpc.remote_exec(proc.socket, "qa!")

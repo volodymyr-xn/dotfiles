@@ -469,9 +469,11 @@ local function guard_qf_keys()
   vim.keymap.set("n", "<2-LeftMouse>", open_qf_entry, opts)
 
   vim.keymap.set("n", "dd", dismiss_under_cursor,
-    { buffer = qf_buf, desc = "OneDiff: dismiss entry for this session" })
+    { buffer = qf_buf, desc = "OneDiff: dismiss entry for this session" }
+  )
   vim.keymap.set("x", "d", dismiss_selection,
-    { buffer = qf_buf, desc = "OneDiff: dismiss selected entries for this session" })
+    { buffer = qf_buf, desc = "OneDiff: dismiss selected entries for this session" }
+  )
 end
 
 -- Drop the guarded maps on session close. Neovim reuses the quickfix buffer
@@ -709,11 +711,14 @@ local function install_session_keymaps()
   session.saved.del = vim.fn.maparg("<C-S-M>", "n", false, true)
 
   vim.keymap.set("n", "<Tab>", function() M.next_hunk() end,
-    { desc = "OneDiff: next hunk across all files" })
+    { desc = "OneDiff: next hunk across all files" }
+  )
   vim.keymap.set("n", "<S-Tab>", function() M.prev_hunk() end,
-    { desc = "OneDiff: prev hunk across all files" })
+    { desc = "OneDiff: prev hunk across all files" }
+  )
   vim.keymap.set("n", "<C-S-M>", function() M.toggle_deleted() end,
-    { desc = "OneDiff: toggle deleted lines" })
+    { desc = "OneDiff: toggle deleted lines" }
+  )
 end
 
 -- Remove the session keymaps and restore any prior mapping.

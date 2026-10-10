@@ -39,7 +39,8 @@ local function run_remote_expr(socket, expr, timeout_ms)
   local started_ns = uv.hrtime()
   local result = vim.system({
     "nvim", "--server", socket, "--remote-expr", expr,
-  }, { text = true, timeout = budget_ms }):wait()
+  }, { text = true, timeout = budget_ms }
+  ):wait()
   local elapsed_ms = (uv.hrtime() - started_ns) / 1e6
 
   if result.code ~= 0 then
@@ -64,7 +65,8 @@ function M.remote_buf_delete(socket, bufnr, opts)
   local unload = opts.unload and "true" or "false"
   local expr = string.format(
     [[luaeval("pcall(vim.api.nvim_buf_delete, %d, {force=%s, unload=%s})")]],
-    bufnr, force, unload)
+    bufnr, force, unload
+  )
 
   return run_remote_expr(socket, expr, 2000)
 end
@@ -126,7 +128,8 @@ local function lsp_processes_for(pid)
   -- macOS pgrep requires a pattern arg; "." matches every command line so
   -- the `-P` filter alone decides what's returned. Works on Linux pgrep too.
   local r = vim.system({ "pgrep", "-P", tostring(pid), "." },
-    { text = true, timeout = 500 }):wait()
+    { text = true, timeout = 500 }
+  ):wait()
 
   if r.code ~= 0 or not r.stdout or r.stdout == "" then
     return { items = {}, total_kb = 0 }
@@ -147,7 +150,8 @@ local function lsp_processes_for(pid)
   end
 
   local r2 = vim.system({ "ps", "-o", "pid=,rss=,args=", "-p", table.concat(pids, ",") },
-    { text = true, timeout = 800 }):wait()
+    { text = true, timeout = 800 }
+  ):wait()
 
   if r2.code ~= 0 or not r2.stdout then
     return { items = {}, total_kb = 0 }
@@ -178,7 +182,8 @@ M.lsp_processes_for = lsp_processes_for
 local function pid_cwd(pid)
   if vim.fn.has("mac") == 1 or vim.fn.has("macunix") == 1 then
     local r = vim.system({ "lsof", "-a", "-p", tostring(pid), "-d", "cwd", "-Fn" },
-      { text = true, timeout = 800 }):wait()
+      { text = true, timeout = 800 }
+    ):wait()
 
     if r.code == 0 and r.stdout then
       for line in r.stdout:gmatch("[^\n]+") do
@@ -192,7 +197,8 @@ local function pid_cwd(pid)
   end
 
   local r = vim.system({ "readlink", "/proc/" .. tostring(pid) .. "/cwd" },
-    { text = true, timeout = 500 }):wait()
+    { text = true, timeout = 500 }
+  ):wait()
 
   if r.code == 0 and r.stdout and r.stdout ~= "" then
     return (r.stdout:gsub("\n$", ""))
@@ -206,7 +212,8 @@ end
 local function tmux_pane_index()
   local r = vim.system({ "tmux", "list-panes", "-a", "-F",
     "#{pane_pid} #{session_name} #{window_index} #{pane_index} #{window_name}" },
-    { text = true, timeout = 800 }):wait()
+    { text = true, timeout = 800 }
+  ):wait()
 
   if r.code ~= 0 or not r.stdout then
     return {}
@@ -277,7 +284,8 @@ end
 -- True when the pid is still alive.
 local function pid_alive(pid)
   local r = vim.system({ "kill", "-0", tostring(pid) },
-    { text = true, timeout = 300 }):wait()
+    { text = true, timeout = 300 }
+  ):wait()
 
   return r.code == 0
 end

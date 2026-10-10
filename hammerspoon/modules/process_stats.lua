@@ -246,11 +246,14 @@ local function panelSections(resting)
   return {
     systemSection(stats),
     rankingSection("Top by CPU", byCpu, statFormat.processPercent,
-      CPU_CEILING_PERCENT, resting),
+      CPU_CEILING_PERCENT, resting
+    ),
     rankingSection("Top by energy", byEnergy, statFormat.processWatts,
-      heaviestValue(byEnergy), resting),
+      heaviestValue(byEnergy), resting
+    ),
     rankingSection("Top by memory", byMemory, statFormat.bytes,
-      heaviestValue(byMemory), resting),
+      heaviestValue(byMemory), resting
+    ),
   }
 end
 

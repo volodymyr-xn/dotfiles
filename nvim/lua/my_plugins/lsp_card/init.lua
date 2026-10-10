@@ -56,7 +56,8 @@ end
 local function indent_lines(lines, offset)
   return vim.tbl_map(function(line)
     return offset .. line
-  end, lines)
+  end, lines
+  )
 end
 
 -- One client block: the "Client: name (id: N, bufnr: [1, 4])" headline plus
@@ -81,7 +82,8 @@ local function client_lines(client)
 
   local info_lines = {
     "filetypes:       " .. (#client.filetypes > 0
-      and table.concat(client.filetypes, ", ") or ""),
+      and table.concat(client.filetypes, ", ") or ""
+    ),
     "autostart:       " .. (client.autostart and "true" or "false"),
     "root directory:  " .. root_dir,
     "cmd:             " .. client.cmd,
@@ -113,7 +115,8 @@ local function treesitter_lines(snapshot)
     info_lines = {
       "parser:          " .. ts.lang,
       "injections:      " .. (#ts.injections > 0
-        and table.concat(ts.injections, ", ") or "none"),
+        and table.concat(ts.injections, ", ") or "none"
+      ),
       "buffer memory:   ~" .. utils.fmt_kb(ts.est_kb) .. " (estimate)",
     }
   else
@@ -122,9 +125,11 @@ local function treesitter_lines(snapshot)
 
   table.insert(info_lines, "active parsers:  " .. tostring(snapshot.parser_count))
   table.insert(info_lines, "languages:       " .. (#snapshot.languages > 0
-    and table.concat(snapshot.languages, ", ") or "none"))
+    and table.concat(snapshot.languages, ", ") or "none"
+  ))
   table.insert(info_lines, "total memory:    ~" .. utils.fmt_kb(snapshot.parser_est_kb)
-    .. " (estimate)")
+    .. " (estimate)"
+  )
   vim.list_extend(lines, indent_lines(info_lines, "\t"))
 
   return lines
@@ -252,7 +257,8 @@ local function apply_syntax()
   -- reports as missing reads as an error (as in the original).
   fn.matchadd("LspCardKey", "\\%1lq\\|\\%1l<Esc>\\|\\%1l\\<r\\>")
   fn.matchadd("Error",
-    "cmd not defined\\|Running in single file mode\\.\\|no active parser in this buffer")
+    "cmd not defined\\|Running in single file mode\\.\\|no active parser in this buffer"
+  )
 end
 
 -- The tip line is highlighted as a whole; syntax rules don't cover it.

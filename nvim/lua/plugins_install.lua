@@ -1047,4 +1047,5 @@ require("lazy").setup({
   -- 'phaazon/hop.nvim/'
   -- folke/noice.nvim
   -- 'm-demare/hlargs.nvim'
-}, lazy_opts)
+}, lazy_opts
+)

@@ -34,18 +34,22 @@ local TOGGLE_DESC = "Toggle OneDiff (quickfix + line highlights)"
 -- Toggle the review session.
 vim.keymap.set("n", "M", function()
   onediff().toggle()
-end, { desc = TOGGLE_DESC })
+end, { desc = TOGGLE_DESC }
+)
 
 -- Show / re-diff only the changed-line highlight (no quickfix list),
 -- independent of the session.
 vim.keymap.set("n", "sf", function()
   onediff().refresh_highlight()
-end, { desc = "Refresh OneDiff changed-line highlight" })
+end, { desc = "Refresh OneDiff changed-line highlight" }
+)
 
 vim.api.nvim_create_user_command("OneDiff", function()
   onediff().toggle()
-end, { desc = TOGGLE_DESC })
+end, { desc = TOGGLE_DESC }
+)
 
 vim.api.nvim_create_user_command("OneDiffRefresh", function()
   onediff().refresh()
-end, { desc = "Rebuild the OneDiff quickfix list" })
+end, { desc = "Rebuild the OneDiff quickfix list" }
+)

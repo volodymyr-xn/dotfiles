@@ -240,7 +240,8 @@ vim.lsp.config('sourcekit', {
 vim.lsp.enable("ts_ls")
 vim.lsp.enable("cssls")
 vim.lsp.enable("herb_ls")
-vim.lsp.enable("lua_ls")
+-- Disabled: lua-language-server's memory footprint is too high
+-- vim.lsp.enable("lua_ls")
 vim.lsp.enable("sourcekit")
 
 

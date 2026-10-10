@@ -228,7 +228,8 @@ cmp.setup({
           vim.api.nvim_feedkeys(endwise_keys, "m", false)
         end
       end
-    end, { "i", "s" }),
+    end, { "i", "s" }
+    ),
     -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
     -- ['<Tab>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
     ["<Tab>"] = function(fallback)

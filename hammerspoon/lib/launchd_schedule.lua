@@ -167,7 +167,8 @@ local function entryTime(entry)
 
   if entry.Hour ~= nil then
     return string.format("every minute from %02d:00 to %02d:59",
-      entry.Hour, entry.Hour)
+      entry.Hour, entry.Hour
+    )
   end
 
   if entry.Minute ~= nil then

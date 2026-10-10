@@ -16,6 +16,8 @@ require('match-up').setup({
 -- map (`id`/`ad`) over mini.ai's 1-char `i`/`a` prefix, so this works
 -- without disabling mini.ai's generic any-char handler for `d`.
 vim.keymap.set({ "o", "x" }, "id", "<Plug>(matchup-i%)",
-  { silent = true, desc = "Inside matchup pair (def...end, etc)" })
+  { silent = true, desc = "Inside matchup pair (def...end, etc)" }
+)
 vim.keymap.set({ "o", "x" }, "ad", "<Plug>(matchup-a%)",
-  { silent = true, desc = "Around matchup pair (def...end, etc)" })
+  { silent = true, desc = "Around matchup pair (def...end, etc)" }
+)

@@ -65,22 +65,26 @@ vim.api.nvim_create_user_command("Format", function(args)
     }
   end
   require("conform").format({ async = true, lsp_format = "fallback", range = range })
-end, { range = true })
+end, { range = true }
+)
 
 vim.api.nvim_create_user_command("FormatEnable", function()
   vim.g.enable_format_on_save = true
   vim.notify("conform: format-on-save ON (global)", vim.log.levels.INFO)
-end, {})
+end, {}
+)
 
 vim.api.nvim_create_user_command("FormatDisable", function()
   vim.g.enable_format_on_save = false
   vim.notify("conform: format-on-save OFF (global)", vim.log.levels.INFO)
-end, {})
+end, {}
+)
 
 vim.api.nvim_create_user_command("FormatToggle", function()
   vim.g.enable_format_on_save = not vim.g.enable_format_on_save
   local state = vim.g.enable_format_on_save and "ON" or "OFF"
   vim.notify("conform: format-on-save " .. state .. " (global)", vim.log.levels.INFO)
-end, {})
+end, {}
+)
 
 -- vim.keymap.set('n', '<Leader>`', ':Format<CR>', {})

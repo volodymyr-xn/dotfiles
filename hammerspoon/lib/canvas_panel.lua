@@ -224,14 +224,16 @@ function M.new(anchorFrame, refreshSeconds, buildSections)
     hs.eventtap.event.types.leftMouseDown,
     hs.eventtap.event.types.rightMouseDown,
     hs.eventtap.event.types.otherMouseDown,
-  }, handleClickOutside)
+  }, handleClickOutside
+  )
   escapeTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, handleEscape)
 
   -- Above ordinary windows and clear of the menubar, and present on whichever
   -- Space is in front — the panel belongs to the bar, not to a desktop.
   canvas:level(hs.canvas.windowLevels.popUpMenu)
   canvas:behavior(hs.canvas.windowBehaviors.canJoinAllSpaces
-    + hs.canvas.windowBehaviors.stationary)
+    + hs.canvas.windowBehaviors.stationary
+  )
 
   return panel
 end

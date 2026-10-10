@@ -30,7 +30,8 @@ local function flash_current_hunk()
         if hunk_flash_generation == current_generation then
           vim.api.nvim_buf_clear_namespace(bufnr, hunk_flash_ns, 0, -1)
         end
-      end, 1000)
+      end, 1000
+      )
 
       return
     end

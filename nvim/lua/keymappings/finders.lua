@@ -14,117 +14,140 @@ local function search_in_dirs(dirs, show_relative)
   R.call(action, dirs)
 end
 
-local function map(key, fn, desc)
+-- Normal-mode keymap with noremap and a description
+local function nmap(key, fn, desc)
   vim.keymap.set("n", key, fn, { noremap = true, desc = desc })
 end
 
-map("<C-p>",
+nmap("<C-p>",
   function() R.call("find_files") end,
-  "Find files")
+  "Find files"
+)
 
-map("<Leader>i",
+nmap("<Leader>i",
   function() R.call("find_sibling_files") end,
-  "Find sibling files")
+  "Find sibling files"
+)
 
-map("q",
+nmap("q",
   function() R.call("find_changed_files") end,
-  "Find changed files")
+  "Find changed files"
+)
 
-map("<Leader>f",
+nmap("<Leader>f",
   function() R.call("find_resource_in_dir", components_dir) end,
-  "Find view components")
+  "Find view components"
+)
 
-map("<Leader>m",
+nmap("<Leader>m",
   function() R.call("find_resource_in_dir", "app/models") end,
-  "Find models")
+  "Find models"
+)
 
-map("<Leader>c",
+nmap("<Leader>c",
   function() R.call("find_resource_in_dir", "app/controllers") end,
-  "Find controllers")
+  "Find controllers"
+)
 
-map("<Leader>j",
+nmap("<Leader>j",
   function() search_in_dirs(js_dirs, true) end,
-  "Find JS files")
+  "Find JS files"
+)
 
-map("<Leader>s",
+nmap("<Leader>s",
   function() R.call("find_resource_in_dir", "app/assets/stylesheets") end,
-  "Find CSS files")
+  "Find CSS files"
+)
 
-map("<Leader>d",
+nmap("<Leader>d",
   function() R.call("find_resource_in_dir", "app/views") end,
-  "Find views")
+  "Find views"
+)
 
-map("<Leader>b",
+nmap("<Leader>b",
   function() R.call("find_resource_in_dir", "config/locales") end,
-  "Find i18n files")
+  "Find i18n files"
+)
 
 
-map("s[",
+nmap("s[",
   function() R.call("buffer_fuzzy_find") end,
-  "Fuzzy find in buffer")
+  "Fuzzy find in buffer"
+)
 
-map(",q",
+nmap(",q",
   function() R.call("open_picker_menu") end,
-  "Open picker menu")
+  "Open picker menu"
+)
 
-map("<Leader>o",
+nmap("<Leader>o",
   function() CustomFileSelectors.live_grep() end,
   "Live grep (Ag)"
 )
 
 -- Much better performance that Live grep with (Ag)
-map("<Leader>p",
+nmap("<Leader>p",
   function() CustomFileSelectors.custom_full_text_search_rg() end,
   "Custom full text search rg+reload (fzf.vim)"
 )
 
-map("si",
+nmap("si",
   function() CustomFileSelectors.custom_full_text_search() end,
-  "Custom full text search (fzf.vim)")
+  "Custom full text search (fzf.vim)"
+)
 
 -- bat-preview variant of <Leader>o (live grep / Ag)
-map("sg",
+nmap("sg",
   function() CustomFileSelectors.live_grep_with_preview() end,
-  "Live grep with bat preview (Ag)")
+  "Live grep with bat preview (Ag)"
+)
 
 -- bat-preview variant of sp (full text search)
-map("s]",
+nmap("s]",
   function() CustomFileSelectors.custom_full_text_search_with_preview() end,
-  "Full text search with bat preview (fzf.vim)")
+  "Full text search with bat preview (fzf.vim)"
+)
 
-map("so",
+nmap("so",
   function() CustomFileSelectors.search_lines_in_all_buffers() end,
-  "Search lines in all buffers")
+  "Search lines in all buffers"
+)
 
-map("sp",
+nmap("sp",
   function() CustomFileSelectors.live_grep_changed_files() end,
-  "Full text search in changed files")
+  "Full text search in changed files"
+)
 
 -- Variant of sp that ignores file names, matching only line content
-map("sn",
+nmap("sn",
   function() CustomFileSelectors.live_grep_changed_files_content_only() end,
-  "Full text search in changed files (text only)")
+  "Full text search in changed files (text only)"
+)
 
 -- MRU picker: open buffers + v:oldfiles, deduped and limited to cwd
-map("sl",
+nmap("sl",
   function() R.call("oldfiles") end,
-  "Recently opened files (MRU, cwd only)")
+  "Recently opened files (MRU, cwd only)"
+)
 
-map("sj",
+nmap("sj",
   function() R.call("buffer_list") end,
-  "Select buffer")
+  "Select buffer"
+)
 
 -- Switch between configured pickers (telescope / fzf-lua)
-map("st",
+nmap("st",
   function() R.cycle() end,
-  "Switch picker")
+  "Switch picker"
+)
 
 -- Telescope buffer picker
 -- vim.api.nvim_set_keymap('n', '<Leader>h', ':Telescope jumplist<CR>', {noremap = true, silent = false })
 -- vim.api.nvim_set_keymap('n', '<Leader>q', ':Telescope buffers<CR>', {noremap = true, silent = false })
-map("<Leader>h",
+nmap("<Leader>h",
   function() vim.cmd("Telescope buffers") end,
-  "Telescope buffers")
+  "Telescope buffers"
+)
 
 -- vim.keymap.set('n', 'sj', ':FzfLua<cr>', { noremap = true, silent = true, desc = "FzfLua select" })
 

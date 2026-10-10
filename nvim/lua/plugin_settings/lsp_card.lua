@@ -6,7 +6,8 @@
 
 vim.api.nvim_create_user_command("LspCard", function()
   require("my_plugins.lsp_card").open()
-end, { desc = "Open the LSP / treesitter card" })
+end, { desc = "Open the LSP / treesitter card" }
+)
 
 -- `sc` — LSP clients, treesitter parsers, and per-buffer diagnostics.
 vim.keymap.set("n", "sc", ":LspCard<CR>", {

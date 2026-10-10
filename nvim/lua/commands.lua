@@ -10,7 +10,8 @@ vim.cmd("command! ToggleCurrentWindowZoom lua ToggleCurrentWindowZoom()")
 vim.api.nvim_create_user_command("Reload", function()
   vim.cmd("source $MYVIMRC")
   vim.notify("[reload] sourced $MYVIMRC", vim.log.levels.INFO)
-end, { desc = "Re-source nvim config" })
+end, { desc = "Re-source nvim config" }
+)
 
 -- CopyCurrentFileRelativePathToClipboard
 

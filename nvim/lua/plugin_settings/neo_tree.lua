@@ -38,6 +38,16 @@ local function open_on_single_click(state)
   end
 end
 
+-- Toggle hiding gitignored files for this session, independent of `H`.
+-- A full refresh is required: the scan only runs the git-ignore check
+-- while `hide_gitignored` is set.
+local function toggle_gitignored(state)
+  local filtered_items = state.filtered_items
+
+  filtered_items.hide_gitignored = not filtered_items.hide_gitignored
+  fs_commands.refresh(state)
+end
+
 require("neo-tree").setup({
   -- displays errors or warnings in the file, depending on the language server.
   enable_diagnostics = true,
@@ -157,6 +167,11 @@ require("neo-tree").setup({
     bind_to_cwd = false,
     follow_current_file = { enabled = false },
     use_libuv_file_watcher = true,
+    window = {
+      mappings = {
+        ["I"] = toggle_gitignored,
+      },
+    },
     filtered_items = {
       visible = false, -- when true, they will just be displayed differently than normal items
       hide_dotfiles = false,

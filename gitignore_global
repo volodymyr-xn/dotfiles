@@ -44,3 +44,4 @@ c_commands/
 .ruby_lsp
 .nvim-asset-watcher-commands
 .nvim.lua
+.worktrees/

@@ -13,7 +13,8 @@
 
 vim.api.nvim_create_user_command("GitDiffPopup", function()
   require("my_plugins.git_diff_popup").open()
-end, { desc = "Show git diff popup for current file" })
+end, { desc = "Show git diff popup for current file" }
+)
 
 vim.keymap.set("n", "sd", ":GitDiffPopup<CR>", {
   noremap = true,

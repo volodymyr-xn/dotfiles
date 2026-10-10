@@ -48,12 +48,14 @@ local function activateApp(name, bundle)
 
   if name and name ~= "" then
     ok = hs.osascript.applescript(
-      "tell application " .. asQuote(name) .. " to activate")
+      "tell application " .. asQuote(name) .. " to activate"
+    )
   end
 
   if not ok and bundle and bundle ~= "" then
     ok = hs.osascript.applescript(
-      "tell application id " .. asQuote(bundle) .. " to activate")
+      "tell application id " .. asQuote(bundle) .. " to activate"
+    )
   end
 
   return ok
@@ -116,7 +118,8 @@ local function readFreshSnapshot()
   if not captured_at or os.time() - captured_at > MAX_AGE_SECONDS then
     os.remove(FULL_PATH)
     log(string.format("expired snapshot discarded (captured_at=%s)",
-      tostring(snap.captured_at)))
+      tostring(snap.captured_at)
+    ))
     return nil
   end
 
@@ -145,7 +148,8 @@ function M.capture(tmuxLoc, agentPane)
 
   if isGhostty and sameAsAgent then
     log("capture: skip — in Ghostty at agent pane " .. tostring(tmuxLoc) ..
-      " (keep prior snapshot)")
+      " (keep prior snapshot)"
+    )
     return
   end
 
@@ -165,7 +169,8 @@ function M.capture(tmuxLoc, agentPane)
   log(string.format(
     "capture: app=%s ghostty=%s tmuxLoc=%q agent=%s stored_tmux=%s",
     tostring(bundle), tostring(isGhostty),
-    tostring(tmuxLoc), tostring(agentPane), tostring(full.tmux)))
+    tostring(tmuxLoc), tostring(agentPane), tostring(full.tmux)
+  ))
 end
 
 -- Human-readable label for a tmux loc: "session window#pane".
@@ -182,7 +187,8 @@ local function tmuxLocLabel(loc)
   -- `#` escapes and the rest is emitted verbatim as "#{pane_index}".
   local out = hs.execute(
     "tmux display-message -t " .. shellQuote(loc) ..
-    " -p '#{session_name} #{window_name}###{pane_index}' 2>/dev/null", true)
+    " -p '#{session_name} #{window_name}###{pane_index}' 2>/dev/null", true
+  )
 
   if out and out ~= "" then
     return out:gsub("%s+$", "")
@@ -224,16 +230,19 @@ function M.restoreFull()
 
   log(string.format("restoreFull: app=%s ghostty=%s tmux=%s",
     tostring(snap.app_bundle or snap.app_name),
-    tostring(snap.is_ghostty), tostring(snap.tmux)))
+    tostring(snap.is_ghostty), tostring(snap.tmux)
+  ))
 
   if isFrontmost(snap.app_bundle, snap.app_name) then
     log(string.format("restoreFull: %s already frontmost — skip activate",
-      tostring(snap.app_bundle or snap.app_name)))
+      tostring(snap.app_bundle or snap.app_name)
+    ))
   else
     local ok = activateApp(snap.app_name, snap.app_bundle)
 
     log(string.format("restoreFull: activate name=%s bundle=%s ok=%s",
-      tostring(snap.app_name), tostring(snap.app_bundle), tostring(ok)))
+      tostring(snap.app_name), tostring(snap.app_bundle), tostring(ok)
+    ))
   end
 
   local restoredTmux = snap.is_ghostty and isTmuxLoc(snap.tmux)

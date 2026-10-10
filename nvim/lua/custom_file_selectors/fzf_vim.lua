@@ -175,7 +175,8 @@ function M.setup()
       options = SEARCH_OPTIONS .. search_label_flags_str("Full Text - ag (text only)"),
       down = "50%",
     })
-  end, { nargs = "*" })
+  end, { nargs = "*" }
+  )
 
   -- Base ripgrep invocation for the search below; --max-columns guards long lines.
   local RG_CMD = "rg --column --line-number --no-heading --color=always --smart-case --max-columns=500"
@@ -189,7 +190,8 @@ function M.setup()
       options = SEARCH_OPTIONS .. search_label_flags_str("Full Text - rg (text only)"),
       down = "50%",
     })
-  end, { nargs = "*" })
+  end, { nargs = "*" }
+  )
 end
 
 -- Fuzzy file finder rooted at the resolved project root. Mirrors the built-in
@@ -199,7 +201,8 @@ function M.find_files()
   vim.fn["fzf#run"](vim.fn["fzf#wrap"]("FZF", {
     dir = root.get(),
     options = with_label({ "--multi", "--scheme", "path" }, "Files"),
-  }, 0))
+  }, 0
+  ))
 end
 
 -- Fuzzy file finder limited to files beside the current file.
@@ -444,7 +447,8 @@ end
 function M.open_picker_menu()
   vim.fn["fzf#run"](vim.fn["fzf#wrap"]("FZF", {
     options = with_label({ "--multi", "--scheme", "path" }, "Files (cwd)"),
-  }, 0))
+  }, 0
+  ))
 end
 
 return M

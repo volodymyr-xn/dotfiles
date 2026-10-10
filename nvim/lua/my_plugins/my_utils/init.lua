@@ -59,7 +59,8 @@ function M.fmt_uptime(seconds)
 
   return string.format("%d day%s %d hour%s ago",
     days, days == 1 and "" or "s",
-    hours, hours == 1 and "" or "s")
+    hours, hours == 1 and "" or "s"
+  )
 end
 
 return M
