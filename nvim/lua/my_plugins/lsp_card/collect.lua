@@ -118,7 +118,7 @@ local function collect_clients(attached_to)
   local clients = {}
 
   for _, client in ipairs(get_clients()) do
-    local buffers = vim.lsp.get_buffers_by_client_id(client.id)
+    local buffers = vim.tbl_keys(client.attached_buffers)
     -- Server binaries rarely match the client name exactly (client "lua_ls"
     -- runs the binary "lua-language-server"), so fall back to a fuzzy match
     -- on the normalized name before giving up on the RSS column.

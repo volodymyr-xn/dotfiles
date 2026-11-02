@@ -3,12 +3,12 @@
   The dropdown behind the claude_stats menubar item (modules/claude_stats.lua),
   styled after ClaudeBar's SwiftUI popup (github.com/LHner1/claude-bar,
   PopupView.swift and Components.swift): header with a traffic light, limit
-  rings, sessions, token usage, footer. ClaudeBar shows one profile; this
-  merges three into the same sections.
+  rings, sessions, footer. ClaudeBar shows one profile; this merges three
+  into the same sections.
 
   Lua drives the page through window.claudeStats:
     configure(profiles)  [{ name, title }], in display order
-    update(event)        a `sessions` or `usage` line from c-claude-stats-macos
+    update(event)        a `sessions` line from c-claude-stats-macos
     setVisible(bool)     relative times only tick while the panel is open
   and the page answers on webkit.messageHandlers.claudeStats with
   { action: "resize", height }, { action: "focus", pid, cwd } and
@@ -32,18 +32,11 @@
     --lamp-rim: rgba(0, 0, 0, 0.45);
     --surface: rgb(242, 242, 244);
     --border: rgba(0, 0, 0, 0.14);
-    --segment-track: rgba(0, 0, 0, 0.06);
-    --segment-on: #ffffff;
     --red: #ff3b30;
     --orange: #ff9500;
     --yellow: #ffcc00;
     --limit-yellow: #a37b00;
     --green: #34c759;
-    --blue: #007aff;
-    --teal: #30b0c7;
-    --purple: #af52de;
-    --gray: #8e8e93;
-    --opus: rgb(217, 120, 87);
   }
 
   @media (prefers-color-scheme: dark) {
@@ -57,16 +50,11 @@
       --lamp-rim: rgba(255, 255, 255, 0.45);
       --surface: rgb(36, 38, 38);
       --border: rgba(255, 255, 255, 0.14);
-      --segment-track: rgba(255, 255, 255, 0.08);
-      --segment-on: rgba(255, 255, 255, 0.24);
       --red: #ff453a;
       --orange: #ff9f0a;
       --yellow: #ffd60a;
       --limit-yellow: #ffd60a;
       --green: #30d158;
-      --blue: #0a84ff;
-      --teal: #40c8e0;
-      --purple: #bf5af2;
     }
   }
 
@@ -255,7 +243,7 @@
   }
 
   /* Sessions */
-  .sessions { padding: 0 8px; }
+  .sessions { padding: 0 8px 10px; }
 
   .group-label {
     display: flex;
@@ -340,103 +328,6 @@
     color: var(--secondary);
   }
 
-  /* Usage */
-  .controls {
-    display: flex;
-    gap: 6px;
-    padding: 0 12px 8px;
-  }
-
-  .segmented {
-    display: flex;
-    padding: 1px;
-    border-radius: 6px;
-    background: var(--segment-track);
-  }
-
-  .segmented.range { flex: 3; }
-  .segmented.filter { flex: 2.3; }
-
-  .segmented button {
-    flex: 1;
-    min-width: 0;
-    height: 18px;
-    padding: 0 4px;
-    border: 0;
-    border-radius: 5px;
-    background: transparent;
-    color: var(--primary);
-    font: inherit;
-    font-size: 11px;
-    white-space: nowrap;
-  }
-
-  .segmented button.selected {
-    background: var(--segment-on);
-    box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.22);
-  }
-
-  .segmented button:focus-visible {
-    outline: 2px solid var(--blue);
-    outline-offset: -1px;
-  }
-
-  .chart {
-    display: block;
-    margin: 0 12px;
-    width: 276px;
-    height: 90px;
-    overflow: visible;
-  }
-
-  .chart text {
-    font-size: 8px;
-    fill: var(--secondary);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .chart .grid { stroke: var(--divider); stroke-width: 1; }
-
-  .chart-placeholder {
-    height: 90px;
-    margin: 0 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    color: var(--tertiary);
-  }
-
-  .detail-rows {
-    padding: 10px 12px 0;
-  }
-
-  .detail-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    height: 16px;
-    margin-bottom: 2px;
-    font-size: 12px;
-  }
-
-  .detail-row .label {
-    flex: 1;
-    color: var(--secondary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .detail-row .swatch {
-    width: 8px;
-    height: 8px;
-    border-radius: 2px;
-    flex: none;
-  }
-
-  .detail-row .value { font-variant-numeric: tabular-nums; white-space: pre; }
-
   .footer {
     display: flex;
     justify-content: space-between;
@@ -446,8 +337,6 @@
     font-size: 10px;
     color: var(--tertiary);
   }
-
-  .usage-end { height: 10px; }
 
   .footer span {
     white-space: nowrap;
@@ -475,22 +364,10 @@
 
     <div class="section-header">Sessions</div>
     <div class="sessions" id="sessions"></div>
-    <div class="divider spaced"></div>
-
-    <div class="section-header">Usage</div>
-    <div class="controls">
-      <div class="segmented range" id="range" role="tablist"></div>
-      <div class="segmented filter" id="filter" role="tablist"></div>
-    </div>
-    <div id="chart"></div>
-    <div class="detail-rows" id="totals"></div>
-    <div id="models"></div>
-    <div class="usage-end"></div>
   </div>
 
   <div class="footer">
     <span id="footer-limits"></span>
-    <span id="footer-usage"></span>
   </div>
 </div>
 
@@ -498,11 +375,6 @@
 (function () {
   "use strict";
 
-  var RANGES = [
-    { key: "today", label: "Today" },
-    { key: "week", label: "7 days" },
-    { key: "month", label: "30 days" },
-  ];
   var MAX_SESSIONS_PER_PROFILE = 5;
   var TICK_MILLISECONDS = 30000;
   var STATE_LABELS = { waiting: "needs you", busy: "working", idle: "ready" };
@@ -510,14 +382,11 @@
 
   var profiles = [];
   var sessionsEvent = null;
-  var usageEvent = null;
   // { profileName: { fiveHour: "yellow", ... } } from the statusline's own
   // colouring (Lua computes it); a window missing here falls back to the
   // page's thresholds.
   var limitColors = {};
   var LIMIT_COLOR_VARS = { red: "var(--red)", yellow: "var(--limit-yellow)", green: "var(--green)" };
-  var range = localStorage.getItem("claudeStats.range") || "today";
-  var filter = localStorage.getItem("claudeStats.filter") || "all";
   var tickTimer = null;
   var lastHeight = 0;
 
@@ -541,22 +410,6 @@
 
   // ---- Formatting, after ClaudeBar's Fmt --------------------------------
 
-  function formatTokens(count) {
-    if (count >= 1e9) return (count / 1e9).toFixed(2) + "B";
-    if (count >= 1e6) return (count / 1e6).toFixed(1) + "M";
-    if (count >= 1e4) return (count / 1e3).toFixed(0) + "K";
-    if (count >= 1e3) return (count / 1e3).toFixed(1) + "K";
-    return String(count);
-  }
-
-  function formatTokensShort(count) {
-    if (count >= 1e9) return (count / 1e9).toFixed(1) + "B";
-    if (count >= 1e7) return (count / 1e6).toFixed(0) + "M";
-    if (count >= 1e6) return (count / 1e6).toFixed(1) + "M";
-    if (count >= 1e3) return (count / 1e3).toFixed(0) + "K";
-    return String(count);
-  }
-
   function formatDuration(seconds) {
     var total = Math.max(0, Math.floor(seconds));
     var days = Math.floor(total / 86400);
@@ -575,83 +428,10 @@
     return age < 60 ? "now" : formatDuration(age);
   }
 
-  function formatClock(date) {
-    return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-  }
-
-
   function percentColor(pct) {
     if (pct >= 85) return "var(--red)";
     if (pct >= 60) return "var(--orange)";
     return "var(--green)";
-  }
-
-  // claude-opus-5-5 → Opus 5.5, claude-haiku-4-5-20251001 → Haiku 4.5
-  function modelName(id) {
-    var parts = id.split("-");
-
-    if (parts[0] === "claude") parts.shift();
-    if (parts.length && /^\d{8}$/.test(parts[parts.length - 1])) parts.pop();
-
-    var familyIndex = parts.findIndex(function (part) { return !/^\d+$/.test(part); });
-
-    if (familyIndex < 0) return id;
-
-    var family = parts.splice(familyIndex, 1)[0];
-    var version = parts.filter(function (part) { return /^\d+$/.test(part); }).join(".");
-    var title = family.charAt(0).toUpperCase() + family.slice(1);
-
-    return version ? title + " " + version : title;
-  }
-
-  function modelBaseColor(name) {
-    var lower = name.toLowerCase();
-
-    if (lower.indexOf("opus") === 0) return "var(--opus)";
-    if (lower.indexOf("sonnet") === 0) return "var(--blue)";
-    if (lower.indexOf("haiku") === 0) return "var(--teal)";
-    if (lower.indexOf("fable") === 0) return "var(--purple)";
-    return "var(--gray)";
-  }
-
-  // Newest version of each family in full colour, older ones lighter.
-  function modelColors(names) {
-    var families = {};
-    var colors = {};
-
-    names.forEach(function (name) {
-      var family = name.split(" ")[0];
-      (families[family] = families[family] || []).push(name);
-    });
-
-    Object.keys(families).forEach(function (family) {
-      var members = families[family].slice().sort(function (left, right) {
-        return compareVersions(versionOf(right), versionOf(left));
-      });
-
-      members.forEach(function (name, index) {
-        var opacity = Math.max(0.35, 1 - index * 0.35);
-        colors[name] = "color-mix(in srgb, " + modelBaseColor(name) + " " + Math.round(opacity * 100) + "%, transparent)";
-      });
-    });
-
-    return colors;
-  }
-
-  function versionOf(name) {
-    var last = name.split(" ").pop();
-
-    return last.split(".").map(Number).filter(function (part) { return !isNaN(part); });
-  }
-
-  function compareVersions(left, right) {
-    for (var index = 0; index < Math.max(left.length, right.length); index++) {
-      var difference = (left[index] || 0) - (right[index] || 0);
-
-      if (difference !== 0) return difference;
-    }
-
-    return 0;
   }
 
   // ---- Shared pieces ----------------------------------------------------
@@ -776,7 +556,6 @@
     var details = [];
 
     if (folder && folder !== session.name) details.push(folder);
-    if (session.model) details.push(modelName(session.model));
     if (session.kind === "background") details.push("background");
 
     var stateClass = STATE_LABELS[session.state] ? session.state : "unknown";
@@ -819,231 +598,6 @@
       '<div class="no-sessions">' + (sessionsEvent ? "No Claude Code session running" : "Looking for sessions…") + "</div>";
   }
 
-  // ---- Usage ------------------------------------------------------------
-
-  function renderControls() {
-    var filters = [{ key: "all", label: "All" }].concat(profiles.map(function (profile) {
-      return { key: profile.name, label: profile.label };
-    }));
-
-    if (!filters.some(function (option) { return option.key === filter; })) filter = "all";
-
-    document.getElementById("range").innerHTML = segmentsHtml(RANGES, range, "range");
-    document.getElementById("filter").innerHTML = segmentsHtml(filters, filter, "filter");
-  }
-
-  function segmentsHtml(options, selected, kind) {
-    return options.map(function (option) {
-      var isSelected = option.key === selected;
-
-      return '<button type="button" role="tab" aria-selected="' + isSelected + '" class="' +
-        (isSelected ? "selected" : "") + '" data-' + kind + '="' + escapeHtml(option.key) + '">' +
-        escapeHtml(option.label) + "</button>";
-    }).join("");
-  }
-
-  // Start of the range, its buckets, and how a bucket is labelled.
-  function rangeBuckets() {
-    var today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (range === "today") {
-      var hours = [];
-
-      for (var hour = 0; hour < 24; hour++) {
-        var start = new Date(today);
-        start.setHours(hour);
-        hours.push({ start: start.getTime() / 1000, label: hour % 6 === 0 ? String(hour).padStart(2, "0") : "" });
-      }
-
-      return hours;
-    }
-
-    var dayCount = range === "week" ? 7 : 30;
-    var days = [];
-
-    for (var back = dayCount - 1; back >= 0; back--) {
-      var day = new Date(today);
-      day.setDate(day.getDate() - back);
-
-      var label = "";
-
-      if (range === "week") {
-        label = day.toLocaleDateString([], { weekday: "narrow" });
-      } else if ((dayCount - 1 - back) % 7 === 0) {
-        label = day.getDate() + "." + (day.getMonth() + 1) + ".";
-      }
-
-      days.push({ start: day.getTime() / 1000, label: label });
-    }
-
-    return days;
-  }
-
-  function bucketIndex(buckets, epochSeconds) {
-    for (var index = buckets.length - 1; index >= 0; index--) {
-      if (epochSeconds >= buckets[index].start) return index;
-    }
-
-    return -1;
-  }
-
-  function usageStats() {
-    var buckets = rangeBuckets();
-    var rangeEnd = buckets[buckets.length - 1].start + (range === "today" ? 3600 : 86400);
-    var totals = { input: 0, output: 0, cacheWrite: 0, cacheRead: 0, responses: 0 };
-    var perBucket = buckets.map(function () { return {}; });
-    var perModel = {};
-    var names = filter === "all" ? profiles.map(function (profile) { return profile.name; }) : [filter];
-
-    names.forEach(function (name) {
-      (usageEvent.profiles[name] || []).forEach(function (row) {
-        var hour = row[0];
-
-        if (hour < buckets[0].start || hour >= rangeEnd) return;
-
-        var index = bucketIndex(buckets, hour);
-        var model = modelName(usageEvent.models[row[1]] || "unknown");
-        var total = row[2] + row[3] + row[4] + row[5];
-
-        totals.input += row[2];
-        totals.output += row[3];
-        totals.cacheWrite += row[4];
-        totals.cacheRead += row[5];
-        totals.responses += row[6];
-        perBucket[index][model] = (perBucket[index][model] || 0) + total;
-        perModel[model] = (perModel[model] || 0) + total;
-      });
-    });
-
-    var models = Object.keys(perModel).sort(function (left, right) { return perModel[right] - perModel[left]; });
-    var counts = usageEvent.sessionCounts[range] || {};
-
-    return {
-      buckets: buckets,
-      perBucket: perBucket,
-      perModel: perModel,
-      models: models,
-      colors: modelColors(models),
-      totals: totals,
-      total: totals.input + totals.output + totals.cacheWrite + totals.cacheRead,
-      sessions: counts[filter] || 0,
-    };
-  }
-
-  // A round ceiling for the y axis: 1, 2 or 5 times a power of ten.
-  function niceCeiling(value) {
-    if (value <= 0) return 1;
-
-    var magnitude = Math.pow(10, Math.floor(Math.log10(value)));
-    var steps = [1, 2, 5, 10];
-
-    for (var index = 0; index < steps.length; index++) {
-      if (steps[index] * magnitude >= value) return steps[index] * magnitude;
-    }
-
-    return 10 * magnitude;
-  }
-
-  function chartHtml(stats) {
-    var width = 276;
-    var height = 90;
-    var axisWidth = 30;
-    var labelHeight = 12;
-    var plotWidth = width - axisWidth;
-    var plotHeight = height - labelHeight;
-    var bucketTotals = stats.perBucket.map(function (bucket) {
-      return Object.keys(bucket).reduce(function (sum, model) { return sum + bucket[model]; }, 0);
-    });
-    var ceiling = niceCeiling(Math.max.apply(null, bucketTotals));
-    var slot = plotWidth / stats.buckets.length;
-    var barWidth = Math.max(1.5, slot * 0.62);
-    var parts = [];
-
-    [0, 0.5, 1].forEach(function (fraction) {
-      var y = plotHeight - fraction * plotHeight;
-      parts.push('<line class="grid" x1="0" x2="' + plotWidth + '" y1="' + y + '" y2="' + y + '"></line>');
-      parts.push('<text x="' + (plotWidth + 4) + '" y="' + (y + 3) + '">' + formatTokensShort(Math.round(ceiling * fraction)) + "</text>");
-    });
-
-    stats.buckets.forEach(function (bucket, index) {
-      var x = index * slot + (slot - barWidth) / 2;
-      var y = plotHeight;
-
-      stats.models.slice().reverse().forEach(function (model) {
-        var value = stats.perBucket[index][model] || 0;
-
-        if (value <= 0) return;
-
-        var barHeight = Math.max(0.5, value / ceiling * plotHeight);
-        y -= barHeight;
-        parts.push('<rect x="' + x.toFixed(2) + '" y="' + y.toFixed(2) + '" width="' + barWidth.toFixed(2) +
-          '" height="' + barHeight.toFixed(2) + '" rx="1.5" fill="' + stats.colors[model] + '"></rect>');
-      });
-
-      if (bucket.label) {
-        parts.push('<text x="' + (index * slot + slot / 2).toFixed(2) + '" y="' + (height - 1) +
-          '" text-anchor="middle">' + escapeHtml(bucket.label) + "</text>");
-      }
-    });
-
-    if (stats.total === 0) {
-      parts.push('<text x="' + (plotWidth / 2) + '" y="' + (plotHeight / 2) +
-        '" text-anchor="middle" style="fill: var(--tertiary); font-size: 10px">No usage in this period</text>');
-    }
-
-    return '<svg class="chart" viewBox="0 0 ' + width + " " + height + '" role="img"><title>Tokens by model</title>' +
-      parts.join("") + "</svg>";
-  }
-
-  function detailRowHtml(label, value, color) {
-    return '<div class="detail-row">' +
-      (color ? '<span class="swatch" style="background:' + color + '"></span>' : "") +
-      '<span class="label">' + escapeHtml(label) + '</span><span class="value">' + escapeHtml(value) + "</span></div>";
-  }
-
-  function shareText(part, total) {
-    if (total <= 0) return "–";
-
-    var pct = part / total * 100;
-
-    return formatTokens(part) + "  " + (pct < 1 ? "<1" : Math.round(pct)) + "%";
-  }
-
-  function renderUsage() {
-    renderControls();
-
-    var chart = document.getElementById("chart");
-    var totalsContainer = document.getElementById("totals");
-    var modelsContainer = document.getElementById("models");
-
-    if (!usageEvent) {
-      chart.innerHTML = '<div class="chart-placeholder">Scanning transcripts…</div>';
-      totalsContainer.innerHTML = "";
-      modelsContainer.innerHTML = "";
-      return;
-    }
-
-    var stats = usageStats();
-
-    chart.innerHTML = chartHtml(stats);
-    totalsContainer.innerHTML = [
-      detailRowHtml("Total tokens", formatTokens(stats.total)),
-      detailRowHtml("Input", formatTokens(stats.totals.input)),
-      detailRowHtml("Output", formatTokens(stats.totals.output)),
-      detailRowHtml("Cache write", formatTokens(stats.totals.cacheWrite)),
-      detailRowHtml("Cache read", formatTokens(stats.totals.cacheRead)),
-      detailRowHtml("Responses", String(stats.totals.responses)),
-      detailRowHtml("Sessions", String(stats.sessions)),
-    ].join("");
-
-    modelsContainer.innerHTML = stats.models.length === 0 ? "" :
-      '<div class="section-header">Models</div><div class="detail-rows" style="padding-top:0">' +
-      stats.models.map(function (model) {
-        return detailRowHtml(model, shareText(stats.perModel[model], stats.total), stats.colors[model]);
-      }).join("") + "</div>";
-  }
-
   // ---- Footer -----------------------------------------------------------
 
   function renderFooter() {
@@ -1058,9 +612,6 @@
     document.getElementById("footer-limits").textContent = ages.length
       ? "Limits: " + ages.join(" · ")
       : "Status line not active yet";
-    document.getElementById("footer-usage").textContent = usageEvent
-      ? "Usage: " + formatClock(new Date(usageEvent.scannedAt * 1000))
-      : "";
   }
 
   // ---- Wiring -----------------------------------------------------------
@@ -1087,29 +638,7 @@
     reportHeight();
   }
 
-  function renderAll() {
-    renderLive();
-    renderUsage();
-    reportHeight();
-  }
-
   function handleClick(event) {
-    var segment = event.target.closest("button[data-range], button[data-filter]");
-
-    if (segment) {
-      if (segment.dataset.range) {
-        range = segment.dataset.range;
-        localStorage.setItem("claudeStats.range", range);
-      } else {
-        filter = segment.dataset.filter;
-        localStorage.setItem("claudeStats.filter", filter);
-      }
-
-      renderUsage();
-      reportHeight();
-      return;
-    }
-
     var row = event.target.closest(".session");
 
     if (!row) return;
@@ -1126,18 +655,13 @@
   window.claudeStats = {
     configure: function (profileList) {
       profiles = profileList;
-      renderAll();
+      renderLive();
     },
 
     update: function (event) {
       if (event.event === "sessions") {
         sessionsEvent = event;
         renderLive();
-      } else if (event.event === "usage") {
-        usageEvent = event;
-        renderUsage();
-        renderFooter();
-        reportHeight();
       }
     },
 
@@ -1152,13 +676,13 @@
       tickTimer = null;
 
       if (visible) {
-        renderAll();
+        renderLive();
         tickTimer = setInterval(renderLive, TICK_MILLISECONDS);
       }
     },
   };
 
-  renderAll();
+  renderLive();
 })();
 </script>
 </body>

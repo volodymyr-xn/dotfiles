@@ -43,9 +43,7 @@ local function stop_orphan_lsp_clients()
 
   for _, client in ipairs(clients) do
     if not allow[client.name] then
-      local bufs = vim.lsp.get_buffers_by_client_id(client.id)
-
-      if #bufs == 0 then
+      if next(client.attached_buffers) == nil then
         local ok = pcall(vim.lsp.stop_client, client.id)
 
         if ok then

@@ -1,24 +1,23 @@
--- Menubar item for every Claude Code profile on this machine: a fixed AI
--- sparkle in the bar, and everything else in the panel it opens. The icon
--- never changes and nothing is read while the panel is closed; the panel
--- reads its figures when it opens and keeps them current while it stays open.
+-- Menubar item for every Claude Code profile on this machine: an AI sparkle
+-- in the bar, and everything else in the panel it opens. The sparkle turns
+-- into Claude Code's spinner, in blue, while a session works and goes orange
+-- while one waits for you; beyond that, nothing is read while the panel is
+-- closed. The panel reads its figures when it opens and keeps them current
+-- while it stays open.
 --
 -- Clicking the item opens a panel styled after ClaudeBar
--- (github.com/LHner1/claude-bar): limit rings per profile, the sessions
--- grouped by profile, token usage by model over today, 7 or 30 days. It is
--- an hs.webview rather than a canvas, because the look it copies — rings,
--- stacked bar charts, segmented controls — is SwiftUI's, and HTML gets
+-- (github.com/LHner1/claude-bar): limit rings per profile and the sessions
+-- grouped by profile. It is an hs.webview rather than a canvas, because the
+-- look it copies — rings, grouped lists — is SwiftUI's, and HTML gets
 -- closer to that than canvas elements do. Clicking a session brings its
 -- terminal to the front, switching tmux to its pane when it runs in one.
 --
 -- Everything shown comes from c-claude-stats-macos, a Swift helper kept
 -- running for as long as Hammerspoon runs (see
 -- native_modules/macos/c-claude-stats-macos.swift). It reads the session
--- files, the statusline's limit caches and the transcripts off this thread,
--- only while told `live`, and prints a line only when something changed.
--- A `usage` line is never decoded here — it can run to tens of kilobytes and
--- the page is its only reader. A `sessions` line is, for the limits: their
--- colours come from the statusline's own code (its Go port's `burn-colors`
+-- files and the statusline's limit caches off this thread, only while told
+-- `live`, and prints a line only when something changed. A `sessions` line
+-- is decoded here for the limits: their colours come from the statusline's own code (its Go port's `burn-colors`
 -- subcommand in control_panel), so the panel and the statusline always agree.
 --
 -- Build the helper once with `dotfiles_setup/build_native_modules.sh`; until
@@ -27,6 +26,7 @@
 -- Inspect from the shell:
 --   hs -c 'require("claude_stats").show()'
 --   hs -c 'return hs.inspect(require("claude_stats").frame())'
+--   hs -c 'return require("claude_stats").barState()'
 
 -- One widget per Hammerspoon instance. modules/ is on package.path, so the
 -- file is reachable as both "claude_stats" and "modules.claude_stats" — two
@@ -72,7 +72,7 @@ local LIMIT_COLOR_SECONDS = 30
 
 -- The profiles, in the order the panel lists them. `name` is the
 -- CLAUDE_PROFILE each statusline exports (it names the limit cache), `label`
--- the panel's short form (usage filter, footer), `title` its long form, and
+-- the panel's short form (footer), `title` its long form, and
 -- `directory` the CLAUDE_CONFIG_DIR the control_panel wrappers (claude, cw,
 -- cdev) set.
 local PROFILES = {
@@ -85,16 +85,92 @@ local PROFILES = {
 -- that dies at all is the unexpected case — this is a backstop, not a poll.
 local SUPERVISOR_SECONDS = 10
 
--- The bar shows a fixed sparkle and never changes: the figures live in the
--- panel only. A template image, so macOS tints it for a light or dark bar;
--- the text stands in if the SVG cannot be loaded.
+-- The bar follows the helper's `bar` line: the sparkle while every session
+-- is idle or nobody can see the screen, Claude Code's spinner in blue while
+-- one works, the sparkle in Claude's orange while one waits for you, and
+-- the spinner in that orange while one works and another waits. The
+-- figures live in the panel only. Every look keeps its own colour, white for
+-- idle included, rather than being tinted for the bar as a template would.
+-- The text stands in if an SVG cannot be loaded.
 local ICON_SIZE = 16
 local ICON = hs.image.imageFromPath(hs.configdir .. "/assets/claude_stats/ai.svg")
-local ICON_FALLBACK_TITLE = "AI"
+local WAITING_ICON = hs.image.imageFromPath(hs.configdir .. "/assets/claude_stats/ai_waiting.svg")
 
 if ICON ~= nil then
   ICON = ICON:setSize({ w = ICON_SIZE, h = ICON_SIZE })
 end
+
+if WAITING_ICON ~= nil then
+  WAITING_ICON = WAITING_ICON:setSize({ w = ICON_SIZE, h = ICON_SIZE })
+end
+
+-- What the bar shows per still state; `title` stands in for a missing image.
+local LOOKS = {
+  idle = { image = ICON, title = "AI" },
+  waiting = { image = WAITING_ICON, title = "AI?" },
+}
+
+-- Nobody can see the bar while away, so it keeps still on the sparkle.
+LOOKS.away = LOOKS.idle
+
+-- The CLI's own spinner glyphs and pace, played forwards then back.
+local SPINNER_GLYPHS = { "·", "✢", "✳", "✶", "✻", "✽" }
+local SPINNER_SECONDS = 0.12
+-- Catppuccin Macchiato blue, the workmux theme's colour for a working agent.
+local SPINNER_COLOR = { hex = "#8aadf4" }
+-- Claude's orange, as in the waiting sparkle.
+local WAITING_SPINNER_COLOR = { hex = "#d97757" }
+-- Sized and nudged up so the glyphs sit where the sparkle does.
+local SPINNER_TEXT_SIZE = 18
+local SPINNER_TOP_OFFSET = -3
+
+-- One spinner glyph in `color` as an image the size of the sparkle, drawn
+-- at twice that and scaled down so it stays sharp on a Retina bar. Every
+-- frame gets the same size, so the item keeps its width while glyphs turn.
+local function glyphImage(glyph, color)
+  local scale = 2
+  local side = ICON_SIZE * scale
+  local topOffset = SPINNER_TOP_OFFSET * scale
+  local canvas = hs.canvas.new({ x = 0, y = 0, w = side, h = side })
+
+  canvas[1] = {
+    type = "text",
+    text = glyph,
+    textSize = SPINNER_TEXT_SIZE * scale,
+    textColor = color,
+    textAlignment = "center",
+    frame = { x = 0, y = topOffset, w = side, h = side - topOffset },
+  }
+
+  local image = canvas:imageFromCanvas()
+
+  canvas:delete()
+
+  return image:setSize({ w = ICON_SIZE, h = ICON_SIZE })
+end
+
+-- The spinner's looks in `color`, in playing order: every glyph forwards,
+-- then back without repeating either end.
+local function spinnerLooks(color)
+  local looks = {}
+
+  for _, glyph in ipairs(SPINNER_GLYPHS) do
+    looks[#looks + 1] = { image = glyphImage(glyph, color), title = glyph }
+  end
+
+  for index = #SPINNER_GLYPHS - 1, 2, -1 do
+    looks[#looks + 1] = looks[index]
+  end
+
+  return looks
+end
+
+-- The spinner per moving bar state, both the same length so a switch keeps
+-- the current frame.
+local SPINNERS = {
+  busy = spinnerLooks(SPINNER_COLOR),
+  busyWaiting = spinnerLooks(WAITING_SPINNER_COLOR),
+}
 
 -- The page is 300pt wide inside a clear margin that holds its shadow; the
 -- margins here match the page's body padding.
@@ -118,7 +194,10 @@ local panelVisible = false
 local panelHeight = 600
 local latestSessions = nil
 local latestSessionsLine = nil
-local latestUsageLine = nil
+local barState = "idle"
+local spinnerTimer = nil
+local spinnerIndex = 1
+local activeSpinner = SPINNERS.busy
 
 -- The helper's command line: the subcommand, the CLI it asks why a session
 -- waits, the picker list it narrows sessions to, then one `name=dir` per
@@ -206,13 +285,57 @@ local function pushLimitColors()
   limitColorTask:start()
 end
 
--- Keep the latest line of each kind for the next open, and hand it to the
--- page now if it is open. The page decodes both itself; a sessions line is
--- also decoded here, for the limits the colours are computed from.
+-- Put `look` in the bar: its image, or its title when the image is missing.
+local function showLook(look)
+  if look.image == nil then
+    menu:setIcon(nil)
+    menu:setTitle(look.title)
+
+    return
+  end
+
+  menu:setTitle(nil)
+  menu:setIcon(look.image, false)
+end
+
+-- Show the spinner's next frame.
+local function turnSpinner()
+  spinnerIndex = spinnerIndex % #activeSpinner + 1
+  showLook(activeSpinner[spinnerIndex])
+end
+
+-- Show the helper's bar state: a spinner while busy or busyWaiting, the look
+-- for idle, waiting or away otherwise. Anything unrecognised counts as idle.
+local function showBarState(state)
+  if SPINNERS[state] == nil and LOOKS[state] == nil then
+    state = "idle"
+  end
+
+  if state == barState then
+    return
+  end
+
+  barState = state
+  local spinner = SPINNERS[state]
+
+  if spinner ~= nil then
+    activeSpinner = spinner
+    showLook(spinner[spinnerIndex])
+    spinnerTimer:start()
+
+    return
+  end
+
+  spinnerTimer:stop()
+  showLook(LOOKS[state])
+end
+
+-- A bar line sets the icon. A sessions line is kept for the next open and
+-- handed to the page now if it is open; the page decodes it itself, and it
+-- is also decoded here, for the limits the colours are computed from.
 local function handleLine(line)
-  if line:sub(2, 16) == '"event":"usage"' then
-    latestUsageLine = line
-    pushToPanel(line)
+  if line:sub(2, 14) == '"event":"bar"' then
+    showBarState(line:match('"state":"(%a+)"'))
 
     return
   end
@@ -240,12 +363,14 @@ local function sendCommand(command)
 end
 
 -- Launch the helper unless it is already running. It starts idle, so a
--- restart behind an open panel is told to go live again.
+-- restart behind an open panel is told to go live again. The icon drops to
+-- idle until the new helper reports, so a dead one leaves no spinner behind.
 local function startHelper()
   if lineStream.isRunning(task) then
     return
   end
 
+  showBarState("idle")
   task = lineStream.start(HELPER, helperArguments(), handleLine)
 
   if panelVisible then
@@ -309,10 +434,6 @@ function M.show()
       pushToPanel(latestSessionsLine)
     end
 
-    if latestUsageLine ~= nil then
-      pushToPanel(latestUsageLine)
-    end
-
     webview:evaluateJavaScript("window.claudeStats.setVisible(true)")
   end
 
@@ -338,7 +459,12 @@ function M.frame()
   return webview:frame()
 end
 
--- Kill the helper and start a fresh one, which rescans every transcript.
+-- What the bar shows now: idle, busy, waiting, busyWaiting or away.
+function M.barState()
+  return barState
+end
+
+-- Kill the helper and start a fresh one.
 function M.restart()
   lineStream.stop(task)
   task = nil
@@ -477,14 +603,9 @@ end
 hs.execute("/usr/bin/pkill -f '^" .. HELPER .. " watch'")
 
 menu = hs.menubar.new(true, "claudeStats")
-
-if ICON ~= nil then
-  menu:setIcon(ICON, true)
-else
-  menu:setTitle(ICON_FALLBACK_TITLE)
-end
-
+showLook(LOOKS.idle)
 menu:setClickCallback(M.toggle)
+spinnerTimer = hs.timer.new(SPINNER_SECONDS, turnSpinner)
 
 buildPanel()
 

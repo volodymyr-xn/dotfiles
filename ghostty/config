@@ -69,14 +69,6 @@ macos-option-as-alt = left
 # Used in applications which need newline insert with shitft-enter
 keybind = shift+enter=text:\x1b\r
 
-# Send a plain carriage return for ctrl+enter, replacing ghostty's default
-# window zoom. It has to happen here: inside a tmux display-popup tmux's key
-# tables are bypassed, and fzf cannot bind ctrl+enter under any name
-# ("unsupported key"), so the AI pane picker only sees this chord if the
-# terminal hands it over as Enter. Side effect: ctrl+enter now acts as Enter
-# everywhere, where before it did nothing outside tmux's tree-mode.
-keybind = ctrl+enter=text:\r
-
 # Ctrl+, toggles the AI agent pane selector. Sent as ESC+comma so it lands as
 # M-, in tmux (which opens the popup) and as alt-, in fzf (which aborts it) —
 # fzf refuses to bind ctrl-, itself, and inside a tmux popup the tmux key

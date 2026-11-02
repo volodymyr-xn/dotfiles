@@ -48,6 +48,8 @@ require("nvim-treesitter.configs").setup({
     "swift",
     "vim",
     "yaml",
+    -- Plists, incl. launchd agents (after/queries/xml/highlights.scm).
+    "xml",
     "embedded_template",
     "markdown",
     "markdown_inline",

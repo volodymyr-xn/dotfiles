@@ -816,13 +816,15 @@ require("lazy").setup({
   -- Show scrollbar for VIM buffer(SUPER COOL!)
   {
     'petertriho/nvim-scrollbar',
+    -- v2 lives here until it replaces v1 on main (2026-11-16); drop the
+    -- line after that date.
+    branch = "refactor/v2",
     event = { "BufReadPost", "BufNewFile" },
-    config = function() require("plugin_settings.nvim_scrollview") end,
+    config = function() require("plugin_settings.nvim_scrollbar") end,
   },
   {
     "kevinhwang91/nvim-hlslens",
     event = { "BufReadPost", "BufNewFile" },
-    dependencies = { "petertriho/nvim-scrollbar" },
     config = function() require("plugin_settings.nvim_hlslens") end,
   },
 

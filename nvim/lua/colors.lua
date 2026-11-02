@@ -25,6 +25,20 @@ require("catppuccin").setup {
             -- show through, surface2 bg + bold to differ from Visual (surface1)
             MatchWord = { bg = colors.surface2, style = { "bold" } },
             MatchParen = { fg = colors.peach, bg = colors.surface2, style = { "bold" } },
+            -- Plist captures (after/queries/xml/highlights.scm); without own
+            -- groups they fall back to near-identical parent colors.
+            -- <key></key> tags, apart from blue value and container tags.
+            ["@tag.key.plist"] = { fg = colors.sapphire },
+            -- Keys documented in launchd.plist(5).
+            ["@keyword.launchd"] = { fg = colors.mauve, style = { "bold" } },
+            -- Keys launchd ignores: Hammerspoon menu keys and typos.
+            ["@property.plist"] = { fg = colors.yellow, style = { "italic" } },
+            -- Names inside EnvironmentVariables, apart from peach numbers.
+            ["@constant.plist"] = { fg = colors.teal, style = { "bold" } },
+            ["@boolean.true.plist"] = { fg = colors.green },
+            ["@boolean.false.plist"] = { fg = colors.red },
+            -- Program, log and working directory paths, apart from strings.
+            ["@string.special.path.plist"] = { fg = colors.sky },
             -- WinSeparator = { fg = "#eceaff" },
             -- CmpItemAbbrDefault = { fg = "#eceaff" },
             -- CmpItemAbbrDeprecated = { fg = "#eceaff" },

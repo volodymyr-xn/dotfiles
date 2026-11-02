@@ -48,16 +48,13 @@ local function override_lens(render, pos_list, nearest, idx, rel_idx)
   render.setVirt(0, lnum - 1, col - 1, { { " " }, { text, hl } }, nearest)
 end
 
--- Wires hlslens into nvim-scrollbar's search handler. Calling this internally
--- runs hlslens.setup with a build_position_cb that pushes match positions to
--- scrollbar, so search hits appear as scrollbar marks. Must run after
--- scrollbar.setup; lazy `dependencies` in plugins_install.lua guarantees that.
--- The override_lens override is forwarded into hlslens' config.
-require("scrollbar.handlers.search").setup({ override_lens = override_lens })
+-- Installs the custom lens renderer. Scrollbar search marks no longer go
+-- through hlslens: nvim-scrollbar v2 reads the native search on its own.
+require("hlslens").setup({ override_lens = override_lens })
 
 local kopts = { noremap = true, silent = true }
 
--- Word-under-cursor search forward + refresh lens (match index/total + scrollbar marks).
+-- Word-under-cursor search forward + refresh lens (match index/total).
 vim.keymap.set("n", "*", [[*<Cmd>lua require("hlslens").start()<CR>]], kopts)
 
 -- Word-under-cursor search backward + refresh lens.
@@ -69,7 +66,7 @@ vim.keymap.set("n", "g*", [[g*<Cmd>lua require("hlslens").start()<CR>]], kopts)
 -- Like `#` but without word boundaries.
 vim.keymap.set("n", "g#", [[g#<Cmd>lua require("hlslens").start()<CR>]], kopts)
 
--- Search forward + refresh lens (match index/total + scrollbar marks).
+-- Search forward + refresh lens (match index/total).
 vim.keymap.set("n", "n", [[<Cmd>execute('normal! ' . v:count1 . 'n')<CR><Cmd>lua require('hlslens').start()<CR>]], kopts)
 
 -- Search backward + refresh lens.
