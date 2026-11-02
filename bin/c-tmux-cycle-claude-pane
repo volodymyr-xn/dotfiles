@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+#
+# Switches a tmux client to the Claude pane <step> places away from its
+# current pane, in the order the side-status sidebar lists them, wrapping
+# around at either end. Bound to ctrl+n / ctrl+p in tmux.conf, which passes
+# the ordered pane ids expanded from the sidebar's own Claude-pane test, so
+# the order and the detection never drift apart.
+#
+# Usage: c-tmux-cycle-claude-pane <client> <step> <current-pane-id> <pane-id>...
+#   step: 1 for the next pane, -1 for the previous one
+
+set -euo pipefail
+
+client=$1
+step=$2
+current_pane=$3
+shift 3
+claude_panes=("$@")
+pane_count=${#claude_panes[@]}
+
+(( pane_count > 0 )) || exit 0
+
+current_index=-1
+
+for index in "${!claude_panes[@]}"; do
+  if [[ "${claude_panes[$index]}" == "$current_pane" ]]; then
+    current_index=$index
+    break
+  fi
+done
+
+# Off a Claude pane, the next one is the first and the previous one the last.
+if (( current_index >= 0 )); then
+  target_index=$(( ((current_index + step) % pane_count + pane_count) % pane_count ))
+elif (( step > 0 )); then
+  target_index=0
+else
+  target_index=$(( pane_count - 1 ))
+fi
+
+tmux switch-client -c "$client" -t "${claude_panes[$target_index]}"
