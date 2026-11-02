@@ -10,7 +10,8 @@
 -- grouped by profile. It is an hs.webview rather than a canvas, because the
 -- look it copies — rings, grouped lists — is SwiftUI's, and HTML gets
 -- closer to that than canvas elements do. Clicking a session brings its
--- terminal to the front, switching tmux to its pane when it runs in one.
+-- terminal to the front, switching tmux to its pane when it runs in one;
+-- Cmd+K then returns, as after an agent notification (notify_return).
 --
 -- Everything shown comes from c-claude-stats-macos, a Swift helper kept
 -- running for as long as Hammerspoon runs (see
@@ -39,6 +40,7 @@ if _G[INSTANCE_KEY] ~= nil then
 end
 
 local lineStream = require("line_stream")
+local notifyReturn = require("notify_return")
 
 local M = {}
 
@@ -473,13 +475,24 @@ end
 
 -- Bring a session's terminal forward. The script switches tmux to the
 -- session's pane when there is one and prints the processes to try, nearest
--- first; the first that is an app gets activated. Nothing found means the
--- session runs somewhere without a window, and its folder opens instead —
--- ClaudeBar's fallback.
+-- first; the first that is an app gets activated. A tmux switch is announced
+-- by a leading "back <client pane> <session pane>" line, which arms Cmd+K's
+-- return before activation, while the app to return to is still in front.
+-- Nothing found means the session runs somewhere without a window, and its
+-- folder opens instead — ClaudeBar's fallback.
 local function focusSession(pid, cwd)
-  -- Activate the first printed pid that is an app, else open the folder.
+  -- Arm Cmd+K, then activate the first printed pid that is an app, else
+  -- open the folder.
   local function activateFirstApp(_, stdout, _)
-    for candidate in (stdout or ""):gmatch("%d+") do
+    local output = "\n" .. (stdout or "")
+    local clientPane, sessionPane = output:match("^\nback (%S+) (%S+)\n")
+
+    if sessionPane ~= nil then
+      notifyReturn.capture(clientPane, sessionPane)
+    end
+
+    -- Whole-line numbers only, so the pane ids on the back line are skipped.
+    for candidate in output:gmatch("\n(%d+)") do
       local app = hs.application.applicationForPID(tonumber(candidate))
 
       if app ~= nil then

@@ -26,8 +26,16 @@
 #
 #
 
-if [[ c-is-mac ]]; then
-  brew install tmux
+if c-is-mac; then
+  # tmux master (3.9 pre-release) for the side-status Claude sidebar in
+  # tmux.conf. Re-running pulls the latest master. Back to stable once 3.9
+  # ships: `brew uninstall --force tmux && brew install tmux`.
+  if brew list --versions tmux | grep -q HEAD; then
+    brew upgrade --fetch-HEAD tmux
+  else
+    brew unlink tmux 2>/dev/null
+    brew install --HEAD tmux || brew link tmux
+  fi
 else
   sudo pacman -S tmux
 fi

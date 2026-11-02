@@ -10,12 +10,19 @@
 # app (the terminal), because activating an app from a script is unreliable
 # since macOS 14 made activation cooperative.
 #
+# Before a tmux switch, the client's location is stamped into C_TMUX_BACK
+# (tmux prefix+l) and a first line "back <client pane> <session pane>" is
+# printed, so Hammerspoon can arm Cmd+K the way an agent notification does.
+#
 # Usage: c-claude-session-focus-macos.sh <pid>
 
 set -euo pipefail
 
 # Hammerspoon starts this with launchd's PATH, which has no Homebrew.
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+# And with no locale: tmux then prints every tab and non-ASCII character in
+# its formats as "_", which breaks the tab-separated client rows.
+export LANG="en_US.UTF-8"
 
 session_pid="$1"
 
@@ -35,22 +42,26 @@ pane_for_tty() {
     | awk -v tty="$1" '$1 == tty { print $2; exit }'
 }
 
-# "tty pid" of the client to switch: the most recently active one already
-# on session $1, else the most recently active one at all.
+# The client to switch, as "tty pid pane session:window.pane" joined by
+# tabs: the most recently active one already on session $1, else the most
+# recently active one at all. Tabs because session names may hold spaces
+# ("dotfiles 🏡"). Its location comes from list-clients, not
+# `display-message -c`, which resolves against an inherited $TMUX_PANE.
 client_for_session() {
   local clients
-  clients="$(tmux list-clients -F '#{client_activity} #{client_session} #{client_tty} #{client_pid}' 2>/dev/null \
+  clients="$(tmux list-clients \
+    -F $'#{client_activity}\t#{client_session}\t#{client_tty}\t#{client_pid}\t#{pane_id}\t#S:#I.#P' 2>/dev/null \
     | sort -rn)"
 
   local on_session
-  on_session="$(awk -v session="$1" '$2 == session { print $3, $4; exit }' <<<"$clients")"
+  on_session="$(awk -F'\t' -v OFS='\t' -v session="$1" '$2 == session { print $3, $4, $5, $6; exit }' <<<"$clients")"
 
   if [[ -n "$on_session" ]]; then
     echo "$on_session"
     return
   fi
 
-  awk 'NR == 1 { print $3, $4 }' <<<"$clients"
+  awk -F'\t' -v OFS='\t' 'NR == 1 { print $3, $4, $5, $6 }' <<<"$clients"
 }
 
 session_tty="$(ps -o tty= -p "$session_pid" | tr -d ' ')"
@@ -63,8 +74,10 @@ if [[ -n "$session_tty" && "$session_tty" != "??" ]] && command -v tmux >/dev/nu
     client="$(client_for_session "$tmux_session")"
 
     if [[ -n "$client" ]]; then
-      client_tty="${client%% *}"
-      client_pid="${client##* }"
+      IFS=$'\t' read -r client_tty client_pid client_pane client_location <<<"$client"
+
+      tmux set-environment -g C_TMUX_BACK "$client_location"
+      echo "back $client_pane $pane"
 
       tmux switch-client -c "$client_tty" -t "$pane"
       tmux select-window -t "$pane"

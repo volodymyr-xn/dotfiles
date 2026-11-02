@@ -176,8 +176,8 @@ copy_mode = "prefix+["
 # var and its watcher script are not needed.
 open_notification_target = "prefix+l"
 
-# tmux: bind g c-claude-toggle-popup. herdr knows which panes host agents,
-# so cycling agents replaces the popup-toggle script.
+# herdr knows which panes host agents, so it cycles them here (tmux's old
+# prefix+g Claude popup is gone).
 next_agent = "prefix+g"
 previous_agent = "prefix+shift+b"
 focus_agent = "prefix+alt+1..9"

@@ -22,9 +22,6 @@ selection=$(
 # Everything before the first space is the pane id.
 pane_id=${selection%% *}
 
-# Move the invoking client to the chosen pane's session, then to its window
-# and pane (window/pane targets resolve a pane id to its window/pane).
-target_session=$(tmux display-message -p -t "$pane_id" '#{session_name}')
-tmux switch-client -t "$target_session"
-tmux select-window -t "$pane_id"
-tmux select-pane -t "$pane_id"
+# Hand the pick to tmux.conf's picker-follow, which switches the client there
+# once this modal pane has closed: tmux ignores select-pane while it is open.
+tmux set-option -w @picker_target "$pane_id"
