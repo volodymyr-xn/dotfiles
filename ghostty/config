@@ -99,10 +99,12 @@ keybind = ctrl+seven=text:\x01\x37
 keybind = ctrl+eight=text:\x01\x38
 keybind = ctrl+nine=text:\x01\x39
 
-# Ctrl+0 switches to the next tmux session. Same workaround as the numbers
-# above: sends the tmux prefix + `0`, reusing the `prefix 0` binding, because
-# macOS eats Ctrl+0 before Ghostty can deliver it as a real key.
-keybind = ctrl+zero=text:\x01\x30
+# Ctrl+0 / Ctrl+-: next / previous Claude agent in the tmux sidebar order.
+# macOS eats Ctrl+0 before Ghostty can deliver it as a real key, and Ctrl+-
+# has no control byte, so both are sent as CSI u sequences that tmux
+# (extended-keys always) reads as C-0 and C--.
+keybind = ctrl+zero=text:\x1b[48;5u
+keybind = ctrl+minus=text:\x1b[45;5u
 
 # Make fonts bolder (works only on MacOS)
 font-thicken=true
