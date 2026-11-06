@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+#
+# Scrolls the tmux side-status Claude sidebar without switching panes: moves
+# the list focus (the global @sidebar_focus option, a pane id) <step> Claude
+# panes away, stopping at either end. tmux keeps the focus row centered, so
+# the list follows it. Bound to the mouse wheel over the sidebar in tmux.conf,
+# which passes the ordered pane ids expanded from the sidebar's own
+# Claude-pane test; a pane-focus-in hook there clears the option again.
+#
+# Usage: c-tmux-sidebar-scroll <step> <focus-pane-id> <pane-id>...
+#   step: 1 to scroll down, -1 to scroll up
+#   focus-pane-id: the pane the list is centered on now
+
+set -euo pipefail
+
+step=$1
+focus_pane=$2
+shift 2
+claude_panes=("$@")
+pane_count=${#claude_panes[@]}
+
+(( pane_count > 0 )) || exit 0
+
+# Off a Claude pane the list sits at its top, so scrolling starts there.
+focus_index=0
+
+for index in "${!claude_panes[@]}"; do
+  if [[ "${claude_panes[$index]}" == "$focus_pane" ]]; then
+    focus_index=$index
+    break
+  fi
+done
+
+target_index=$(( focus_index + step ))
+
+if (( target_index < 0 )); then
+  target_index=0
+elif (( target_index >= pane_count )); then
+  target_index=$(( pane_count - 1 ))
+fi
+
+tmux set-option -g @sidebar_focus "${claude_panes[$target_index]}"
